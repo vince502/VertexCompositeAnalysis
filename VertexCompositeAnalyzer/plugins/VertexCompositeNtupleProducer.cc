@@ -97,6 +97,7 @@ private:
 
   reco::GenParticleRef findMother(const reco::GenParticleRef&);
   void genDecayLength(const reco::GenParticle&);
+  void getAncestorId(const reco::GenParticle&);
 
   // ----------member data ---------------------------
 
@@ -355,6 +356,8 @@ private:
     int iddau3;
 
   // gen information for # of daughters == 2
+    int   gen_ancestorFlavor_;
+    int   gen_ancestorId_;
   float gen_PVx_;
   float gen_PVy_;
   float gen_PVz_;
@@ -741,6 +744,7 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
                 // gen_angle3D_;
                 // gen_angle2D_;
                 genDecayLength(*genRef);
+                getAncestorId(*genRef);
 
                 gen_pTD1_ = genDaus[0]->pt();
                 gen_etaD1_ = genDaus[0]->eta();
@@ -1530,6 +1534,34 @@ VertexCompositeNtupleProducer::fillGEN(const edm::Event& iEvent, const edm::Even
         iddau2 = fabs(Dd2->pdgId());
         if(Dd3) iddau3 = fabs(Dd3->pdgId());
 
+        getAncestorId(trk);
+        genDecayLength(trk);
+
+                gen_pT_     = trk.pt();
+                gen_eta_    = trk.eta();
+                gen_phi_    = trk.phi();
+                gen_mass_   = trk.mass();
+                gen_y_      = trk.rapidity();
+                gen_charge_ = trk.charge();
+                gen_pdgId_  = trk.pdgId();
+
+
+                gen_pTD1_ = Dd1->pt();
+                gen_etaD1_ = Dd1->eta();
+                gen_phiD1_ = Dd1->phi();
+                gen_massD1_ = Dd1->mass();
+                gen_yD1_ = Dd1->rapidity();
+                gen_chargeD1_ = Dd1->charge();
+                gen_pdgIdD1_ = Dd1->pdgId();
+
+                gen_pTD2_ = Dd2->pt();
+                gen_etaD2_ = Dd2->eta();
+                gen_phiD2_ = Dd2->phi();
+                gen_massD2_ = Dd2->mass();
+                gen_yD2_ = Dd2->rapidity();
+                gen_chargeD2_ = Dd2->charge();
+                gen_pdgIdD2_ = Dd2->pdgId();
+
         genCandidateNtuple->Fill();
     }
 }
@@ -1647,7 +1679,7 @@ VertexCompositeNtupleProducer::initTree()
         VertexCompositeNtuple->Branch("VtxProb",&VtxProb,"VtxProb/F");
 //        VertexCompositeNtuple->Branch("VtxChi2",&vtxChi2,"VtxChi2/F");
 //        VertexCompositeNtuple->Branch("VtxNDF",&ndf,"VtxNDF/F");
-        VertexCompositeNtuple->Branch("3DCosPointingAngle",&agl,"3DCosPointingAngleF");
+        VertexCompositeNtuple->Branch("3DCosPointingAngle",&agl,"3DCosPointingAngle/F");
         VertexCompositeNtuple->Branch("3DPointingAngle",&agl_abs,"3DPointingAngle/F");
         VertexCompositeNtuple->Branch("2DCosPointingAngle",&agl2D,"2DCosPointingAngle/F");
         VertexCompositeNtuple->Branch("2DPointingAngle",&agl2D_abs,"2DPointingAngle/F");
@@ -1664,6 +1696,9 @@ VertexCompositeNtupleProducer::initTree()
             VertexCompositeNtuple->Branch("matchGEN",&matchGEN,"matchGEN/O");
 
             if (!twoLayerDecay_ && !threeProngDecay_) {
+              VertexCompositeNtuple->Branch("gen_ancestorFlavor", &gen_ancestorFlavor_);
+              VertexCompositeNtuple->Branch("gen_ancestorId", &gen_ancestorId_);
+
               VertexCompositeNtuple->Branch("gen_PVx_", &gen_PVx_);
               VertexCompositeNtuple->Branch("gen_PVy", &gen_PVy_);
               VertexCompositeNtuple->Branch("gen_PVz", &gen_PVz_);
@@ -1863,6 +1898,40 @@ VertexCompositeNtupleProducer::initTree()
             genCandidateNtuple->Branch("DauID2_gen",&iddau2,"DauID2_gen/I");
             genCandidateNtuple->Branch("DauID3_gen",&iddau3,"DauID3_gen/I");
         }
+
+        genCandidateNtuple->Branch("gen_ancestorFlavor", &gen_ancestorFlavor_);
+        genCandidateNtuple->Branch("gen_ancestorId", &gen_ancestorId_);
+
+        genCandidateNtuple->Branch("gen_PVx_", &gen_PVx_);
+        genCandidateNtuple->Branch("gen_PVy", &gen_PVy_);
+        genCandidateNtuple->Branch("gen_PVz", &gen_PVz_);
+
+        genCandidateNtuple->Branch("gen_pT", &gen_pT_);
+        genCandidateNtuple->Branch("gen_eta", &gen_eta_);
+        genCandidateNtuple->Branch("gen_phi", &gen_phi_);
+        genCandidateNtuple->Branch("gen_mass", &gen_mass_);
+        genCandidateNtuple->Branch("gen_y", &gen_y_);
+
+        genCandidateNtuple->Branch("gen_decayLength3D", &gen_decayLength3D_);
+        genCandidateNtuple->Branch("gen_decayLength2D", &gen_decayLength2D_);
+        genCandidateNtuple->Branch("gen_angle3D", &gen_angle3D_);
+        genCandidateNtuple->Branch("gen_angle2D", &gen_angle2D_);
+
+        genCandidateNtuple->Branch("gen_pTD1", &gen_pTD1_);
+        genCandidateNtuple->Branch("gen_etaD1", &gen_etaD1_);
+        genCandidateNtuple->Branch("gen_phiD1", &gen_phiD1_);
+        genCandidateNtuple->Branch("gen_massD1", &gen_massD1_);
+        genCandidateNtuple->Branch("gen_yD1", &gen_yD1_);
+        genCandidateNtuple->Branch("gen_chargeD1", &gen_chargeD1_);
+        genCandidateNtuple->Branch("gen_pdgIdD1", &gen_pdgIdD1_);
+
+        genCandidateNtuple->Branch("gen_pTD2", &gen_pTD2_);
+        genCandidateNtuple->Branch("gen_etaD2", &gen_etaD2_);
+        genCandidateNtuple->Branch("gen_phiD2", &gen_phiD2_);
+        genCandidateNtuple->Branch("gen_massD2", &gen_massD2_);
+        genCandidateNtuple->Branch("gen_yD2", &gen_yD2_);
+        genCandidateNtuple->Branch("gen_chargeD2", &gen_chargeD2_);
+        genCandidateNtuple->Branch("gen_pdgIdD2", &gen_pdgIdD2_);
     }
 }
 
@@ -1917,6 +1986,25 @@ VertexCompositeNtupleProducer::genDecayLength(const reco::GenParticle& gCand)
   TVector3 secvec2D(gCand.px(), gCand.py(), 0.0);
   gen_angle2D_ = secvec2D.Angle(ptosvec2D);
   gen_decayLength2D_ = ptosvec2D.Mag();
+}
+
+void
+VertexCompositeNtupleProducer::getAncestorId(const reco::GenParticle& gCand)
+{
+  gen_ancestorId_ = 0;
+  gen_ancestorFlavor_ = 0;
+  for (auto mothers = gCand.motherRefVector();
+      !mothers.empty(); ) {
+    auto mom = mothers.at(0);
+    mothers = mom->motherRefVector();
+    gen_ancestorId_ = mom->pdgId();
+    const auto idstr = std::to_string(std::abs(gen_ancestorId_));
+    gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
+    if (idstr[0] == '5') {
+      break;
+    }
+    if (std::abs(gen_ancestorId_) <= 40) break;
+  }
 }
 
 //define this as a plug-in
