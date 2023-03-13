@@ -31,6 +31,8 @@ D0Producer::D0Producer(const edm::ParameterSet& iConfig) :
  
   produces< reco::VertexCompositeCandidateCollection >("D0");
   if(useAnyMVA_) produces<MVACollection>("MVAValuesD0");
+  produces<std::vector<float > >("DCAValuesD0");
+  produces<std::vector<float > >("DCAErrorsD0");
 }
 
 // (Empty) Destructor
@@ -70,6 +72,10 @@ void D0Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
      auto mvas = std::make_unique<MVACollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
      iEvent.put(std::move(mvas), std::string("MVAValuesD0"));
    }
+   auto dcaVals = std::make_unique<std::vector<float > >(theVees.getDCAVals().begin(), theVees.getDCAVals().end());
+   iEvent.put(std::move(dcaVals), std::string("DCAValuesD0"));
+   auto dcaErrs = std::make_unique<std::vector<float > >(theVees.getDCAErrs().begin(), theVees.getDCAErrs().end());
+   iEvent.put(std::move(dcaErrs), std::string("DCAErrorsD0"));
 
    theVees.resetAll();
 }

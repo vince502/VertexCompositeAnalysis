@@ -205,6 +205,8 @@ private:
     float dl[MAXCAN];
     float dlerror[MAXCAN];
     float agl[MAXCAN];
+    float dca3D[MAXCAN];
+    float dcaErr3D[MAXCAN];
     float vtxChi2[MAXCAN];
     float ndf[MAXCAN];
     float agl_abs[MAXCAN];
@@ -368,6 +370,7 @@ private:
     vector<int> *pVectIDmom;
     
     bool useAnyMVA_;
+    bool useDCA_;
     bool isSkimMVA_;
     bool isCentrality_;
     bool isEventPlane_;
@@ -389,6 +392,10 @@ private:
     edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
 
     edm::EDGetTokenT<reco::EvtPlaneCollection> tok_eventplaneSrc_;
+
+    // for DCA
+    edm::EDGetTokenT<std::vector<float > > tok_DCAVal_;
+    edm::EDGetTokenT<std::vector<float > > tok_DCAErr_;
 };
 
 //
@@ -466,6 +473,11 @@ VertexCompositeTreeProducer::VertexCompositeTreeProducer(const edm::ParameterSet
 
     if(useAnyMVA_ && iConfig.exists("MVACollection"))
       MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
+    if(iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
+      useDCA_ = true;
+      tok_DCAVal_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
+      tok_DCAErr_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
+    }
 }
 
 
@@ -516,6 +528,15 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
     {
       iEvent.getByToken(MVAValues_Token_,mvavalues);
       assert( (*mvavalues).size() == v0candidates->size() );
+    }
+    edm::Handle<std::vector<float > > dcaValues;
+    edm::Handle<std::vector<float > > dcaErrors;
+    if(useDCA_)
+    {
+      iEvent.getByToken(tok_DCAVal_, dcaValues);
+      iEvent.getByToken(tok_DCAErr_ , dcaErrors);
+      assert( (*dcaValues).size() == v0candidates->size() );
+      assert( (*dcaErrors).size() == v0candidates->size() );
     }
 
     edm::Handle<reco::GenParticleCollection> genpars;
@@ -714,6 +735,13 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
 
         mva[it] = 0.0;
         if(useAnyMVA_) mva[it] = (*mvavalues)[it];
+
+        dca3D[it] = -1.0;
+        dcaErr3D[it] = -1.0;
+        if(useDCA_) {
+          dca3D[it] = dcaValues->at(it);
+          dcaErr3D[it] = dcaErrors->at(it);
+        }
 
         double px = trk.px();
         double py = trk.py();
@@ -1027,6 +1055,12 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
         dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector))/dl[it];
         
         dlos[it] = dl[it]/dlerror[it];
+
+        // correct way for both DCA and its Error
+        // std::cout << "By cur3DIP                " << dca3D[it] << " +/- " << dcaErr3D[it] <<"\n";
+        // incorrect way for DCA error
+        // std::cout << "By decay length and alpha " << std::sin(agl_abs[it])*dl[it]<< " +/- " << dlerror[it]* std::sin(agl_abs[it]) <<"\n";
+        // std::cout << "\n";
         
         //Decay length 2D
         SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1),vtx.covariance(1,1),0,0,0);
@@ -1732,6 +1766,10 @@ VertexCompositeTreeProducer::initTree()
     VertexCompositeNtuple->Branch("phi",&phi,"phi[candSize]/F");
     VertexCompositeNtuple->Branch("mass",&mass,"mass[candSize]/F");
     if(useAnyMVA_) VertexCompositeNtuple->Branch("mva",&mva,"mva[candSize]/F");
+    if(useDCA_) {
+      VertexCompositeNtuple->Branch("dca3D", &dca3D, "dca3D[candSize]/F");
+      VertexCompositeNtuple->Branch("dcaErr3D", &dcaErr3D, "dcaErr3D[candSize]/F");
+    }
 
     if(!isSkimMVA_)  
     {

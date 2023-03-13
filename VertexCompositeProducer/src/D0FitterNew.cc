@@ -30,6 +30,13 @@
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
+// for DCA
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
+#include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include <Math/Functions.h>
@@ -164,6 +171,10 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
 
   magField = bFieldHandle.product();
+
+  //needed for IP error
+  AnalyticalImpactPointExtrapolator extrapolator(magField);
+  TrajectoryStateOnSurface tsos;
 
   // Setup TMVA
 //  mvaValValueMap = auto_ptr<edm::ValueMap<float> >(new edm::ValueMap<float>);
@@ -465,6 +476,21 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       rVtxMag = d0LineOfFlight.perp();
       sigmaLvtxMag = sqrt(ROOT::Math::Similarity(d0TotalCov, distanceVector3D)) / lVtxMag;
       sigmaRvtxMag = sqrt(ROOT::Math::Similarity(d0TotalCov, distanceVector2D)) / rVtxMag;
+
+      // DCA error
+      tsos = extrapolator.extrapolate(d0Cand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
+      Measurement1D cur3DIP;
+      VertexDistance3D a3d;
+      GlobalPoint refPoint          = tsos.globalPosition();
+      GlobalError refPointErr       = tsos.cartesianError().position();
+      GlobalPoint vertexPosition    = RecoVertex::convertPos(vtxPrimary->position());
+      GlobalError vertexPositionErr = RecoVertex::convertError(vtxPrimary->error());
+      cur3DIP =  (a3d.distance(VertexState(vertexPosition,vertexPositionErr), VertexState(refPoint, refPointErr)));
+      // correct way for both DCA and its Error
+      // std::cout << "By cur3DIP                " << cur3DIP.value() << " +/- " << cur3DIP.error() <<"\n";
+      // incorrect way for DCA error
+      // std::cout << "By decay length and alpha " << std::sin(d0Angle3D)*lVtxMag << " +/- " << sigmaLvtxMag * std::sin(d0Angle3D) <<"\n";
+      // std::cout << "\n";
 
       if( d0NormalizedChi2 > chi2Cut ||
           rVtxMag < rVtxCut ||

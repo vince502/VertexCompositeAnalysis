@@ -334,10 +334,15 @@ private:
     edm::EDGetTokenT<int> tok_centBinLabel_;
     edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
 
+    edm::EDGetTokenT<std::vector<float > > tok_DCAVal_;
+    edm::EDGetTokenT<std::vector<float > > tok_DCAErr_;
+
     std::string v0IDName_;
 
     reco::VertexCompositeCandidateCollection theVertexComps;
     MVACollection theMVANew;
+    std::vector<float> theDCAValNew_;
+    std::vector<float> theDCAErrNew_;
 };
 
 //
@@ -413,6 +418,9 @@ VertexCompositeSelector::VertexCompositeSelector(const edm::ParameterSet& iConfi
     Dedx_Token2_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxTruncated40"));
     tok_genParticle_ = consumes<reco::GenParticleCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
 
+    tok_DCAVal_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
+    tok_DCAErr_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
+
     usePID_ = false;
     selectFlavor_ = 0;
     if(iConfig.exists("usePID")) usePID_ = iConfig.getParameter<bool>("usePID");
@@ -483,6 +491,8 @@ VertexCompositeSelector::VertexCompositeSelector(const edm::ParameterSet& iConfi
 
     produces< reco::VertexCompositeCandidateCollection >(v0IDName_);
     produces<MVACollection>(Form("MVAValuesNew%s",v0IDName_.c_str()));
+    produces<std::vector<float > >(Form("DCAValuesNew%s",v0IDName_.c_str()));
+    produces<std::vector<float > >(Form("DCAErrorsNew%s",v0IDName_.c_str()));
 
     isPionD1 = true;
     isPionD2 = true;
@@ -531,6 +541,13 @@ VertexCompositeSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSet
       iEvent.put(std::move(mvas), Form("MVAValuesNew%s",v0IDName_.c_str()));
       theMVANew.clear();
     }
+
+    auto dcaVals = std::make_unique<std::vector<float > >(theDCAValNew_.begin(), theDCAValNew_.end());
+    iEvent.put(std::move(dcaVals), Form("DCAValuesNew%s",v0IDName_.c_str()));
+    auto dcaErrs = std::make_unique<std::vector<float > >(theDCAErrNew_.begin(), theDCAErrNew_.end());
+    iEvent.put(std::move(dcaErrs), Form("DCAErrorsNew%s",v0IDName_.c_str()));
+    theDCAValNew_.clear();
+    theDCAErrNew_.clear();
 }
 
 void
@@ -553,6 +570,13 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
       iEvent.getByToken(MVAValues_Token_,mvavalues);
       assert( (*mvavalues).size() == v0candidates->size() );
     }
+
+    edm::Handle<std::vector<float > > dcaValues;
+    edm::Handle<std::vector<float > > dcaErrors;
+    iEvent.getByToken(tok_DCAVal_, dcaValues);
+    assert( (*dcaValues).size() == v0candidates->size() );
+    iEvent.getByToken(tok_DCAErr_ , dcaErrors);
+    assert( (*dcaErrors).size() == v0candidates->size() );
 
     edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle1;
     if(usePID_) iEvent.getByToken(Dedx_Token1_, dEdxHandle1);
@@ -1464,9 +1488,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
 
           if(mva<GetMVACut(y,pt)) continue;
 
-          theVertexComps.push_back( trk );
           theMVANew.push_back( mva );
-          continue;
         }
         else if(useAnyMVA_ && !useExistingMVA_)
         {
@@ -1611,6 +1633,10 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
           theMVANew.push_back( gbrVal );
         } 
         theVertexComps.push_back( trk );
+        const float dca = (*dcaValues)[it];
+        const float dcaE = (*dcaErrors)[it];
+        theDCAValNew_.push_back(dca);
+        theDCAErrNew_.push_back(dcaE);
     }
 }
 
@@ -1621,7 +1647,7 @@ VertexCompositeSelector::GetMVACut(double y, double pt)
   if(fabs(y)>2.4) return 1.0;
 
   //temporary
-  if(pt<4) return 0.4;
+  if(pt<4) return 0.3;
   else if(pt>4 && pt<6) return 0.3;
   else if(pt>6 && pt<8) return -0.2;
   else return -1.0;

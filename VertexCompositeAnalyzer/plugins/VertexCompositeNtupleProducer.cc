@@ -201,6 +201,8 @@ private:
     float dl;
     float dlerror;
     float agl;
+    float dca3D;
+    float dcaErr3D;
     float vtxChi2;
     float ndf;
     float agl_abs;
@@ -395,6 +397,7 @@ private:
 
   // options
     bool useAnyMVA_;
+    bool useDCA_;
     bool isSkimMVA_;
     bool isCentrality_;
 
@@ -413,6 +416,10 @@ private:
 
     edm::EDGetTokenT<int> tok_centBinLabel_;
     edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
+
+    // for DCA
+    edm::EDGetTokenT<std::vector<float > > tok_DCAVal_;
+    edm::EDGetTokenT<std::vector<float > > tok_DCAErr_;
 };
 
 //
@@ -487,6 +494,11 @@ VertexCompositeNtupleProducer::VertexCompositeNtupleProducer(const edm::Paramete
 
     if(useAnyMVA_ && iConfig.exists("MVACollection"))
       MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
+    if(iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
+      useDCA_ = true;
+      tok_DCAVal_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
+      tok_DCAErr_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
+    }
 }
 
 
@@ -535,6 +547,16 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
     {
       iEvent.getByToken(MVAValues_Token_,mvavalues);
       assert( (*mvavalues).size() == v0candidates->size() );
+    }
+
+    edm::Handle<std::vector<float > > dcaValues;
+    edm::Handle<std::vector<float > > dcaErrors;
+    if(useDCA_)
+    {
+      iEvent.getByToken(tok_DCAVal_, dcaValues);
+      iEvent.getByToken(tok_DCAErr_ , dcaErrors);
+      assert( (*dcaValues).size() == v0candidates->size() );
+      assert( (*dcaErrors).size() == v0candidates->size() );
     }
 
     edm::Handle<reco::GenParticleCollection> genpars;
@@ -671,6 +693,13 @@ VertexCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::Eve
 
         mva = 0.0;
         if(useAnyMVA_) mva = (*mvavalues)[it];
+
+        dca3D = -1.0;
+        dcaErr3D = -1.0;
+        if(useDCA_) {
+          dca3D = dcaValues->at(it);
+          dcaErr3D = dcaErrors->at(it);
+        }
 
         double px = trk.px();
         double py = trk.py();
@@ -1657,6 +1686,11 @@ VertexCompositeNtupleProducer::initTree()
     VertexCompositeNtuple->Branch("mass",&mass,"mass/F");
 
     if(useAnyMVA_) VertexCompositeNtuple->Branch("mva",&mva,"mva/F");
+
+    if(useDCA_) {
+      VertexCompositeNtuple->Branch("dca3D", &dca3D, "dca3D/F");
+      VertexCompositeNtuple->Branch("dcaErr3D", &dcaErr3D, "dcaErr3D/F");
+    }
 
     if(isCentrality_) VertexCompositeNtuple->Branch("centrality",&centrality,"centrality/I");
 

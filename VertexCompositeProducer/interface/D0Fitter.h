@@ -51,6 +51,9 @@
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 #include "DataFormats/TrackReco/interface/DeDxData.h"
 
+// DCA
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Geometry/CommonDetUnit/interface/TrackingGeometry.h"
@@ -82,6 +85,8 @@ class D0Fitter {
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
   const reco::VertexCompositeCandidateCollection& getD0() const;
+  const std::vector<float>& getDCAVals() const;
+  const std::vector<float>& getDCAErrs() const;
   const std::vector<float>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
@@ -145,6 +150,9 @@ class D0Fitter {
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 
+  // DCA
+  std::vector<float> dcaVals_;
+  std::vector<float> dcaErrs_;
 
   std::string dbFileName_;
 
