@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from ZDC2018Pedestal_cfg import ZDC2018Pedestal_0
+from VertexCompositeAnalysis.VertexCompositeProducer.ZDC2018Pedestal_cfg import ZDC2018Pedestal_0
 
 
 zdcdigi = cms.EDProducer('QWZDC2018Producer2',

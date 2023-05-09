@@ -39,7 +39,6 @@
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
 const float piMassD0New = 0.13957018;
 const float piMassD0NewSquared = piMassD0New*piMassD0New;
@@ -51,7 +50,9 @@ float kaonMassD0New_sigma = 1.6E-5f;
 float d0MassD0New_sigma = d0MassD0New*1.e-6;
 
 // Constructor and (empty) destructor
-D0FitterNew::D0FitterNew(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
+D0FitterNew::D0FitterNew(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
+{
 //		   const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ConsumesCollector && iC) {
   using std::string;
 
@@ -121,6 +122,8 @@ D0FitterNew::D0FitterNew(const edm::ParameterSet& theParameters,  edm::ConsumesC
   for (unsigned int ndx = 0; ndx < qual.size(); ndx++) {
     qualities.push_back(reco::TrackBase::qualityByName(qual[ndx]));
   }
+
+  mvaToken_ = iC.esConsumes<GBRForest, GBRWrapperRcd>(edm::ESInputTag("", forestLabel_));
 }
 
 D0FitterNew::~D0FitterNew() {
@@ -161,7 +164,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
   if( !theTrackHandle->size() ) return;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
 
   magField = bFieldHandle.product();
 
@@ -542,7 +545,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
             GBRForest const * forest = forest_;
             if(useForestFromDB_){
               edm::ESHandle<GBRForest> forestHandle;
-              iSetup.get<GBRWrapperRcd>().get(forestLabel_,forestHandle);
+              forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
               forest = forestHandle.product();
             }
 

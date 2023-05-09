@@ -21,7 +21,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -36,7 +36,7 @@
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/V0Fitter.h"
 
-class V0Producer : public edm::EDProducer {
+class V0Producer : public edm::one::EDProducer<> {
 public:
   explicit V0Producer(const edm::ParameterSet&);
   ~V0Producer();

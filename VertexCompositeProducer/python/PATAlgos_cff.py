@@ -36,13 +36,27 @@ def doPATMuons(process, MC=False):
     process.muonL1Info.maxDeltaR = cms.double(0.3)
     process.muonL1Info.maxDeltaEta   = cms.double(0.2)
     process.muonL1Info.fallbackToME1 = cms.bool(True)
+    process.muonL1Info.useStation2 = cms.bool(True)
+    process.muonL1Info.cosmicPropagationHypothesis = cms.bool(False)
+    process.muonL1Info.propagatorAlong = cms.ESInputTag("", "hltESPSteppingHelixPropagatorAlong")
+    process.muonL1Info.propagatorAny = cms.ESInputTag("", "SteppingHelixPropagatorAny")
+    process.muonL1Info.propagatorOpposite = cms.ESInputTag("", "hltESPSteppingHelixPropagatorOpposite")
     process.muonMatchHLTL1.maxDeltaR = cms.double(0.3)
     process.muonMatchHLTL1.maxDeltaEta   = cms.double(0.2)
     process.muonMatchHLTL1.fallbackToME1 = cms.bool(True)
+    process.muonMatchHLTL1.useStation2 = cms.bool(True)
+    process.muonMatchHLTL1.cosmicPropagationHypothesis = cms.bool(False)
+    process.muonMatchHLTL1.propagatorAlong = cms.ESInputTag("", "hltESPSteppingHelixPropagatorAlong")
+    process.muonMatchHLTL1.propagatorAny = cms.ESInputTag("", "SteppingHelixPropagatorAny")
+    process.muonMatchHLTL1.propagatorOpposite = cms.ESInputTag("", "hltESPSteppingHelixPropagatorOpposite")
     process.muonMatchHLTL2.maxDeltaR = cms.double(0.3)
     process.muonMatchHLTL2.maxDPtRel = cms.double(10.0)
     process.muonMatchHLTL3.maxDeltaR = cms.double(0.1)
     process.muonMatchHLTL3.maxDPtRel = cms.double(10.0)
+
+    from HLTrigger.Configuration.HLT_GRun_cff import fragment
+    process.hltESPSteppingHelixPropagatorAlong = fragment.hltESPSteppingHelixPropagatorAlong
+    process.hltESPSteppingHelixPropagatorOpposite = fragment.hltESPSteppingHelixPropagatorOpposite
 
     # Add MC gen matching
     if MC:

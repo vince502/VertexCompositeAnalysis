@@ -1,5 +1,5 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
@@ -21,7 +21,7 @@
 #include "boost/bimap.hpp"
 
 using namespace std;
-class QWZDC2018Producer2 : public edm::EDProducer {
+class QWZDC2018Producer2 : public edm::one::EDProducer<edm::one::WatchRuns> {
 public:
 	explicit QWZDC2018Producer2(const edm::ParameterSet&);
 	~QWZDC2018Producer2();
@@ -29,7 +29,10 @@ public:
 private:
 	virtual void produce(edm::Event&, const edm::EventSetup&) override;
 	virtual void beginRun(const edm::Run&, const edm::EventSetup&) override;
+    virtual void endRun(const edm::Run&, const edm::EventSetup&) {};
 	///
+
+    edm::ESGetToken<HcalDbService, HcalDbRecord> tok_dbservice_;
 
 	edm::InputTag	Src_;
 	int		SOI_;
@@ -43,6 +46,7 @@ private:
 
 
 QWZDC2018Producer2::QWZDC2018Producer2(const edm::ParameterSet& pset) :
+    tok_dbservice_(esConsumes<HcalDbService, HcalDbRecord>()),
 	Src_(pset.getUntrackedParameter<edm::InputTag>("Src")),
 	SOI_(pset.getUntrackedParameter<int>("SOI", 4)),
 	bHardCode_(pset.getUntrackedParameter<bool>("HardCode", true)), // has to be hard coded now, calibration format is not working at the moment =_=
@@ -134,7 +138,7 @@ void QWZDC2018Producer2::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
 	ESHandle<HcalDbService> conditions;
 	if ( !bHardCode_ )
-		iSetup.get<HcalDbRecord>().get(conditions);
+		conditions = iSetup.getHandle(tok_dbservice_);
 
 
 	Handle<QIE10DigiCollection> digis;

@@ -76,6 +76,7 @@ class DiMuFitter {
   // Tracker geometry for discerning hit positions
   const MagneticField* magField;
 
+  edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bField_esToken_;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
   edm::EDGetTokenT<pat::MuonCollection> token_muons;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;

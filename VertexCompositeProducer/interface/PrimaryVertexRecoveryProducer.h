@@ -51,6 +51,8 @@
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 //
 // class declaration
 //
@@ -61,6 +63,7 @@ public:
   ~PrimaryVertexRecoveryProducer() override;
   
   void produce(edm::Event&, const edm::EventSetup&) override;
+  void skimTracks(reco::VertexCollection&);
 
   // access to config
   edm::ParameterSet config() const { return theConfig; }
@@ -84,6 +87,7 @@ private:
   edm::ParameterSet theConfig;
   bool fVerbose;
 
+  const edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> transTrackBuilderToken_;
   edm::EDGetTokenT<reco::BeamSpot> bsToken;
   bool redoAllVertices;
   edm::EDGetTokenT<reco::VertexCollection> oldVtxToken;

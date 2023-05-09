@@ -60,7 +60,7 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "CondFormats/GBRForest/interface/GBRForest.h"
 
 #include <string>
 #include <fstream>
@@ -90,6 +90,8 @@ class BFitter {
   const TrackerGeometry* trackerGeom;
 
   const MagneticField* magField;
+
+  edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bField_esToken_;
 
   edm::InputTag recoAlg;
   edm::InputTag vtxAlg;

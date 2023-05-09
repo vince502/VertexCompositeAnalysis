@@ -23,7 +23,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -37,7 +37,7 @@
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PFitter.h"
 
-class LamC3PProducer : public edm::EDProducer {
+class LamC3PProducer : public edm::one::EDProducer<> {
 public:
   using MVACollection = std::vector<float>;
 

@@ -13,15 +13,14 @@
 #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include "RecoVertex/VertexTools/interface/GeometricAnnealing.h"
 #include <iostream>
 
 PrimaryVertexRecoveryProducer::PrimaryVertexRecoveryProducer(const edm::ParameterSet& conf)
-  :theConfig(conf)
+  :theConfig(conf),
+   transTrackBuilderToken_(esConsumes(edm::ESInputTag{"", "TransientTrackBuilder"}))
 {
 
   fVerbose   = conf.getUntrackedParameter<bool>("verbose", false);
@@ -193,8 +192,7 @@ PrimaryVertexRecoveryProducer::produce(edm::Event& iEvent, const edm::EventSetup
   if(nAlgosFound==algorithms.size()) return;
 
   // interface RECO tracks to vertex reconstruction
-  edm::ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
+  const auto& theB = iSetup.getHandle(transTrackBuilderToken_);
   std::vector<reco::TransientTrack> t_tks;
 
   if( f4D ) {

@@ -37,6 +37,7 @@ const double muonMass = 0.10565837;
 
 // Constructor and (empty) destructor
 DiMuFitter::DiMuFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+  bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>()),
   muonSelection(theParameters.getParameter<std::string>("muonSelection")),
   candidateSelection(theParameters.getParameter<std::string>("candidateSelection"))
 {
@@ -93,7 +94,7 @@ void DiMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   if( !theMuonHandle->size() ) return;
 
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
   magField = bFieldHandle.product();
 
   // Find the primary vertex

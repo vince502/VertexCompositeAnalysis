@@ -18,7 +18,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -75,7 +75,7 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATCompositeTreeProducer : public edm::EDAnalyzer {
+class PATCompositeTreeProducer : public edm::one::EDAnalyzer<edm::one::WatchRuns> {
 public:
   explicit PATCompositeTreeProducer(const edm::ParameterSet&);
   ~PATCompositeTreeProducer();
@@ -85,6 +85,7 @@ public:
 private:
   virtual void beginJob();
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+  virtual void endRun(const edm::Run&, const edm::EventSetup&) {};
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void fillRECO(const edm::Event&, const edm::EventSetup&);
   virtual void fillMUON(const edm::Event&, const edm::EventSetup&);
@@ -163,7 +164,7 @@ private:
   uint  runNb;
   uint  eventNb;
   uint  lsNb;
-  short trigPrescale[MAXTRG];
+  float trigPrescale[MAXTRG];
   short centrality;
   int   Ntrkoffline;
   int   NtrkHP;
@@ -562,10 +563,10 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
       bool isTriggerFired = false;
       if(triggerResults->accept(triggerIndex)) isTriggerFired = true;
       //Get the trigger prescale
-      int prescaleValue = -1;
+      float prescaleValue = -1;
       if(hltPrescaleProvider_.hltConfigProvider().inited() && hltPrescaleProvider_.prescaleSet(iEvent,iSetup)>=0)
       {
-        const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
+        const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail<double>(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
         const auto& hltPres = presInfo.second;
         const short& l1Pres = ((presInfo.first.size()==1) ? presInfo.first.at(0).second : ((presInfo.first.size()>1) ? 1 : -1));
         prescaleValue = hltPres*l1Pres;
@@ -1326,7 +1327,7 @@ PATCompositeTreeProducer::initTree()
       PATCompositeNtuple->Branch("ephfmSumW",&ephfmSumW,"ephfmSumW/F");
       PATCompositeNtuple->Branch("eptrackmidSumW",&eptrackmidSumW,"eptrackmidSumW/F");
     }
-    PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/S",NTRG_));
+    PATCompositeNtuple->Branch("trigPrescale",trigPrescale,Form("trigPrescale[%d]/F",NTRG_));
     PATCompositeNtuple->Branch("trigHLT",trigHLT,Form("trigHLT[%d]/O",NTRG_));
     PATCompositeNtuple->Branch("evtSel",evtSel,Form("evtSel[%d]/O",NSEL_));
 

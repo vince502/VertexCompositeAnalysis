@@ -23,7 +23,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -37,7 +37,7 @@
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DiMuFitter.h"
 
-class DiMuProducer : public edm::EDProducer {
+class DiMuProducer : public edm::one::EDProducer<> {
 public:
   explicit DiMuProducer(const edm::ParameterSet&);
   ~DiMuProducer();

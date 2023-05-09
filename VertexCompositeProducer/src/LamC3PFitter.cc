@@ -39,7 +39,6 @@
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
 const float piMassLamC3P = 0.13957018;
 const float piMassLamC3PSquared = piMassLamC3P*piMassLamC3P;
@@ -59,7 +58,9 @@ float cand1Mass_sigma[2] = {piMassLamC3P_sigma, protonMassLamC3P_sigma};
 float cand2Mass_sigma[2] = {protonMassLamC3P_sigma, piMassLamC3P_sigma};
 
 // Constructor and (empty) destructor
-LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
+LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
+{
 //		   const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ConsumesCollector && iC) {
   using std::string;
 
@@ -125,6 +126,7 @@ LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::Consume
     }
 
     mvaType_ = type;
+    mvaToken_ = iC.esConsumes<GBRForest, GBRWrapperRcd>(edm::ESInputTag("", forestLabel_));
   }
 
   std::vector<std::string> qual = theParameters.getParameter<std::vector<std::string> >("trackQualities");
@@ -169,7 +171,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByToken(token_dedx, dEdxHandle);
 
   if( !theTrackHandle->size() ) return;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
 
   magField = bFieldHandle.product();
 
@@ -600,7 +602,7 @@ void LamC3PFitter::fitLamCCandidates(
             GBRForest const * forest = forest_;
             if(useForestFromDB_){
               edm::ESHandle<GBRForest> forestHandle;
-              iSetup.get<GBRWrapperRcd>().get(forestLabel_,forestHandle);
+              forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
               forest = forestHandle.product();
             }
 

@@ -62,7 +62,8 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "CondFormats/GBRForest/interface/GBRForest.h"
+#include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
 #include <string>
 #include <fstream>
@@ -95,6 +96,8 @@ class D0FitterNew {
   const TrackerGeometry* trackerGeom;
 
   const MagneticField* magField;
+
+  edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bField_esToken_;
 
   edm::InputTag recoAlg;
   edm::InputTag vtxAlg;
@@ -142,6 +145,7 @@ class D0FitterNew {
   bool useForestFromDB_;
 
   std::vector<float> mvaVals_;
+  edm::ESGetToken<GBRForest, GBRWrapperRcd> mvaToken_;
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 

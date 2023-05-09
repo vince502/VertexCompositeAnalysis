@@ -71,7 +71,9 @@ float omegaMass_sigma = omegaMass*1.e-6;
 float phiMass_sigma = phiMass*1.e-6;
 
 // Constructor and (empty) destructor
-V0Fitter::V0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
+V0Fitter::V0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
+{
 //		   const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ConsumesCollector && iC) {
   using std::string;
 
@@ -207,7 +209,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //  iEvent.getByLabel(vtxAlg,  theVertexHandle);
 //  iEvent.getByLabel(std::string("offlineBeamSpot"), theBeamSpotHandle);
   if( !theTrackHandle->size() ) return;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
 //  iSetup.get<TrackerDigiGeometryRecord>().get(trackerGeomHandle);
 //  iSetup.get<GlobalTrackingGeometryRecord>().get(globTkGeomHandle);
 

@@ -52,7 +52,8 @@ float kaonMassB_sigma = 1.6E-5f;
 float d0MassB_sigma = d0MassB*1.e-6;
 
 // Constructor and (empty) destructor
-BFitter::BFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC)
+BFitter::BFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
 {
   using std::string;
 
@@ -126,7 +127,7 @@ void BFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   iEvent.getByToken(token_dedx, dEdxHandle);
 
   if( !theTrackHandle->size() ) return;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
 
   magField = bFieldHandle.product();
 

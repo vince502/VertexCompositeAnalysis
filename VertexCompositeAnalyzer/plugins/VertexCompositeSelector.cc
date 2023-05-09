@@ -28,7 +28,7 @@
 #include "DataFormats/Common/interface/Ref.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -64,8 +64,8 @@
 #include "DataFormats/HeavyIonEvent/interface/CentralityBins.h"
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 
+#include "CondFormats/GBRForest/interface/GBRForest.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
@@ -80,7 +80,7 @@
 
 using namespace std;
 
-class VertexCompositeSelector : public edm::EDProducer {
+class VertexCompositeSelector : public edm::one::EDProducer<> {
 public:
   explicit VertexCompositeSelector(const edm::ParameterSet&);
   ~VertexCompositeSelector();
@@ -338,6 +338,7 @@ private:
 
     reco::VertexCompositeCandidateCollection theVertexComps;
     MVACollection theMVANew;
+    edm::ESGetToken<GBRForest, GBRWrapperRcd> mvaToken_;
 };
 
 //
@@ -488,6 +489,8 @@ VertexCompositeSelector::VertexCompositeSelector(const edm::ParameterSet& iConfi
     isPionD2 = true;
     isKaonD1 = false;
     isKaonD2 = false;
+
+    mvaToken_ = esConsumes<GBRForest, GBRWrapperRcd>(edm::ESInputTag("", forestLabel_));
 }
 
 
@@ -1554,8 +1557,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
 
           GBRForest const * forest = forest_;
           if(useForestFromDB_){
-            edm::ESHandle<GBRForest> forestHandle;
-            iSetup.get<GBRWrapperRcd>().get(forestLabel_,forestHandle);
+            const auto& forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
             forest = forestHandle.product();
           }
 
