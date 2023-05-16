@@ -26,6 +26,14 @@ dimuana = cms.EDAnalyzer('PATCompositeTreeProducer',
   #Trigger info
   TriggerResultCollection = cms.untracked.InputTag("TriggerResults::HLT"),
   triggerPathNames = cms.untracked.vstring(
+    'HLT_HIUPC_SingleMuOpen_NotMBHF2AND_v', # UPC muons
+    'HLT_HIUPC_SingleMuCosmic_NotMBHF2AND_MaxPixelTrack_v'
+    'HLT_HIUPC_SingleMuCosmic_NotMBHF2AND_v',
+    'HLT_HIUPC_SingleMuOpen_NotMBHF2AND_MaxPixelTrack_v',
+    'HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_NotMBHF2AND_v',
+    'HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_NotMBHF2AND_MaxPixelTrack_v',
+    'HLT_HIUPC_DoubleMuOpen_NotMBHF2AND_v',
+    'HLT_HIUPC_DoubleMuCosmic_NotMBHF2AND_v',
   ),
   triggerFilterNames = cms.untracked.vstring(
   ),
