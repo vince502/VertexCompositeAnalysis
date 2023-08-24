@@ -14,7 +14,7 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-   fileNames = cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/anstahll/CERN/Run3/2023/MC/STARLIGHT/CohJPsi_STARLIGHT_5p36TeV_2023Run3_RECO_20230812/CohJPsi_STARLIGHT_5p36TeV_2023Run3/CohJPsi_STARLIGHT_5p36TeV_2023Run3_RECO_20230812/230812_093758/0000/step3_STARlight_Reco_10.root'),
+   fileNames = cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/jiazhao/STARlight/2023Run3/Reco/STARlight_CohJpsiToMuMu_Reco_132X_230824_045129/CRAB_UserFiles/STARlight_CohJpsiToMuMu_Reco_132X_230824_045129/230824_025138/0000/step3_STARlight_Reco_10.root'),
    inputCommands=cms.untracked.vstring('keep *', 'drop *_hiEvtPlane_*_*')
 )
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
