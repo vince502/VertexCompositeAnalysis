@@ -35,7 +35,7 @@ request_name += "_%s" % datetime.now().strftime("%y%m%d_%H%M%S")
 
 config.General.requestName = request_name
 config.Data.outputDatasetTag = config.General.requestName
-config.Data.outLFNDirBase = '/store/group/phys_heavyions/jiazhao/STARlight/VCTree/%s' %  config.General.requestName
+config.Data.outLFNDirBase = '/store/group/phys_heavyions/jiazhao/STARlight/2023Run3/VCTree/%s' %  config.General.requestName
 # config.JobType.maxMemoryMB = 2000
 # config.JobType.maxJobRuntimeMin = 1000
 # config.Data.inputDataset = dataset
