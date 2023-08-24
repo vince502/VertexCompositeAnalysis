@@ -6,3 +6,4 @@ __init__.py
 *~
 *.root
 *.log
+.DS_Store
