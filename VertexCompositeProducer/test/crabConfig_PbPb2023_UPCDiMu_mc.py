@@ -30,7 +30,7 @@ config.Site.storageSite = 'T2_CH_CERN'
 #############################################################################################
 #############################################################################################
 
-request_name = "VCTree_CohJpsiToMuMu"
+request_name = "VCTree_CohJpsiToMuMu_132X"
 request_name += "_%s" % datetime.now().strftime("%y%m%d_%H%M%S")
 
 config.General.requestName = request_name
