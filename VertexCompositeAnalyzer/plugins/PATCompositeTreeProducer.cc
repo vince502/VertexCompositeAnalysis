@@ -169,6 +169,7 @@ private:
   int   Ntrkoffline;
   int   NtrkHP;
   int   Npixel;
+  int   NpixelTracks;
   short nPV;
   uint candSize;
   bool  trigHLT[MAXTRG];
@@ -598,6 +599,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     HFsumETPlus = (cent.isValid() ? cent->EtHFtowerSumPlus() : -1.);
     HFsumETMinus = (cent.isValid() ? cent->EtHFtowerSumMinus() : -1.);
     Npixel = (cent.isValid() ? cent->multiplicityPixel() : -1);
+    NpixelTracks = (cent.isValid() ? cent->NpixelTracks() : -1);
     ZDCPlus = (cent.isValid() ? cent->zdcSumPlus() : -1.);
     ZDCMinus = (cent.isValid() ? cent->zdcSumMinus() : -1.);
     Ntrkoffline = (cent.isValid() ? cent->Ntracks() : -1);
@@ -1309,6 +1311,7 @@ PATCompositeTreeProducer::initTree()
     {
       PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
       PATCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
+      PATCompositeNtuple->Branch("NpixelTracks",&NpixelTracks,"NpixelTracks/I");
       PATCompositeNtuple->Branch("HFsumETPlus",&HFsumETPlus,"HFsumETPlus/F");
       PATCompositeNtuple->Branch("HFsumETMinus",&HFsumETMinus,"HFsumETMinus/F");
       PATCompositeNtuple->Branch("ZDCPlus",&ZDCPlus,"ZDCPlus/F");
