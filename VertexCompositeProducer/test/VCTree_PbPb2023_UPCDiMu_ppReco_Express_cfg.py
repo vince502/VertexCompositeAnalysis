@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
-process = cms.Process('ANASKIM',eras.Run3_pp_on_PbPb)
+process = cms.Process('ANASKIM',eras.Run3)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
@@ -15,7 +15,7 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-   fileNames = cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/wangj/RECO2023/aod_PhysicsHIForward0_374345/reco_run374345_ls0100_streamPhysicsHIForward0_StorageManager.root'),
+   fileNames = cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/jiazhao/public/reco_RAW2DIGI_L1Reco_RECO_PAT.root'),
    inputCommands=cms.untracked.vstring('keep *', 'drop *_hiEvtPlane_*_*'),
 )
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -25,30 +25,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = cms.string('132X_dataRun3_Express_v4')
 
 
-## ##############################################################################################################################
-## Variables Production #########################################################################################################
-
-#* cent_seq: Add PbPb centrality
-#* CentralityBin_cfi contains Ntrack information
-process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
-process.load('RecoHI.HiCentralityAlgos.HiCentrality_cfi')
-process.centralityBin.Centrality = cms.InputTag("hiCentrality")
-process.centralityBin.centralityVariable = cms.string("HFtowers")
-process.centralityBin.nonDefaultGlauberModel = cms.string("")
-process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
-process.GlobalTag.toGet.extend([
-    cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run2v1033p1x01_offline"),
-        # tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1205x02_offline"),
-        # tag = cms.string("CentralityTable_HFtowers200_v0_express"),
-        connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
-        label = cms.untracked.string("HFtowers")
-        ),
-    ])
-process.cent_seq = cms.Sequence(process.centralityBin)
-
 #* Add the VertexComposite producer
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDiMuCandidates_cff")
+process.generalMuMuMassMin0CandidatesWrongSign = process.generalMuMuMassMin0Candidates.clone(isWrongSign = cms.bool(True))
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import doPATMuons
 doPATMuons(process, False)
 
@@ -68,25 +47,19 @@ process.oneGoodDimuon = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("
 process.dimuonEvtSel = cms.Sequence(process.twoMuons * process.goodMuon * process.twoGoodMuons * process.goodDimuon * process.oneGoodDimuon)
 
 #* Add PbPb collision event selection
-#* hfCoincFilter2Th4: 2 HF towers above 4 GeV
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
-process.load('VertexCompositeAnalysis.VertexCompositeProducer.clusterCompatibilityFilter_cfi')
-process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff')
-process.load("VertexCompositeAnalysis.VertexCompositeProducer.OfflinePrimaryVerticesRecovery_cfi")
-# process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter * process.clusterCompatibilityFilter)
-process.colEvtSel = cms.Sequence(process.primaryVertexFilter)
+process.colEvtSel = cms.Sequence( process.primaryVertexFilter )
 
 #* Define the event selection sequence
 process.eventFilter_HM = cms.Sequence(
-	process.colEvtSel *
-    process.dimuonEvtSel *
-	process.offlinePrimaryVerticesRecovery
+    process.colEvtSel *
+    process.dimuonEvtSel
 )
 process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 
 #* Define the analysis steps
-process.pcentandep_step = cms.Path(process.eventFilter_HM * process.cent_seq)
 process.dimurereco_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin0Candidates)
+process.dimurerecowrongsign_step = cms.Path(process.eventFilter_HM * process.patMuonSequence * process.generalMuMuMassMin0CandidatesWrongSign)
 
 
 ## Adding the VertexComposite tree ################################################################################################
@@ -96,32 +69,29 @@ process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dimuanalyzer_tree_
 process.dimucontana.selectEvents = cms.untracked.string("eventFilter_HM_step")
 process.dimucontana.doMuonNtuple = cms.untracked.bool(True)
 process.dimucontana.VertexCompositeCollection = cms.untracked.InputTag("generalMuMuMassMin0Candidates:DiMu")
-# process.dimucontana_wrongsign.selectEvents = cms.untracked.string("eventFilter_HM_step")
+process.dimucontana.isCentrality = cms.bool(False)
+process.dimucontana.isEventPlane = cms.bool(False)
+process.dimucontana_wrongsign = process.dimuana.clone(VertexCompositeCollection = cms.untracked.InputTag("generalMuMuMassMin0CandidatesWrongSign:DiMu"))
+process.dimucontana_wrongsign.doMuonNtuple = cms.untracked.bool(False)
 
 # Define the output
 process.TFileService = cms.Service("TFileService", fileName = cms.string('dimuana.root'))
-process.p = cms.EndPath(process.dimucontana)
+process.p = cms.EndPath(process.dimucontana * process.dimucontana_wrongsign)
 
 #! Define the process schedule !!!!!!!!!!!!!!!!!!
 process.schedule = cms.Schedule(
     process.eventFilter_HM_step,
-    # process.pcentandep_step,
     process.dimurereco_step,
-    # process.dimurerecowrongsign_step,
+    process.dimurerecowrongsign_step,
     process.p
 )
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 ## Add the event selection filters. Going to be used in evtSel ###############################################################
-process.Flag_colEvtSel = cms.Path(process.offlinePrimaryVerticesRecovery * process.colEvtSel)
-process.Flag_hfCoincFilter2Th4 = cms.Path(process.offlinePrimaryVerticesRecovery * process.hfCoincFilter2Th4)
-process.Flag_primaryVertexFilter = cms.Path(process.offlinePrimaryVerticesRecovery * process.primaryVertexFilter)
-process.Flag_clusterCompatibilityFilter = cms.Path(process.offlinePrimaryVerticesRecovery * process.clusterCompatibilityFilter)
-# eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter2Th4 , process.Flag_primaryVertexFilter , process.Flag_clusterCompatibilityFilter ]
-eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_primaryVertexFilter ]
+process.Flag_primaryVertexFilter = cms.Path(process.primaryVertexFilter)
+eventFilterPaths = [ process.Flag_primaryVertexFilter ]
 
 #! Adding the process schedule !!!!!!!!!!!!!!!!!!
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

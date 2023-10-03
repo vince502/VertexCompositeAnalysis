@@ -56,6 +56,7 @@
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+
 //
 // constants, enums and typedefs
 //
@@ -176,6 +177,8 @@ private:
   bool  evtSel[MAXSEL];
   float HFsumETPlus;
   float HFsumETMinus;
+  float HFmaxETPlus;
+  float HFmaxETMinus;
   float ZDCPlus;
   float ZDCMinus;
   float bestvx;
@@ -358,6 +361,7 @@ private:
 
   edm::EDGetTokenT<pat::MuonCollection> tok_muoncol_;
   edm::EDGetTokenT<reco::TrackCollection> tok_tracks_;
+  edm::EDGetTokenT<reco::PFCandidateCollection> tok_pfcands_;
 
   edm::EDGetTokenT<int> tok_centBinLabel_;
   edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
@@ -439,6 +443,7 @@ PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iCon
 
   tok_muoncol_ = consumes<pat::MuonCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection")));
   tok_tracks_ = consumes<reco::TrackCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection")));
+  tok_pfcands_ = consumes<reco::PFCandidateCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("PFCandidateCollection")));
 
   useDeDxData_ = (iConfig.exists("useDeDxData") ? iConfig.getParameter<bool>("useDeDxData") : false);
   if(useDeDxData_)
@@ -615,6 +620,21 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
   {
     NtrkHP = 0;
     for (const auto& trk : *trackColl) { if (trk.quality(reco::TrackBase::highPurity)) NtrkHP++; }
+  }
+
+  HFmaxETPlus = -1;
+  HFmaxETMinus = -1;
+  const auto& pfCandColl = iEvent.getHandle(tok_pfcands_);
+  if(pfCandColl.isValid())
+  {
+    for (const auto& pf : *pfCandColl) {
+      const auto aeta = std::abs(pf.eta());
+      if (pf.particleId() < 6 || aeta < 3.0 || aeta > 6.0) continue;
+      if (pf.eta() > 0 && HFmaxETPlus < pf.energy())
+        HFmaxETPlus = pf.energy();
+      if (pf.eta() < 0 && HFmaxETMinus < pf.energy())
+        HFmaxETMinus = pf.energy();
+    }
   }
 
   if(isEventPlane_)
@@ -1307,6 +1327,8 @@ PATCompositeTreeProducer::initTree()
     PATCompositeNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
     PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
     PATCompositeNtuple->Branch("candSize",&candSize,"candSize/i");
+    PATCompositeNtuple->Branch("HFmaxETPlus",&HFmaxETPlus,"HFmaxETPlus/F");
+    PATCompositeNtuple->Branch("HFmaxETMinus",&HFmaxETMinus,"HFmaxETMinus/F");
     if(isCentrality_) 
     {
       PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
