@@ -14,25 +14,26 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/anstahll/CERN/PbPb2023/SKIM/SKIM_AOD_HIForward0_HIRun2023A_20231009/HIForward0/SKIM_AOD_HIForward0_HIRun2023A_20231009/231009_081732/0000/reco_RAW2DIGI_L1Reco_RECO_89.root"),
+#    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/anstahll/CERN/PbPb2023/SKIM/SKIM_AOD_HIForward0_HIRun2023A_20231009/HIForward0/SKIM_AOD_HIForward0_HIRun2023A_20231009/231009_081732/0000/reco_RAW2DIGI_L1Reco_RECO_89.root"),
+    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/DimuonSkims/DimuonSkim_PhysicsHIPhysicsRawPrime0_Run374810_ls140to215_miniAOD.root"),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
 
-# Set ZDC information
-process.es_pool = cms.ESSource("PoolDBESSource",
-    timetype = cms.string('runnumber'),
-    toGet = cms.VPSet(cms.PSet(record = cms.string("HcalElectronicsMapRcd"), tag = cms.string("HcalElectronicsMap_2021_v2.0_data"))),
-    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
-    authenticationMethod = cms.untracked.uint32(1)
-)
-process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
-process.es_ascii = cms.ESSource('HcalTextCalibrations',
-    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("emap_2023_newZDC_v3.txt")))
-)
+## Set ZDC information
+#process.es_pool = cms.ESSource("PoolDBESSource",
+#    timetype = cms.string('runnumber'),
+#    toGet = cms.VPSet(cms.PSet(record = cms.string("HcalElectronicsMapRcd"), tag = cms.string("HcalElectronicsMap_2021_v2.0_data"))),
+#    connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS'),
+#    authenticationMethod = cms.untracked.uint32(1)
+#)
+#process.es_prefer = cms.ESPrefer('HcalTextCalibrations', 'es_ascii')
+#process.es_ascii = cms.ESSource('HcalTextCalibrations',
+#    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("emap_2023_newZDC_v3.txt")))
+#)
 
 # Add PbPb centrality
 process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
@@ -67,21 +68,22 @@ process.diMu = generalParticles.clone(
 process.oneDiMu = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("diMu"), minNumber = cms.uint32(1))
 
 # Add muons
-from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import doPATMuons
-doPATMuons(process)
+#from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import doPATMuons
+#doPATMuons(process)
 
-from RecoMuon.MuonIdentification.calomuons_cfi import calomuons
-process.mergedMuons = cms.EDProducer("CaloMuonMerger",
-    muons    = cms.InputTag("muons::RECO"),
-    caloMuons = cms.InputTag("calomuons"),
-    minCaloCompatibility = calomuons.minCaloCompatibility,
-    mergeTracks = cms.bool(True),
-    tracks = cms.InputTag("generalTracks"),
-    mergeCaloMuons = cms.bool(False),
-    caloMuonsCut = cms.string(""),
-    muonsCut     = hpMuSelection,
-    tracksCut    = cms.string("quality(\"highPurity\")"),
-)
+
+#from RecoMuon.MuonIdentification.calomuons_cfi import calomuons
+#process.mergedMuons = cms.EDProducer("CaloMuonMerger",
+#    muons    = cms.InputTag("muons::RECO"),
+#    caloMuons = cms.InputTag("calomuons"),
+#    minCaloCompatibility = calomuons.minCaloCompatibility,
+#    mergeTracks = cms.bool(True),
+#    tracks = cms.InputTag("generalTracks"),
+#    mergeCaloMuons = cms.bool(False),
+#    caloMuonsCut = cms.string(""),
+#    muonsCut     = hpMuSelection,
+#    tracksCut    = cms.string("quality(\"highPurity\")"),
+#)
 
 # Add diMu event selection
 process.twoMuons = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("muons"), minNumber = cms.uint32(2))
@@ -98,7 +100,7 @@ process.goodDiMuons = cms.EDProducer("CandViewShallowCloneCombiner",
             decay = cms.string('goodMuons@+ goodMuons@-')
             )
 process.oneGoodDiMu = cms.EDFilter("CandViewCountFilter", src = cms.InputTag("goodDiMuons"), minNumber = cms.uint32(1))
-process.diMuEvtSel = cms.Sequence(process.mergedMuons * process.twoMuons * process.hpMuons * process.maxTwoHPMuons * process.goodMuons * process.twoGoodMuons * process.goodDiMuons * process.oneGoodDiMu)
+process.diMuEvtSel = cms.Sequence( process.twoMuons * process.hpMuons * process.maxTwoHPMuons * process.goodMuons * process.twoGoodMuons * process.goodDiMuons * process.oneGoodDiMu)
 
 # Add trigger selection
 import HLTrigger.HLTfilters.hltHighLevel_cfi
@@ -106,24 +108,15 @@ process.hltFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltFilter.andOr = cms.bool(True)
 process.hltFilter.throw = cms.bool(False)
 process.hltFilter.HLTPaths = [
-    # UPC muon triggers
-    'HLT_HIUPC_SingleMu*',
-    # UPC zero bias triggers
-    'HLT_HIZeroBias_v*',
-    'HLT_HIZeroBias_HighRate_v*',
-    'HLT_HIUPC_ZeroBias_SinglePixelTrack_MaxPixelTrack_v*',
-    'HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v*',
-    'HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v*',
-    # UPC SDC triggers
-    'HLT_HIUPC_ZDC1nOR_SinglePixelTrack_MaxPixelTrack_v*',
-    'HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v*',
-    'HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v*',
+    "HLT_HIL*SingleMu*_v*", "HLT_HIL*DoubleMu*_v*", "HLT_HIMinimumBiasHF1AND*_v*"
 ]
 
 # Add PbPb collision event selection
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff')
 process.colEvtSel = cms.Sequence(process.hfCoincFilter2Th4 * process.primaryVertexFilter)
+process.primaryVertexFilter.src = cms.InputTag("offlineSlimmedPrimaryVertices")
+process.primaryVertexFilter.cut = cms.string("!isFake && abs(z) <= 25 && position.Rho <= 2")
 
 # Define the event selection sequence
 process.eventFilter_HM = cms.Sequence(
@@ -133,7 +126,9 @@ process.eventFilter_HM = cms.Sequence(
 process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 
 # Define the analysis steps
-process.diMu_rereco_step = cms.Path(process.eventFilter_HM * process.mergedMuons * process.patMuonSequence *  process.diMu * process.oneDiMu * process.cent_seq)
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndVertices_cfi')
+process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
+process.diMu_rereco_step = cms.Path(process.eventFilter_HM  * process.unpackedTracksAndVertices * process.unpackedMuons  *process.patMuonSequence *  process.diMu * process.oneDiMu * process.cent_seq)
 
 # Add the VertexComposite tree
 from VertexCompositeAnalysis.VertexCompositeAnalyzer.particle_tree_cff import particleAna
@@ -144,48 +139,12 @@ process.diMuAna = particleAna.clone(
       'Flag_colEvtSel',
       'Flag_hfCoincFilter2Th4',
       'Flag_primaryVertexFilter',
-      'Flag_hfPosFilterNTh3',
-      'Flag_hfNegFilterNTh3',
-      'Flag_hfPosFilterNTh4',
-      'Flag_hfNegFilterNTh4',
-      'Flag_hfPosFilterNTh5',
-      'Flag_hfNegFilterNTh5',
-      'Flag_hfPosFilterNTh6',
-      'Flag_hfNegFilterNTh6',
-      'Flag_hfPosFilterNTh7',
-      'Flag_hfNegFilterNTh7',
-      'Flag_hfPosFilterNTh8',
-      'Flag_hfNegFilterNTh8',
-      'Flag_hfPosFilterNTh7p3',
-      'Flag_hfNegFilterNTh7p6'
   ),
   triggerInfo = cms.untracked.VPSet([
     # UPC muon triggers
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuCosmic_BptxAND_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuCosmic_NotMBHF2AND_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuCosmic_NotMBHF2AND_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuCosmic_NotMBHF2OR_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuCosmic_NotMBHF2OR_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_BptxAND_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_NotMBHF2AND_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_NotMBHF2AND_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_NotMBHF2OR_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_NotMBHF2OR_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_BptxAND_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_NotMBHF2AND_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_NotMBHF2AND_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_NotMBHF2OR_MaxPixelCluster1000_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_SingleMuOpen_OR_SingleMuCosmic_EMTF_NotMBHF2OR_v*')),
-    # UPC zero bias triggers
-    cms.PSet(path = cms.string('HLT_HIZeroBias_v*')),
-    cms.PSet(path = cms.string('HLT_HIZeroBias_HighRate_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_ZeroBias_SinglePixelTrack_MaxPixelTrack_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v*')),
-    # UPC ZDC triggers
-    cms.PSet(path = cms.string('HLT_HIUPC_ZDC1nOR_SinglePixelTrack_MaxPixelTrack_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_ZDC1nOR_SinglePixelTrackLowPt_MaxPixelCluster400_v*')),
-    cms.PSet(path = cms.string('HLT_HIUPC_ZDC1nOR_MinPixelCluster400_MaxPixelCluster10000_v*')),
+    cms.PSet(path = cms.string('HLT_HIL*SingleMu*_v*')),
+    cms.PSet(path = cms.string('HLT_HIL*DoubleMu*_v*')),
+    cms.PSet(path = cms.string('HLT_HIMinimumBiasHF1AND*_v*')),
   ]),
 )
 
@@ -204,34 +163,16 @@ process.schedule = cms.Schedule(
 process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
 process.Flag_hfCoincFilter2Th4 = cms.Path(process.eventFilter_HM * process.hfCoincFilter2Th4)
 process.Flag_primaryVertexFilter = cms.Path(process.eventFilter_HM * process.primaryVertexFilter)
-process.Flag_hfPosFilterNTh3 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh3_seq)
-process.Flag_hfPosFilterNTh4 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh4_seq)
-process.Flag_hfPosFilterNTh5 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh5_seq)
-process.Flag_hfPosFilterNTh6 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh6_seq)
-process.Flag_hfPosFilterNTh7 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh7_seq)
-process.Flag_hfPosFilterTh8 = cms.Path(process.eventFilter_HM * process.hfPosFilterTh8_seq)
-process.Flag_hfPosFilterNTh8 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh8_seq)
-process.Flag_hfPosFilterNTh7p3 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh7p3_seq)
-process.Flag_hfPosFilterNTh200 = cms.Path(process.eventFilter_HM * process.hfPosFilterNTh200_seq)
-process.Flag_hfNegFilterNTh3 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh3_seq)
-process.Flag_hfNegFilterNTh4 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh4_seq)
-process.Flag_hfNegFilterNTh5 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh5_seq)
-process.Flag_hfNegFilterNTh6 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh6_seq)
-process.Flag_hfNegFilterNTh7 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh7_seq)
-process.Flag_hfNegFilterTh8 = cms.Path(process.eventFilter_HM * process.hfNegFilterTh8_seq)
-process.Flag_hfNegFilterNTh8 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh8_seq)
-process.Flag_hfNegFilterNTh7p6 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh7p6_seq)
-process.Flag_hfNegFilterNTh200 = cms.Path(process.eventFilter_HM * process.hfNegFilterNTh200_seq)
 
-eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter2Th4 , process.Flag_primaryVertexFilter, process.Flag_hfPosFilterNTh3, process.Flag_hfNegFilterNTh3,process.Flag_hfPosFilterNTh4,
-                     process.Flag_hfNegFilterNTh4, process.Flag_hfPosFilterNTh5, process.Flag_hfNegFilterNTh5, process.Flag_hfPosFilterNTh6, process.Flag_hfNegFilterNTh6, process.Flag_hfPosFilterNTh7, process.Flag_hfNegFilterNTh7,
-                     process.Flag_hfPosFilterTh8, process.Flag_hfPosFilterNTh8, process.Flag_hfNegFilterTh8, process.Flag_hfNegFilterNTh8, process.Flag_hfPosFilterNTh7p3, process.Flag_hfNegFilterNTh7p6 ]
+eventFilterPaths = [ 
+    process.Flag_colEvtSel ,
+    process.Flag_hfCoincFilter2Th4 ,
+    process.Flag_primaryVertexFilter,
+]
 
 process.eventFilter_HM = cms.Sequence(
     process.hltFilter *
     process.primaryVertexFilter *
-    process.hfPosFilterNTh200_seq *
-    process.hfNegFilterNTh200_seq *
     process.diMuEvtSel
 )
 
@@ -240,5 +181,8 @@ for P in eventFilterPaths:
 
 # Add recovery for offline primary vertex
 from Configuration.Applications.ConfigBuilder import MassReplaceInputTag
-process = MassReplaceInputTag(process, "muons", "mergedMuons")
-process.mergedMuons.muons = cms.InputTag("muons")
+process = MassReplaceInputTag(process, "muons", "slimmedMuons")
+process = MassReplaceInputTag(process,"offlinePrimaryVertices","unpackedTracksAndVertices")
+process = MassReplaceInputTag(process,"generalTracks","unpackedTracksAndVertices")
+process = MassReplaceInputTag(process,"genParticles","prunedGenParticles")
+#process.mergedMuons.muons = cms.InputTag("muons")
