@@ -169,15 +169,15 @@ void ParticleFitter::addParticles(ParticleDaughter& d, const edm::Event& iEvent)
   const auto charge = (d.charge()!=-99 ? d.charge() : HepPDT::ParticleID(pdgId).threeCharge());
   const auto& vertex = (vertex_.isFake() ? beamSpot2D_ : vertex_);
   if (d.useSource()) { d.addParticles(iEvent); }
-  else if (pdgId==0 ) { d.addParticles(iEvent, token_pfParticles_, vertex); }
+  else if (pdgId==0 ) { d.addParticles(iEvent, token_tracks_, vertex); }
   else if (pdgId<=6 ) { d.addParticles(iEvent, token_jets_, vertex);        }
   else if (pdgId==11) { d.addParticles(iEvent, token_electrons_, vertex);   }
   else if (pdgId==13) { d.addParticles(iEvent, token_muons_, vertex);       }
   else if (pdgId==15) { d.addParticles(iEvent, token_taus_, vertex);        }
   else if (d.pdgId()== 22) { d.addParticles(iEvent, token_photons_, vertex);     }
   else if (d.pdgId()==-22) { d.addParticles(iEvent, token_convPhotons_, vertex); }
-  else if (charge!=0) { d.addParticles(iEvent, token_tracks_, vertex);      }
-  else                { d.addParticles(iEvent, token_pfParticles_, vertex); }
+  else if (charge==0) { d.addParticles(iEvent, token_pfParticles_, vertex); }
+  else                { d.addParticles(iEvent, token_tracks_, vertex);      }
 };
 
 
@@ -847,7 +847,7 @@ void ParticleDaughter::fillInfo(const edm::ParameterSet& pSet, const edm::Parame
       tokens_dedx_.insert( std::make_pair(input, iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag(input))));
     }
   }
-  if (std::abs(pdgId)==13 && (pSet.existsAs<bool>("propToMuon") && pSet.getParameter<bool>("propToMuon"))) {
+  if (pdgId==13 && (pSet.existsAs<bool>("propToMuon") && pSet.getParameter<bool>("propToMuon"))) {
     edm::ParameterSet conf;
     conf.addParameter("useSimpleGeometry", (pSet.existsAs<bool>("useSimpleGeometry") ? pSet.getParameter<bool>("useSimpleGeometry") : true)); // default: true
     conf.addParameter("useTrack", (pSet.existsAs<std::string>("useTrack") ? pSet.getParameter<std::string>("useTrack") : "none")); // default: none
@@ -883,6 +883,7 @@ void ParticleDaughter::addParticles(const edm::Event& event, const edm::EDGetTok
   StringCutObjectSelector<pat::GenericParticle, true> finalSelection(finalSelection_);
   // add particles
   ParticleMassSet particles;
+  if (handle.isValid()) { // DEBUG REMOVE cout
   for (size_t i=0; i<handle->size(); i++) {
     const auto& p = edm::Ref<std::vector<T> >(handle, i);
     if (!selection(*p)) continue;
@@ -910,6 +911,7 @@ void ParticleDaughter::addParticles(const edm::Event& event, const edm::EDGetTok
     if (finalSelection(cand)) {
       particles.insert(cand);
     }
+  }
   }
   particles_.assign(particles.begin(), particles.end());
   particlesRef_.resize(particles_.size());
@@ -943,7 +945,7 @@ void ParticleDaughter::addParticles(const edm::Event& event)
 template <class T>
 void ParticleDaughter::addInfo(pat::GenericParticle& c, const T& p)
 {
-  if (mass_<0) { throw std::logic_error(Form("[ERROR] Mass not set for particle %d !", pdgId_)); }
+  if (pdgId_!=0 && mass_<0) { throw std::logic_error(Form("[ERROR] Mass not set for particle %d !", pdgId_)); }
   const auto p4 = math::PtEtaPhiMLorentzVector(p.pt(), p.eta(), p.phi(), mass_);
   c.setP4(p4);
   c.setCharge(p.charge());
