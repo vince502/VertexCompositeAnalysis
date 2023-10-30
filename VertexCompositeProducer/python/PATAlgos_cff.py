@@ -137,13 +137,14 @@ def changeToMiniAOD(process):
         triggerResults              = cms.InputTag('TriggerResults::HLT'),
         unpackFilterLabels          = cms.bool(True)
     )
-    process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
+    process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedTracksAndVertices_cfi')
     process.eventFilter_HM.insert(0, process.unpackedTracksAndVertices)
 
     if hasattr(process, "patMuons"):
         process.load('VertexCompositeAnalysis.VertexCompositeProducer.unpackedMuons_cfi')
         process.patMuons = process.unpackedMuons.clone()
 
-    from HLTrigger.Configuration.CustomConfigs import MassReplaceInputTag
+    from Configuration.Applications.ConfigBuilder import MassReplaceInputTag
     process = MassReplaceInputTag(process,"offlinePrimaryVertices","unpackedTracksAndVertices")
     process = MassReplaceInputTag(process,"generalTracks","unpackedTracksAndVertices")
+    process = MassReplaceInputTag(process,"genParticles","prunedGenParticles")
