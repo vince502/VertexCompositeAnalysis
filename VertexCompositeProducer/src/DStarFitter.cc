@@ -33,6 +33,8 @@
 // for DCA
 #include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
 #include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackFromFTSFactory.h"
+
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
@@ -59,13 +61,14 @@ float piMassD0_sigma = 3.5E-7f;
 float kaonMassD0_sigma = 1.6E-5f;
 float dStarMassD0_sigma = dStarMassD0*1.e-6;
 
+
 // Constructor and (empty) destructor
 DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
   using std::string;
 
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  token_d0cand = iC.consumes<reco::VertexCompositeCandidate>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0cand = iC.consumes<reco::VertexCompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("d0Collection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -251,7 +254,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
   }
   for(unsigned int idx = 0; idx < theD0Handle->size(); idx ++){
-    pat::GenericParticleRef tmpRef ( theD0Handle, idx);
+  //   pat::GenericParticleRef tmpRef ( theD0Handle, idx);
     theD0CandRefs.push_back( tmpRef );
   }
 
@@ -277,6 +280,9 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate& theD0 = theD0Handle[didx1];
+      GlobalTrajectoryParameters pars(GlobalPoint(theD0.vx(), theD0.vy(), theD0.vz()), GlobalVector(theD0.px(), theD0.py(), theD0.pz()), 0, magField);
+      FreeTrajectoryState FTSD0(pars);
+      
 
       // Calculate DCA of two daughters
 //      double dzvtx_pos = positiveTrackRef->dz(bestvtx);
@@ -347,7 +353,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        float ndf = 0.0;
 
        vector<RefCountedKinematicParticle> dStarParticles;
-       dStarParticles.push_back(pFactory.particle(theD0,theD0.mass(),chi,ndf,0.001));
+       dStarParticles.push_back(pFactory.particle(TransientTrackFromFTSFactory().build(FTSD0),theD0.mass(),chi,ndf,0.001));
        dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassD0,chi,ndf,piMassD0_sigma));
 
        KinematicParticleVertexFitter dStarFitter;
@@ -387,7 +393,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        float negCandTotalE = sqrt( negCandTotalP.mag2() + piMassD0*piMassD0 );
        float dStarTotalE = posCandTotalE + negCandTotalE;
 
-       const Particle::LorentzVector dStarP4(dStarTotalP.x(), dStarTotalP.y(), dStarTotalP.z(), dStarTotalE[i]);
+       const Particle::LorentzVector dStarP4(dStarTotalP.x(), dStarTotalP.y(), dStarTotalP.z(), dStarTotalE);
 
        Particle::Point dStarVtx((*dStarDecayVertex).position().x(), (*dStarDecayVertex).position().y(), (*dStarDecayVertex).position().z());
        std::vector<double> dStarVtxEVec;
@@ -455,7 +461,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        RecoChargedCandidate
          theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
                                                   negCandTotalP.y(), negCandTotalP.z(),
-                                                  negCandTotalE[i]), dStarVtx);
+                                                  negCandTotalE), dStarVtx);
        theNegCand.setTrack(pionTrackRef);
 
        AddFourMomenta addp4;

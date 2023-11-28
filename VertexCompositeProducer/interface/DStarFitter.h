@@ -85,7 +85,7 @@ class DStarFitter {
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
-  const reco::VertexCompositeCandidateCollection& getD0() const;
+  const reco::VertexCompositeCandidateCollection& getDStar() const;
   const std::vector<float>& getDCAVals() const;
   const std::vector<float>& getDCAErrs() const;
   const std::vector<float>& getMVAVals() const; 
@@ -106,7 +106,7 @@ class DStarFitter {
   edm::InputTag vtxAlg;
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
-  edm::EDGetTokenT<reco::VertexCompositeCandidate> token_d0cand;
+  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> token_d0cand;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
 
