@@ -9,12 +9,13 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-#process.MessageLogger.cerr.FwkReport.reportEvery = 200
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-'/store/hidata/PARun2016C/PAHighMultiplicity1/AOD/PromptReco-v1/000/285/505/00000/006F1E14-85AF-E611-9F9E-02163E014508.root'
+#'/store/hidata/PARun2016C/PAHighMultiplicity1/AOD/PromptReco-v1/000/285/505/00000/006F1E14-85AF-E611-9F9E-02163E014508.root'
+#'/store/hidata/PARun2016C/PAMinimumBias19/AOD/PromptReco-v1/000/285/975/00000/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
+'file:/eos/home-s/soohwan/store/PARun2016CPAMinimumBias19AOD/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
 #'file:output.root'
 )
 )
@@ -58,12 +59,12 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(1.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.7)
-process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
-process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.6)
+process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
 process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))

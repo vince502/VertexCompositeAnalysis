@@ -495,6 +495,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
         // DCA error
         tsos = extrapolator.extrapolate(d0Cand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
+	if( !tsos.isValid() ) continue;
         Measurement1D cur3DIP;
         VertexDistance3D a3d;
         GlobalPoint refPoint          = tsos.globalPosition();

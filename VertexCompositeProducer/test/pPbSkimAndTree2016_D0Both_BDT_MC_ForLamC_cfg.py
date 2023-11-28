@@ -18,14 +18,17 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('analysis')
 
 if not options.inputFiles:
-    options.inputFiles = ['/store/himc/pPb816Summer16DR/NonPromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/90000/0007792C-D8A0-E711-9B47-FA163EEC8769.root']
+    options.inputFiles = [
+#'/store/himc/pPb816Summer16DR/NonPromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/90000/0007792C-D8A0-E711-9B47-FA163EEC8769.root'
+'file:/eos/home-s/soohwan/store/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/009F94B7-5D9B-E711-B27B-009C02AABEB8.root',
+]
 
 process.source = cms.Source("PoolSource",
    fileNames = cms.untracked.vstring(options.inputFiles)
 )
 
 # =============== Other Statements =====================
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_mcRun2_pA_v4'
 
@@ -54,7 +57,16 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 ########## D0 candidate rereco ###############################################################
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
-process.generalD0CandidatesNewWrongSign = process.generalD0Candidates.clone(isWrongSign = cms.bool(True))
+#process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.0)
+#process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(4.8)
+#process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
+#process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.2)
+#process.generalD0CandidatesNew.tkPtCut = cms.double(0.4)
+#process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
+#process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
+#process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+
+process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
 process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew )
 process.d0rereco_wrongsign_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNewWrongSign )
@@ -79,7 +91,6 @@ process.d0ana_mc_wrongsign.MVACollection = cms.InputTag("d0selectorMCWS:MVAValue
 process.d0selectorMCBDTPreCut.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_v2.root')
 process.d0selectorMC = process.d0selectorMCBDTPreCut.clone()
 process.d0selectorMCWS = process.d0selectorMC.clone(
-    wronsign = cms.bool(True),
   VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
   MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
 )
@@ -94,12 +105,14 @@ process.d0selectorMCNewReducedWS.DCAValCollection = cms.InputTag("generalD0Candi
 process.d0selectorMCNewReducedWS.DCAErrCollection = cms.InputTag("generalD0CandidatesNewWrongSign:DCAErrorsD0")
 
 process.d0ana_mc_newreduced = process.d0ana_mc.clone()
+process.d0ana_mc_newreduced.saveTree = True
 process.d0ana_mc_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0selectorMCNewReduced:D0")
 process.d0ana_mc_newreduced.MVACollection = cms.InputTag("d0selectorMCNewReduced:MVAValuesNewD0")
 process.d0ana_mc_newreduced.DCAValCollection = cms.InputTag("d0selectorMCNewReduced:DCAValuesNewD0")
 process.d0ana_mc_newreduced.DCAErrCollection = cms.InputTag("d0selectorMCNewReduced:DCAErrorsNewD0")
 
 process.d0ana_mc_newreduced_wrongsign = process.d0ana_mc_wrongsign.clone()
+process.d0ana_mc_newreduced_wrongsign.saveTree = True
 process.d0ana_mc_newreduced_wrongsign.VertexCompositeCollection = cms.untracked.InputTag("d0selectorMCNewReducedWS:D0")
 process.d0ana_mc_newreduced_wrongsign.MVACollection = cms.InputTag("d0selectorMCNewReducedWS:MVAValuesNewD0")
 process.d0ana_mc_newreduced_wrongsign.DCAValCollection = cms.InputTag("d0selectorMCNewReducedWS:DCAValuesNewD0")
