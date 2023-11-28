@@ -52,14 +52,12 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
-const float piMassD0 = 0.13957018;
-const float piMassD0Squared = piMassD0*piMassD0;
-const float kaonMassD0 = 0.493677;
-const float kaonMassD0Squared = kaonMassD0*kaonMassD0;
-const float dStarMassD0 = 2.010000;
-// float piMassD0_sigma = 3.5E-7f;
+const float piMassDStar = 0.13957018;
+const float piMassDStarSquared = piMassDStar*piMassDStar;
+const float dStarMassDStar = 2.010000;
+float piMassDStar_sigma = 3.5E-7f;
 float D0MassD0_sigma = 1.6E-4f;
-float dStarMassD0_sigma = dStarMassD0*1.e-6;
+float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
 
 
 // Constructor and (empty) destructor
@@ -258,10 +256,10 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   //   theD0CandRefs.push_back( tmpRef );
   // }
 
-  //float posCandMass[2] = {piMassD0, kaonMassD0};
-  //float negCandMass[2] = {kaonMassD0, piMassD0};
-  //float posCandMass_sigma[2] = {piMassD0_sigma, kaonMassD0_sigma};
-  //float negCandMass_sigma[2] = {kaonMassD0_sigma, piMassD0_sigma};
+  //float posCandMass[2] = {piMassDStar, kaonMassD0};
+  //float negCandMass[2] = {kaonMassD0, piMassDStar};
+  //float posCandMass_sigma[2] = {piMassDStar_sigma, kaonMassD0_sigma};
+  //float negCandMass_sigma[2] = {kaonMassD0_sigma, piMassDStar_sigma};
   //int   pdg_id[2] = {421, -421};
 
   // Loop over tracks and vertex good charged track pairs
@@ -354,7 +352,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
        vector<RefCountedKinematicParticle> dStarParticles;
        dStarParticles.push_back(pFactory.particle(TransientTrackFromFTSFactory().build(FTSD0),theD0.mass(),chi,ndf,D0MassD0_sigma));
-       dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassD0,chi,ndf,piMassD0_sigma));
+       dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassDStar,chi,ndf,piMassDStar_sigma));
 
        KinematicParticleVertexFitter dStarFitter;
        RefCountedKinematicTree dStarVertex;
@@ -390,7 +388,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        GlobalVector negCandTotalP = GlobalVector(negCandKP.momentum().x(),negCandKP.momentum().y(),negCandKP.momentum().z());
 
        float posCandTotalE = sqrt( posCandTotalP.mag2() + theD0.mass()*theD0.mass() );
-       float negCandTotalE = sqrt( negCandTotalP.mag2() + piMassD0*piMassD0 );
+       float negCandTotalE = sqrt( negCandTotalP.mag2() + piMassDStar*piMassDStar );
        float dStarTotalE = posCandTotalE + negCandTotalE;
 
        const Particle::LorentzVector dStarP4(dStarTotalP.x(), dStarTotalP.y(), dStarTotalP.z(), dStarTotalE);
@@ -470,8 +468,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
        theDStar->setPdgId(pdgId);
        addp4.set( *theDStar );
-       if( theDStar->mass() < dStarMassD0 + dStarMassCut &&
-           theDStar->mass() > dStarMassD0 - dStarMassCut ) 
+       if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
+           theDStar->mass() > dStarMassDStar - dStarMassCut ) 
        {
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());
