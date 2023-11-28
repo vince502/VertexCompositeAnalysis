@@ -54,10 +54,10 @@ const float piMassD0 = 0.13957018;
 const float piMassD0Squared = piMassD0*piMassD0;
 const float kaonMassD0 = 0.493677;
 const float kaonMassD0Squared = kaonMassD0*kaonMassD0;
-const float dStarMassDStar = 2.010000;
+const float dStarMassD0 = 2.010000;
 float piMassD0_sigma = 3.5E-7f;
 float kaonMassD0_sigma = 1.6E-5f;
-float d0MassD0_sigma = d0MassD0*1.e-6;
+float dStarMassD0_sigma = dStarMassD0*1.e-6;
 
 // Constructor and (empty) destructor
 DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
@@ -65,7 +65,7 @@ DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesC
 
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  token_d0cand = iC.consumes<reco::VertexCompositeCandidate>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0cand = iC.consumes<VertexCompositeCandidate>(theParameters.getParameter<edm::InputTag>("d0Collection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -153,7 +153,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   //  passing to the KalmanVertexFitter)
   std::vector<TrackRef> theTrackRefs;
   std::vector<TransientTrack> theTransTracks;
-  std::vector<GenericParticleRef> theD0CandRefs;
+  std::vector<pat::GenericParticleRef> theD0CandRefs;
 
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
@@ -462,8 +462,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        theDStar->addDaughter(theNegCand);
        theDStar->setPdgId(pdg_id[i]);
        addp4.set( *theDStar );
-       if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
-           theDStar->mass() > dStarMassDStar - dStarMassCut ) 
+       if( theDStar->mass() < dStarMassD0 + dStarMassCut &&
+           theDStar->mass() > dStarMassD0 - dStarMassCut ) 
        {
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());
