@@ -58,7 +58,7 @@ const float kaonMassD0 = 0.493677;
 const float kaonMassD0Squared = kaonMassD0*kaonMassD0;
 const float dStarMassD0 = 2.010000;
 float piMassD0_sigma = 3.5E-7f;
-float kaonMassD0_sigma = 1.6E-5f;
+float D0MassD0_sigma = 1.6E-4f;
 float dStarMassD0_sigma = dStarMassD0*1.e-6;
 
 
@@ -161,7 +161,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
-  Handle<reco::VertexCompositeCandidate> theD0Handle;
+  Handle<reco::VertexCompositeCandidateCollection> theD0Handle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
@@ -253,10 +253,10 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       }
     }
   }
-  for(unsigned int idx = 0; idx < theD0Handle->size(); idx ++){
+  // for(unsigned int idx = 0; idx < theD0Handle->size(); idx ++){
   //   pat::GenericParticleRef tmpRef ( theD0Handle, idx);
-    theD0CandRefs.push_back( tmpRef );
-  }
+  //   theD0CandRefs.push_back( tmpRef );
+  // }
 
   //float posCandMass[2] = {piMassD0, kaonMassD0};
   //float negCandMass[2] = {kaonMassD0, piMassD0};
@@ -265,7 +265,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   //int   pdg_id[2] = {421, -421};
 
   // Loop over tracks and vertex good charged track pairs
-  for(unsigned int didx1 = 0; didx1 < theD0CandRefs.size(); didx1++) {
+  for(unsigned int didx1 = 0; didx1 < theD0Handle->size(); didx1++) {
 
     for(unsigned int trdx1 = 0; trdx1 < theTrackRefs.size(); trdx1++) {
 
@@ -353,7 +353,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        float ndf = 0.0;
 
        vector<RefCountedKinematicParticle> dStarParticles;
-       dStarParticles.push_back(pFactory.particle(TransientTrackFromFTSFactory().build(FTSD0),theD0.mass(),chi,ndf,0.001));
+       dStarParticles.push_back(pFactory.particle(TransientTrackFromFTSFactory().build(FTSD0),theD0.mass(),chi,ndf,D0MassD0_sigma));
        dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassD0,chi,ndf,piMassD0_sigma));
 
        KinematicParticleVertexFitter dStarFitter;
