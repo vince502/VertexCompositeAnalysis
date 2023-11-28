@@ -279,7 +279,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TrackRef pionTrackRef = theTrackRefs[trdx1];
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
-      VertexCompositeCandidate& theD0 = (*theD0Handle)[didx1];
+      VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
       GlobalTrajectoryParameters pars(GlobalPoint(theD0.vx(), theD0.vy(), theD0.vz()), GlobalVector(theD0.px(), theD0.py(), theD0.pz()), 0, magField);
       FreeTrajectoryState FTSD0(pars);
       
