@@ -253,10 +253,10 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       }
     }
   }
-  // for(unsigned int idx = 0; idx < theD0Handle->size(); idx ++){
-  //   pat::GenericParticleRef tmpRef ( theD0Handle, idx);
-  //   theD0CandRefs.push_back( tmpRef );
-  // }
+  for(unsigned int idx = 0; idx < theD0Handle->size(); idx ++){
+    pat::GenericParticleRef tmpRef ( theD0Handle, idx);
+    theD0CandRefs.push_back( tmpRef );
+  }
 
   //float posCandMass[2] = {piMassD0, kaonMassD0};
   //float negCandMass[2] = {kaonMassD0, piMassD0};
@@ -279,7 +279,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TrackRef pionTrackRef = theTrackRefs[trdx1];
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
-      VertexCompositeCandidate& theD0 = theD0Handle[didx1];
+      pat::GenericParticle& theD0 = theD0CandRefs[didx1];
       GlobalTrajectoryParameters pars(GlobalPoint(theD0.vx(), theD0.vy(), theD0.vz()), GlobalVector(theD0.px(), theD0.py(), theD0.pz()), 0, magField);
       FreeTrajectoryState FTSD0(pars);
       
