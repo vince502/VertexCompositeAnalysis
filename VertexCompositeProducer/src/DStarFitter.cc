@@ -470,8 +470,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
          dcaErrs_.push_back(cur3DIP.error());
 
 // per//form MVA evaluation
-      //    if(useAnyMVA_)
-      //    {
+         if(useAnyMVA_)
+         {
       //    //   float gbrVals_[20];
       //    //   gbrVals_[0] = d0P4.Pt();
       //    //   gbrVals_[1] = d0P4.Eta();
