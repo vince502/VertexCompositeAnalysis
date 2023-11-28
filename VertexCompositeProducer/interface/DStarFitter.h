@@ -106,7 +106,7 @@ class DStarFitter {
   edm::InputTag vtxAlg;
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
-  edm::EDGetTokenT<VertexCompositeCandidate> token_d0;
+  edm::EDGetTokenT<reco::VertexCompositeCandidate> token_d0;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
 
@@ -128,6 +128,7 @@ class DStarFitter {
   double lVtxSigCut;
   double collinCut2D;
   double collinCut3D;
+  double dStarMassCut;
   double d0MassCut;
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
@@ -152,6 +153,9 @@ class DStarFitter {
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 
+  // DCA
+  std::vector<float> dcaVals_;
+  std::vector<float> dcaErrs_;
 
   std::string dbFileName_;
 

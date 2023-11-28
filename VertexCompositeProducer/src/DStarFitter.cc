@@ -65,7 +65,7 @@ DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesC
 
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  token_d0cand = iC.consumes<VertexCompositeCandidate>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0cand = iC.consumes<reco::VertexCompositeCandidate>(theParameters.getParameter<edm::InputTag>("d0Collection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -158,7 +158,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
-  Handle<reco::VertexCompositeCanddiate> theD0Handle;
+  Handle<reco::VertexCompositeCandiate> theD0Handle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
@@ -251,15 +251,15 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
   }
   for(unsigned int idx = 0; idx < theD0Handle->size(); idx ++){
-    GenericParticleRef tmpRef ( theD0Handle, idx);
+    pat::GenericParticleRef tmpRef ( theD0Handle, idx);
     theD0CandRefs.push_back( tmpRef );
   }
 
-  float posCandMass[2] = {piMassD0, kaonMassD0};
-  float negCandMass[2] = {kaonMassD0, piMassD0};
-  float posCandMass_sigma[2] = {piMassD0_sigma, kaonMassD0_sigma};
-  float negCandMass_sigma[2] = {kaonMassD0_sigma, piMassD0_sigma};
-  int   pdg_id[2] = {421, -421};
+  //float posCandMass[2] = {piMassD0, kaonMassD0};
+  //float negCandMass[2] = {kaonMassD0, piMassD0};
+  //float posCandMass_sigma[2] = {piMassD0_sigma, kaonMassD0_sigma};
+  //float negCandMass_sigma[2] = {kaonMassD0_sigma, piMassD0_sigma};
+  //int   pdg_id[2] = {421, -421};
 
   // Loop over tracks and vertex good charged track pairs
   for(unsigned int didx1 = 0; didx1 < theD0CandRefs.size(); didx1++) {
@@ -274,7 +274,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       std::vector<TransientTrack> transTracks;
 
       TrackRef pionTrackRef = theTrackRefs[trdx1];
-      TransientTrack* pionTransTkPtr = theTrackRefs[trdx1];
+      TransientTrack* pionTransTkPtr = 0;
+      pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate& theD0 = theD0Handle[didx1];
 
       // Calculate DCA of two daughters
@@ -346,8 +347,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        float ndf = 0.0;
 
        vector<RefCountedKinematicParticle> dStarParticles;
-       dStarParticles.push_back(pFactory.particle(*theD0,theD0.mass(),chi,ndf,0.001));
-       dStarParticles.push_back(pFactory.particle(*pointTransTkPtr,piMassD0,chi,ndf,negCandMass_sigma[i]));
+       dStarParticles.push_back(pFactory.particle(theD0,theD0.mass(),chi,ndf,0.001));
+       dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassD0,chi,ndf,piMassD0_sigma));
 
        KinematicParticleVertexFitter dStarFitter;
        RefCountedKinematicTree dStarVertex;
@@ -455,12 +456,13 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
          theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
                                                   negCandTotalP.y(), negCandTotalP.z(),
                                                   negCandTotalE[i]), dStarVtx);
-       theNegCand.setTrack(negativeTrackRef);
+       theNegCand.setTrack(pionTrackRef);
 
        AddFourMomenta addp4;
        theDStar->addDaughter(theD0);
        theDStar->addDaughter(theNegCand);
-       theDStar->setPdgId(pdg_id[i]);
+       int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
+       theDStar->setPdgId(pdgId);
        addp4.set( *theDStar );
        if( theDStar->mass() < dStarMassD0 + dStarMassCut &&
            theDStar->mass() > dStarMassD0 - dStarMassCut ) 
