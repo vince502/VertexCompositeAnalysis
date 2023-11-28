@@ -57,7 +57,7 @@ const float piMassD0Squared = piMassD0*piMassD0;
 const float kaonMassD0 = 0.493677;
 const float kaonMassD0Squared = kaonMassD0*kaonMassD0;
 const float dStarMassD0 = 2.010000;
-float piMassD0_sigma = 3.5E-7f;
+// float piMassD0_sigma = 3.5E-7f;
 float D0MassD0_sigma = 1.6E-4f;
 float dStarMassD0_sigma = dStarMassD0*1.e-6;
 
