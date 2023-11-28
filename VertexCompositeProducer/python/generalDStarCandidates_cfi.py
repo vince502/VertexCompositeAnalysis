@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-generalD0Candidates = cms.EDProducer("DStarProducer",
+generalDStarCandidates = cms.EDProducer("DStarProducer",
 
     # InputTag that tells which TrackCollection to use for vertexing
     d0Collection = cms.InputTag('d0selectorNewReduced'),
