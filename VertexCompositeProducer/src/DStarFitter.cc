@@ -314,7 +314,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       //     return trajectoryState;
       // };
       GlobalTrajectoryParameters pars(GlobalPoint(theD0.vx(), theD0.vy(), theD0.vz()), GlobalVector(theD0.px(), theD0.py(), theD0.pz()), theD0.charge(), magField);
-      FreeTrajectoryState FTSD0 = FreeTrajectoryState(pars, theTTBuilder);
+      FreeTrajectoryState FTSD0 = FreeTrajectoryState(pars);
       
 
       // Calculate DCA of two daughters
