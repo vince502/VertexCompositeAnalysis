@@ -278,7 +278,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
-      auto getFreeTrajectoryStateFromFittedMother  [](const reco::VertexCompositeCandidate& fittedMother,
+      auto getFreeTrajectoryStateFromFittedMother =  [](const reco::VertexCompositeCandidate& fittedMother,
                                                                  const TransientTrackBuilder* builder) {
           FreeTrajectoryState trajectoryState;
 
