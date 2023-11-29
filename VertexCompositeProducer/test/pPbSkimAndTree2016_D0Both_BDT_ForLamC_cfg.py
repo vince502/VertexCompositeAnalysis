@@ -168,3 +168,11 @@ process.Flag_pileupVertexFilterCutGplus = cms.Path(process.eventFilter_HM * proc
 eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter , process.Flag_primaryVertexFilterPA , process.Flag_NoScraping , process.Flag_pileupVertexFilterCut , process.Flag_pileupVertexFilterCutGplus ]
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
+
+process.output = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring("keep *"),
+    fileName = cms.untracked.string('output.root'),
+)
+
+process.outputPath = cms.EndPath(process.output)
+process.schedule.append(process.outputPath)

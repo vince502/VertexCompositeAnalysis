@@ -279,7 +279,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
       GlobalTrajectoryParameters pars(GlobalPoint(theD0.vx(), theD0.vy(), theD0.vz()), GlobalVector(theD0.px(), theD0.py(), theD0.pz()), 0, magField);
-      FreeTrajectoryState FTSD0(pars);
+      const auto& error = theD0.userData<KinematicParametersError>("kinematicParametersError")->matrix().Sub<AlgebraicSymMatrix66>(0,0);
+      FreeTrajectoryState FTSD0(pars, CartesianTrajectoryError(error));
       
 
       // Calculate DCA of two daughters
