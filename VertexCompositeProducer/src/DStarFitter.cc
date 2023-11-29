@@ -349,10 +349,12 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        vector<RefCountedKinematicParticle> d0Daus;
        reco::Candidate* dau0 = theD0.daughter(0);
        reco::Candidate* dau1 = theD0.daughter(1);
+       reco::TransientTrack ttk0(*dau0, magField);
+       reco::TransientTrack ttk1(*dau1, magField);
        float dau0mass =  dau0->mass();
        float dau1mass =  dau1->mass();
-       d0Daus.push_back(pFactory.particle(*dau0->bestTrack(),dau0mass,chi,ndf,D0MassD0_sigma));
-       d0Daus.push_back(pFactory.particle(*dau1->bestTrack(),dau1mass,chi,ndf,D0MassD0_sigma));
+       d0Daus.push_back(pFactory.particle(ttk0,dau0mass,chi,ndf,D0MassD0_sigma));
+       d0Daus.push_back(pFactory.particle(ttk1,dau1mass,chi,ndf,D0MassD0_sigma));
 
        KinematicParticleVertexFitter kpvFitter;
        RefCountedKinematicTree d0Tree =  kpvFitter.fit(d0Daus);
