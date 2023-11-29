@@ -278,8 +278,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
-      auto getFreeTrajectoryStateFromFittedMother =  [](const reco::VertexCompositeCandidate& fittedMother,
-                                                                 const TransientTrackBuilder* builder) {
+      auto getFreeTrajectoryStateFromFittedMother =  [&magField](const reco::VertexCompositeCandidate& fittedMother) {
           FreeTrajectoryState trajectoryState;
 
           // Assuming the fittedMother has two daughters
@@ -287,13 +286,9 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
           const reco::Candidate* daughter2 = fittedMother.daughter(1);
 
           if (daughter1 && daughter2) {
-              // Retrieve the tracks of the daughters
-              reco::TrackRef track1 = daughter1->bestTrack();
-              reco::TrackRef track2 = daughter2->bestTrack();
-
               // Build TransientTracks from the daughter tracks
-              reco::TransientTrack transientTrack1 = builder->build(track1);
-              reco::TransientTrack transientTrack2 = builder->build(track2);
+              reco::TransientTrack transientTrack1(*daughter2->BestTrack(), magField);
+              reco::TransientTrack transientTrack2(*daughter2->BestTrack(), magField);
 
               // Combine the TransientTracks to form the mother's trajectory
               std::vector<reco::TransientTrack> tracks;
