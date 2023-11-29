@@ -361,7 +361,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
        d0Tree->movePointerToTheTop();
 
-       vector<RefCountedKinematicParticle> dStarParticles= d0Tree->currentParticle();
+       vector<RefCountedKinematicParticle> dStarParticles;
+       dStarParticles.push_back(d0Tree->currentParticle());
        dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassDStar,chi,ndf,piMassDStar_sigma));
 
        KinematicParticleVertexFitter dStarFitter;
