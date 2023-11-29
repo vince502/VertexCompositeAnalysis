@@ -278,37 +278,37 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
-      auto getFreeTrajectoryStateFromFittedMother =  [&magField](const reco::VertexCompositeCandidate& fittedMother) {
-          FreeTrajectoryState trajectoryState;
+      //auto getFreeTrajectoryStateFromFittedMother =  [&magField](const reco::VertexCompositeCandidate& fittedMother) {
+      //    FreeTrajectoryState trajectoryState;
 
-          // Assuming the fittedMother has two daughters
-          const reco::Candidate* daughter1 = fittedMother.daughter(0);
-          const reco::Candidate* daughter2 = fittedMother.daughter(1);
+      //    // Assuming the fittedMother has two daughters
+      //    const reco::Candidate* daughter1 = fittedMother.daughter(0);
+      //    const reco::Candidate* daughter2 = fittedMother.daughter(1);
 
-          if (daughter1 && daughter2) {
-              // Build TransientTracks from the daughter tracks
-              reco::TransientTrack transientTrack1(*daughter2->BestTrack(), magField);
-              reco::TransientTrack transientTrack2(*daughter2->BestTrack(), magField);
+      //    if (daughter1 && daughter2) {
+      //        // Build TransientTracks from the daughter tracks
+      //        reco::TransientTrack transientTrack1(*daughter2->BestTrack(), magField);
+      //        reco::TransientTrack transientTrack2(*daughter2->BestTrack(), magField);
 
-              // Combine the TransientTracks to form the mother's trajectory
-              std::vector<reco::TransientTrack> tracks;
-              tracks.push_back(transientTrack1);
-              tracks.push_back(transientTrack2);
+      //        // Combine the TransientTracks to form the mother's trajectory
+      //        std::vector<reco::TransientTrack> tracks;
+      //        tracks.push_back(transientTrack1);
+      //        tracks.push_back(transientTrack2);
 
-              KinematicParticleFactoryFromTransientTrack factory;
-              RefCountedKinematicTree vertexFitTree = factory.fit(tracks);
+      //        KinematicParticleFactoryFromTransientTrack factory;
+      //        RefCountedKinematicTree vertexFitTree = factory.fit(tracks);
 
-              // Extract the fitted state of the mother particle
-              if (vertexFitTree->isValid()) {
-                  vertexFitTree->movePointerToTheTop();
-                  RefCountedKinematicParticle fittedParticle = vertexFitTree->currentParticle();
-                  trajectoryState = fittedParticle->currentState().freeTrajectoryState();
-              }
-          }
-          return trajectoryState;
-      };
-      const auto &theTTBuilder = iSetup.getHandle(trackBuilderToken_);
-      FreeTrajectoryState FTSD0 = getFreeTrajectoryStateFromFittedMother(theD0, theTTBuilder);
+      //        // Extract the fitted state of the mother particle
+      //        if (vertexFitTree->isValid()) {
+      //            vertexFitTree->movePointerToTheTop();
+      //            RefCountedKinematicParticle fittedParticle = vertexFitTree->currentParticle();
+      //            trajectoryState = fittedParticle->currentState().freeTrajectoryState();
+      //        }
+      //    }
+      //    return trajectoryState;
+      //};
+      //const auto &theTTBuilder = iSetup.getHandle(trackBuilderToken_);
+      //FreeTrajectoryState FTSD0 = getFreeTrajectoryStateFromFittedMother(theD0, theTTBuilder);
       
 
       // Calculate DCA of two daughters
@@ -380,7 +380,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        float ndf = 0.0;
 
        vector<RefCountedKinematicParticle> dStarParticles;
-       dStarParticles.push_back(pFactory.particle(TransientTrackFromFTSFactory().build(FTSD0),theD0.mass(),chi,ndf,D0MassD0_sigma));
+       //dStarParticles.push_back(pFactory.particle(TransientTrackFromFTSFactory().build(FTSD0),theD0.mass(),chi,ndf,D0MassD0_sigma));
+       dStarParticles.push_back(pFactory.particle(TransientTrack(*theD0.bestTrack(),magField),theD0.mass(),chi,ndf,D0MassD0_sigma));
        dStarParticles.push_back(pFactory.particle(*pionTransTkPtr,piMassDStar,chi,ndf,piMassDStar_sigma));
 
        KinematicParticleVertexFitter dStarFitter;
