@@ -278,8 +278,42 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
-      GlobalTrajectoryParameters pars(GlobalPoint(theD0.vx(), theD0.vy(), theD0.vz()), GlobalVector(theD0.px(), theD0.py(), theD0.pz()), 0, magField);
-      FreeTrajectoryState FTSD0(pars);
+      auto getFreeTrajectoryStateFromFittedMother  [](const reco::VertexCompositeCandidate& fittedMother,
+                                                                 const TransientTrackBuilder* builder) {
+          FreeTrajectoryState trajectoryState;
+
+          // Assuming the fittedMother has two daughters
+          const reco::Candidate* daughter1 = fittedMother.daughter(0);
+          const reco::Candidate* daughter2 = fittedMother.daughter(1);
+
+          if (daughter1 && daughter2) {
+              // Retrieve the tracks of the daughters
+              reco::TrackRef track1 = daughter1->bestTrack();
+              reco::TrackRef track2 = daughter2->bestTrack();
+
+              // Build TransientTracks from the daughter tracks
+              reco::TransientTrack transientTrack1 = builder->build(track1);
+              reco::TransientTrack transientTrack2 = builder->build(track2);
+
+              // Combine the TransientTracks to form the mother's trajectory
+              std::vector<reco::TransientTrack> tracks;
+              tracks.push_back(transientTrack1);
+              tracks.push_back(transientTrack2);
+
+              KinematicParticleFactoryFromTransientTrack factory;
+              RefCountedKinematicTree vertexFitTree = factory.fit(tracks);
+
+              // Extract the fitted state of the mother particle
+              if (vertexFitTree->isValid()) {
+                  vertexFitTree->movePointerToTheTop();
+                  RefCountedKinematicParticle fittedParticle = vertexFitTree->currentParticle();
+                  trajectoryState = fittedParticle->currentState().freeTrajectoryState();
+              }
+          }
+          return trajectoryState;
+      };
+      const auto &theTTBuilder = iSetup.getHandle(trackBuilderToken_);
+      FreeTrajectoryState FTSD0 = getFreeTrajectoryStateFromFittedMother(theD0, theTTBuilder);
       
 
       // Calculate DCA of two daughters
