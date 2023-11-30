@@ -1,30 +1,30 @@
 import FWCore.ParameterSet.Config as cms
 
-from VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_tree_cfi import *
+from VertexCompositeAnalysis.VertexCompositeAnalyzer.dStaranalyzer_tree_cfi import *
 
-d0ana_wrongsign = d0ana.clone(
-  VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
-  MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
+dStarana_wrongsign = dStarana.clone(
+  VertexCompositeCollection = cms.untracked.InputTag("generalDStarCandidatesNewWrongSign:D0")
+  #MVACollection = cms.InputTag("generalDStarCandidatesNewWrongSign:MVAValues")
 )
 
-d0ana_wrongsign_mc = d0ana_mc.clone(
-  VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
-  MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
-)
+#dStarana_wrongsign_mc = dStarana_mc.clone(
+#  VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
+#  MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
+#)
 
-d0ana_tof = d0ana.clone(
+dStarana_tof = dStarana.clone(
   doGenMatchingTOF = cms.untracked.bool(True)
 )
 
-d0ana_tof_wrongsign = d0ana_wrongsign.clone(
+#dStarana_tof_wrongsign = dStarana_wrongsign.clone(
+#  doGenMatchingTOF = cms.untracked.bool(True)
+#)
+
+dStarana_tof_mc = dStarana_mc.clone(
   doGenMatchingTOF = cms.untracked.bool(True)
 )
 
-d0ana_tof_mc = d0ana_mc.clone(
-  doGenMatchingTOF = cms.untracked.bool(True)
-)
-
-d0ana_tof_wrongsign_mc = d0ana_wrongsign_mc.clone(
-  doGenMatchingTOF = cms.untracked.bool(True)
-)
+#dStarana_tof_wrongsign_mc = dStarana_wrongsign_mc.clone(
+#  doGenMatchingTOF = cms.untracked.bool(True)
+#)
 
