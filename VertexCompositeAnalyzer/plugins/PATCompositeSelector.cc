@@ -28,7 +28,7 @@
 #include "DataFormats/Common/interface/Ref.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -80,7 +80,7 @@
 
 using namespace std;
 
-class PATCompositeSelector : public edm::EDProducer {
+class PATCompositeSelector : public edm::EDProducer<> {
 public:
   explicit PATCompositeSelector(const edm::ParameterSet&);
   ~PATCompositeSelector();

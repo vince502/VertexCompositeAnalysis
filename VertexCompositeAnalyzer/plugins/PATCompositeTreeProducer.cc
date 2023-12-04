@@ -18,7 +18,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -74,7 +74,7 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // class decleration
 //
 
-class PATCompositeTreeProducer : public edm::EDAnalyzer {
+class PATCompositeTreeProducer : public edm::one::EDAnalyzer<> {
 public:
   explicit PATCompositeTreeProducer(const edm::ParameterSet&);
   ~PATCompositeTreeProducer();

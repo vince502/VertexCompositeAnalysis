@@ -15,7 +15,7 @@
 #include <memory>
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/one/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -26,7 +26,7 @@
 #include <DataFormats/VertexReco/interface/Vertex.h>
 #include <DataFormats/VertexReco/interface/VertexFwd.h>
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-class PPPileUpVertexFilter : public edm::EDFilter {
+class PPPileUpVertexFilter : public edm::one::EDFilter<> {
 public:
     explicit PPPileUpVertexFilter(const edm::ParameterSet&);
     ~PPPileUpVertexFilter();
