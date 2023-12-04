@@ -67,7 +67,7 @@
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "CommonTools/MVAUtils/interface/GBRForestTools.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>

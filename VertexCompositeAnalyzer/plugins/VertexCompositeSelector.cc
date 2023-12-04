@@ -65,12 +65,12 @@
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "CommonTools/MVAUtils/interface/GBRForestTools.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
-
+#include "Math/Vector4D.h"
 
 //
 // class decleration
