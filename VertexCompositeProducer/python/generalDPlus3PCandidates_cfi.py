@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-generalLamC3PCandidates = cms.EDProducer("LamC3PProducer",
+generalDPlus3PCandidates = cms.EDProducer("DPlus3PProducer",
                                      
     # InputTag that tells which TrackCollection to use for vertexing
     trackRecoAlgorithm = cms.InputTag('generalTracks'),
@@ -16,8 +16,8 @@ generalLamC3PCandidates = cms.EDProducer("LamC3PProducer",
 #    tkPtSumCut = cms.double(0.0), 
 #    tkEtaDiffCut = cms.double(999.0), 
 
-    mPiKPCutMin = cms.double(2.13),
-    mPiKPCutMax = cms.double(2.45),
+    mPiKPCutMin = cms.double(1.75),
+    mPiKPCutMax = cms.double(2.05),
     mKPCutMin = cms.double(0.938+0.494),
     mKPCutMax = cms.double(2.45),
 

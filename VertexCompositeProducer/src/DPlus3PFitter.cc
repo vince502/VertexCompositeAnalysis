@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      LamC3PFitter
+// Class:      DPlus3PFitter
 // 
-/**\class LamC3PFitter LamC3PFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/LamC3PFitter.cc
+/**\class DPlus3PFitter DPlus3PFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DPlus3PFitter.cc
 
  Description: <one line class summary>
 
@@ -14,7 +14,7 @@
 //
 //
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PFitter.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -41,25 +41,25 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
-const float piMassLamC3P = 0.13957018;
-const float piMassLamC3PSquared = piMassLamC3P*piMassLamC3P;
-const float kaonMassLamC3P = 0.493677;
-const float kaonMassLamC3PSquared = kaonMassLamC3P*kaonMassLamC3P;
-const float protonMassLamC3P = 0.938272013; 
-const float protonMassLamC3PSquared = protonMassLamC3P*protonMassLamC3P;
-const float lamCMassLamC3P = 2.28646;
-float piMassLamC3P_sigma = 3.5E-7f;
-float kaonMassLamC3P_sigma = 1.6E-5f;
-float protonMassLamC3P_sigma = 1.6E-5f;
-float lamCMassLamC3P_sigma = lamCMassLamC3P*1.e-6;
+const float piMassDPlus3P = 0.13957018;
+const float piMassDPlus3PSquared = piMassDPlus3P*piMassDPlus3P;
+const float kaonMassDPlus3P = 0.493677;
+const float kaonMassDPlus3PSquared = kaonMassDPlus3P*kaonMassDPlus3P;
+const float protonMassDPlus3P = 0.938272013; 
+const float protonMassDPlus3PSquared = protonMassDPlus3P*protonMassDPlus3P;
+const float DPlusMassDPlus3P = 2.28646;
+float piMassDPlus3P_sigma = 3.5E-7f;
+float kaonMassDPlus3P_sigma = 1.6E-5f;
+float protonMassDPlus3P_sigma = 1.6E-5f;
+float DPlusMassDPlus3P_sigma = DPlusMassDPlus3P*1.e-6;
 
-float cand1Mass[2] = {piMassLamC3P, protonMassLamC3P};
-float cand2Mass[2] = {protonMassLamC3P, piMassLamC3P};
-float cand1Mass_sigma[2] = {piMassLamC3P_sigma, protonMassLamC3P_sigma};
-float cand2Mass_sigma[2] = {protonMassLamC3P_sigma, piMassLamC3P_sigma};
+float cand1Mass[2] = {piMassDPlus3P, piMassDPlus3P};
+float cand2Mass[2] = {piMassDPlus3P, piMassDPlus3P};
+float cand1Mass_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
+float cand2Mass_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
 
 // Constructor and (empty) destructor
-LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
+DPlus3PFitter::DPlus3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
 //		   const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ConsumesCollector && iC) {
   using std::string;
 
@@ -89,7 +89,7 @@ LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::Consume
   lVtxSigCut = theParameters.getParameter<double>(string("vtxSignificance3DCut"));
   collinCut2D = theParameters.getParameter<double>(string("collinearityCut2D"));
   collinCut3D = theParameters.getParameter<double>(string("collinearityCut3D"));
-  lamCMassCut = theParameters.getParameter<double>(string("lamCMassCut"));
+  DPlusMassCut = theParameters.getParameter<double>(string("DPlusMassCut"));
   dauTransImpactSigCut = theParameters.getParameter<double>(string("dauTransImpactSigCut"));
   dauLongImpactSigCut = theParameters.getParameter<double>(string("dauLongImpactSigCut"));
   VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
@@ -100,7 +100,7 @@ LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::Consume
 
 
   useAnyMVA_ = false;
-  forestLabel_ = "LamC3PInpPb";
+  forestLabel_ = "DPlus3PInpPb";
   std::string type = "BDT";
   useForestFromDB_ = true;
   dbFileName_ = "";
@@ -133,12 +133,12 @@ LamC3PFitter::LamC3PFitter(const edm::ParameterSet& theParameters,  edm::Consume
   }
 }
 
-LamC3PFitter::~LamC3PFitter() {
+DPlus3PFitter::~DPlus3PFitter() {
   delete forest_;
 }
 
 // Method containing the algorithm for vertex reconstruction
-void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   using std::vector;
   using std::cout;
@@ -255,17 +255,17 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   if(!isWrongSign)
   {
-    fitLamCCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
-    fitLamCCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);
+    fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
+    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);
   }
   else 
   {
-    fitLamCCandidates(theTrackRefs_pos,theTrackRefs_pos,theTransTracks_pos,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
-    fitLamCCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);    
+    fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_pos,theTransTracks_pos,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
+    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);    
   }
 }
 
-void LamC3PFitter::fitLamCCandidates(
+void DPlus3PFitter::fitDPlusCandidates(
                                   std::vector<reco::TrackRef> theTrackRefs_sgn1,
                                   std::vector<reco::TrackRef> theTrackRefs_sgn2,
                                   std::vector<reco::TransientTrack> theTransTracks_sgn1,
@@ -286,7 +286,7 @@ void LamC3PFitter::fitLamCCandidates(
   typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
   typedef ROOT::Math::SVector<double, 3> SVector3;
 
-  int lamCCharge = pdg_id/abs(pdg_id);
+  int DPlusCharge = pdg_id/abs(pdg_id);
 
   // Loop over tracks and vertex good charged track pairs
   for(unsigned int trdx1 = 0; trdx1 < theTrackRefs_sgn1.size(); trdx1++) {
@@ -350,12 +350,12 @@ void LamC3PFitter::fitLamCCandidates(
 
       if( !trkTSCP1.isValid() || !trkTSCP2.isValid() ) continue;
 
-      double totalE1 = sqrt( trkTSCP1.momentum().mag2() + protonMassLamC3PSquared ) +
-                      sqrt( trkTSCP2.momentum().mag2() + piMassLamC3PSquared );
+      double totalE1 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+                      sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared );
       double totalE1Sq = totalE1*totalE1;
 
-      double totalE2 = sqrt( trkTSCP1.momentum().mag2() + piMassLamC3PSquared ) +
-                      sqrt( trkTSCP2.momentum().mag2() + protonMassLamC3PSquared );
+      double totalE2 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+                      sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared );
       double totalE2Sq = totalE2*totalE2;
 
       double totalPSq =
@@ -367,7 +367,7 @@ void LamC3PFitter::fitLamCCandidates(
       double mass1 = sqrt( totalE1Sq - totalPSq);
       double mass2 = sqrt( totalE2Sq - totalPSq);
 
-      if( (mass1 > mKPCutMax || mass1 < mKPCutMin) && (mass2 > mKPCutMax || mass2 < mKPCutMin)) continue;
+      // if( (mass1 > mKPCutMax || mass1 < mKPCutMin) && (mass2 > mKPCutMax || mass2 < mKPCutMin)) continue;
 //      if( totalPt < dPtCut ) continue;
 
       for(unsigned int trdx3 = 0; trdx3 < theTrackRefs_sgn2.size(); trdx3++) {
@@ -403,14 +403,14 @@ void LamC3PFitter::fitLamCCandidates(
 
         if( !trkTSCP31.isValid() ) continue;
 
-        double totalE31 = sqrt( trkTSCP1.momentum().mag2() + protonMassLamC3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + piMassLamC3PSquared ) + 
-                          sqrt( trkTSCP31.momentum().mag2() + kaonMassLamC3PSquared );
+        double totalE31 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
+                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
         double totalE31Sq = totalE31*totalE31;
 
-        double totalE32 = sqrt( trkTSCP1.momentum().mag2() + piMassLamC3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + protonMassLamC3PSquared ) + 
-                          sqrt( trkTSCP31.momentum().mag2() + kaonMassLamC3PSquared );
+        double totalE32 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
+                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
         double totalE32Sq = totalE32*totalE32;
 
         double totalP3Sq =
@@ -422,13 +422,13 @@ void LamC3PFitter::fitLamCCandidates(
         double mass31 = sqrt( totalE31Sq - totalP3Sq);
         double mass32 = sqrt( totalE32Sq - totalP3Sq);
 
-        if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) && (mass32 > mPiKPCutMax || mass32 < mPiKPCutMin)) continue;
+        // if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) && (mass32 > mPiKPCutMax || mass32 < mPiKPCutMin)) continue;
         if( totalPt3 < dPt3Cut ) continue;
 
         // Create the vertex fitter object and vertex the tracks
         float cand1TotalE[2]={0.0};
         float cand2TotalE[2]={0.0};
-        float lamCTotalE[2]={0.0};
+        float DPlusTotalE[2]={0.0};
 
         for(int i=0;i<2;i++)
         {
@@ -438,33 +438,33 @@ void LamC3PFitter::fitLamCCandidates(
           float chi = 0.0;
           float ndf = 0.0;
 
-          vector<RefCountedKinematicParticle> lamCParticles;
-          lamCParticles.push_back(pFactory.particle(*transTkPtr1,cand1Mass[i],chi,ndf,cand1Mass_sigma[i]));
-          lamCParticles.push_back(pFactory.particle(*transTkPtr2,cand2Mass[i],chi,ndf,cand2Mass_sigma[i]));
-          lamCParticles.push_back(pFactory.particle(*transTkPtr3,kaonMassLamC3P,chi,ndf,kaonMassLamC3P_sigma));
+          vector<RefCountedKinematicParticle> DPlusParticles;
+          DPlusParticles.push_back(pFactory.particle(*transTkPtr1,cand1Mass[i],chi,ndf,cand1Mass_sigma[i]));
+          DPlusParticles.push_back(pFactory.particle(*transTkPtr2,cand2Mass[i],chi,ndf,cand2Mass_sigma[i]));
+          DPlusParticles.push_back(pFactory.particle(*transTkPtr3,kaonMassDPlus3P,chi,ndf,kaonMassDPlus3P_sigma));
 
-          KinematicParticleVertexFitter lamCFitter;
-          RefCountedKinematicTree lamCVertex;
-          lamCVertex = lamCFitter.fit(lamCParticles);
+          KinematicParticleVertexFitter DPlusFitter;
+          RefCountedKinematicTree DPlusVertex;
+          DPlusVertex = DPlusFitter.fit(DPlusParticles);
 
-          if( !lamCVertex->isValid() ) continue;
+          if( !DPlusVertex->isValid() ) continue;
 
-          lamCVertex->movePointerToTheTop();
-          RefCountedKinematicParticle lamCCand = lamCVertex->currentParticle();
-          if(!lamCCand->currentState().isValid()) continue;
+          DPlusVertex->movePointerToTheTop();
+          RefCountedKinematicParticle DPlusCand = DPlusVertex->currentParticle();
+          if(!DPlusCand->currentState().isValid()) continue;
 
-          RefCountedKinematicVertex lamCDecayVertex = lamCVertex->currentDecayVertex();
-          if(!lamCDecayVertex->vertexIsValid()) continue;
+          RefCountedKinematicVertex DPlusDecayVertex = DPlusVertex->currentDecayVertex();
+          if(!DPlusDecayVertex->vertexIsValid()) continue;
 
-  	  float lamCC2Prob = TMath::Prob(lamCDecayVertex->chiSquared(),lamCDecayVertex->degreesOfFreedom());
-  	  if (lamCC2Prob < VtxChiProbCut) continue;
+  	  float DPlusC2Prob = TMath::Prob(DPlusDecayVertex->chiSquared(),DPlusDecayVertex->degreesOfFreedom());
+  	  if (DPlusC2Prob < VtxChiProbCut) continue;
 
-          lamCVertex->movePointerToTheFirstChild();
-          RefCountedKinematicParticle cand1 = lamCVertex->currentParticle();
-          lamCVertex->movePointerToTheNextChild();
-          RefCountedKinematicParticle cand2 = lamCVertex->currentParticle();
-          lamCVertex->movePointerToTheNextChild();
-          RefCountedKinematicParticle cand3 = lamCVertex->currentParticle();
+          DPlusVertex->movePointerToTheFirstChild();
+          RefCountedKinematicParticle cand1 = DPlusVertex->currentParticle();
+          DPlusVertex->movePointerToTheNextChild();
+          RefCountedKinematicParticle cand2 = DPlusVertex->currentParticle();
+          DPlusVertex->movePointerToTheNextChild();
+          RefCountedKinematicParticle cand3 = DPlusVertex->currentParticle();
 
           if(!cand1->currentState().isValid() || !cand2->currentState().isValid() || !cand3->currentState().isValid()) continue;
 
@@ -472,9 +472,9 @@ void LamC3PFitter::fitLamCCandidates(
           KinematicParameters cand2KP = cand2->currentState().kinematicParameters();
           KinematicParameters cand3KP = cand3->currentState().kinematicParameters();
 
-          GlobalVector lamCTotalP = GlobalVector (lamCCand->currentState().globalMomentum().x(),
-                                                  lamCCand->currentState().globalMomentum().y(),
-                                                  lamCCand->currentState().globalMomentum().z());
+          GlobalVector DPlusTotalP = GlobalVector (DPlusCand->currentState().globalMomentum().x(),
+                                                  DPlusCand->currentState().globalMomentum().y(),
+                                                  DPlusCand->currentState().globalMomentum().z());
 
           GlobalVector cand1TotalP = GlobalVector(cand1KP.momentum().x(),cand1KP.momentum().y(),cand1KP.momentum().z());
           GlobalVector cand2TotalP = GlobalVector(cand2KP.momentum().x(),cand2KP.momentum().y(),cand2KP.momentum().z());
@@ -482,108 +482,108 @@ void LamC3PFitter::fitLamCCandidates(
 
           cand1TotalE[i] = sqrt( cand1TotalP.mag2() + cand1Mass[i]*cand1Mass[i] );
           cand2TotalE[i] = sqrt( cand2TotalP.mag2() + cand2Mass[i]*cand2Mass[i] );
-          float cand3TotalE = sqrt( cand3TotalP.mag2() + kaonMassLamC3PSquared );
+          float cand3TotalE = sqrt( cand3TotalP.mag2() + kaonMassDPlus3PSquared );
 
-          lamCTotalE[i] = cand1TotalE[i] + cand2TotalE[i] + cand3TotalE;
+          DPlusTotalE[i] = cand1TotalE[i] + cand2TotalE[i] + cand3TotalE;
 
-          const Particle::LorentzVector lamCP4(lamCTotalP.x(), lamCTotalP.y(), lamCTotalP.z(), lamCTotalE[i]);
+          const Particle::LorentzVector DPlusP4(DPlusTotalP.x(), DPlusTotalP.y(), DPlusTotalP.z(), DPlusTotalE[i]);
 
-          Particle::Point lamCVtx((*lamCDecayVertex).position().x(), (*lamCDecayVertex).position().y(), (*lamCDecayVertex).position().z());
-          std::vector<double> lamCVtxEVec;
-          lamCVtxEVec.push_back( lamCDecayVertex->error().cxx() );
-          lamCVtxEVec.push_back( lamCDecayVertex->error().cyx() );
-          lamCVtxEVec.push_back( lamCDecayVertex->error().cyy() );
-          lamCVtxEVec.push_back( lamCDecayVertex->error().czx() );
-          lamCVtxEVec.push_back( lamCDecayVertex->error().czy() );
-          lamCVtxEVec.push_back( lamCDecayVertex->error().czz() );
-          SMatrixSym3D lamCVtxCovMatrix(lamCVtxEVec.begin(), lamCVtxEVec.end());
-          const Vertex::CovarianceMatrix lamCVtxCov(lamCVtxCovMatrix);
-          double lamCVtxChi2(lamCDecayVertex->chiSquared());
-          double lamCVtxNdof(lamCDecayVertex->degreesOfFreedom());
-          double lamCNormalizedChi2 = lamCVtxChi2/lamCVtxNdof;
+          Particle::Point DPlusVtx((*DPlusDecayVertex).position().x(), (*DPlusDecayVertex).position().y(), (*DPlusDecayVertex).position().z());
+          std::vector<double> DPlusVtxEVec;
+          DPlusVtxEVec.push_back( DPlusDecayVertex->error().cxx() );
+          DPlusVtxEVec.push_back( DPlusDecayVertex->error().cyx() );
+          DPlusVtxEVec.push_back( DPlusDecayVertex->error().cyy() );
+          DPlusVtxEVec.push_back( DPlusDecayVertex->error().czx() );
+          DPlusVtxEVec.push_back( DPlusDecayVertex->error().czy() );
+          DPlusVtxEVec.push_back( DPlusDecayVertex->error().czz() );
+          SMatrixSym3D DPlusVtxCovMatrix(DPlusVtxEVec.begin(), DPlusVtxEVec.end());
+          const Vertex::CovarianceMatrix DPlusVtxCov(DPlusVtxCovMatrix);
+          double DPlusVtxChi2(DPlusDecayVertex->chiSquared());
+          double DPlusVtxNdof(DPlusDecayVertex->degreesOfFreedom());
+          double DPlusNormalizedChi2 = DPlusVtxChi2/DPlusVtxNdof;
 
           double rVtxMag = 99999.0; 
           double lVtxMag = 99999.0;
           double sigmaRvtxMag = 999.0;
           double sigmaLvtxMag = 999.0;
-          double lamCAngle3D = -100.0;
-          double lamCAngle2D = -100.0;
+          double DPlusAngle3D = -100.0;
+          double DPlusAngle2D = -100.0;
 
-          GlobalVector lamCLineOfFlight = GlobalVector (lamCVtx.x() - bestvtx.x(),
-                                                        lamCVtx.y() - bestvtx.y(),
-                                                        lamCVtx.z() - bestvtx.z());
+          GlobalVector DPlusLineOfFlight = GlobalVector (DPlusVtx.x() - bestvtx.x(),
+                                                        DPlusVtx.y() - bestvtx.y(),
+                                                        DPlusVtx.z() - bestvtx.z());
 
-          SMatrixSym3D lamCTotalCov;
-          if(isVtxPV) lamCTotalCov = lamCVtxCovMatrix + vtxPrimary->covariance();
-          else lamCTotalCov = lamCVtxCovMatrix + theBeamSpotHandle->rotatedCovariance3D();
+          SMatrixSym3D DPlusTotalCov;
+          if(isVtxPV) DPlusTotalCov = DPlusVtxCovMatrix + vtxPrimary->covariance();
+          else DPlusTotalCov = DPlusVtxCovMatrix + theBeamSpotHandle->rotatedCovariance3D();
 
-          SVector3 distanceVector3D(lamCLineOfFlight.x(), lamCLineOfFlight.y(), lamCLineOfFlight.z());
-          SVector3 distanceVector2D(lamCLineOfFlight.x(), lamCLineOfFlight.y(), 0.0);
+          SVector3 distanceVector3D(DPlusLineOfFlight.x(), DPlusLineOfFlight.y(), DPlusLineOfFlight.z());
+          SVector3 distanceVector2D(DPlusLineOfFlight.x(), DPlusLineOfFlight.y(), 0.0);
 
-          lamCAngle3D = angle(lamCLineOfFlight.x(), lamCLineOfFlight.y(), lamCLineOfFlight.z(),
-                          lamCTotalP.x(), lamCTotalP.y(), lamCTotalP.z());
-          lamCAngle2D = angle(lamCLineOfFlight.x(), lamCLineOfFlight.y(), (float)0.0,
-                          lamCTotalP.x(), lamCTotalP.y(), (float)0.0);
+          DPlusAngle3D = angle(DPlusLineOfFlight.x(), DPlusLineOfFlight.y(), DPlusLineOfFlight.z(),
+                          DPlusTotalP.x(), DPlusTotalP.y(), DPlusTotalP.z());
+          DPlusAngle2D = angle(DPlusLineOfFlight.x(), DPlusLineOfFlight.y(), (float)0.0,
+                          DPlusTotalP.x(), DPlusTotalP.y(), (float)0.0);
 
-          lVtxMag = lamCLineOfFlight.mag();
-          rVtxMag = lamCLineOfFlight.perp();
-          sigmaLvtxMag = sqrt(ROOT::Math::Similarity(lamCTotalCov, distanceVector3D)) / lVtxMag;
-          sigmaRvtxMag = sqrt(ROOT::Math::Similarity(lamCTotalCov, distanceVector2D)) / rVtxMag;
+          lVtxMag = DPlusLineOfFlight.mag();
+          rVtxMag = DPlusLineOfFlight.perp();
+          sigmaLvtxMag = sqrt(ROOT::Math::Similarity(DPlusTotalCov, distanceVector3D)) / lVtxMag;
+          sigmaRvtxMag = sqrt(ROOT::Math::Similarity(DPlusTotalCov, distanceVector2D)) / rVtxMag;
 
-          if( lamCNormalizedChi2 > chi2Cut ||
+          if( DPlusNormalizedChi2 > chi2Cut ||
               rVtxMag < rVtxCut ||
               rVtxMag / sigmaRvtxMag < rVtxSigCut ||
               lVtxMag < lVtxCut ||
               lVtxMag / sigmaLvtxMag < lVtxSigCut ||
-              cos(lamCAngle3D) < collinCut3D || cos(lamCAngle2D) < collinCut2D || lamCAngle3D > alphaCut || lamCAngle2D > alpha2DCut
+              cos(DPlusAngle3D) < collinCut3D || cos(DPlusAngle2D) < collinCut2D || DPlusAngle3D > alphaCut || DPlusAngle2D > alpha2DCut
           ) continue;
 
-          VertexCompositeCandidate* theLamC3P = 0;
-          theLamC3P = new VertexCompositeCandidate(lamCCharge, lamCP4, lamCVtx, lamCVtxCov, lamCVtxChi2, lamCVtxNdof);
+          VertexCompositeCandidate* theDPlus3P = 0;
+          theDPlus3P = new VertexCompositeCandidate(DPlusCharge, DPlusP4, DPlusVtx, DPlusVtxCov, DPlusVtxChi2, DPlusVtxNdof);
 
           RecoChargedCandidate
-            theCand1(lamCCharge, Particle::LorentzVector(cand1TotalP.x(),
+            theCand1(DPlusCharge, Particle::LorentzVector(cand1TotalP.x(),
                                                   cand1TotalP.y(), cand1TotalP.z(),
-                                                  cand1TotalE[i]), lamCVtx);
+                                                  cand1TotalE[i]), DPlusVtx);
             theCand1.setTrack(trackRef1);
 
           RecoChargedCandidate
-            theCand2(lamCCharge, Particle::LorentzVector(cand2TotalP.x(),
+            theCand2(DPlusCharge, Particle::LorentzVector(cand2TotalP.x(),
                                                    cand2TotalP.y(), cand2TotalP.z(),
-                                                   cand2TotalE[i]), lamCVtx);
+                                                   cand2TotalE[i]), DPlusVtx);
             theCand2.setTrack(trackRef2);
 
           RecoChargedCandidate
-            theCand3(-lamCCharge, Particle::LorentzVector(cand3TotalP.x(),
+            theCand3(-DPlusCharge, Particle::LorentzVector(cand3TotalP.x(),
                                                    cand3TotalP.y(), cand3TotalP.z(),
-                                                   cand3TotalE), lamCVtx);
+                                                   cand3TotalE), DPlusVtx);
             theCand3.setTrack(trackRef3);
 
           AddFourMomenta addp4;
-          theLamC3P->addDaughter(theCand1);
-          theLamC3P->addDaughter(theCand2);
-          theLamC3P->addDaughter(theCand3);
-          theLamC3P->setPdgId(pdg_id);
-          addp4.set( *theLamC3P );
-          if( theLamC3P->mass() < lamCMassLamC3P + lamCMassCut &&
-              theLamC3P->mass() > lamCMassLamC3P - lamCMassCut ) //&&
-	     // theLamC3P->pt() > dPtCut ) {
+          theDPlus3P->addDaughter(theCand1);
+          theDPlus3P->addDaughter(theCand2);
+          theDPlus3P->addDaughter(theCand3);
+          theDPlus3P->setPdgId(pdg_id);
+          addp4.set( *theDPlus3P );
+          if( theDPlus3P->mass() < DPlusMassDPlus3P + DPlusMassCut &&
+              theDPlus3P->mass() > DPlusMassDPlus3P - DPlusMassCut ) //&&
+	     // theDPlus3P->pt() > dPtCut ) {
           {
-            theLamC3Ps.push_back( *theLamC3P );
+            theDPlus3Ps.push_back( *theDPlus3P );
           }
 // perform MVA evaluation
 /*
           if(useAnyMVA_)
           {
             float gbrVals_[20];
-            gbrVals_[0] = lamCP4.Pt();
-            gbrVals_[1] = lamCP4.Eta();
-            gbrVals_[2] = lamCC2Prob;
+            gbrVals_[0] = DPlusP4.Pt();
+            gbrVals_[1] = DPlusP4.Eta();
+            gbrVals_[2] = DPlusC2Prob;
             gbrVals_[3] = lVtxMag / sigmaLvtxMag;
             gbrVals_[4] = rVtxMag / sigmaRvtxMag;
             gbrVals_[5] = lVtxMag;
-            gbrVals_[6] = lamCAngle3D;
-            gbrVals_[7] = lamCAngle2D;
+            gbrVals_[6] = DPlusAngle3D;
+            gbrVals_[7] = DPlusAngle2D;
             gbrVals_[8] = dauLongImpactSig_pos;
             gbrVals_[9] = dauLongImpactSig_neg;
             gbrVals_[10] = dauTransImpactSig_pos;
@@ -608,34 +608,34 @@ void LamC3PFitter::fitLamCCandidates(
             mvaVals_.push_back(gbrVal);
           }
 */
-          if(theLamC3P) delete theLamC3P;
+          if(theDPlus3P) delete theDPlus3P;
         } // swap mass
       } // trk3 
     }  // trk2
   } // trk1
 
-//  mvaFiller.insert(theLamC3Ps,mvaVals_.begin(),mvaVals_.end());
+//  mvaFiller.insert(theDPlus3Ps,mvaVals_.begin(),mvaVals_.end());
 //  mvaFiller.fill();
 //  mvas = std::make_unique<MVACollection>(mvaVals_.begin(),mvaVals_.end());
 
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& LamC3PFitter::getLamC3P() const {
-  return theLamC3Ps;
+const reco::VertexCompositeCandidateCollection& DPlus3PFitter::getDPlus3P() const {
+  return theDPlus3Ps;
 }
 
-const std::vector<float>& LamC3PFitter::getMVAVals() const {
+const std::vector<float>& DPlus3PFitter::getMVAVals() const {
   return mvaVals_;
 }
 
 /*
-auto_ptr<edm::ValueMap<float> > LamC3PFitter::getMVAMap() const {
+auto_ptr<edm::ValueMap<float> > DPlus3PFitter::getMVAMap() const {
   return mvaValValueMap;
 }
 */
 
-void LamC3PFitter::resetAll() {
-    theLamC3Ps.clear();
+void DPlus3PFitter::resetAll() {
+    theDPlus3Ps.clear();
     mvaVals_.clear();
 }

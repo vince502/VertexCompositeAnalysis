@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      LamC3PFitter
+// Class:      DPlus3PFitter
 // 
-/**\class LamC3PFitter LamC3PFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PFitter.h
+/**\class DPlus3PFitter DPlus3PFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PFitter.h
 
  Description: <one line class summary>
 
@@ -73,13 +73,13 @@
 #include <algorithm>
 #include <map>
 
-class LamC3PFitter {
+class DPlus3PFitter {
  public:
-  LamC3PFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
-  ~LamC3PFitter();
+  DPlus3PFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
+  ~DPlus3PFitter();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-  void fitLamCCandidates(
+  void fitDPlusCandidates(
                           std::vector<reco::TrackRef> theTrackRefs_sgn1,
                           std::vector<reco::TrackRef> theTrackRefs_sgn2,
                           std::vector<reco::TransientTrack> theTransTracks_sgn1,
@@ -90,8 +90,8 @@ class LamC3PFitter {
                           int pdg_id
                         );
 
-  // Switching to L. Lista's reco::Candidate infrastructure for LamC3P storage
-  const reco::VertexCompositeCandidateCollection& getLamC3P() const;
+  // Switching to L. Lista's reco::Candidate infrastructure for DPlus3P storage
+  const reco::VertexCompositeCandidateCollection& getDPlus3P() const;
   const std::vector<float>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
@@ -99,7 +99,7 @@ class LamC3PFitter {
 
  private:
   // STL vector of VertexCompositeCandidate that will be filled with VertexCompositeCandidates by fitAll()
-  reco::VertexCompositeCandidateCollection theLamC3Ps;
+  reco::VertexCompositeCandidateCollection theDPlus3Ps;
 
   // Tracker geometry for discerning hit positions
   const TrackerGeometry* trackerGeom;

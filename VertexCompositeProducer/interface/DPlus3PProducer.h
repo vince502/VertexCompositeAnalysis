@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      LamC3PProducer
+// Class:      DPlus3PProducer
 // 
-/**\class LamC3PProducer LamC3PProducer.h VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PProducer.h
+/**\class DPlus3PProducer DPlus3PProducer.h VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PProducer.h
 
  Description: <one line class summary>
 
@@ -35,14 +35,14 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PFitter.h"
 
-class LamC3PProducer : public edm::EDProducer {
+class DPlus3PProducer : public edm::EDProducer {
 public:
   using MVACollection = std::vector<float>;
 
-  explicit LamC3PProducer(const edm::ParameterSet&);
-  ~LamC3PProducer();
+  explicit DPlus3PProducer(const edm::ParameterSet&);
+  ~DPlus3PProducer();
 
 private:
   //virtual void beginJob() ;
@@ -52,7 +52,7 @@ private:
 
   bool useAnyMVA_;
 
-  LamC3PFitter theVees; 
+  DPlus3PFitter theVees; 
 //  edm::ParameterSet theParams;
 };
 

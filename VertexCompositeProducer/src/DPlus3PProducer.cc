@@ -2,9 +2,9 @@
 //
 // Package:    VertexCompositeProducer
 //
-// Class:      LamC3PProducer
+// Class:      DPlus3PProducer
 // 
-/**\class LamC3PProducer LamC3PProducer.cc VertexCompositeAnalysis/VertexCompositeProducer/src/LamC3PProducer.cc
+/**\class DPlus3PProducer DPlus3PProducer.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DPlus3PProducer.cc
 
  Description: <one line class summary>
 
@@ -20,21 +20,21 @@
 // system include files
 #include <memory>
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/LamC3PProducer.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PProducer.h"
 
 // Constructor
-LamC3PProducer::LamC3PProducer(const edm::ParameterSet& iConfig) :
+DPlus3PProducer::DPlus3PProducer(const edm::ParameterSet& iConfig) :
  theVees(iConfig, consumesCollector())
 {
   useAnyMVA_ = false;
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
-  produces< reco::VertexCompositeCandidateCollection >("LamC3P");
-  if(useAnyMVA_) produces<MVACollection>("MVAValuesLamC3P");
+  produces< reco::VertexCompositeCandidateCollection >("DPlus3P");
+  if(useAnyMVA_) produces<MVACollection>("MVAValuesDPlus3P");
 }
 
 // (Empty) Destructor
-LamC3PProducer::~LamC3PProducer() {
+DPlus3PProducer::~DPlus3PProducer() {
 }
 
 
@@ -43,47 +43,47 @@ LamC3PProducer::~LamC3PProducer() {
 //
 
 // Producer Method
-void LamC3PProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void DPlus3PProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    using namespace edm;
 
-   // Create LamC3PFitter object which reconstructs the vertices and creates
-//   LamC3PFitter theVees(theParams, iEvent, iSetup);
+   // Create DPlus3PFitter object which reconstructs the vertices and creates
+//   DPlus3PFitter theVees(theParams, iEvent, iSetup);
 
    theVees.fitAll(iEvent, iSetup);
 
    // Create auto_ptr for each collection to be stored in the Event
 //   std::auto_ptr< reco::VertexCompositeCandidateCollection >
-//     lamCCandidates( new reco::VertexCompositeCandidateCollection );
+//     DPlusCandidates( new reco::VertexCompositeCandidateCollection );
 //
-   auto lamCCandidates = std::make_unique<reco::VertexCompositeCandidateCollection>();
-   lamCCandidates->reserve( theVees.getLamC3P().size() );
+   auto DPlusCandidates = std::make_unique<reco::VertexCompositeCandidateCollection>();
+   DPlusCandidates->reserve( theVees.getDPlus3P().size() );
 
-   std::copy( theVees.getLamC3P().begin(),
-              theVees.getLamC3P().end(),
-              std::back_inserter(*lamCCandidates) );
+   std::copy( theVees.getDPlus3P().begin(),
+              theVees.getDPlus3P().end(),
+              std::back_inserter(*DPlusCandidates) );
 
    // Write the collections to the Event
-   iEvent.put( std::move(lamCCandidates), std::string("LamC3P") );
+   iEvent.put( std::move(DPlusCandidates), std::string("DPlus3P") );
     
    if(useAnyMVA_) 
    {
      auto mvas = std::make_unique<MVACollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
-     iEvent.put(std::move(mvas), std::string("MVAValuesLamC3P"));
+     iEvent.put(std::move(mvas), std::string("MVAValuesDPlus3P"));
    }
 
    theVees.resetAll();
 }
 
 
-//void LamC3PProducer::beginJob() {
-void LamC3PProducer::beginJob() {
+//void DPlus3PProducer::beginJob() {
+void DPlus3PProducer::beginJob() {
 }
 
 
-void LamC3PProducer::endJob() {
+void DPlus3PProducer::endJob() {
 }
 
 //define this as a plug-in
 #include "FWCore/PluginManager/interface/ModuleDef.h"
 
-DEFINE_FWK_MODULE(LamC3PProducer);
+DEFINE_FWK_MODULE(DPlus3PProducer);
