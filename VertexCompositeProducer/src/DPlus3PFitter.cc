@@ -255,13 +255,13 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   if(!isWrongSign)
   {
-    fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
-    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);
+    fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,411);
+    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-411);
   }
   else 
   {
-    fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_pos,theTransTracks_pos,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
-    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);    
+    fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_pos,theTransTracks_pos,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,411);
+    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-411);    
   }
 }
 
