@@ -53,10 +53,10 @@ float kaonMassDPlus3P_sigma = 1.6E-5f;
 float protonMassDPlus3P_sigma = 1.6E-5f;
 float DPlusMassDPlus3P_sigma = DPlusMassDPlus3P*1.e-6;
 
-float cand1Mass[2] = {piMassDPlus3P, piMassDPlus3P};
-float cand2Mass[2] = {piMassDPlus3P, piMassDPlus3P};
-float cand1Mass_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
-float cand2Mass_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
+float cand1MassDP[2] = {piMassDPlus3P, piMassDPlus3P};
+float cand2MassDP[2] = {piMassDPlus3P, piMassDPlus3P};
+float cand1MassDP_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
+float cand2MassDP_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
 
 // Constructor and (empty) destructor
 DPlus3PFitter::DPlus3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
@@ -439,8 +439,8 @@ void DPlus3PFitter::fitDPlusCandidates(
           float ndf = 0.0;
 
           vector<RefCountedKinematicParticle> DPlusParticles;
-          DPlusParticles.push_back(pFactory.particle(*transTkPtr1,cand1Mass[i],chi,ndf,cand1Mass_sigma[i]));
-          DPlusParticles.push_back(pFactory.particle(*transTkPtr2,cand2Mass[i],chi,ndf,cand2Mass_sigma[i]));
+          DPlusParticles.push_back(pFactory.particle(*transTkPtr1,cand1MassDP[i],chi,ndf,cand1MassDP_sigma[i]));
+          DPlusParticles.push_back(pFactory.particle(*transTkPtr2,cand2MassDP[i],chi,ndf,cand2MassDP_sigma[i]));
           DPlusParticles.push_back(pFactory.particle(*transTkPtr3,kaonMassDPlus3P,chi,ndf,kaonMassDPlus3P_sigma));
 
           KinematicParticleVertexFitter DPlusFitter;
@@ -480,8 +480,8 @@ void DPlus3PFitter::fitDPlusCandidates(
           GlobalVector cand2TotalP = GlobalVector(cand2KP.momentum().x(),cand2KP.momentum().y(),cand2KP.momentum().z());
           GlobalVector cand3TotalP = GlobalVector(cand3KP.momentum().x(),cand3KP.momentum().y(),cand3KP.momentum().z());
 
-          cand1TotalE[i] = sqrt( cand1TotalP.mag2() + cand1Mass[i]*cand1Mass[i] );
-          cand2TotalE[i] = sqrt( cand2TotalP.mag2() + cand2Mass[i]*cand2Mass[i] );
+          cand1TotalE[i] = sqrt( cand1TotalP.mag2() + cand1MassDP[i]*cand1MassDP[i] );
+          cand2TotalE[i] = sqrt( cand2TotalP.mag2() + cand2MassDP[i]*cand2MassDP[i] );
           float cand3TotalE = sqrt( cand3TotalP.mag2() + kaonMassDPlus3PSquared );
 
           DPlusTotalE[i] = cand1TotalE[i] + cand2TotalE[i] + cand3TotalE;
