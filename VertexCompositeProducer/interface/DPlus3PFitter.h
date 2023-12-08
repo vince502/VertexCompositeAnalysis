@@ -133,7 +133,7 @@ class DPlus3PFitter {
   double lVtxSigCut;
   double collinCut2D;
   double collinCut3D;
-  double lamCMassCut;
+  double DPlusMassCut;
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
   double VtxChiProbCut;
