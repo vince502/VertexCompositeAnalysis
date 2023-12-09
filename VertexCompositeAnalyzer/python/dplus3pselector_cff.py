@@ -62,7 +62,7 @@ dplus3pselectorPID = dplus3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorPID2 = lamc3pselector.clone(
+dplus3pselectorPID2 = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
   userPID = cms.bool(True),
 
@@ -75,7 +75,7 @@ lamc3pselectorPID2 = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCut = lamc3pselector.clone(
+dplus3pselectorCut = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
 
   trkPtMin = cms.untracked.double(0.7),
@@ -87,7 +87,7 @@ lamc3pselectorCut = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCutNew = lamc3pselector.clone(
+dplus3pselectorCutNew = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
 
   trkPtMin = cms.untracked.double(0.7),
@@ -100,7 +100,7 @@ lamc3pselectorCutNew = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCutNew2 = lamc3pselector.clone(
+dplus3pselectorCutNew2 = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
 
   trkPtSumMin = cms.untracked.double(1.6),
@@ -114,7 +114,7 @@ lamc3pselectorCutNew2 = lamc3pselector.clone(
 )
 
 
-lamc3pselectorCutNew3 = lamc3pselector.clone(
+dplus3pselectorCutNew3 = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
 
   trkPtSumMin = cms.untracked.double(1.6),
@@ -127,7 +127,7 @@ lamc3pselectorCutNew3 = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCutNew4 = lamc3pselector.clone(
+dplus3pselectorCutNew4 = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
 
   trkPtSumMin = cms.untracked.double(1.6),
@@ -140,7 +140,7 @@ lamc3pselectorCutNew4 = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCutNew5 = lamc3pselector.clone(
+dplus3pselectorCutNew5 = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
   
   trkPtSumMin = cms.untracked.double(1.6),
@@ -154,7 +154,7 @@ lamc3pselectorCutNew5 = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCutMC = lamc3pselector.clone(
+dplus3pselectorCutMC = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
   
   trkPtMin = cms.untracked.double(0.7),
@@ -166,7 +166,7 @@ lamc3pselectorCutMC = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorCutNewMC = lamc3pselector.clone(
+dplus3pselectorCutNewMC = dplus3pselector.clone(
   useAnyMVA = cms.bool(False),
 
   trkPtMin = cms.untracked.double(0.7),
@@ -179,28 +179,28 @@ lamc3pselectorCutNewMC = lamc3pselector.clone(
   candVtxProbMin = cms.untracked.double(0.15)
 )
 
-lamc3pselectorWS = lamc3pselector.clone(
-  VertexCompositeCollection = cms.untracked.InputTag("generalLamC3PCandidatesNewWrongSign:LamC3P"),
-  MVACollection = cms.InputTag("generalLamC3PCandidatesNewWrongSign:MVAValues")
+dplus3pselectorWS = dplus3pselector.clone(
+  VertexCompositeCollection = cms.untracked.InputTag("generaldplus3PCandidatesNewWrongSign:dplus3P"),
+  MVACollection = cms.InputTag("generaldplus3PCandidatesNewWrongSign:MVAValues")
 )
 
-lamc3pselectorWSMC = lamc3pselectorMC.clone(
-  VertexCompositeCollection = cms.untracked.InputTag("generalLamC3PCandidatesNewWrongSign:LamC3P"),
-  MVACollection = cms.InputTag("generalLamC3PCandidatesNewWrongSign:MVAValues")
+dplus3pselectorWSMC = dplus3pselectorMC.clone(
+  VertexCompositeCollection = cms.untracked.InputTag("generaldplus3PCandidatesNewWrongSign:dplus3P"),
+  MVACollection = cms.InputTag("generaldplus3PCandidatesNewWrongSign:MVAValues")
 )
 
-lamc3pselectorMCGenMatch = lamc3pselectorMC.clone(
+dplus3pselectorMCGenMatch = dplus3pselectorMC.clone(
   selectGenMatch = cms.untracked.bool(True)
 )
 
-lamc3pselectorMCGenUnMatch = lamc3pselectorMC.clone(
+dplus3pselectorMCGenUnMatch = dplus3pselectorMC.clone(
   selectGenUnMatch = cms.untracked.bool(True)
 )
 
-lamc3pselectorMCGenMatchSwap = lamc3pselectorMC.clone(
+dplus3pselectorMCGenMatchSwap = dplus3pselectorMC.clone(
   selectGenMatchSwap = cms.untracked.bool(True)
 )
 
-lamc3pselectorMCGenMatchUnSwap = lamc3pselectorMC.clone(
+dplus3pselectorMCGenMatchUnSwap = dplus3pselectorMC.clone(
   selectGenMatchUnSwap = cms.untracked.bool(True)
 )
