@@ -3,12 +3,12 @@ import FWCore.ParameterSet.Config as cms
 from VertexCompositeAnalysis.VertexCompositeAnalyzer.dplus3panalyzer_tree_cfi import *
 
 dplus3pana_wrongsign = dplus3pana.clone(
-  VertexCompositeCollection = cms.untracked.InputTag("generalDStarCandidatesNewWrongSign:D0")
+  VertexCompositeCollection = cms.untracked.InputTag("generalDPlus3PCandidatesNewWrongSign:D0")
   #MVACollection = cms.InputTag("generalDStarCandidatesNewWrongSign:MVAValues")
 )
 
 #dplus3pana_wrongsign_mc = dplus3pana_mc.clone(
-#  VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
+#  VertexCompositeCollection = cms.untracked.InputTag("generalDPlus3PCandidatesNewWrongSign:D0"),
 #  MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
 #)
 
