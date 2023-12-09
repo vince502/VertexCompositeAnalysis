@@ -41,6 +41,7 @@ generalDPlus3PCandidates = cms.EDProducer("DPlus3PProducer",
     dPt3Cut = cms.double(1.0),
 
     isWrongSign = cms.bool(False),
+    DPlusMassCut = cms.double(2.0),
 
 # MVA 
 
