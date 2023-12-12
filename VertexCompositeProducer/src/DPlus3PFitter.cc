@@ -180,10 +180,6 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   magField = bFieldHandle.product();
 
-  //needed for IP error
-  AnalyticalImpactPointExtrapolator extrapolator(magField);
-  TrajectoryStateOnSurface tsos;
-
   // Setup TMVA
 //  mvaValValueMap = auto_ptr<edm::ValueMap<float> >(new edm::ValueMap<float>);
 //  edm::ValueMap<float>::Filler mvaFiller(*mvaValValueMap);
@@ -541,6 +537,11 @@ void DPlus3PFitter::fitDPlusCandidates(
           rVtxMag = DPlusLineOfFlight.perp();
           sigmaLvtxMag = sqrt(ROOT::Math::Similarity(DPlusTotalCov, distanceVector3D)) / lVtxMag;
           sigmaRvtxMag = sqrt(ROOT::Math::Similarity(DPlusTotalCov, distanceVector2D)) / rVtxMag;
+
+        //needed for IP error
+        AnalyticalImpactPointExtrapolator extrapolator(magField);
+        TrajectoryStateOnSurface tsos;
+
 
         // DCA error
         tsos = extrapolator.extrapolate(DPlusCand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
