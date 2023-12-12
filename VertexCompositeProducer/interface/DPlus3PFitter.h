@@ -92,6 +92,8 @@ class DPlus3PFitter {
 
   // Switching to L. Lista's reco::Candidate infrastructure for DPlus3P storage
   const reco::VertexCompositeCandidateCollection& getDPlus3P() const;
+  const std::vector<float>& getDCAVals() const;
+  const std::vector<float>& getDCAErrs() const;
   const std::vector<float>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
