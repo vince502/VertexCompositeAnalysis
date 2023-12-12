@@ -430,7 +430,7 @@ void DPlus3PFitter::fitDPlusCandidates(
         double mass31 = sqrt( totalE31Sq - totalP3Sq);
         double mass32 = sqrt( totalE32Sq - totalP3Sq);
 
-        // if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) && (mass32 > mPiKPCutMax || mass32 < mPiKPCutMin)) continue;
+        if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) && (mass32 > mPiKPCutMax || mass32 < mPiKPCutMin)) continue;
         if( totalPt3 < dPt3Cut ) continue;
 
         // Create the vertex fitter object and vertex the tracks
