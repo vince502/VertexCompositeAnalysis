@@ -72,7 +72,7 @@ void DPlus3PProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      auto mvas = std::make_unique<MVACollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
      iEvent.put(std::move(mvas), std::string("MVAValuesDPlus3P"));
    }
-   auto dcaVals = std::make_unique<std::vector<float > >(theVees.getDCAVals().begin(), theVees.().end());
+   auto dcaVals = std::make_unique<std::vector<float > >(theVees.getDCAVals().begin(), theVees.getDCAVals().end());
    iEvent.put(std::move(dcaVals), std::string("DCAValuesDPlus3P"));
    auto dcaErrs = std::make_unique<std::vector<float > >(theVees.getDCAErrs().begin(), theVees.getDCAErrs().end());
    iEvent.put(std::move(dcaErrs), std::string("DCAErrorsDPlus3P"));
