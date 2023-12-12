@@ -246,6 +246,9 @@ EventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup&
       if(triggerResults->accept(triggerIndex)) isTriggerFired = true;
       //Get the trigger prescale
       float prescaleValue = -1;
+      const auto& l1tGlobalUtil = hltPrescaleProvider_.l1tGlobalUtil();
+      const auto& hltConfig = hltPrescaleProvider_.hltConfigProvider();
+      const auto& hltPaths = hltConfig.triggerNames();
       if(hltPrescaleProvider_.hltConfigProvider().inited() && hltPrescaleProvider_.prescaleSet(iEvent,iSetup)>=0)
       {
         const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail<double>(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
