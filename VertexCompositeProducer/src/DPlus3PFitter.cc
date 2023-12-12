@@ -594,8 +594,8 @@ void DPlus3PFitter::fitDPlusCandidates(
 	     // theDPlus3P->pt() > dPtCut ) {
           {
             theDPlus3Ps.push_back( *theDPlus3P );
-          dcaVals_.push_back(cur3DIP.value());
-          dcaErrs_.push_back(cur3DIP.error());
+            dcaVals_.push_back(cur3DIP.value());
+            dcaErrs_.push_back(cur3DIP.error());
           }
 // perform MVA evaluation
 /*
@@ -671,4 +671,6 @@ auto_ptr<edm::ValueMap<float> > DPlus3PFitter::getMVAMap() const {
 void DPlus3PFitter::resetAll() {
     theDPlus3Ps.clear();
     mvaVals_.clear();
+    dcaVals_.clear();
+    dcaErrs_.clear();
 }
