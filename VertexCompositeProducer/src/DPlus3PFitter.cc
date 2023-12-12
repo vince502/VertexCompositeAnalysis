@@ -373,6 +373,7 @@ void DPlus3PFitter::fitDPlusCandidates(
       for(unsigned int trdx3 = 0; trdx3 < theTrackRefs_sgn2.size(); trdx3++) {
 
         TrackRef trackRef3 = theTrackRefs_sgn2[trdx3];
+        if (trackRef3 == trackRef1 || trackRef3 == trackRef2) continue;
         TransientTrack* transTkPtr3 = &theTransTracks_sgn2[trdx3];
   
 //        double dzvtx3 = trackRef3->dz(bestvtx);
