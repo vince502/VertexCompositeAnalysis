@@ -66,7 +66,9 @@ float cand1MassDP_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
 float cand2MassDP_sigma[2] = {piMassDPlus3P_sigma, piMassDPlus3P_sigma};
 
 // Constructor and (empty) destructor
-DPlus3PFitter::DPlus3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
+DPlus3PFitter::DPlus3PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
+{
 //		   const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ConsumesCollector && iC) {
   using std::string;
 
@@ -176,7 +178,7 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByToken(token_dedx, dEdxHandle);
 
   if( !theTrackHandle->size() ) return;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
 
   magField = bFieldHandle.product();
 

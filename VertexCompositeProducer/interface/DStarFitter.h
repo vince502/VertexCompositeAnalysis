@@ -103,6 +103,8 @@ class DStarFitter {
 
   const MagneticField* magField;
 
+  edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bField_esToken_;
+
   edm::InputTag recoAlg;
   edm::InputTag vtxAlg;
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;

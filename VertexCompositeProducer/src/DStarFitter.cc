@@ -61,7 +61,9 @@ float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
 
 
 // Constructor and (empty) destructor
-DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) {
+DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
+{
   using std::string;
 
   // Get the track reco algorithm from the ParameterSet
@@ -174,7 +176,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
   if( !theTrackHandle->size() ) return;
-  iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
+  bFieldHandle = iSetup.getHandle(bField_esToken_);
 
   magField = bFieldHandle.product();
 
