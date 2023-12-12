@@ -66,7 +66,8 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "CondFormats/EgammaObjects/interface/GBRForest.h"
+#include "CondFormats/GBRForest/interface/GBRForest.h"
+#include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
 #include <string>
 #include <fstream>
