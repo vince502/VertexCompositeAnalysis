@@ -531,6 +531,17 @@ void DPlus3PFitter::fitDPlusCandidates(
           sigmaLvtxMag = sqrt(ROOT::Math::Similarity(DPlusTotalCov, distanceVector3D)) / lVtxMag;
           sigmaRvtxMag = sqrt(ROOT::Math::Similarity(DPlusTotalCov, distanceVector2D)) / rVtxMag;
 
+        // DCA error
+        tsos = extrapolator.extrapolate(DPlusCand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
+	if( !tsos.isValid() ) continue;
+        Measurement1D cur3DIP;
+        VertexDistance3D a3d;
+        GlobalPoint refPoint          = tsos.globalPosition();
+        GlobalError refPointErr       = tsos.cartesianError().position();
+        GlobalPoint vertexPosition    = RecoVertex::convertPos(vtxPrimary->position());
+        GlobalError vertexPositionErr = RecoVertex::convertError(vtxPrimary->error());
+        cur3DIP =  (a3d.distance(VertexState(vertexPosition,vertexPositionErr), VertexState(refPoint, refPointErr)));
+
           if( DPlusNormalizedChi2 > chi2Cut ||
               rVtxMag < rVtxCut ||
               rVtxMag / sigmaRvtxMag < rVtxSigCut ||
@@ -571,6 +582,8 @@ void DPlus3PFitter::fitDPlusCandidates(
 	     // theDPlus3P->pt() > dPtCut ) {
           {
             theDPlus3Ps.push_back( *theDPlus3P );
+          dcaVals_.push_back(cur3DIP.value());
+          dcaErrs_.push_back(cur3DIP.error());
           }
 // perform MVA evaluation
 /*
@@ -624,6 +637,13 @@ void DPlus3PFitter::fitDPlusCandidates(
 
 const reco::VertexCompositeCandidateCollection& DPlus3PFitter::getDPlus3P() const {
   return theDPlus3Ps;
+}
+const std::vector<float>& DPlus3PFitter::getDCAVals() const{
+  return dcaVals_;
+}
+
+const std::vector<float>& DPlus3PFitter::getDCAErrs() const{
+  return dcaErrs_;
 }
 
 const std::vector<float>& DPlus3PFitter::getMVAVals() const {

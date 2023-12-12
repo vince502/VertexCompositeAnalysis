@@ -157,6 +157,8 @@ class DPlus3PFitter {
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 
+  std::vector<float> dcaVals_;
+  std::vector<float> dcaErrs_;
 
   std::string dbFileName_;
 
