@@ -30,6 +30,13 @@
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
+// for DCA
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
+#include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include <Math/Functions.h>
@@ -172,6 +179,10 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
 
   magField = bFieldHandle.product();
+
+  //needed for IP error
+  AnalyticalImpactPointExtrapolator extrapolator(magField);
+  TrajectoryStateOnSurface tsos;
 
   // Setup TMVA
 //  mvaValValueMap = auto_ptr<edm::ValueMap<float> >(new edm::ValueMap<float>);
