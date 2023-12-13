@@ -281,10 +281,10 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
 
-      if( !pionTransTkPtr.impactPointStateAvailable()) continue;
+      if( !pionTransTkPtr->impactPointStateAvailable()) continue;
       const auto& D0Vec = theD0.p4();
       const reco::Track& thePiTrack = pionTransTkPtr->track();
-      math::PtEtaPhiMLorentzVector pPi(thePiTrack.pt(), thePiTrack.eta(), thePiTrack.phi(), piMassDStar)
+      math::PtEtaPhiMLorentzVector pPi(thePiTrack.pt(), thePiTrack.eta(), thePiTrack.phi(), piMassDStar);
       double theDStarcandMass = (D0Vec + pPi).M();
       if(theDStarcandMass - D0Vec.M() >0.16) continue;
       
