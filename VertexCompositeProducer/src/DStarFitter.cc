@@ -284,7 +284,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       const reco::Track& thePiTrack = pionTransTkPtr.track();
       PtEtaPhiMLorentzVector pPi(thePiTrack.pt(), thePiTrack.eta(), thePiTrack.phi(), piMassDStar)
       double theDStarcandMass = (D0Vec + pPi).M();
-      if(theDStarcandMass - D0Vec.M() >0.155) continue;
+      if(theDStarcandMass - D0Vec.M() >0.16) continue;
 
 
       
