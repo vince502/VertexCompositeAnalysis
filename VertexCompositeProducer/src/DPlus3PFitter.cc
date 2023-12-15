@@ -297,6 +297,10 @@ void DPlus3PFitter::fitDPlusCandidates(
 
   // Loop over tracks and vertex good charged track pairs
   for(unsigned int trdx1 = 0; trdx1 < theTrackRefs_sgn1.size(); trdx1++) {
+    TrackRef trackRef1 = theTrackRefs_sgn1[trdx1];
+    TransientTrack* transTkPtr1 = &theTransTracks_sgn1[trdx1];
+    FreeTrajectoryState trkState1 = transTkPtr1->impactPointTSCP().theState();
+    if( !transTkPtr1->impactPointTSCP().isValid()) continue;
 
     for(unsigned int trdx2 = trdx1 + 1; trdx2 < theTrackRefs_sgn1.size(); trdx2++) {
 //      if( (theTrackRefs[trdx1]->pt() + theTrackRefs[trdx2]->pt()) < tkPtSumCut) continue;
@@ -305,9 +309,7 @@ void DPlus3PFitter::fitDPlusCandidates(
       //This vector holds the pair of oppositely-charged tracks to be vertexed
       std::vector<TransientTrack> transTracks;
 
-      TrackRef trackRef1 = theTrackRefs_sgn1[trdx1];
       TrackRef trackRef2 = theTrackRefs_sgn1[trdx2];
-      TransientTrack* transTkPtr1 = &theTransTracks_sgn1[trdx1];
       TransientTrack* transTkPtr2 = &theTransTracks_sgn1[trdx2];
 
 //      double dzvtx1 = trackRef1->dz(bestvtx);
@@ -335,10 +337,9 @@ void DPlus3PFitter::fitDPlusCandidates(
       transTracks.push_back(*transTkPtr2);
 
       // Trajectory states to calculate DCA for the 2 tracks
-      FreeTrajectoryState trkState1 = transTkPtr1->impactPointTSCP().theState();
       FreeTrajectoryState trkState2 = transTkPtr2->impactPointTSCP().theState();
 
-      if( !transTkPtr1->impactPointTSCP().isValid() || !transTkPtr2->impactPointTSCP().isValid() ) continue;
+      if( !transTkPtr2->impactPointTSCP().isValid() ) continue;
 
       // Measure distance between tracks at their closest approach
       ClosestApproachInRPhi cApp;
