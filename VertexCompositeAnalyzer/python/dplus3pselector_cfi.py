@@ -78,10 +78,10 @@ dplus3pselectorMC = cms.EDProducer('VertexCompositeSelector',
   selectGenMatchUnSwap = cms.untracked.bool(False),
 
   #PID used only for GEN and/or GEN match
-  PID = cms.untracked.int32(4122),
+  PID = cms.untracked.int32(411),
   PID_dau1 = cms.untracked.int32(211),
   PID_dau2 = cms.untracked.int32(321),
-  PID_dau3 = cms.untracked.int32(2212),
+  PID_dau3 = cms.untracked.int32(211),
   deltaR = cms.untracked.double(0.03),
   VertexCollection = cms.untracked.InputTag("offlinePrimaryVertices"),
   TrackCollection = cms.untracked.InputTag("generalTracks"),
