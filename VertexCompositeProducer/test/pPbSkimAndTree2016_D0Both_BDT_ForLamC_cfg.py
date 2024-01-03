@@ -22,7 +22,7 @@ process.source = cms.Source("PoolSource",
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_dataRun2_v19'
 
@@ -63,9 +63,9 @@ process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalD0CandidatesNew.tkPtCut = cms.double(0.6)
-process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
-process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
-process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+process.generalD0CandidatesNew.alphaCut = cms.double(0.5)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(0.7)
+process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -169,10 +169,10 @@ eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter , proce
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
-process.output = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring("keep *"),
-    fileName = cms.untracked.string('output.root'),
-)
-
-process.outputPath = cms.EndPath(process.output)
-process.schedule.append(process.outputPath)
+#process.output = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring("keep *"),
+#    fileName = cms.untracked.string('output.root'),
+#)
+#
+#process.outputPath = cms.EndPath(process.output)
+#process.schedule.append(process.outputPath)
