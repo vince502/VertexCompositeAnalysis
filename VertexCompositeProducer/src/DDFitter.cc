@@ -56,7 +56,7 @@ const float piMassDD = 0.13957018;
 const float piMassDDSquared = piMassDD*piMassDD;
 const float dStarMassDD = 2.010000;
 float piMassDD_sigma = 3.5E-7f;
-float D0MassD0_sigma = 1.6E-4f;
+float DDMassD0_sigma = 1.6E-4f;
 float dStarMassDD_sigma = dStarMassDD*1.e-6;
 
 
@@ -281,8 +281,8 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       VertexCompositeCandidate theD02 = (*theD0Handle)[didx2];
 
       // if( !pionTransTkPtr->impactPointStateAvailable()) continue;
-      const auto& D0Vec1 = theD01.p4();
-      const auto& D0Vec2 = theD02.p4();
+      // const auto& D0Vec1 = theD01.p4();
+      // const auto& D0Vec2 = theD02.p4();
       // const reco::Track& thePiTrack = pionTransTkPtr->track();
       // math::PtEtaPhiMLorentzVector pPi(thePiTrack.pt(), thePiTrack.eta(), thePiTrack.phi(), piMassDD);
       // double theDDcandMass = (D0Vec1 + D0Vec2).M();
@@ -365,8 +365,8 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        reco::TransientTrack ttk11(*dau11->bestTrack(), magField);
        float dau10mass =  dau10->mass();
        float dau11mass =  dau11->mass();
-       d01Daus.push_back(pFactory.particle(ttk10,dau10mass,chi,ndf,D0MassD0_sigma));
-       d01Daus.push_back(pFactory.particle(ttk11,dau11mass,chi,ndf,D0MassD0_sigma));
+       d01Daus.push_back(pFactory.particle(ttk10,dau10mass,chi,ndf,DDMassD0_sigma));
+       d01Daus.push_back(pFactory.particle(ttk11,dau11mass,chi,ndf,DDMassD0_sigma));
 
        reco::Candidate* dau20 = theD02.daughter(0);
        reco::Candidate* dau21 = theD02.daughter(1);
@@ -374,8 +374,8 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        reco::TransientTrack ttk21(*dau21->bestTrack(), magField);
        float dau20mass =  dau20->mass();
        float dau21mass =  dau21->mass();
-       d02Daus.push_back(pFactory.particle(ttk20,dau20mass,chi,ndf,D0MassD0_sigma));
-       d02Daus.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,D0MassD0_sigma));
+       d02Daus.push_back(pFactory.particle(ttk20,dau20mass,chi,ndf,DDMassD0_sigma));
+       d02Daus.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,DDMassD0_sigma));
 
        if( ttk10 == ttk20 || ttk10 == ttk21) continue;
        if( ttk11 == ttk20 || ttk11 == ttk21) continue;
