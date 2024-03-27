@@ -493,11 +493,11 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        VertexCompositeCandidate* theDD = 0;
        theDD = new VertexCompositeCandidate(0, ddP4, ddVtx, ddVtxCov, ddVtxChi2, ddVtxNdof);
 
-       RecoChargedCandidate
-         theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
-                                                  negCandTotalP.y(), negCandTotalP.z(),
-                                                  negCandTotalE), ddVtx);
-       theNegCand.setTrack(pionTrackRef);
+      //  RecoChargedCandidate
+      //    theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
+      //                                             negCandTotalP.y(), negCandTotalP.z(),
+      //                                             negCandTotalE), ddVtx);
+      //  theNegCand.setTrack(pionTrackRef);
 
        AddFourMomenta addp4;
        theDD->addDaughter(theD01);
