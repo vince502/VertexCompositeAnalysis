@@ -9,7 +9,8 @@ from VertexCompositeAnalysis.VertexCompositeProducer.pileUpFilter_cff import *
 # Selection of at least a two-track fitted vertex
 primaryVertexFilterPA = cms.EDFilter("VertexSelector",
     src = cms.InputTag("offlinePrimaryVertices"),
-    cut = cms.string("!isFake && abs(z) <= 25 && position.Rho <= 2 && tracksSize >= 2"),
+    #cut = cms.string("isFake && abs(z) <= 25000 && position.Rho <= 2 && tracksSize >=0"),
+    cut = cms.string("!isFake && abs(z) <= 25 && position.Rho <= 2 && tracksSize >=2"),
     filter = cms.bool(True), # otherwise it won't filter the events
 )
 

@@ -6,7 +6,7 @@ from CRABClient.UserUtilities import config
 config = config()
 
 userName = "soohwan"
-date = "2023Dec23"
+date = "2024Jan27"
 
 config.section_("General")
 config.General.workArea = 'crab_projects_knu_%s_v2' % (date)
@@ -47,11 +47,11 @@ def submit(config):
 dataMap = {}
 # MinBias 1 already ran in 06 March 2023
 for i in range(1,21):
-    dataMap[("PAMinimumBias"+str(i))] = { "PD": ("/PAMinimumBias"+str(i)+"/PARun2016C-PromptReco-v1/AOD"), "Units": 5, "Memory": 2500, "RunTime": 2400 }
+    dataMap[("PAMinimumBias"+str(i))] = { "PD": ("/PAMinimumBias"+str(i)+"/PARun2016C-PromptReco-v1/AOD"), "Units": 4, "Memory": 2500, "RunTime": 2400 }
 
 ## Submit the muon PDs
 for key, val in dataMap.items():
-    config.General.requestName = key+'_8TeVpPb2016_DmesonSkim_'+date+'_v4'
+    config.General.requestName = key+'_8TeVpPb2016_DmesonSkim_'+date+'_v1'
     config.Data.inputDataset = val["PD"]
     config.Data.unitsPerJob = val["Units"]
     config.JobType.maxMemoryMB = val["Memory"]

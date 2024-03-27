@@ -20,7 +20,21 @@ options = VarParsing ('analysis')
 if not options.inputFiles:
     options.inputFiles = [
 #'/store/himc/pPb816Summer16DR/NonPromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/90000/0007792C-D8A0-E711-9B47-FA163EEC8769.root'
-'file:/eos/home-s/soohwan/store/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/009F94B7-5D9B-E711-B27B-009C02AABEB8.root',
+#'file:/eos/home-s/soohwan/store/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/009F94B7-5D9B-E711-B27B-009C02AABEB8.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_36_patch2/src/HIN-pPb816Summer16DR-00164.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_40.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_41.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_42.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_43.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_44.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_45.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_46.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_47.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_48.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_49.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_26/src/HIN-pPb816Summer16DR-00164.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/HIN-pPb816Summer16DR-00164.root',
+'file:step3_Embedded_PromptD0_KK_8160GeV_pythia8_RECO_20190906_88.root',
 ]
 
 process.source = cms.Source("PoolSource",
@@ -28,7 +42,7 @@ process.source = cms.Source("PoolSource",
 )
 
 # =============== Other Statements =====================
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(4000))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_mcRun2_pA_v4'
 
@@ -70,12 +84,14 @@ process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(i
 
 process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew )
 process.d0rereco_wrongsign_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNewWrongSign )
+#process.d0rereco_step = cms.Path(  process.generalD0CandidatesNew )
+#process.d0rereco_wrongsign_step = cms.Path( process.generalD0CandidatesNewWrongSign )
 
 ###############################################################################################
 
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0selector_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_tree_cff")
-#process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_ntp_cff")
+process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_ntp_cff")
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('d0ana_mc_tree.root')
@@ -124,6 +140,8 @@ process.d0ana_wrongsign_seq2 = cms.Sequence(process.d0selectorMCNewReducedWS * p
 
 process.p1 = cms.Path(process.eventFilter_HM * process.d0ana_seq2)
 process.p2 = cms.Path(process.eventFilter_HM * process.d0ana_wrongsign_seq2)
+#process.p1 = cms.Path( process.d0ana_seq2)
+#process.p2 = cms.Path( process.d0ana_wrongsign_seq2)
 
 process.schedule = cms.Schedule(
     process.eventFilter_HM_step,
