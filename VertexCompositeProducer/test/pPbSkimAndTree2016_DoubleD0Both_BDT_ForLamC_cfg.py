@@ -22,7 +22,7 @@ process.source = cms.Source("PoolSource",
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_dataRun2_v19'
 
@@ -70,7 +70,7 @@ process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDDCandidates_cff")
-process.generalDDCandidatesNew = process.generalDStarCandidates.clone()
+process.generalDDCandidatesNew = process.generalDDCandidates.clone()
 process.generalDDCandidatesNew.trkPtSumCut = cms.double(0.0)
 process.generalDDCandidatesNew.trkEtaDiffCut = cms.double(0.0)
 process.generalDDCandidatesNew.tkNhitsCut = cms.int32(0)
@@ -124,7 +124,7 @@ process.d0selectorNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_P
 process.d0selectorNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
 
-process.generalDStarCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
+process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
 
 process.d0selectorWSNewReduced = process.d0selectorWS.clone()
 process.d0selectorWSNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')

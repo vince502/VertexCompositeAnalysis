@@ -172,8 +172,11 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
   iEvent.getByToken(token_dedx, dEdxHandle);
 
+  std::cout << "Hi " << std::endl;
 
   if( !theTrackHandle->size() ) return;
+
+  std::cout << "Bye " << std::endl;
   iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
 
   magField = bFieldHandle.product();
@@ -263,9 +266,11 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   //int   pdg_id[2] = {421, -421};
 
   // Loop over tracks and vertex good charged track pairs
+std::cout << "Loop1" << std::endl;
   for(unsigned int didx1 = 0; didx1 < theD0Handle->size(); didx1++) {
 
-    for(unsigned int didx2 = didx1 + 1; didx2 < theTrackRefs.size(); didx2++) {
+std::cout << "Loop2" << std::endl;
+    for(unsigned int didx2 = didx1 + 1; didx2 < theD0Handle->size(); didx2++) {
 
       // Not using this on Dstar fit (1)
       // if( (theTrackRefs[didx1]->pt() + theTrackRefs[trdx2]->pt()) < tkPtSumCut) continue;
@@ -377,8 +382,12 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        d02Daus.push_back(pFactory.particle(ttk20,dau20mass,chi,ndf,DDMassD0_sigma));
        d02Daus.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,DDMassD0_sigma));
 
-       if( ttk10 == ttk20 || ttk10 == ttk21) continue;
-       if( ttk11 == ttk20 || ttk11 == ttk21) continue;
+       if( ttk10 == ttk20 || ttk10 == ttk21){
+std::cout << "Duplicate daughter, continue" << std::endl;
+ continue;}
+       if( ttk11 == ttk20 || ttk11 == ttk21){
+std::cout << "Duplicate daughter, continue" << std::endl;
+ continue;}
 
        KinematicParticleVertexFitter kpvFitter;
        RefCountedKinematicTree d01Tree =  kpvFitter.fit(d01Daus);

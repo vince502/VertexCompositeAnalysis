@@ -93,6 +93,8 @@ process.TFileService = cms.Service("TFileService",
 
 # set up selectors
 
+process.ddana_mc.PID = cms.untracked.int32(4)
+
 process.d0ana_mc.useAnyMVA = cms.bool(True)
 process.d0ana_mc.VertexCompositeCollection = cms.untracked.InputTag("d0selectorMC:D0")
 process.d0ana_mc.MVACollection = cms.InputTag("d0selectorMC:MVAValuesNewD0")
@@ -109,7 +111,7 @@ process.d0selectorMCNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT
 process.d0selectorMCNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorMCNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
 
-process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
+process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorMCNewReduced:D0")
 
 process.d0ana_mc_newreduced = process.d0ana_mc.clone()
 process.d0ana_mc_newreduced.saveTree = True
@@ -118,7 +120,7 @@ process.d0ana_mc_newreduced.MVACollection = cms.InputTag("d0selectorMCNewReduced
 process.d0ana_mc_newreduced.DCAValCollection = cms.InputTag("d0selectorMCNewReduced:DCAValuesNewD0")
 process.d0ana_mc_newreduced.DCAErrCollection = cms.InputTag("d0selectorMCNewReduced:DCAErrorsNewD0")
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.generalDDCandidatesNew * process.ddana)
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.generalDDCandidatesNew * process.ddana_mc)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
