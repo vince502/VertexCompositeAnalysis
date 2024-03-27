@@ -285,7 +285,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       const auto& D0Vec2 = theD02.p4();
       // const reco::Track& thePiTrack = pionTransTkPtr->track();
       // math::PtEtaPhiMLorentzVector pPi(thePiTrack.pt(), thePiTrack.eta(), thePiTrack.phi(), piMassDD);
-      double theDDcandMass = (D0Vec1 + D0Vec2).M();
+      // double theDDcandMass = (D0Vec1 + D0Vec2).M();
       // if(theDDcandMass - D0Vec.M() >0.16) continue;
 
 
@@ -365,8 +365,8 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        reco::TransientTrack ttk11(*dau11->bestTrack(), magField);
        float dau10mass =  dau10->mass();
        float dau11mass =  dau11->mass();
-       d0Daus1.push_back(pFactory.particle(ttk10,dau10mass,chi,ndf,D0MassD0_sigma));
-       d0Daus1.push_back(pFactory.particle(ttk11,dau11mass,chi,ndf,D0MassD0_sigma));
+       d01Daus.push_back(pFactory.particle(ttk10,dau10mass,chi,ndf,D0MassD0_sigma));
+       d01Daus.push_back(pFactory.particle(ttk11,dau11mass,chi,ndf,D0MassD0_sigma));
 
        reco::Candidate* dau20 = theD02.daughter(0);
        reco::Candidate* dau21 = theD02.daughter(1);
@@ -374,20 +374,15 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        reco::TransientTrack ttk21(*dau21->bestTrack(), magField);
        float dau20mass =  dau20->mass();
        float dau21mass =  dau21->mass();
-       d0Daus2.push_back(pFactory.particle(ttk20,dau20mass,chi,ndf,D0MassD0_sigma));
-       d0Daus2.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,D0MassD0_sigma));
+       d02Daus.push_back(pFactory.particle(ttk20,dau20mass,chi,ndf,D0MassD0_sigma));
+       d02Daus.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,D0MassD0_sigma));
 
-       reco::TrackRef ref10 = ttk10.track();
-       reco::TrackRef ref11 = ttk11.track();
-       reco::TrackRef ref20 = ttk20.track();
-       reco::TrackRef ref21 = ttk21.track();
-
-       if( ref10 == ref20 || ref10 == ref21) continue;
-       if( ref11 == ref20 || ref11 == ref21) continue;
+       if( ttk10 == ttk20 || ttk10 == ttk21) continue;
+       if( ttk11 == ttk20 || ttk11 == ttk21) continue;
 
        KinematicParticleVertexFitter kpvFitter;
        RefCountedKinematicTree d01Tree =  kpvFitter.fit(d01Daus);
-       RefCountedKinematicTree d01Tree =  kpvFitter.fit(d02Daus);
+       RefCountedKinematicTree d02Tree =  kpvFitter.fit(d02Daus);
 
        d01Tree->movePointerToTheTop();
        d02Tree->movePointerToTheTop();
@@ -496,7 +491,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        ) continue;
 
        VertexCompositeCandidate* theDD = 0;
-       theDD = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), ddP4, ddVtx, ddVtxCov, ddVtxChi2, ddVtxNdof);
+       theDD = new VertexCompositeCandidate(0, ddP4, ddVtx, ddVtxCov, ddVtxChi2, ddVtxNdof);
 
        RecoChargedCandidate
          theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
@@ -505,14 +500,15 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        theNegCand.setTrack(pionTrackRef);
 
        AddFourMomenta addp4;
-       theDD->addDaughter(theD0);
-       theDD->addDaughter(theNegCand);
-       int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
+       theDD->addDaughter(theD01);
+       theDD->addDaughter(theD02);
+      //  int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
+      int pdgId = 30443;
        theDD->setPdgId(pdgId);
        addp4.set( *theDD );
-       if( theDD->mass() < ddMassDD + ddMassCut &&
-           theDD->mass() > ddMassDD - ddMassCut ) 
-       {
+       //if( theDD->mass() < ddMassDD + ddMassCut &&
+       //    theDD->mass() > ddMassDD - ddMassCut ) 
+       //{
          theDDs.push_back( *theDD );
          dcaVals_.push_back(cur3DIP.value());
          dcaErrs_.push_back(cur3DIP.error());
@@ -552,7 +548,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       //    //   auto gbrVal = forest->GetClassifier(gbrVals_);
       //    //   mvaVals_.push_back(gbrVal);
          }
-       }
+       //}
 
        if(theDD) delete theDD;
       }
