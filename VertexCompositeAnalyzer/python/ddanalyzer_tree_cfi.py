@@ -8,6 +8,7 @@ ddana = cms.EDAnalyzer('VertexCompositeTreeProducerNew',
   hasSwap = cms.untracked.bool(False),
   decayInGen = cms.untracked.bool(False),
   twoLayerDecay = cms.untracked.bool(True),
+  doubleCand = cms.untracked.bool(True),
   threeProngDecay = cms.untracked.bool(False),
   #PID used only for GEN and/or GEN match
   PID = cms.untracked.int32(413),

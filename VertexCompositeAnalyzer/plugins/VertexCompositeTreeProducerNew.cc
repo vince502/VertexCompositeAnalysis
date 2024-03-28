@@ -159,6 +159,7 @@ private:
     bool hasSwap_;
     bool decayInGen_;
     bool twoLayerDecay_;
+    bool doubleCand_;
     bool threeProngDecay_;
     bool doMuon_;
     bool doMuonFull_;
@@ -448,13 +449,14 @@ private:
 // constructors and destructor
 //
 
-VertexCompositeTreeProducer::VertexCompositeTreeProducer(const edm::ParameterSet& iConfig)
+VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(const edm::ParameterSet& iConfig)
 {
     //options
     doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
     doGenNtuple_ = iConfig.getUntrackedParameter<bool>("doGenNtuple");
     twoLayerDecay_ = iConfig.getUntrackedParameter<bool>("twoLayerDecay");
     threeProngDecay_ = iConfig.getUntrackedParameter<bool>("threeProngDecay");
+    doubleCand_ = iConfig.getUntrackedParameter<bool>("doubleCand");
     doGenMatching_ = iConfig.getUntrackedParameter<bool>("doGenMatching");
     doGenMatchingTOF_ = iConfig.getUntrackedParameter<bool>("doGenMatchingTOF");
     hasSwap_ = iConfig.getUntrackedParameter<bool>("hasSwap");
@@ -519,7 +521,7 @@ VertexCompositeTreeProducer::VertexCompositeTreeProducer(const edm::ParameterSet
 }
 
 
-VertexCompositeTreeProducer::~VertexCompositeTreeProducer()
+VertexCompositeTreeProducerNew::~VertexCompositeTreeProducerNew()
 {
  
   // do anything here that needs to be done at desctruction time
@@ -534,7 +536,7 @@ VertexCompositeTreeProducer::~VertexCompositeTreeProducer()
 
 // ------------ method called to for each event  ------------
 void
-VertexCompositeTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup&
+VertexCompositeTreeProducerNew::analyze(const edm::Event& iEvent, const edm::EventSetup&
 iSetup)
 {
     using std::vector;
@@ -548,7 +550,7 @@ iSetup)
 }
 
 void
-VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
@@ -1575,7 +1577,7 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
             double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/gdl2D;
             
             grand_dlos2D[it] = gdl2D/gdl2Derror;
-            if( doubleCand )
+            if( doubleCand_ )
             {
                 grand_mass2[it] = d2->mass();
 
@@ -1779,7 +1781,7 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
 }
 
 void
-VertexCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+VertexCompositeTreeProducerNew::fillGEN(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     edm::Handle<reco::GenParticleCollection> genpars;
     iEvent.getByToken(tok_genParticle_,genpars);
@@ -1833,7 +1835,7 @@ VertexCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventS
 // ------------ method called once each job just before starting event
 //loop  ------------
 void
-VertexCompositeTreeProducer::beginJob()
+VertexCompositeTreeProducerNew::beginJob()
 {
     TH1D::SetDefaultSumw2();
     
@@ -1852,7 +1854,7 @@ VertexCompositeTreeProducer::beginJob()
 }
 
 void
-VertexCompositeTreeProducer::initHistogram()
+VertexCompositeTreeProducerNew::initHistogram()
 {
   for(unsigned int ipt=0;ipt<pTBins_.size()-1;ipt++)
   {
@@ -1911,7 +1913,7 @@ VertexCompositeTreeProducer::initHistogram()
 }
 
 void 
-VertexCompositeTreeProducer::initTree()
+VertexCompositeTreeProducerNew::initTree()
 { 
     VertexCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
     
@@ -2023,7 +2025,7 @@ VertexCompositeTreeProducer::initTree()
 //            VertexCompositeNtuple->Branch("dedxTruncated40GrandDaugther2",&grand_T4dedx2,"dedxTruncated40GrandDaugther2[candSize]/F");
 //            VertexCompositeNtuple->Branch("normalizedChi2GrandDaugther1",&grand_trkChi1,"normalizedChi2GrandDaugther1[candSize]/F");
 //            VertexCompositeNtuple->Branch("normalizedChi2GrandDaugther2",&grand_trkChi2,"normalizedChi2GrandDaugther2[candSize]/F");
-            if( doubleCand ){
+            if( doubleCand_ ){
             VertexCompositeNtuple->Branch("massDaugther2",&grand_mass2,"massDaugther2[candSize]/F");
             VertexCompositeNtuple->Branch("pTD2",&pt2,"pTD2[candSize]/F");
             VertexCompositeNtuple->Branch("EtaD2",&eta2,"EtaD2[candSize]/F");
@@ -2177,7 +2179,7 @@ VertexCompositeTreeProducer::initTree()
     }
 }
 
-int VertexCompositeTreeProducer::
+int VertexCompositeTreeProducerNew::
 muAssocToTrack( const reco::TrackRef& trackref,
                 const edm::Handle<reco::MuonCollection>& muonh) const {
   auto muon = std::find_if(muonh->cbegin(),muonh->cend(),
@@ -2191,7 +2193,7 @@ muAssocToTrack( const reco::TrackRef& trackref,
 // ------------ method called once each job just after ending the event
 //loop  ------------
 void 
-VertexCompositeTreeProducer::endJob() {
+VertexCompositeTreeProducerNew::endJob() {
     
 }
 
