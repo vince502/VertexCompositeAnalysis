@@ -1205,7 +1205,6 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
         
         dzos2[it] = dzbest2/dzerror2;
         dxyos2[it] = dxybest2/dxyerror2;
-        }
         
         if(doMuon_)
         {
@@ -1437,6 +1436,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             }
           }
           } // doMuonFull
+        }
         }
         
         if(twoLayerDecay_)
