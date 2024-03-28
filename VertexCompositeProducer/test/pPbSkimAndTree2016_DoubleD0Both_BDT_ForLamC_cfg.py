@@ -22,7 +22,7 @@ process.source = cms.Source("PoolSource",
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_dataRun2_v19'
 
@@ -81,7 +81,7 @@ process.generalDDCandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalDDCandidatesNew.dPtCut = cms.double(0.0)
 
 
-process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew)
+process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew * process.generalDDCandidatesNew)
 process.d0rereco_wrongsign_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNewWrongSign )
 
 
@@ -113,18 +113,19 @@ process.d0ana.multMin = cms.untracked.double(0)
 process.d0ana.multMax = cms.untracked.double(100000)
 process.d0ana.VertexCompositeCollection = cms.untracked.InputTag("d0selector:D0")
 process.d0ana.MVACollection = cms.InputTag("d0selector:MVAValuesNewD0")
-process.d0ana_wrongsign.useAnyMVA = cms.bool(True)
-process.d0ana_wrongsign.multMin = cms.untracked.double(0)
-process.d0ana_wrongsign.multMax = cms.untracked.double(100000)
-process.d0ana_wrongsign.VertexCompositeCollection = cms.untracked.InputTag("d0selectorWS:D0")
-process.d0ana_wrongsign.MVACollection = cms.InputTag("d0selectorWS:MVAValuesNewD0")
+#process.d0ana_wrongsign.useAnyMVA = cms.bool(True)
+#process.d0ana_wrongsign.multMin = cms.untracked.double(0)
+#process.d0ana_wrongsign.multMax = cms.untracked.double(100000)
+#process.d0ana_wrongsign.VertexCompositeCollection = cms.untracked.InputTag("d0selectorWS:D0")
+#process.d0ana_wrongsign.MVACollection = cms.InputTag("d0selectorWS:MVAValuesNewD0")
 
 process.d0selectorNewReduced = process.d0selector.clone()
 process.d0selectorNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
 process.d0selectorNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
 
-process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
+#process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
+process.generalDDCandidatesNew.d0Collection = cms.InputTag("generalD0CandidatesNew:D0")
 
 process.d0selectorWSNewReduced = process.d0selectorWS.clone()
 process.d0selectorWSNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
@@ -137,14 +138,21 @@ process.d0ana_newreduced.MVACollection = cms.InputTag("d0selectorNewReduced:MVAV
 process.d0ana_newreduced.DCAValCollection = cms.InputTag("d0selectorNewReduced:DCAValuesNewD0")
 process.d0ana_newreduced.DCAErrCollection = cms.InputTag("d0selectorNewReduced:DCAErrorsNewD0")
 
-process.d0ana_wrongsign_newreduced = process.d0ana_wrongsign.clone()
-process.d0ana_wrongsign_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0selectorWSNewReduced:D0")
-process.d0ana_wrongsign_newreduced.MVACollection = cms.InputTag("d0selectorWSNewReduced:MVAValuesNewD0")
-process.d0ana_wrongsign_newreduced.DCAValCollection = cms.InputTag("d0selectorWSNewReduced:DCAValuesNewD0")
-process.d0ana_wrongsign_newreduced.DCAErrCollection = cms.InputTag("d0selectorWSNewReduced:DCAErrorsNewD0")
+#process.d0ana_wrongsign_newreduced = process.d0ana_wrongsign.clone()
+#process.d0ana_wrongsign_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0selectorWSNewReduced:D0")
+#process.d0ana_wrongsign_newreduced.MVACollection = cms.InputTag("d0selectorWSNewReduced:MVAValuesNewD0")
+#process.d0ana_wrongsign_newreduced.DCAValCollection = cms.InputTag("d0selectorWSNewReduced:DCAValuesNewD0")
+#process.d0ana_wrongsign_newreduced.DCAErrCollection = cms.InputTag("d0selectorWSNewReduced:DCAErrorsNewD0")
+
+process.ddana_new = process.ddana.clone()
+process.ddana_new.twoLayerDecay = cms.untracked.bool(True)
+process.ddana_new.TrackCollection = cms.untracked.InputTag("generalTracks")
+process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
+process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
 
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDDCandidatesNew * process.ddana)
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  * process.ddana_new)
+#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDDCandidatesNew )
 # process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorWSNewReduced * process.d0ana_wrongsign_newreduced)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
@@ -186,10 +194,10 @@ eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter , proce
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
-#process.output = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM"),
-#    fileName = cms.untracked.string('output.root'),
-#)
+process.output = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM", "keep *_*_generalTracks_*"),
+    fileName = cms.untracked.string('output.root'),
+)
 
-#process.outputPath = cms.EndPath(process.output)
-#process.schedule.append(process.outputPath)
+process.outputPath = cms.EndPath(process.output)
+process.schedule.append(process.outputPath)
