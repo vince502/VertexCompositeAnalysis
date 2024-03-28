@@ -6,6 +6,7 @@ generalDDCandidates = cms.EDProducer("DDProducer",
     d0Collection = cms.InputTag('d0selectorNewReduced'),
     trackRecoAlgorithm = cms.InputTag('generalTracks'),
     vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices'),
+    MVACollection = cms.InputTag(''),
 
     trackQualities = cms.vstring('highPurity'),
 
@@ -43,7 +44,7 @@ generalDDCandidates = cms.EDProducer("DDProducer",
 
 # MVA
 
-    useAnyMVA = cms.bool(False),
+    useAnyMVA = cms.bool(True),
     mvaType = cms.string('BDT'),
     GBRForestLabel = cms.string('D0InpPb'),
     GBRForestFileName = cms.string('GBRForestfile.root'),

@@ -22,7 +22,7 @@ process.source = cms.Source("PoolSource",
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50000))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_dataRun2_v19'
 
@@ -81,7 +81,7 @@ process.generalDDCandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalDDCandidatesNew.dPtCut = cms.double(0.0)
 
 
-process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew * process.generalDDCandidatesNew)
+process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew)
 process.d0rereco_wrongsign_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNewWrongSign )
 
 
@@ -124,8 +124,9 @@ process.d0selectorNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_P
 process.d0selectorNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
 
-#process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
-process.generalDDCandidatesNew.d0Collection = cms.InputTag("generalD0CandidatesNew:D0")
+process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
+process.generalDDCandidatesNew.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
+#process.generalDDCandidatesNew.d0Collection = cms.InputTag("generalD0CandidatesNew:D0")
 
 process.d0selectorWSNewReduced = process.d0selectorWS.clone()
 process.d0selectorWSNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
@@ -151,7 +152,7 @@ process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAVal
 process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
 
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  * process.ddana_new)
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  * process.generalDDCandidatesNew * process.ddana_new)
 #process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDDCandidatesNew )
 # process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorWSNewReduced * process.d0ana_wrongsign_newreduced)
 
@@ -194,10 +195,10 @@ eventFilterPaths = [ process.Flag_colEvtSel , process.Flag_hfCoincFilter , proce
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
-process.output = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM", "keep *_*_generalTracks_*"),
-    fileName = cms.untracked.string('output.root'),
-)
-
-process.outputPath = cms.EndPath(process.output)
-process.schedule.append(process.outputPath)
+#process.output = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM", "keep *_*_generalTracks_*"),
+#    fileName = cms.untracked.string('output.root'),
+#)
+#
+#process.outputPath = cms.EndPath(process.output)
+#process.schedule.append(process.outputPath)
