@@ -36,6 +36,7 @@ ddana = cms.EDAnalyzer('VertexCompositeTreeProducerNew',
   useAnyMVA = cms.bool(False),
   isSkimMVA = cms.untracked.bool(False),
   MVACollection = cms.InputTag("generalD0CandidatesNew:MVAValues"),
+  MVAPairCollection = cms.InputTag("generalDDCandidatesNew:MVAValues"),
 
   isCentrality = cms.bool(False),
   centralityBinLabel = cms.InputTag("centralityBin","HFtowers"),

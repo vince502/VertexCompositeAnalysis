@@ -30,7 +30,7 @@ DDProducer::DDProducer(const edm::ParameterSet& iConfig) :
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
   produces< reco::VertexCompositeCandidateCollection >("DD");
-  if(useAnyMVA_) produces<MVACollection>("MVAValuesDD");
+  if(useAnyMVA_) produces<MVAPairCollection>("MVAValuesDD");
   produces<std::vector<float > >("DCAValuesDD");
   produces<std::vector<float > >("DCAErrorsDD");
 }
@@ -69,7 +69,7 @@ void DDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     
    if(useAnyMVA_) 
    {
-     auto mvas = std::make_unique<MVACollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
+     auto mvas = std::make_unique<MVAPairCollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
      iEvent.put(std::move(mvas), std::string("MVAValuesDD"));
    }
    auto dcaVals = std::make_unique<std::vector<float > >(theVees.getDCAVals().begin(), theVees.getDCAVals().end());

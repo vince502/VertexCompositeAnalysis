@@ -87,6 +87,7 @@ public:
   ~VertexCompositeTreeProducerNew();
 
   using MVACollection = std::vector<float>;
+  using MVAPairCollection = std::vector<std::pair<float,float>>;
 
 private:
   virtual void beginJob() ;
@@ -423,6 +424,7 @@ private:
     edm::EDGetTokenT<reco::TrackCollection> tok_generalTrk_;
     edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> recoVertexCompositeCandidateCollection_Token_;
     edm::EDGetTokenT<MVACollection> MVAValues_Token_;
+    edm::EDGetTokenT<MVAPairCollection> MVAPairValues_Token_;
 
     edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
     edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token2_;
@@ -515,6 +517,8 @@ VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(const edm::Parame
 
     if(useAnyMVA_ && iConfig.exists("MVACollection"))
       MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
+    if(useAnyMVA_ && iConfig.exists("MVAPairCollection"))
+      MVAPairValues_Token_ = consumes<MVAPairCollection>(iConfig.getParameter<edm::InputTag>("MVAPairCollection"));
     if(iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
       useDCA_ = true;
       tok_DCAVal_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
@@ -566,10 +570,17 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
     const reco::VertexCompositeCandidateCollection * v0candidates_ = v0candidates.product();
     
     edm::Handle<MVACollection> mvavalues;
+    edm::Handle<MVAPairCollection> mvapairvalues;
     if(useAnyMVA_)
     {
-      iEvent.getByToken(MVAValues_Token_,mvavalues);
-      assert( (*mvavalues).size() == v0candidates->size() );
+      if( !doubleCand_ ){
+        iEvent.getByToken(MVAValues_Token_,mvavalues);
+        assert( (*mvavalues).size() == v0candidates->size() );
+      }
+      if( doubleCand_ ){
+        iEvent.getByToken(MVAPairValues_Token_,mvapairvalues);
+        assert( (*mvapairvalues).size() == v0candidates->size() );
+      }
     }
     edm::Handle<std::vector<float > > dcaValues;
     edm::Handle<std::vector<float > > dcaErrors;
@@ -1444,7 +1455,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
         if(twoLayerDecay_)
         {
             grand_mass[it] = d1->mass();
-            mva1[it] = d1->userFloat("mva1");
+            mva1[it] = (*mvapairvalues)[it].first;
             
             const reco::Candidate * gd1 = d1->daughter(0);
             const reco::Candidate * gd2 = d1->daughter(1);
@@ -1584,7 +1595,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             if( doubleCand_ )
             {
                 grand_mass2[it] = d2->mass();
-                mva2[it] = d2->userFloat("mva2");
+                mva2[it] = (*mvapairvalues)[it].second;
 
                 const reco::Candidate * gd21 = d2->daughter(0);
                 const reco::Candidate * gd22 = d2->daughter(1);

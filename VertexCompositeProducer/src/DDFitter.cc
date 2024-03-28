@@ -516,8 +516,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        //    theDD->mass() > ddMassDD - ddMassCut ) 
        //{
          if(useAnyMVA_){ 
-          theDD->addUserFloat("mva1", (*theD0mvaHandle)[didx1] );
-          theDD->addUserFloat("mva2", (*theD0mvaHandle)[didx2] );
+          mvaVals_.push_back({(*theD0mvaHandle)[didx1], (*theD0mvaHandle)[didx2]});
          }
          theDDs.push_back( *theDD );
          dcaVals_.push_back(cur3DIP.value());
@@ -584,7 +583,7 @@ const std::vector<float>& DDFitter::getDCAErrs() const{
   return dcaErrs_;
 }
 
-const std::vector<float>& DDFitter::getMVAVals() const {
+const std::vector<std::pair<float,float>>& DDFitter::getMVAVals() const {
   return mvaVals_;
 }
 
