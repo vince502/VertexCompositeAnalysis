@@ -91,7 +91,7 @@ class DDFitter {
   const reco::VertexCompositeCandidateCollection& getDD() const;
   const std::vector<float>& getDCAVals() const;
   const std::vector<float>& getDCAErrs() const;
-  const std::vector<std::pair<float,float>& getMVAVals() const; 
+  const std::vector<std::pair<float,float>>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
