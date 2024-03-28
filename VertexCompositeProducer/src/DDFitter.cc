@@ -67,6 +67,7 @@ DDFitter::DDFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   token_d0cand = iC.consumes<reco::VertexCompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0mva = iC.consumes<MVACollection>(theParameters.getParameter<edm::InputTag>("MVACollection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -160,6 +161,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
   Handle<reco::VertexCompositeCandidateCollection> theD0Handle;
+  Handle<MVACollection> theD0mvaHandle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
@@ -169,14 +171,13 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   iEvent.getByToken(token_tracks, theTrackHandle); 
   iEvent.getByToken(token_vertices, theVertexHandle);
   iEvent.getByToken(token_d0cand, theD0Handle);
+  iEvent.getByToken(token_d0mva, theD0mvaHandle);
   iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
   iEvent.getByToken(token_dedx, dEdxHandle);
 
-  std::cout << "Hi " << std::endl;
 
   if( !theTrackHandle->size() ) return;
 
-  std::cout << "Bye " << std::endl;
   iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
 
   magField = bFieldHandle.product();
@@ -266,10 +267,8 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   //int   pdg_id[2] = {421, -421};
 
   // Loop over tracks and vertex good charged track pairs
-std::cout << "Loop1" << std::endl;
   for(unsigned int didx1 = 0; didx1 < theD0Handle->size(); didx1++) {
 
-std::cout << "Loop2" << std::endl;
     for(unsigned int didx2 = didx1 + 1; didx2 < theD0Handle->size(); didx2++) {
 
       // Not using this on Dstar fit (1)
@@ -383,10 +382,8 @@ std::cout << "Loop2" << std::endl;
        d02Daus.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,DDMassD0_sigma));
 
        if( ttk10 == ttk20 || ttk10 == ttk21){
-std::cout << "Duplicate daughter, continue" << std::endl;
  continue;}
        if( ttk11 == ttk20 || ttk11 == ttk21){
-std::cout << "Duplicate daughter, continue" << std::endl;
  continue;}
 
        KinematicParticleVertexFitter kpvFitter;
@@ -518,6 +515,10 @@ std::cout << "Duplicate daughter, continue" << std::endl;
        //if( theDD->mass() < ddMassDD + ddMassCut &&
        //    theDD->mass() > ddMassDD - ddMassCut ) 
        //{
+         if(useAnyMVA_){ 
+          theDD->addUserFloat("mva1", (*theD0mvaHandle)[didx1] );
+          theDD->addUserFloat("mva2", (*theD0mvaHandle)[didx2] );
+         }
          theDDs.push_back( *theDD );
          dcaVals_.push_back(cur3DIP.value());
          dcaErrs_.push_back(cur3DIP.error());
@@ -556,6 +557,7 @@ std::cout << "Duplicate daughter, continue" << std::endl;
 
       //    //   auto gbrVal = forest->GetClassifier(gbrVals_);
       //    //   mvaVals_.push_back(gbrVal);
+          
          }
        //}
 

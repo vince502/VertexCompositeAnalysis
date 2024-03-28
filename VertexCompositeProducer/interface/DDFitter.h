@@ -82,6 +82,8 @@ class DDFitter {
   DDFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
   ~DDFitter();
 
+  using MVACollection = std::vector<float>;
+
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
@@ -107,6 +109,7 @@ class DDFitter {
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
   edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> token_d0cand;
+  edm::EDGetTokenT<MVACollection> token_d0mva;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
 
