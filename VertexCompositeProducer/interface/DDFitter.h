@@ -82,7 +82,6 @@ class DDFitter {
   DDFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
   ~DDFitter();
 
-  using MVAPairCollection = std::vector<std::pair<float,float>>;
   using MVACollection = std::vector<float>;
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -91,7 +90,8 @@ class DDFitter {
   const reco::VertexCompositeCandidateCollection& getDD() const;
   const std::vector<float>& getDCAVals() const;
   const std::vector<float>& getDCAErrs() const;
-  const std::vector<std::pair<float,float>>& getMVAVals() const; 
+  const std::vector<float>& getMVAVals1() const; 
+  const std::vector<float>& getMVAVals2() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
@@ -153,7 +153,8 @@ class DDFitter {
   GBRForest * forest_;
   bool useForestFromDB_;
 
-  MVAPairCollection mvaVals_;
+  MVACollection mvaVals1_;
+  MVACollection mvaVals2_;
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 

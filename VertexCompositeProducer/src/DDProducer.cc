@@ -69,8 +69,10 @@ void DDProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     
    if(useAnyMVA_) 
    {
-     auto mvas = std::make_unique<MVAPairCollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
-     iEvent.put(std::move(mvas), std::string("MVAValuesDD"));
+     auto mvas1 = std::make_unique<MVACollection>(theVees.getMVAVals1().begin(),theVees.getMVAVals1().end());
+     iEvent.put(std::move(mvas1), std::string("MVAValuesDD1"));
+     auto mvas2 = std::make_unique<MVACollection>(theVees.getMVAVals2().begin(),theVees.getMVAVals2().end());
+     iEvent.put(std::move(mvas2), std::string("MVAValuesDD2"));
    }
    auto dcaVals = std::make_unique<std::vector<float > >(theVees.getDCAVals().begin(), theVees.getDCAVals().end());
    iEvent.put(std::move(dcaVals), std::string("DCAValuesDD"));

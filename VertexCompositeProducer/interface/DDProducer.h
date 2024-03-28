@@ -39,7 +39,7 @@
 
 class DDProducer : public edm::EDProducer {
 public:
-  using MVAPairCollection = std::vector<std::pair<float,float>>;
+  using MVACollection = std::vector<float>;
 
   explicit DDProducer(const edm::ParameterSet&);
   ~DDProducer();

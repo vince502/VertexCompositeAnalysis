@@ -87,7 +87,6 @@ public:
   ~VertexCompositeTreeProducerNew();
 
   using MVACollection = std::vector<float>;
-  using MVAPairCollection = std::vector<std::pair<float,float>>;
 
 private:
   virtual void beginJob() ;
@@ -424,7 +423,7 @@ private:
     edm::EDGetTokenT<reco::TrackCollection> tok_generalTrk_;
     edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> recoVertexCompositeCandidateCollection_Token_;
     edm::EDGetTokenT<MVACollection> MVAValues_Token_;
-    edm::EDGetTokenT<MVAPairCollection> MVAPairValues_Token_;
+    edm::EDGetTokenT<MVACollection> MVAValues_Token2_;
 
     edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
     edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token2_;
@@ -495,6 +494,7 @@ VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(const edm::Parame
     tok_generalTrk_ = consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection"));
     recoVertexCompositeCandidateCollection_Token_ = consumes<reco::VertexCompositeCandidateCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection"));
     MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
+    MVAValues_Token2_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection2"));
     tok_muon_ = consumes<reco::MuonCollection>(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection"));
     Dedx_Token1_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
     Dedx_Token2_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxTruncated40"));
@@ -517,8 +517,8 @@ VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(const edm::Parame
 
     if(useAnyMVA_ && iConfig.exists("MVACollection"))
       MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
-    if(useAnyMVA_ && iConfig.exists("MVAPairCollection"))
-      MVAPairValues_Token_ = consumes<MVAPairCollection>(iConfig.getParameter<edm::InputTag>("MVAPairCollection"));
+    if(useAnyMVA_ && iConfig.exists("MVACollection2"))
+      MVAValues_Token2_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection2"));
     if(iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
       useDCA_ = true;
       tok_DCAVal_ = consumes<std::vector<float > >(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
@@ -570,16 +570,14 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
     const reco::VertexCompositeCandidateCollection * v0candidates_ = v0candidates.product();
     
     edm::Handle<MVACollection> mvavalues;
-    edm::Handle<MVAPairCollection> mvapairvalues;
+    edm::Handle<MVACollection> mvavalues2;
     if(useAnyMVA_)
     {
-      if( !doubleCand_ ){
-        iEvent.getByToken(MVAValues_Token_,mvavalues);
-        assert( (*mvavalues).size() == v0candidates->size() );
-      }
+      iEvent.getByToken(MVAValues_Token_,mvavalues);
+      assert( (*mvavalues).size() == v0candidates->size() );
       if( doubleCand_ ){
-        iEvent.getByToken(MVAPairValues_Token_,mvapairvalues);
-        assert( (*mvapairvalues).size() == v0candidates->size() );
+        iEvent.getByToken(MVAValues_Token2_,mvapairvalues2);
+        assert( (*mvapairvalues2).size() == v0candidates->size() );
       }
     }
     edm::Handle<std::vector<float > > dcaValues;
@@ -1455,7 +1453,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
         if(twoLayerDecay_)
         {
             grand_mass[it] = d1->mass();
-            mva1[it] = (*mvapairvalues)[it].first;
+            mva1[it] = (*mvapairvalues)[it];
             
             const reco::Candidate * gd1 = d1->daughter(0);
             const reco::Candidate * gd2 = d1->daughter(1);
@@ -1595,7 +1593,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             if( doubleCand_ )
             {
                 grand_mass2[it] = d2->mass();
-                mva2[it] = (*mvapairvalues)[it].second;
+                mva2[it] = (*mvapairvalues2)[it];
 
                 const reco::Candidate * gd21 = d2->daughter(0);
                 const reco::Candidate * gd22 = d2->daughter(1);
