@@ -1162,7 +1162,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             dzos1[it] = dzbest1/dzerror1;
             dxyos1[it] = dxybest1/dxyerror1;
         }
-        
+        if( !doubleCand_){
         auto dau2 = d2->get<reco::TrackRef>();
         
         //trk quality
@@ -1205,6 +1205,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
         
         dzos2[it] = dzbest2/dzerror2;
         dxyos2[it] = dxybest2/dxyerror2;
+        }
         
         if(doMuon_)
         {
