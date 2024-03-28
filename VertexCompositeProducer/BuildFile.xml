@@ -1,4 +1,3 @@
-<flags   EDM_PLUGIN="1"/>
 <use   name="roottmva"/>
 <use   name="DataFormats/BeamSpot"/>
 <use   name="DataFormats/Candidate"/>

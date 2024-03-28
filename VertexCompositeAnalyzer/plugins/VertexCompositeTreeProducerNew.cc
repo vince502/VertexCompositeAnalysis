@@ -576,8 +576,8 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
       iEvent.getByToken(MVAValues_Token_,mvavalues);
       assert( (*mvavalues).size() == v0candidates->size() );
       if( doubleCand_ ){
-        iEvent.getByToken(MVAValues_Token2_,mvapairvalues2);
-        assert( (*mvapairvalues2).size() == v0candidates->size() );
+        iEvent.getByToken(MVAValues_Token2_,mvavalues2);
+        assert( (*mvavalues2).size() == v0candidates->size() );
       }
     }
     edm::Handle<std::vector<float > > dcaValues;
@@ -1453,7 +1453,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
         if(twoLayerDecay_)
         {
             grand_mass[it] = d1->mass();
-            mva1[it] = (*mvapairvalues)[it];
+            mva1[it] = (*mvavalues)[it];
             
             const reco::Candidate * gd1 = d1->daughter(0);
             const reco::Candidate * gd2 = d1->daughter(1);
@@ -1593,7 +1593,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             if( doubleCand_ )
             {
                 grand_mass2[it] = d2->mass();
-                mva2[it] = (*mvapairvalues2)[it];
+                mva2[it] = (*mvavalues2)[it];
 
                 const reco::Candidate * gd21 = d2->daughter(0);
                 const reco::Candidate * gd22 = d2->daughter(1);
