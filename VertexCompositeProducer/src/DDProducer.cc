@@ -30,7 +30,8 @@ DDProducer::DDProducer(const edm::ParameterSet& iConfig) :
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
   produces< reco::VertexCompositeCandidateCollection >("DD");
-  if(useAnyMVA_) produces<MVAPairCollection>("MVAValuesDD");
+  if(useAnyMVA_) produces<MVACollection>("MVAValuesDD1");
+  if(useAnyMVA_) produces<MVACollection>("MVAValuesDD2");
   produces<std::vector<float > >("DCAValuesDD");
   produces<std::vector<float > >("DCAErrorsDD");
 }

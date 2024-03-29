@@ -600,7 +600,8 @@ auto_ptr<edm::ValueMap<float> > DDFitter::getMVAMap() const {
 
 void DDFitter::resetAll() {
     theDDs.clear();
-    mvaVals_.clear();
+    mvaVals1_.clear();
+    mvaVals2_.clear();
     dcaVals_.clear();
     dcaErrs_.clear();
 }

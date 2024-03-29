@@ -112,6 +112,7 @@ process.d0selectorMCNewReduced.DCAValCollection = cms.InputTag("generalD0Candida
 process.d0selectorMCNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
 
 process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorMCNewReduced:D0")
+process.generalDDCandidatesNew.MVACollection = cms.InputTag("d0selectorMCNewReduced:MVAValuesNewD0")
 
 process.d0ana_mc_newreduced = process.d0ana_mc.clone()
 process.d0ana_mc_newreduced.saveTree = True
@@ -120,7 +121,17 @@ process.d0ana_mc_newreduced.MVACollection = cms.InputTag("d0selectorMCNewReduced
 process.d0ana_mc_newreduced.DCAValCollection = cms.InputTag("d0selectorMCNewReduced:DCAValuesNewD0")
 process.d0ana_mc_newreduced.DCAErrCollection = cms.InputTag("d0selectorMCNewReduced:DCAErrorsNewD0")
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.generalDDCandidatesNew * process.ddana_mc)
+process.ddana_new = process.ddana_mc.clone()
+process.ddana_new.twoLayerDecay = cms.untracked.bool(True)
+process.ddana_new.TrackCollection = cms.untracked.InputTag("generalTracks")
+process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
+process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
+process.ddana_new.useAnyMVA = cms.bool(True)
+process.ddana_new.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValuesDD1")
+process.ddana_new.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
+
+
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.generalDDCandidatesNew * process.ddana_new)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')

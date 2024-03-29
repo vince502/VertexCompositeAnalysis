@@ -150,6 +150,9 @@ process.ddana_new.twoLayerDecay = cms.untracked.bool(True)
 process.ddana_new.TrackCollection = cms.untracked.InputTag("generalTracks")
 process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
 process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
+process.ddana_new.useAnyMVA = cms.bool(True)
+process.ddana_new.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValuesDD1")
+process.ddana_new.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
 
 
 process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  * process.generalDDCandidatesNew * process.ddana_new)
