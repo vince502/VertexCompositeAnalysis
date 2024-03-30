@@ -1119,16 +1119,16 @@ std::cout << " Gen Mother trk PDG ID : " << id << std::endl;
                     d2massGEN = Dvector2.at(4);
                     d2mass = d2->mass();
 
-                    delaRg1 =999.9; deltaRg2 = 999.9;
+                    deltaRg1 =999.9; deltaRg2 = 999.9;
                     matchChargeGD1=false; matchDRGD1=false;matchDPTGD1=false;
                     matchChargeGD2=false; matchDRGD2=false;matchDPTGD2=false;
                     const reco::Candidate * gd21 = d2->daughter(0);
                     const reco::Candidate * gd22 = d2->daughter(1);
-                    vector<double> D2gvector2_ = (*pVectg2)[0]; //get GEN grand daughter vector, a D meson's track 1
+                    vector<double> D2gvector1_ = (*pVectg2)[0]; //get GEN grand daughter vector, a D meson's track 1
                     deltaRg1 = sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2));
                     matchChargeGD1 = gd21->charge()==D2gvector1_.at(3);
                     matchDRGD1 = sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2)) <= deltaR_;
-                    matchDPTGD1 = fabs((gd21->pt()-D1gector1.at(0))/gd21->pt()) <= 0.5;
+                    matchDPTGD1 = fabs((gd21->pt()-D2gvector1.at(0))/gd21->pt()) <= 0.5;
 
                     double d2gmassGEN1 = D2gector1.at(4);
                     double d2gmass1 = gd21->mass();
@@ -1137,7 +1137,7 @@ std::cout << " Gen Mother trk PDG ID : " << id << std::endl;
                     deltaRg2 = sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2));
                     matchChargeGD2 = gd22->charge()==D2gvector2_.at(3);
                     matchDRGD2 = sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2)) <= deltaR_;
-                    matchDPTGD2 = fabs((gd22->pt()-D1gector2.at(0))/gd22->pt()) <= 0.5;
+                    matchDPTGD2 = fabs((gd22->pt()-D2gvector2.at(0))/gd22->pt()) <= 0.5;
 
                     double d2gmassGEN2 = D2gvector2_.at(4);
                     double d2gmass2 = gd22->mass();
