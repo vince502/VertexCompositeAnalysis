@@ -733,31 +733,48 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             const reco::GenParticle & trk = (*genpars)[it];
             
             int id = trk.pdgId();
-            if(fabs(id)!=PID_) continue; //check is target
+            int idmom_tmp = -77;
+            const reco::Candidate * Dd1 = trk.daughter(0);
+            const reco::Candidate * Dd2 = trk.daughter(1);
+if( Dd1 != nullptr && Dd2 != nullptr){
+	if( abs(Dd1->pdgId()) == 421 && abs(Dd2->pdgId()) == 421) {
+std::cout << " Gen dau PDG ID : " << Dd1->pdgId() << ", " << Dd2->pdgId()<< std::endl;
 std::cout << " Gen trk PDG ID : " << id << std::endl;
+            if(trk.numberOfMothers()!=0)
+            {
+                const reco::Candidate * mom = trk.mother();
+                idmom_tmp = mom->pdgId();
+std::cout << " Gen Mother trk PDG ID : " << idmom_tmp << std::endl;
+		idmom_tmp = -77;
+            }
+}
+} 
+            //if( fabs(id)!=PID_) continue; //check is target
+            if( !doGenDoubleDecay_ &&fabs(id)!=PID_) continue; //check is target
+            if( Dd1 == nullptr || Dd2 == nullptr ) continue; //check is target
+            if( doGenDoubleDecay_ && !(abs(Dd1->pdgId()) == 421 && abs(Dd2->pdgId()) == 421) ) continue; //check is target
+std::cout << " Fog " << std::endl;
             if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
             if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
             
-            int idmom_tmp = -77;
             
             if(trk.numberOfMothers()!=0)
             {
                 const reco::Candidate * mom = trk.mother();
                 idmom_tmp = mom->pdgId();
-std::cout << " Gen Mother trk PDG ID : " << id << std::endl;
             }
             
-            const reco::Candidate * Dd1 = trk.daughter(0);
-            const reco::Candidate * Dd2 = trk.daughter(1);
             const reco::Candidate * Dd3 = 0;            
             const reco::Candidate * Dd1g1 = 0;
             const reco::Candidate * Dd1g2 = 0;
             const reco::Candidate * Dd2g1 = 0;
             const reco::Candidate * Dd2g2 = 0;
 
+
             if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
 
 
+std::cout << " Fog 1 " << std::endl;
             if(threeProngDecay_)
             {
               Dd3 = trk.daughter(2);
