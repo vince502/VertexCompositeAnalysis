@@ -702,6 +702,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             
             int id = trk.pdgId();
             if(fabs(id)!=PID_) continue; //check is target
+std::cout << " Gen trk PDG ID : " << id << std::endl;
             if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
             if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
             
@@ -711,11 +712,13 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
             {
                 const reco::Candidate * mom = trk.mother();
                 idmom_tmp = mom->pdgId();
+std::cout << " Gen Mother trk PDG ID : " << id << std::endl;
             }
             
             const reco::Candidate * Dd1 = trk.daughter(0);
             const reco::Candidate * Dd2 = trk.daughter(1);
             const reco::Candidate * Dd3 = 0;            
+std::cout << " Gen Daughter trk PDG ID : " << Dd1->pdgId() << ", " << Dd2->pdgId() << std::endl;
 
             if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
 

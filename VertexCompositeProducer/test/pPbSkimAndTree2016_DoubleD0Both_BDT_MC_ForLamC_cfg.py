@@ -16,6 +16,14 @@ process.source = cms.Source("PoolSource",
 #'/store/hidata/PARun2016C/PAHighMultiplicity1/AOD/PromptReco-v1/000/285/505/00000/006F1E14-85AF-E611-9F9E-02163E014508.root'
 #'/store/hidata/PARun2016C/PAMinimumBias19/AOD/PromptReco-v1/000/285/975/00000/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
 'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_10.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_11.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_12.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_13.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_2.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_3.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_4.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_5.root',
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_6.root',
 #'file:output.root'
 )
 )
@@ -93,7 +101,7 @@ process.TFileService = cms.Service("TFileService",
 
 # set up selectors
 
-process.ddana_mc.PID = cms.untracked.int32(4)
+process.ddana_mc.PID = cms.untracked.int32(21)
 
 process.d0ana_mc.useAnyMVA = cms.bool(True)
 process.d0ana_mc.VertexCompositeCollection = cms.untracked.InputTag("d0selectorMC:D0")
