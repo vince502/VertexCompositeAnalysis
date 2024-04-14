@@ -604,7 +604,6 @@ iSetup)
 void
 VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-    if(debug_) std::cout << "Reco >>" << std::endl;
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
     iEvent.getByToken(tok_offlinePV_,vertices);
@@ -738,13 +737,13 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
           pVectg1 = new vector< vector<double>>;
           pVectg2 = new vector< vector<double>>;
         }
-        if(!genpars.isValid()) cout<<"Gen matching cannot be done without Gen collection!!"<<endl; return;
+        if(!genpars.isValid()) {cout<<"Gen matching cannot be done without Gen collection!!"<<endl; return; }
         int count = 0;
         double cache_pt_sameMotherCheck = 0.00;
         double cache_eta_sameMotherCheck = 0.00;
         double cache_phi_sameMotherCheck = 0.00;
         bool cache_sameMotherCheck = false;
-        if( debug_ ) std::cout << "Gen Cand Size : "  << genpars->size() << std::endl;
+//        if( debug_ ) std::cout << "Gen Cand Size : "  << genpars->size() << std::endl;
         for(unsigned it=0; it<genpars->size(); ++it){
           const reco::GenParticle & trk = (*genpars)[it];
           int id = trk.pdgId();
@@ -759,7 +758,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
               {
                 const reco::Candidate * mom = trk.mother();
                 idmom_tmp = mom->pdgId();
-                if( debug_ ) std::cout << " Gen Mother (nMom " << trk.numberOfMothers() << ") trk PDG ID : " << idmom_tmp << std::endl;
+//                if( debug_ ) std::cout << " Gen Mother (nMom " << trk.numberOfMothers() << ") trk PDG ID : " << idmom_tmp << std::endl;
           		  idmom_tmp = -77;
               }
             }
@@ -822,7 +821,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
               ((fabs(Dd2g1->pdgId())==PID_dau2_grand1_) && (fabs(Dd2g2->pdgId())==PID_dau1_grand2_)) ||
               ((fabs(Dd2g1->pdgId())==PID_dau2_grand2_) && (fabs(Dd2g2->pdgId())==PID_dau1_grand1_))
             ) ) continue;
-            if( debug_ ) std::cout << " PDG ID pass " << std::endl;
+//            if( debug_ ) std::cout << " PDG ID pass " << std::endl;
           }
 
             Dvector1 = new vector<double>;
@@ -1126,6 +1125,7 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
               isSwap2[it] = false;
               idmom_reco[it] = -77;
               const auto nGen = genRefs.size();
+              if(debug_ ) std::cout << "nGen : " << nGen << std::endl;
               int matchGenIdx = -1;
               std::pair<unsigned int, unsigned int> idxMatch1 = {99999, 999};
               std::pair<unsigned int, unsigned int> idxMatch2 = {99999, 999};
@@ -1165,6 +1165,7 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                       const bool unMatchCharge = genGDaus1[iGDau1]->charge() != recoGDaus1[iGDau1]->charge();
                       const bool unMatchDR = dR > deltaR_;
                       const bool unMatchDPt = dPt > 0.5;
+                      if(debug_ ) std::cout << "idx (" << it <<", " << iGDau1 << ", 0 ) dR, dPt, chg : " << dR << ", " << dPt << ", " << unMatchCharge << std::endl; 
                       matchGEN1[it] = !(unMatchCharge || unMatchDR || unMatchDPt);
                       if(matchGEN1[it]) idxMatch1 = {perm.at(0), iGDau1};
                     }
