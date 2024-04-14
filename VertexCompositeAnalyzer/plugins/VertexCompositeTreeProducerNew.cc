@@ -790,9 +790,10 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
               cache_pt_sameMotherCheck = Dd1->pt();
               cache_eta_sameMotherCheck = Dd1->eta();
               cache_phi_sameMotherCheck = Dd1->phi();
+              cache_sameMotherCheck = true;
             }
             if( cache_sameMotherCheck == true ){
-              if ( cache_pt_sameMotherCheck == Dd1->pt()  && cache_eta_sameMotherCheck == Dd1->eta()  && cache_phi_sameMotherCheck == Dd1->phi() ){
+              if ( (cache_pt_sameMotherCheck == Dd1->pt()  && cache_eta_sameMotherCheck == Dd1->eta()  && cache_phi_sameMotherCheck == Dd1->phi()) ||(cache_pt_sameMotherCheck == Dd2->pt()  && cache_eta_sameMotherCheck == Dd2->eta()  && cache_phi_sameMotherCheck == Dd2->phi() ) ){
                 cache_sameMotherCheck = false;
                 continue;
               }
@@ -1143,6 +1144,7 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                 const auto nGenDau = theGen->numberOfDaughters();
                 const auto nGenGDau1 = theGen->daughter(0)->numberOfDaughters();
                 const auto nGenGDau2 = theGen->daughter(1)->numberOfDaughters();
+                if(debug_ ) std::cout << "nGenDau, nGenGDau1, nGenGDau2 : " << nGenDau << ","<< nGenGDau1 << ","<< nGenGDau1 << std::endl;
                 std::vector<unsigned int> perm = {0, 1};
                 std::vector<unsigned int> perm1 = {0, 1};
                 std::vector<unsigned int> perm2 = {0, 1};
