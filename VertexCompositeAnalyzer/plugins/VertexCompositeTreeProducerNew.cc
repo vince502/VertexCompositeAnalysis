@@ -1152,12 +1152,12 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                   do{
                     matchGEN1[it] = false;
                     for( unsigned int iGDau1=0; iGDau1<nGenGDau1; ++iGDau1){
-                      genGDaus1[iDau] = genDaus[0]->daughter(perm1.at(iGDau1));
+                      genGDaus1[iGDau1] = genDaus[0]->daughter(perm1.at(iGDau1));
                       recoGDaus1[iGDau1] = recoDaus[0]->daughter(iGDau1);
                     }
                     for( unsigned int iGDau1=0; iGDau1<nGenGDau1; ++iGDau1){
-                      const double dR = reco::deltaR(genGDaus1[iGdau1]->eta(), genGDaus1[iGdau1]->phi(),
-                          regoGDaus1[iGdau1]->eta(), regoGDaus1[iGdau1]->phi());
+                      const double dR = reco::deltaR(genGDaus1[iGDau1]->eta(), genGDaus1[iGdau1]->phi(),
+                          recoGDaus1[iGdau1]->eta(), regoGDaus1[iGdau1]->phi());
                       const double dPt = abs(genGDaus1[iGdau1]->pt()-regoGDaus1[iGdau1]->pt())/regoGDaus1[iGdau1]->pt();
                       const bool unMatchCharge = genGDaus1[iGdau1]->charge() != regoGDaus1[iGdau1]->charge();
                       const bool unMatchDR = dR > deltaR_;
@@ -1170,12 +1170,12 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                   do{
                     matchGEN2[it] = false;
                     for( unsigned int iGDau2=0; iGDau2<nGenGDau2; ++iGDau2){
-                      genGDaus2[iDau] = genDaus[1]->daughter(perm2.at(iGDau2));
+                      genGDaus2[iGDau2] = genDaus[1]->daughter(perm2.at(iGDau2));
                       recoGDaus2[iGDau2] = recoDaus[1]->daughter(iGDau2);
                     }
                     for( unsigned int iGDau2=0; iGDau2<nGenGDau2; ++iGDau2){
                       const double dR = reco::deltaR(genGDaus2[iGdau2]->eta(), genGDaus2[iGdau2]->phi(),
-                          regoGDaus2[iGdau2]->eta(), regoGDaus2[iGdau2]->phi());
+                          recoGDaus2[iGdau2]->eta(), regoGDaus2[iGdau2]->phi());
                       const double dPt = abs(genGDaus2[iGdau2]->pt()-regoGDaus2[iGdau2]->pt())/regoGDaus2[iGdau2]->pt();
                       const bool unMatchCharge = genGDaus2[iGdau2]->charge() != regoGDaus2[iGdau2]->charge();
                       const bool unMatchDR = dR > deltaR_;
@@ -1199,8 +1199,8 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                 auto const& theGen = genRefs.at(matchGenIdx);
                 auto idgenDau1 = theGen->daughter(idxMatch1.first)->pdgId();
                 auto idgenDau2 = theGen->daughter(idxMatch2.first)->pdgId();
-                auto idrecoDau1 = trk.daughter(idxMatch1.first).pdgId();
-                auto idrecoDau2 = trk.daughter(idxMatch2.first).pdgId();
+                auto idrecoDau1 = trk.daughter(idxMatch1.first)->pdgId();
+                auto idrecoDau2 = trk.daughter(idxMatch2.first)->pdgId();
                 isSwap1[it]  = (idgenDau1 == idrecoDau1);
                 isSwap2[it]  = (idgenDau2 == idrecoDau2);
               }
@@ -2223,19 +2223,19 @@ if( debug_ ) std::cout << "pass decay" << std::endl;
         iddau2[candSize_gen-1] = fabs(Dd2->pdgId());
         if(Dd3) iddau3[candSize_gen-1] = fabs(Dd3->pdgId());
         if( doGenDoubleDecay_){
-          pt_gen1[candSize_gen-1] = Dd1.pt();
-          mass_gen1[candSize_gen-1] = Dd1.mass();
-          eta_gen1[candSize_gen-1] = Dd1.eta();
-          phi_gen1[candSize_gen-1] = Dd1.phi();
-          status_gen1[candSize_gen-1] = Dd1.status();
-          idself1[candSize_gen-1] = Dd1.pdgId();
+          pt_gen1[candSize_gen-1] = Dd1->pt();
+          mass_gen1[candSize_gen-1] = Dd1->mass();
+          eta_gen1[candSize_gen-1] = Dd1->eta();
+          phi_gen1[candSize_gen-1] = Dd1->phi();
+          status_gen1[candSize_gen-1] = Dd1->status();
+          idself1[candSize_gen-1] = Dd1->pdgId();
 
-          pt_gen2[candSize_gen-1] = Dd2.pt();
-          mass_gen2[candSize_gen-1] = Dd2.mass();
-          eta_gen2[candSize_gen-1] = Dd2.eta();
-          phi_gen2[candSize_gen-1] = Dd2.phi();
-          status_gen2[candSize_gen-1] = Dd2.status();
-          idself2[candSize_gen-1] = Dd2.pdgId();
+          pt_gen2[candSize_gen-1] = Dd2->pt();
+          mass_gen2[candSize_gen-1] = Dd2->mass();
+          eta_gen2[candSize_gen-1] = Dd2->eta();
+          phi_gen2[candSize_gen-1] = Dd2->phi();
+          status_gen2[candSize_gen-1] = Dd2->status();
+          idself2[candSize_gen-1] = Dd2->pdgId();
         }
     }
 }
