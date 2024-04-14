@@ -1156,10 +1156,10 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                       recoGDaus1[iGDau1] = recoDaus[0]->daughter(iGDau1);
                     }
                     for( unsigned int iGDau1=0; iGDau1<nGenGDau1; ++iGDau1){
-                      const double dR = reco::deltaR(genGDaus1[iGDau1]->eta(), genGDaus1[iGdau1]->phi(),
-                          recoGDaus1[iGdau1]->eta(), regoGDaus1[iGdau1]->phi());
-                      const double dPt = abs(genGDaus1[iGdau1]->pt()-regoGDaus1[iGdau1]->pt())/regoGDaus1[iGdau1]->pt();
-                      const bool unMatchCharge = genGDaus1[iGdau1]->charge() != regoGDaus1[iGdau1]->charge();
+                      const double dR = reco::deltaR(genGDaus1[iGDau1]->eta(), genGDaus1[iGDau1]->phi(),
+                          recoGDaus1[iGDau1]->eta(), recoGDaus1[iGDau1]->phi());
+                      const double dPt = abs(genGDaus1[iGDau1]->pt()-recoGDaus1[iGDau1]->pt())/recoGDaus1[iGDau1]->pt();
+                      const bool unMatchCharge = genGDaus1[iGDau1]->charge() != recoGDaus1[iGDau1]->charge();
                       const bool unMatchDR = dR > deltaR_;
                       const bool unMatchDPt = dPt > 0.5;
                       matchGEN1[it] = !(unMatchCharge || unMatchDR || unMatchDPt);
@@ -1174,10 +1174,10 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                       recoGDaus2[iGDau2] = recoDaus[1]->daughter(iGDau2);
                     }
                     for( unsigned int iGDau2=0; iGDau2<nGenGDau2; ++iGDau2){
-                      const double dR = reco::deltaR(genGDaus2[iGdau2]->eta(), genGDaus2[iGdau2]->phi(),
-                          recoGDaus2[iGdau2]->eta(), regoGDaus2[iGdau2]->phi());
-                      const double dPt = abs(genGDaus2[iGdau2]->pt()-regoGDaus2[iGdau2]->pt())/regoGDaus2[iGdau2]->pt();
-                      const bool unMatchCharge = genGDaus2[iGdau2]->charge() != regoGDaus2[iGdau2]->charge();
+                      const double dR = reco::deltaR(genGDaus2[iGDau2]->eta(), genGDaus2[iGDau2]->phi(),
+                          recoGDaus2[iGDau2]->eta(), recoGDaus2[iGDau2]->phi());
+                      const double dPt = abs(genGDaus2[iGDau2]->pt()-recoGDaus2[iGDau2]->pt())/recoGDaus2[iGDau2]->pt();
+                      const bool unMatchCharge = genGDaus2[iGDau2]->charge() != recoGDaus2[iGDau2]->charge();
                       const bool unMatchDR = dR > deltaR_;
                       const bool unMatchDPt = dPt > 0.5;
                       matchGEN2[it] = !(unMatchCharge || unMatchDR || unMatchDPt);
