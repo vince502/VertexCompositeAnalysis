@@ -596,7 +596,6 @@ iSetup)
     using namespace reco;
 
     if(doGenNtuple_) fillGEN(iEvent,iSetup);
-    if(debug_) std::cout << "Reco >>" << std::endl;
     if(doRecoNtuple_) fillRECO(iEvent,iSetup);
 
     if(saveTree_) VertexCompositeNtuple->Fill();
@@ -605,6 +604,7 @@ iSetup)
 void
 VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+    if(debug_) std::cout << "Reco >>" << std::endl;
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
     iEvent.getByToken(tok_offlinePV_,vertices);
