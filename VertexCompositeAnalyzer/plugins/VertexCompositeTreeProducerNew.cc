@@ -743,6 +743,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
         double cache_eta_sameMotherCheck = 0.00;
         double cache_phi_sameMotherCheck = 0.00;
         bool cache_sameMotherCheck = false;
+        if( debug_ ) std::cout << "Gen Cand Size : "  << genpars->size() << std::endl;
         for(unsigned it=0; it<genpars->size(); ++it){
           const reco::GenParticle & trk = (*genpars)[it];
           int id = trk.pdgId();
@@ -917,6 +918,7 @@ count++;
 
     //RECO Candidate info
     candSize = v0candidates_->size();
+    if( debug_ ) std::cout << "Reco cand Size : "  << candSize << std::endl;
     for(unsigned it=0; it<v0candidates_->size(); ++it){
         
         const reco::VertexCompositeCandidate & trk = (*v0candidates_)[it];
