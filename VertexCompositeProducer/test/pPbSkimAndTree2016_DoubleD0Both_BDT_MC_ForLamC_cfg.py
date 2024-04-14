@@ -9,22 +9,28 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #'/store/hidata/PARun2016C/PAHighMultiplicity1/AOD/PromptReco-v1/000/285/505/00000/006F1E14-85AF-E611-9F9E-02163E014508.root'
 #'/store/hidata/PARun2016C/PAMinimumBias19/AOD/PromptReco-v1/000/285/975/00000/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_10.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_11.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_12.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_13.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_2.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_3.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_4.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_5.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_6.root',
-#'file:output.root'
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_10.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_11.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_12.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_13.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_2.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_3.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_4.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_5.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/jobConfigs/tmp/HIN-pPb816Summer16DR-00164_6.root',
+#'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/682C6215-7F9A-E711-AB29-0025901D49AC.root',
+#'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/823C5ABC-839A-E711-A4B7-0CC47AC08BF8.root',
+#'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/D4B2A990-889A-E711-98C8-0CC47AC08BFA.root',
+#'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/88787D31-909A-E711-86AD-0025904C7B26.root',
+#'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/5C4D85CB-959A-E711-8E76-0CC47A7EEE80.root',
+#'file:682C6215-7F9A-E711-AB29-0025901D49AC.root'
+'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/EvtGenMod/CMSSW_8_0_30/src/HIN-pPb816Summer16DR-00033.root'
 )
 )
 
@@ -59,14 +65,23 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 ########## D0 candidate rereco ###############################################################
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
-process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+#process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
+#process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+#process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
+#process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
+#process.generalD0CandidatesNew.tkPtCut = cms.double(0.6)
+#process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
+#process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
+#process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+
+process.generalD0CandidatesNew.trkPtSumCut = cms.double(0.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(0.0)
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.6)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.4)
 process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
 process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
-process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -75,7 +90,7 @@ process.generalDDCandidatesNew = process.generalDDCandidates.clone()
 process.generalDDCandidatesNew.trkPtSumCut = cms.double(0.0)
 process.generalDDCandidatesNew.trkEtaDiffCut = cms.double(0.0)
 process.generalDDCandidatesNew.tkNhitsCut = cms.int32(0)
-process.generalDDCandidatesNew.tkPtErrCut = cms.double(0.0)
+process.generalDDCandidatesNew.tkPtErrCut = cms.double(1.0)
 process.generalDDCandidatesNew.tkPtCut = cms.double(0.0)
 process.generalDDCandidatesNew.alphaCut = cms.double(999.0)
 process.generalDDCandidatesNew.alpha2DCut = cms.double(999.0)
@@ -135,6 +150,7 @@ process.ddana_new.TrackCollection = cms.untracked.InputTag("generalTracks")
 process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
 process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
 process.ddana_new.useAnyMVA = cms.bool(True)
+process.ddana_new.debug = cms.untracked.bool(True)
 process.ddana_new.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValuesDD1")
 process.ddana_new.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
 
@@ -153,7 +169,19 @@ process.eventinfoana.triggerPathNames = cms.untracked.vstring(
 process.eventinfoana.triggerFilterNames = cms.untracked.vstring()
 process.pevt = cms.EndPath(process.eventinfoana)
 
-process.p = cms.Path(process.d0ana_seq2)
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.printTree = cms.EDAnalyzer("ParticleTreeDrawer",
+                                   src = cms.InputTag("genParticles"),                                                                 
+                                   printP4 = cms.untracked.bool(False),
+                                   printPtEtaPhi = cms.untracked.bool(False),
+                                   printVertex = cms.untracked.bool(False),
+                                   printStatus = cms.untracked.bool(False),
+                                   printIndex = cms.untracked.bool(False),
+                                   status = cms.untracked.vint32( 3 )
+                                   )
+
+process.p = cms.Path(process.d0ana_seq2 * process.printTree)
+
 
 # Add the Conversion tree
 

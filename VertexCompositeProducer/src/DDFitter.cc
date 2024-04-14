@@ -283,6 +283,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       // pionTransTkPtr = &theTransTracks[trdx1];
       VertexCompositeCandidate theD01 = (*theD0Handle)[didx1];
       VertexCompositeCandidate theD02 = (*theD0Handle)[didx2];
+      if( theD01.pt() == theD02.pt() && theD01.eta() == theD02.eta() ) continue;
 
       // if( !pionTransTkPtr->impactPointStateAvailable()) continue;
       // const auto& D0Vec1 = theD01.p4();
@@ -365,6 +366,7 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        vector<RefCountedKinematicParticle> d02Daus;
        reco::Candidate* dau10 = theD01.daughter(0);
        reco::Candidate* dau11 = theD01.daughter(1);
+       if((dau10->pt() == dau11->pt()) && (dau10->eta() == dau11->eta() )) continue;
        reco::TransientTrack ttk10(*dau10->bestTrack(), magField);
        reco::TransientTrack ttk11(*dau11->bestTrack(), magField);
        float dau10mass =  dau10->mass();
