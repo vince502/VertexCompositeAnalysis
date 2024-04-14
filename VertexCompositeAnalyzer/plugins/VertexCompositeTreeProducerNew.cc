@@ -596,6 +596,7 @@ iSetup)
     using namespace reco;
 
     if(doGenNtuple_) fillGEN(iEvent,iSetup);
+    if(debug_) std::cout << "Reco >>" << std::endl;
     if(doRecoNtuple_) fillRECO(iEvent,iSetup);
 
     if(saveTree_) VertexCompositeNtuple->Fill();
