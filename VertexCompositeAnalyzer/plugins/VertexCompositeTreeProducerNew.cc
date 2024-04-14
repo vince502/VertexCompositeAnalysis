@@ -402,6 +402,8 @@ private:
 
     // gen info    
     int candSize_gen;
+    int idself[MAXCAN];
+    float mass_gen[MAXCAN];
     float pt_gen[MAXCAN];
     float eta_gen[MAXCAN];
     float phi_gen[MAXCAN];
@@ -416,6 +418,20 @@ private:
     int iddau1[MAXCAN];
     int iddau2[MAXCAN];
     int iddau3[MAXCAN];
+
+    int idself1[MAXCAN];
+    float mass_gen1[MAXCAN];
+    float pt_gen1[MAXCAN];
+    float eta_gen1[MAXCAN];
+    float phi_gen1[MAXCAN];
+    int status_gen1[MAXCAN];
+
+    int idself2[MAXCAN];
+    float mass_gen2[MAXCAN];
+    float pt_gen2[MAXCAN];
+    float eta_gen2[MAXCAN];
+    float phi_gen2[MAXCAN];
+    int status_gen2[MAXCAN];
 
     //vector for gen match
     vector< vector<double> > *pVect;
@@ -712,6 +728,7 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
     }
 
     //Gen info for matching
+    std::vector<reco::GenParticleRef> genRefs;
     if(doGenMatching_)
     {
         pVect = new vector< vector<double>>;
@@ -720,104 +737,91 @@ VertexCompositeTreeProducerNew::fillRECO(const edm::Event& iEvent, const edm::Ev
           pVectg1 = new vector< vector<double>>;
           pVectg2 = new vector< vector<double>>;
         }
-        
-//        edm::Handle<reco::GenParticleCollection> genpars;
-//        iEvent.getByToken(tok_genParticle_,genpars);
-        
-        if(!genpars.isValid())
-        {
-            cout<<"Gen matching cannot be done without Gen collection!!"<<endl;
-            return;
-        }
-
-int count = 0;
-double cache_pt_sameMotherCheck = 0.00;
-double cache_eta_sameMotherCheck = 0.00;
-double cache_phi_sameMotherCheck = 0.00;
-bool cache_sameMotherCheck = false;
+        if(!genpars.isValid()) cout<<"Gen matching cannot be done without Gen collection!!"<<endl; return;
+        int count = 0;
+        double cache_pt_sameMotherCheck = 0.00;
+        double cache_eta_sameMotherCheck = 0.00;
+        double cache_phi_sameMotherCheck = 0.00;
+        bool cache_sameMotherCheck = false;
         for(unsigned it=0; it<genpars->size(); ++it){
-            
-            const reco::GenParticle & trk = (*genpars)[it];
-            
-            int id = trk.pdgId();
-            int idmom_tmp = -77;
-            const reco::Candidate * Dd1 = trk.daughter(0);
-            const reco::Candidate * Dd2 = trk.daughter(1);
-if( debug_ && ( Dd1 != nullptr && Dd2 != nullptr)){
-	if( abs(Dd1->pdgId()) == 421 && abs(Dd2->pdgId()) == 421) {
-std::cout << " Gen dau PDG ID : " << Dd1->pdgId() << ", " << Dd2->pdgId()<< std::endl;
-std::cout << " Gen trk PDG ID : " << id << ", status " << trk.status() << std::endl;
-            if(trk.numberOfMothers()!=0)
-            {
+          const reco::GenParticle & trk = (*genpars)[it];
+          int id = trk.pdgId();
+          int idmom_tmp = -77;
+          const reco::Candidate * Dd1 = trk.daughter(0);
+          const reco::Candidate * Dd2 = trk.daughter(1);
+          if( debug_ && ( Dd1 != nullptr && Dd2 != nullptr)){
+          	if( abs(Dd1->pdgId()) == 421 && abs(Dd2->pdgId()) == 421) {
+              // std::cout << " Gen dau PDG ID : " << Dd1->pdgId() << ", " << Dd2->pdgId()<< std::endl;
+              // std::cout << " Gen trk PDG ID : " << id << ", status " << trk.status() << std::endl;
+              if(trk.numberOfMothers()!=0)
+              {
                 const reco::Candidate * mom = trk.mother();
                 idmom_tmp = mom->pdgId();
-if( debug_ ) std::cout << " Gen Mother (nMom " << trk.numberOfMothers() << ") trk PDG ID : " << idmom_tmp << std::endl;
-		idmom_tmp = -77;
-            }
-}
-} 
-            //if( fabs(id)!=PID_) continue; //check is target
-            if( !doGenDoubleDecay_ &&fabs(id)!=PID_) continue; //check is target
-            if( Dd1 == nullptr || Dd2 == nullptr ) continue; //check is target
-            if( doGenDoubleDecay_ && !(abs(Dd1->pdgId()) == 421 && abs(Dd2->pdgId()) == 421) ) continue; //check is target
-            if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
-            if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
-            
-            
-            if(trk.numberOfMothers()!=0)
-            {
-                const reco::Candidate * mom = trk.mother();
-                idmom_tmp = mom->pdgId();
-            }
-            
-            const reco::Candidate * Dd3 = 0;            
-            const reco::Candidate * Dd1g1 = 0;
-            const reco::Candidate * Dd1g2 = 0;
-            const reco::Candidate * Dd2g1 = 0;
-            const reco::Candidate * Dd2g2 = 0;
-
-
-            if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
-
-
-            if( abs(id) == 4){
-              if( cache_sameMotherCheck == false ){
-                cache_pt_sameMotherCheck = Dd1->pt();
-                cache_eta_sameMotherCheck = Dd1->eta();
-                cache_phi_sameMotherCheck = Dd1->phi();
-              }
-              if( cache_sameMotherCheck == true ){
-                if ( cache_pt_sameMotherCheck == Dd1->pt()  && cache_eta_sameMotherCheck == Dd1->eta()  && cache_phi_sameMotherCheck == Dd1->phi() ){
-                  cache_sameMotherCheck = false;
-                  continue;
-                }
+                if( debug_ ) std::cout << " Gen Mother (nMom " << trk.numberOfMothers() << ") trk PDG ID : " << idmom_tmp << std::endl;
+          		  idmom_tmp = -77;
               }
             }
+          } 
+          //if( fabs(id)!=PID_) continue; //check is target
+          if( !doGenDoubleDecay_ &&fabs(id)!=PID_) continue; //check is target
+          if( Dd1 == nullptr || Dd2 == nullptr ) continue; //check is target
+          if( doGenDoubleDecay_ && !(abs(Dd1->pdgId()) == 421 && abs(Dd2->pdgId()) == 421) ) continue; //check is target
+          if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
+          if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
+          if(trk.numberOfMothers()!=0)
+          {
+              const reco::Candidate * mom = trk.mother();
+              idmom_tmp = mom->pdgId();
+          }
+          
+          const reco::Candidate * Dd3 = 0;            
+          const reco::Candidate * Dd1g1 = 0;
+          const reco::Candidate * Dd1g2 = 0;
+          const reco::Candidate * Dd2g1 = 0;
+          const reco::Candidate * Dd2g2 = 0;
 
-            if(threeProngDecay_)
-            {
-              Dd3 = trk.daughter(2);
-              if(!(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_ && fabs(Dd3->pdgId())==PID_dau3_)
-              && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau3_ && fabs(Dd3->pdgId())==PID_dau2_)
-              && !(fabs(Dd1->pdgId())==PID_dau2_ && fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd3->pdgId())==PID_dau3_)
-              && !(fabs(Dd1->pdgId())==PID_dau2_ && fabs(Dd2->pdgId())==PID_dau3_ && fabs(Dd3->pdgId())==PID_dau1_)
-              && !(fabs(Dd1->pdgId())==PID_dau3_ && fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd3->pdgId())==PID_dau2_)
-              && !(fabs(Dd1->pdgId())==PID_dau3_ && fabs(Dd2->pdgId())==PID_dau2_ && fabs(Dd3->pdgId())==PID_dau1_) ) continue;
+
+          if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
+
+
+          if( abs(id) == 4){
+            if( cache_sameMotherCheck == false ){
+              cache_pt_sameMotherCheck = Dd1->pt();
+              cache_eta_sameMotherCheck = Dd1->eta();
+              cache_phi_sameMotherCheck = Dd1->phi();
             }
+            if( cache_sameMotherCheck == true ){
+              if ( cache_pt_sameMotherCheck == Dd1->pt()  && cache_eta_sameMotherCheck == Dd1->eta()  && cache_phi_sameMotherCheck == Dd1->phi() ){
+                cache_sameMotherCheck = false;
+                continue;
+              }
+            }
+          }
 
-            if( doGenDoubleDecay_){ 
-              Dd1g1 = Dd1->daughter(0);
-              Dd1g2 = Dd1->daughter(1);
-              Dd2g1 = Dd2->daughter(0);
-              Dd2g2 = Dd2->daughter(1);
+          if(threeProngDecay_)
+          {
+            Dd3 = trk.daughter(2);
+            if(!(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_ && fabs(Dd3->pdgId())==PID_dau3_)
+            && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau3_ && fabs(Dd3->pdgId())==PID_dau2_)
+            && !(fabs(Dd1->pdgId())==PID_dau2_ && fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd3->pdgId())==PID_dau3_)
+            && !(fabs(Dd1->pdgId())==PID_dau2_ && fabs(Dd2->pdgId())==PID_dau3_ && fabs(Dd3->pdgId())==PID_dau1_)
+            && !(fabs(Dd1->pdgId())==PID_dau3_ && fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd3->pdgId())==PID_dau2_)
+            && !(fabs(Dd1->pdgId())==PID_dau3_ && fabs(Dd2->pdgId())==PID_dau2_ && fabs(Dd3->pdgId())==PID_dau1_) ) continue;
+          }
+
+          if( doGenDoubleDecay_){ 
+            Dd1g1 = Dd1->daughter(0);
+            Dd1g2 = Dd1->daughter(1);
+            Dd2g1 = Dd2->daughter(0);
+            Dd2g2 = Dd2->daughter(1);
             if( ! (
               ((fabs(Dd1g1->pdgId())==PID_dau1_grand1_) && (fabs(Dd1g2->pdgId())==PID_dau1_grand2_)) ||
               ((fabs(Dd1g1->pdgId())==PID_dau1_grand2_) && (fabs(Dd1g2->pdgId())==PID_dau1_grand1_)) ||
               ((fabs(Dd2g1->pdgId())==PID_dau2_grand1_) && (fabs(Dd2g2->pdgId())==PID_dau1_grand2_)) ||
               ((fabs(Dd2g1->pdgId())==PID_dau2_grand2_) && (fabs(Dd2g2->pdgId())==PID_dau1_grand1_))
             ) ) continue;
-if( debug_ ) std::cout << " PDG ID pass " << std::endl;
-            }
+            if( debug_ ) std::cout << " PDG ID pass " << std::endl;
+          }
 
             Dvector1 = new vector<double>;
             Dvector2 = new vector<double>;
@@ -863,13 +867,13 @@ if( debug_ ) std::cout << " PDG ID pass " << std::endl;
               delete D2gvector1;
               delete D2gvector2;
             }
-if( debug_ ){            
-std::cout << "Dau pT :  "<< Dd1->pt() << ", " << Dd2->pt() << std::endl;
-std::cout << "Dau eta :  "<< Dd1->eta() << ", " << Dd2->eta() << std::endl;
-std::cout << "Dau phi :  "<< Dd1->phi() << ", " << Dd2->phi() << std::endl;
-std::cout << "Dau chg :  "<< Dd1->charge() << ", " << Dd2->charge() << std::endl;
-std::cout << "Dau mass :  "<< Dd1->mass() << ", " << Dd2->mass() << std::endl;
-}
+            if( debug_ ){            
+            std::cout << "Dau pT :  "<< Dd1->pt() << ", " << Dd2->pt() << std::endl;
+            std::cout << "Dau eta :  "<< Dd1->eta() << ", " << Dd2->eta() << std::endl;
+            std::cout << "Dau phi :  "<< Dd1->phi() << ", " << Dd2->phi() << std::endl;
+            std::cout << "Dau chg :  "<< Dd1->charge() << ", " << Dd2->charge() << std::endl;
+            std::cout << "Dau mass :  "<< Dd1->mass() << ", " << Dd2->mass() << std::endl;
+            }
             Dvector1->push_back(Dd1->pt());
             Dvector1->push_back(Dd1->eta());
             Dvector1->push_back(Dd1->phi());
@@ -904,9 +908,10 @@ count++;
               pVect->push_back(*Dvector3);
               delete Dvector3;
             }
+            genRefs.push_back(reco::GenParticleRef(genpars, it));
         }
 
-if(debug_ && count > 0 ) std::cout << "Filled gen : " << count << std::endl;
+      if(debug_ && count > 0 ) std::cout << "Filled gen : " << count << " vs. " << genRefs.size() << std::endl;
     }
 
 
@@ -1112,130 +1117,220 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
               }
             }
             if( doGenDoubleDecay_ ){
-              matchGEN[it] = false;
-              int nGenDau = (int)pVect->size();
-if( debug_ )	std::cout << " Checking Match... (nDau) " << nGenDau << std::endl;
-              isSwap[it] = false;
+              matchGEN1[it] = false;
+              matchGEN2[it] = false;
+              isSwap1[it] = false;
+              isSwap2[it] = false;
               idmom_reco[it] = -77;
+              const auto nGen = genRefs.size();
+              int matchGenIdx = -1;
+              std::pair<unsigned int, unsigned int> idxMatch1 = {99999, 999};
+              std::pair<unsigned int, unsigned int> idxMatch2 = {99999, 999};
+              for( unsigned int igen=0; igen<nGen; igen++){
+                auto const& theGen = genRefs.at(igen);
+                // Only works for 2 body two layer decay
+                reco::Candidate const* recoDaus[2] = {nullptr, nullptr};
+                reco::Candidate const* recoGDaus1[2] = {nullptr, nullptr};
+                reco::Candidate const* recoGDaus2[2] = {nullptr, nullptr};
+
+                reco::Candidate const* genDaus[2] = {nullptr, nullptr};
+                reco::Candidate const* genGDaus1[2] = {nullptr, nullptr};
+                reco::Candidate const* genGDaus2[2] = {nullptr, nullptr};
+
+                const auto nGenDau = theGen->numberOfDaughters();
+                const auto nGenGDau1 = theGen->daughter(0)->numberOfDaughters();
+                const auto nGenGDau2 = theGen->daughter(1)->numberOfDaughters();
+                std::vector<unsigned int> perm = {0, 1};
+                std::vector<unsigned int> perm1 = {0, 1};
+                std::vector<unsigned int> perm2 = {0, 1};
+                do{
+                  matchGEN[it] = false;
+                  for( unsigned int iDau=0; iDau<nGenDau; ++iDau){
+                    genDaus[iDau] = theGen->daughter(perm.at(iDau));
+                    recoDaus[iDau] = trk.daughter(iDau);
+                  }
+                  do{
+                    matchGEN1[it] = false;
+                    for( unsigned int iGDau1=0; iGDau1<nGenGDau1; ++iGDau1){
+                      genGDaus1[iDau] = genDaus[0]->daughter(perm1.at(iGDau1));
+                      recoGDaus1[iGDau1] = recoDaus[0]->daughter(iGDau1);
+                    }
+                    for( unsigned int iGDau1=0; iGDau1<nGenGDau1; ++iGDau1){
+                      const double dR = reco::deltaR(genGDaus1[iGdau1]->eta(), genGDaus1[iGdau1]->phi(),
+                          regoGDaus1[iGdau1]->eta(), regoGDaus1[iGdau1]->phi());
+                      const double dPt = abs(genGDaus1[iGdau1]->pt()-regoGDaus1[iGdau1]->pt())/regoGDaus1[iGdau1]->pt();
+                      const bool unMatchCharge = genGDaus1[iGdau1]->charge() != regoGDaus1[iGdau1]->charge();
+                      const bool unMatchDR = dR > deltaR_;
+                      const bool unMatchDPt = dPt > 0.5;
+                      matchGEN1[it] = !(unMatchCharge || unMatchDR || unMatchDPt);
+                      if(matchGEN1[it]) idxMatch1 = {perm.at(0), iGDau1};
+                    }
+                    if(matchGEN1[it]) break;
+                  } while( std::next_permutation(perm1.begin(), perm1.end()));
+                  do{
+                    matchGEN2[it] = false;
+                    for( unsigned int iGDau2=0; iGDau2<nGenGDau2; ++iGDau2){
+                      genGDaus2[iDau] = genDaus[1]->daughter(perm2.at(iGDau2));
+                      recoGDaus2[iGDau2] = recoDaus[1]->daughter(iGDau2);
+                    }
+                    for( unsigned int iGDau2=0; iGDau2<nGenGDau2; ++iGDau2){
+                      const double dR = reco::deltaR(genGDaus2[iGdau2]->eta(), genGDaus2[iGdau2]->phi(),
+                          regoGDaus2[iGdau2]->eta(), regoGDaus2[iGdau2]->phi());
+                      const double dPt = abs(genGDaus2[iGdau2]->pt()-regoGDaus2[iGdau2]->pt())/regoGDaus2[iGdau2]->pt();
+                      const bool unMatchCharge = genGDaus2[iGdau2]->charge() != regoGDaus2[iGdau2]->charge();
+                      const bool unMatchDR = dR > deltaR_;
+                      const bool unMatchDPt = dPt > 0.5;
+                      matchGEN2[it] = !(unMatchCharge || unMatchDR || unMatchDPt);
+                      if(matchGEN2[it]) idxMatch2 = {perm.at(1), iGDau2};
+                    }
+                    if(matchGEN2[it]) break;
+                  } while( std::next_permutation(perm2.begin(), perm2.end()));
+                  if( matchGEN1[it] &&matchGEN2[it]){
+                    matchGEN[it] = (idxMatch1.first != idxMatch2.first && idxMatch1.second != idxMatch2.second) ? true : false;
+                    if(matchGEN[it]) matchGenIdx = igen;
+                  }
+                  std::sort(perm1.begin(), perm1.end());
+                  std::sort(perm2.begin(), perm2.end());
+                } while( std::next_permutation(perm.begin(), perm.end()));
+                if( matchGEN[it] ) break;
+
+              } // END for nGen
+              if( matchGEN1[it] && matchGEN){
+                auto const& theGen = genRefs.at(matchGenIdx);
+                auto idgenDau1 = theGen->daughter(idxMatch1.first)->pdgId();
+                auto idgenDau2 = theGen->daughter(idxMatch2.first)->pdgId();
+                auto idrecoDau1 = trk.daughter(idxMatch1.first).pdgId();
+                auto idrecoDau2 = trk.daughter(idxMatch2.first).pdgId();
+                isSwap1[it]  = (idgenDau1 == idrecoDau1);
+                isSwap2[it]  = (idgenDau2 == idrecoDau2);
+              }
+            } // END if doGenDoubleDecay_
+
+//             if( doGenDoubleDecay_ ){
+//               matchGEN[it] = false;
+//               int nGenDau = (int)pVect->size();
+// if( debug_ )	std::cout << " Checking Match... (nDau) " << nGenDau << std::endl;
+//               isSwap[it] = false;
+//               idmom_reco[it] = -77;
             
-              for(int i=0;i<nGenDau;i++)
-              {
+//               for(int i=0;i<nGenDau;i++)
+//               {
 
-              	  matchGEN1[it] = false;
-              	  matchGEN2[it] = false;
+//               	  matchGEN1[it] = false;
+//               	  matchGEN2[it] = false;
 			
-                  vector<double> Dvector1_ = (*pVect)[i]; //get GEN daughter vector, a D meson 
-                  //if(d1->charge()!=Dvector1_.at(3)) continue; //check match charge
-                  //double deltaR = sqrt(pow(d1->eta()-Dvector1_.at(1),2)+pow(d1->phi()-Dvector1_.at(2),2));
+//                   vector<double> Dvector1_ = (*pVect)[i]; //get GEN daughter vector, a D meson 
+//                   //if(d1->charge()!=Dvector1_.at(3)) continue; //check match charge
+//                   //double deltaR = sqrt(pow(d1->eta()-Dvector1_.at(1),2)+pow(d1->phi()-Dvector1_.at(2),2));
 
-                  //if(deltaR > deltaR_) continue; //check deltaR matching
-                  //if(fabs((d1->pt()-Dvector1_.at(0))/d1->pt()) > 0.5) continue; //check deltaPt matching
-                  double d1massGEN = Dvector1_.at(4);
-                  double d1mass = d1->mass();
-                  double d2massGEN=0, d2mass=0;
+//                   //if(deltaR > deltaR_) continue; //check deltaR matching
+//                   //if(fabs((d1->pt()-Dvector1_.at(0))/d1->pt()) > 0.5) continue; //check deltaPt matching
+//                   double d1massGEN = Dvector1_.at(4);
+//                   double d1mass = d1->mass();
+//                   double d2massGEN=0, d2mass=0;
 
-                  double d1gmassGEN2 = 0;
-                  double d1gmass2 = 0;
-                  double d1gmassGEN1 = 0;
-                  double d1gmass1 = 0;
-                  double d2gmassGEN2 = 0;
-                  double d2gmass2 = 0;
-                  double d2gmassGEN1 = 0;
-                  double d2gmass1 = 0;
-                  bool matchChargeGD1 = false;
-                  bool matchChargeGD2 = false;
-                  bool matchDRGD1 = false;
-                  bool matchDRGD2 = false;
-                  bool matchDPTGD1 = false;
-                  bool matchDPTGD2 = false;
+//                   double d1gmassGEN2 = 0;
+//                   double d1gmass2 = 0;
+//                   double d1gmassGEN1 = 0;
+//                   double d1gmass1 = 0;
+//                   double d2gmassGEN2 = 0;
+//                   double d2gmass2 = 0;
+//                   double d2gmassGEN1 = 0;
+//                   double d2gmass1 = 0;
+//                   bool matchChargeGD1 = false;
+//                   bool matchChargeGD2 = false;
+//                   bool matchDRGD1 = false;
+//                   bool matchDRGD2 = false;
+//                   bool matchDPTGD1 = false;
+//                   bool matchDPTGD2 = false;
 
-                  for( int ii=0;ii<2;ii++){
-                    matchChargeGD1=false; matchDRGD1=false;matchDPTGD1=false;
-                    matchChargeGD2=false; matchDRGD2=false;matchDPTGD2=false;
-                    const reco::Candidate * gd11 = d1->daughter(ii);
-                    const reco::Candidate * gd12 = d1->daughter(1-ii);
-                    vector<double>& D1gvector1_ = (*pVectg1)[i]; //get GEN grand daughter vector, a D meson's track 1
-                    // double deltaRg1 = sqrt(pow(gd11->eta()-D1gvector1_.at(1),2)+pow(gd11->phi()-D1gvector1_.at(2),2));
-                    matchChargeGD1 = gd11->charge()==D1gvector1_.at(3);
-                    matchDRGD1 = sqrt(pow(gd11->eta()-D1gvector1_.at(1),2)+pow(gd11->phi()-D1gvector1_.at(2),2)) <= deltaR_;
-                    matchDPTGD1 = fabs((gd11->pt()-D1gvector1_.at(0))/gd11->pt()) <= 0.5;
+//                   for( int ii=0;ii<2;ii++){
+//                     matchChargeGD1=false; matchDRGD1=false;matchDPTGD1=false;
+//                     matchChargeGD2=false; matchDRGD2=false;matchDPTGD2=false;
+//                     const reco::Candidate * gd11 = d1->daughter(ii);
+//                     const reco::Candidate * gd12 = d1->daughter(1-ii);
+//                     vector<double>& D1gvector1_ = (*pVectg1)[i]; //get GEN grand daughter vector, a D meson's track 1
+//                     // double deltaRg1 = sqrt(pow(gd11->eta()-D1gvector1_.at(1),2)+pow(gd11->phi()-D1gvector1_.at(2),2));
+//                     matchChargeGD1 = gd11->charge()==D1gvector1_.at(3);
+//                     matchDRGD1 = sqrt(pow(gd11->eta()-D1gvector1_.at(1),2)+pow(gd11->phi()-D1gvector1_.at(2),2)) <= deltaR_;
+//                     matchDPTGD1 = fabs((gd11->pt()-D1gvector1_.at(0))/gd11->pt()) <= 0.5;
 
 	
-if( debug_ )	std::cout   << " D1 g1 : charge ("<< gd11->charge() << ", "<< D1gvector1_.at(3) << "), dR ("<<sqrt(pow(gd11->eta()-D1gvector1_.at(1),2)+pow(gd11->phi()-D1gvector1_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd11->pt()-D1gvector1_.at(0))/gd11->pt()) <<","<< "0.5" <<") : " << matchChargeGD1 << ", "<< matchDRGD1 <<", "<< matchDPTGD1 << std::endl;
+// if( debug_ )	std::cout   << " D1 g1 : charge ("<< gd11->charge() << ", "<< D1gvector1_.at(3) << "), dR ("<<sqrt(pow(gd11->eta()-D1gvector1_.at(1),2)+pow(gd11->phi()-D1gvector1_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd11->pt()-D1gvector1_.at(0))/gd11->pt()) <<","<< "0.5" <<") : " << matchChargeGD1 << ", "<< matchDRGD1 <<", "<< matchDPTGD1 << std::endl;
 
-                    vector<double> & D1gvector2_ = (*pVectg2)[i]; //get GEN grand daughter vector, a D meson's track 1
-                    // double deltaRg2 = sqrt(pow(gd12->eta()-D1gvector2_.at(1),2)+pow(gd12->phi()-D1gvector2_.at(2),2));
-                    matchChargeGD2 = gd12->charge()==D1gvector2_.at(3);
-                    matchDRGD2 = sqrt(pow(gd12->eta()-D1gvector2_.at(1),2)+pow(gd12->phi()-D1gvector2_.at(2),2)) <= deltaR_;
-                    matchDPTGD2 = fabs((gd12->pt()-D1gvector2_.at(0))/gd12->pt()) <= 0.5;
-if( debug_ )	std::cout   << " D1 g2 : charge ("<< gd12->charge() << ", "<< D1gvector2_.at(3) << "), dR ("<<sqrt(pow(gd12->eta()-D1gvector2_.at(1),2)+pow(gd12->phi()-D1gvector2_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd12->pt()-D1gvector2_.at(0))/gd12->pt()) <<","<< "0.5" <<") : " << matchChargeGD2 << ", "<< matchDRGD2 <<", "<< matchDPTGD2 << std::endl;
+//                     vector<double> & D1gvector2_ = (*pVectg2)[i]; //get GEN grand daughter vector, a D meson's track 1
+//                     // double deltaRg2 = sqrt(pow(gd12->eta()-D1gvector2_.at(1),2)+pow(gd12->phi()-D1gvector2_.at(2),2));
+//                     matchChargeGD2 = gd12->charge()==D1gvector2_.at(3);
+//                     matchDRGD2 = sqrt(pow(gd12->eta()-D1gvector2_.at(1),2)+pow(gd12->phi()-D1gvector2_.at(2),2)) <= deltaR_;
+//                     matchDPTGD2 = fabs((gd12->pt()-D1gvector2_.at(0))/gd12->pt()) <= 0.5;
+// if( debug_ )	std::cout   << " D1 g2 : charge ("<< gd12->charge() << ", "<< D1gvector2_.at(3) << "), dR ("<<sqrt(pow(gd12->eta()-D1gvector2_.at(1),2)+pow(gd12->phi()-D1gvector2_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd12->pt()-D1gvector2_.at(0))/gd12->pt()) <<","<< "0.5" <<") : " << matchChargeGD2 << ", "<< matchDRGD2 <<", "<< matchDPTGD2 << std::endl;
 
-                    matchGEN1[it] = matchGEN1[it] || (matchChargeGD1 && matchChargeGD2 && matchDRGD1 && matchDRGD2 && matchDPTGD1 && matchDPTGD2 );
+//                     matchGEN1[it] = matchGEN1[it] || (matchChargeGD1 && matchChargeGD2 && matchDRGD1 && matchDRGD2 && matchDPTGD1 && matchDPTGD2 );
 
-if( debug_ ) std::cout << "match : " <<  matchGEN1[it]  << std::endl;
-                    if( matchGEN1[it] ) {
-                      d1gmassGEN1 = D1gvector1_.at(4);
-                      d1gmass1 = gd11->mass();
-                      d1gmassGEN2 = D1gvector2_.at(4);
-                      d1gmass2 = gd12->mass();
-                    }
-                  }
+// if( debug_ ) std::cout << "match : " <<  matchGEN1[it]  << std::endl;
+//                     if( matchGEN1[it] ) {
+//                       d1gmassGEN1 = D1gvector1_.at(4);
+//                       d1gmass1 = gd11->mass();
+//                       d1gmassGEN2 = D1gvector2_.at(4);
+//                       d1gmass2 = gd12->mass();
+//                     }
+//                   }
 
-                  if((nGenDau%2) == 0)
-                  {
-                    int i2 = (i%2==0) ? i+1 : i-1;
-                    vector<double> Dvector2 = (*pVect)[i2]; //get GEN daughter vector for D meson 2
-                    //if(d2->charge()!=Dvector2.at(3)) continue; //check match charge
-                    //double deltaR = sqrt(pow(d2->eta()-Dvector2.at(1),2)+pow(d2->phi()-Dvector2.at(2),2));
+//                   if((nGenDau%2) == 0)
+//                   {
+//                     int i2 = (i%2==0) ? i+1 : i-1;
+//                     vector<double> Dvector2 = (*pVect)[i2]; //get GEN daughter vector for D meson 2
+//                     //if(d2->charge()!=Dvector2.at(3)) continue; //check match charge
+//                     //double deltaR = sqrt(pow(d2->eta()-Dvector2.at(1),2)+pow(d2->phi()-Dvector2.at(2),2));
 
-                    //if(deltaR > deltaR_) continue; //check deltaR matching
-                    //if(fabs((d2->pt()-Dvector2.at(0))/d2->pt()) > 0.5) continue; //check deltaPt matching
-                    d2massGEN = Dvector2.at(4);
-                    d2mass = d2->mass();
+//                     //if(deltaR > deltaR_) continue; //check deltaR matching
+//                     //if(fabs((d2->pt()-Dvector2.at(0))/d2->pt()) > 0.5) continue; //check deltaPt matching
+//                     d2massGEN = Dvector2.at(4);
+//                     d2mass = d2->mass();
 
-                    // deltaRg1 =999.9; deltaRg2 = 999.9;
-                  for( int ii=0;ii<2;ii++){
-                    matchChargeGD1=false; matchDRGD1=false;matchDPTGD1=false;
-                    matchChargeGD2=false; matchDRGD2=false;matchDPTGD2=false;
-                    const reco::Candidate * gd21 = d2->daughter(ii);
-                    const reco::Candidate * gd22 = d2->daughter(1-ii);
-                    vector<double> D2gvector1_ = (*pVectg1)[i2]; //get GEN grand daughter vector, a D meson's track 1
-                    // deltaRg1 = sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2));
-                    matchChargeGD1 = gd21->charge()==D2gvector1_.at(3);
-                    matchDRGD1 = sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2)) <= deltaR_;
-                    matchDPTGD1 = fabs((gd21->pt()-D2gvector1_.at(0))/gd21->pt()) <= 0.5;
+//                     // deltaRg1 =999.9; deltaRg2 = 999.9;
+//                   for( int ii=0;ii<2;ii++){
+//                     matchChargeGD1=false; matchDRGD1=false;matchDPTGD1=false;
+//                     matchChargeGD2=false; matchDRGD2=false;matchDPTGD2=false;
+//                     const reco::Candidate * gd21 = d2->daughter(ii);
+//                     const reco::Candidate * gd22 = d2->daughter(1-ii);
+//                     vector<double> D2gvector1_ = (*pVectg1)[i2]; //get GEN grand daughter vector, a D meson's track 1
+//                     // deltaRg1 = sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2));
+//                     matchChargeGD1 = gd21->charge()==D2gvector1_.at(3);
+//                     matchDRGD1 = sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2)) <= deltaR_;
+//                     matchDPTGD1 = fabs((gd21->pt()-D2gvector1_.at(0))/gd21->pt()) <= 0.5;
 
-if( debug_ )	std::cout << " D2 g1 : charge ("<< gd21->charge() << ", "<< D2gvector1_.at(3) << "), dR ("<<sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd21->pt()-D2gvector1_.at(0))/gd21->pt()) <<","<< "0.5" <<") : " << matchChargeGD1 << ", "<< matchDRGD1 <<", "<< matchDPTGD1 << std::endl;
+// if( debug_ )	std::cout << " D2 g1 : charge ("<< gd21->charge() << ", "<< D2gvector1_.at(3) << "), dR ("<<sqrt(pow(gd21->eta()-D2gvector1_.at(1),2)+pow(gd21->phi()-D2gvector1_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd21->pt()-D2gvector1_.at(0))/gd21->pt()) <<","<< "0.5" <<") : " << matchChargeGD1 << ", "<< matchDRGD1 <<", "<< matchDPTGD1 << std::endl;
 
-                    vector<double> D2gvector2_ = (*pVectg2)[i2]; //get GEN grand daughter vector, a D meson's track 1
-                    // deltaRg2 = sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2));
-                    matchChargeGD2 = gd22->charge()==D2gvector2_.at(3);
-                    matchDRGD2 = sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2)) <= deltaR_;
-                    matchDPTGD2 = fabs((gd22->pt()-D2gvector2_.at(0))/gd22->pt()) <= 0.5;
+//                     vector<double> D2gvector2_ = (*pVectg2)[i2]; //get GEN grand daughter vector, a D meson's track 1
+//                     // deltaRg2 = sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2));
+//                     matchChargeGD2 = gd22->charge()==D2gvector2_.at(3);
+//                     matchDRGD2 = sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2)) <= deltaR_;
+//                     matchDPTGD2 = fabs((gd22->pt()-D2gvector2_.at(0))/gd22->pt()) <= 0.5;
 
-if( debug_ )	std::cout << " D2 g2 : charge ("<< gd22->charge() << ", "<< D2gvector2_.at(3) << "), dR ("<<sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd22->pt()-D2gvector2_.at(0))/gd22->pt()) <<","<< "0.5" <<") : " << matchChargeGD2 << ", "<< matchDRGD2 <<", "<< matchDPTGD2 << std::endl;
+// if( debug_ )	std::cout << " D2 g2 : charge ("<< gd22->charge() << ", "<< D2gvector2_.at(3) << "), dR ("<<sqrt(pow(gd22->eta()-D2gvector2_.at(1),2)+pow(gd22->phi()-D2gvector2_.at(2),2)) << ", " << deltaR_ <<"), dPt ("<< fabs((gd22->pt()-D2gvector2_.at(0))/gd22->pt()) <<","<< "0.5" <<") : " << matchChargeGD2 << ", "<< matchDRGD2 <<", "<< matchDPTGD2 << std::endl;
 
-                    matchGEN2[it] = matchGEN2[it] || (matchChargeGD1 && matchChargeGD2 && matchDRGD1 && matchDRGD2 && matchDPTGD1 && matchDPTGD2 );
-                    if( matchGEN2[it] ) {
-                      d2gmassGEN1 = D2gvector1_.at(4);
-                      d2gmass1 = gd21->mass();
-                      d2gmassGEN2 = D2gvector2_.at(4);
-                      d2gmass2 = gd22->mass();
-                    }
-                  }
+//                     matchGEN2[it] = matchGEN2[it] || (matchChargeGD1 && matchChargeGD2 && matchDRGD1 && matchDRGD2 && matchDPTGD1 && matchDPTGD2 );
+//                     if( matchGEN2[it] ) {
+//                       d2gmassGEN1 = D2gvector1_.at(4);
+//                       d2gmass1 = gd21->mass();
+//                       d2gmassGEN2 = D2gvector2_.at(4);
+//                       d2gmass2 = gd22->mass();
+//                     }
+//                   }
 
-                    matchGEN[it] = matchGEN1[it] && matchGEN2[it]; //matched gen
+//                     matchGEN[it] = matchGEN1[it] && matchGEN2[it]; //matched gen
 
-                    //check swap
-                    if(abs(d1gmassGEN1 - d1gmass1)>0.01 || abs(d1gmassGEN2 - d1gmass2)>0.01) isSwap1[it] = true;
-                    if(abs(d2gmassGEN1 - d2gmass1)>0.01 || abs(d2gmassGEN2 - d2gmass2)>0.01) isSwap2[it] = true;
-                    if(abs(d1massGEN - d1mass)>0.01 || abs(d2massGEN - d2mass)>0.01) isSwap[it] = true;
+//                     //check swap
+//                     if(abs(d1gmassGEN1 - d1gmass1)>0.01 || abs(d1gmassGEN2 - d1gmass2)>0.01) isSwap1[it] = true;
+//                     if(abs(d2gmassGEN1 - d2gmass1)>0.01 || abs(d2gmassGEN2 - d2gmass2)>0.01) isSwap2[it] = true;
+//                     if(abs(d1massGEN - d1mass)>0.01 || abs(d2massGEN - d2mass)>0.01) isSwap[it] = true;
 
-                    //check prompt & record mom id
-                    idmom_reco[it] = pVectIDmom->at(i/2);
-                  }
-              }  // end GEN dau loop
-            } // end double decay 
+//                     //check prompt & record mom id
+//                     idmom_reco[it] = pVectIDmom->at(i/2);
+//                   }
+//               }  // end GEN dau loop
+//             } // end double decay 
         }
         
         double pxd1 = d1->px();
@@ -2096,9 +2191,11 @@ if( debug_ ) std::cout << "pass decay" << std::endl;
         candSize_gen+=1;
 
         pt_gen[candSize_gen-1] = trk.pt();
+        mass_gen[candSize_gen-1] = trk.mass();
         eta_gen[candSize_gen-1] = trk.eta();
         phi_gen[candSize_gen-1] = trk.phi();
         status_gen[candSize_gen-1] = trk.status();
+        idself[candSize_gen-1] = trk.pdgId();
         idmom[candSize_gen-1] = -77;
         y_gen[candSize_gen-1] = trk.rapidity();
         ptmom[candSize_gen-1] = -999.0;
@@ -2126,7 +2223,19 @@ if( debug_ ) std::cout << "pass decay" << std::endl;
         iddau2[candSize_gen-1] = fabs(Dd2->pdgId());
         if(Dd3) iddau3[candSize_gen-1] = fabs(Dd3->pdgId());
         if( doGenDoubleDecay_){
-          // TODO: Method for saving D1 D2 Gen info
+          pt_gen1[candSize_gen-1] = Dd1.pt();
+          mass_gen1[candSize_gen-1] = Dd1.mass();
+          eta_gen1[candSize_gen-1] = Dd1.eta();
+          phi_gen1[candSize_gen-1] = Dd1.phi();
+          status_gen1[candSize_gen-1] = Dd1.status();
+          idself1[candSize_gen-1] = Dd1.pdgId();
+
+          pt_gen2[candSize_gen-1] = Dd2.pt();
+          mass_gen2[candSize_gen-1] = Dd2.mass();
+          eta_gen2[candSize_gen-1] = Dd2.eta();
+          phi_gen2[candSize_gen-1] = Dd2.phi();
+          status_gen2[candSize_gen-1] = Dd2.status();
+          idself2[candSize_gen-1] = Dd2.pdgId();
         }
     }
 }
@@ -2471,6 +2580,8 @@ VertexCompositeTreeProducerNew::initTree()
     if(doGenNtuple_)
     {
         VertexCompositeNtuple->Branch("candSize_gen",&candSize_gen,"candSize_gen/I");
+        VertexCompositeNtuple->Branch("id_gen",&idself,"id_gen[candSize_gen]/F");
+        VertexCompositeNtuple->Branch("mass_gen",&mass_gen,"mass_gen[candSize_gen]/F");
         VertexCompositeNtuple->Branch("pT_gen",&pt_gen,"pT_gen[candSize_gen]/F");
         VertexCompositeNtuple->Branch("eta_gen",&eta_gen,"eta_gen[candSize_gen]/F");
         VertexCompositeNtuple->Branch("phi_gen",&phi_gen,"phi_gen[candSize_gen]/F");
@@ -2482,6 +2593,22 @@ VertexCompositeTreeProducerNew::initTree()
         VertexCompositeNtuple->Branch("MotherPhi_gen",&phimom,"MotherPhi_gen[candSize_gen]/I");
         VertexCompositeNtuple->Branch("MotherY_gen",&ymom,"MotherY_gen[candSize_gen]/I");
         VertexCompositeNtuple->Branch("MotherStatus_gen",&statusmom,"MotherStatus_gen[candSize_gen]/I");
+        if(doGenDoubleDecay_){
+          VertexCompositeNtuple->Branch("id_gen1",&idself1,"id_gen1[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("mass_gen1",&mass_gen1,"mass_gen1[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("pt_gen1",&pt_gen1,"pt_gen1[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("eta_gen1",&eta_gen1,"eta_gen1[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("phi_gen1",&phi_gen1,"phi_gen1[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("status_gen1",&status_gen1,"status_gen1[candSize_gen]/I");
+
+          VertexCompositeNtuple->Branch("id_gen2",&idself2,"id_gen2[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("mass_gen2",&mass_gen2,"mass_gen2[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("pt_gen2",&pt_gen2,"pt_gen2[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("eta_gen2",&eta_gen2,"eta_gen2[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("phi_gen2",&phi_gen2,"phi_gen2[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("status_gen2",&status_gen2,"status_gen2[candSize_gen]/I");
+
+        }
 
         if(decayInGen_)
         {
