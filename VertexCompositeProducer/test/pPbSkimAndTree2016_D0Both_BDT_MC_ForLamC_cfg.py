@@ -34,7 +34,8 @@ if not options.inputFiles:
 #'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/PromptD0_PbPemb_8TeVpPb/RECOAODSIM_MC_PromptD0_PbPemb_14Feb2024_v1/240215_112339/0000/HIN-pPb816Summer16DR-00164_49.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_26/src/HIN-pPb816Summer16DR-00164.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/CMSSW_8_0_30/src/HIN-pPb816Summer16DR-00164.root',
-'file:step3_Embedded_PromptD0_KK_8160GeV_pythia8_RECO_20190906_88.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_9.root',
+'/store/himc/pPb816Summer16DR/SoftQCD_D0ToKPi_PtGT1p2-Pbp-Embed_8p16TeV_TuneCUETP8M1_Pythia8_evtgen/AODSIM/PbP_80X_mcRun2_pA_v4-v1/2820000/3E5993A9-2F80-ED11-8869-A0369FE2C084.root',
 ]
 
 process.source = cms.Source("PoolSource",
@@ -42,7 +43,7 @@ process.source = cms.Source("PoolSource",
 )
 
 # =============== Other Statements =====================
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(4000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(400))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_mcRun2_pA_v4'
 
@@ -71,14 +72,14 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 ########## D0 candidate rereco ###############################################################
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
-#process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.0)
-#process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(4.8)
-#process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
-#process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.2)
-#process.generalD0CandidatesNew.tkPtCut = cms.double(0.4)
-#process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
-#process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
-#process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+process.generalD0CandidatesNew.trkPtSumCut = cms.double(0.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(4.8)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(1)
+process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.3)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.3)
+process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
+process.generalD0CandidatesNew.dPtCut = cms.double(1.2)
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 

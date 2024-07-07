@@ -34,51 +34,51 @@ process.source = cms.Source("PoolSource",
 
 'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_1.root',
 'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_10.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_11.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_12.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_13.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_14.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_15.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_16.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_17.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_18.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_19.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_2.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_20.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_21.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_22.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_23.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_24.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_25.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_26.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_27.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_28.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_29.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_3.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_30.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_31.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_32.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_33.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_34.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_35.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_36.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_37.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_38.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_39.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_4.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_40.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_41.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_42.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_43.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_44.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_45.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_46.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_47.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_5.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_6.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_7.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_8.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_9.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_11.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_12.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_13.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_14.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_15.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_16.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_17.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_18.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_19.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_2.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_20.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_21.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_22.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_23.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_24.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_25.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_26.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_27.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_28.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_29.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_3.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_30.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_31.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_32.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_33.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_34.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_35.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_36.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_37.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_38.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_39.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_4.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_40.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_41.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_42.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_43.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_44.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_45.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_46.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_47.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_5.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_6.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_7.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_8.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_9.root',
 )
 )
 
@@ -123,10 +123,10 @@ process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
 
 process.generalD0CandidatesNew.trkPtSumCut = cms.double(0.0)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(0.0)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(10.0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(6)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.4)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.3)
 process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
 process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
 process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
@@ -136,7 +136,7 @@ process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(i
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDDCandidates_cff")
 process.generalDDCandidatesNew = process.generalDDCandidates.clone()
 process.generalDDCandidatesNew.trkPtSumCut = cms.double(0.0)
-process.generalDDCandidatesNew.trkEtaDiffCut = cms.double(0.0)
+process.generalDDCandidatesNew.trkEtaDiffCut = cms.double(999.0)
 process.generalDDCandidatesNew.tkNhitsCut = cms.int32(0)
 process.generalDDCandidatesNew.tkPtErrCut = cms.double(1.0)
 process.generalDDCandidatesNew.tkPtCut = cms.double(0.0)
@@ -153,6 +153,7 @@ process.d0rereco_wrongsign_step = cms.Path( process.eventFilter_HM * process.gen
 # produce D0 trees
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0selector_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_tree_cff")
+process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_tree_cff")
 #process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dStarselector_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.ddanalyzer_tree_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.eventinfotree_cff")
@@ -164,7 +165,7 @@ process.TFileService = cms.Service("TFileService",
 
 # set up selectors
 
-process.ddana_mc.PID = cms.untracked.int32(21)
+process.ddana_mc.PID = cms.untracked.int32(421)
 
 process.d0ana_mc.useAnyMVA = cms.bool(True)
 process.d0ana_mc.VertexCompositeCollection = cms.untracked.InputTag("d0selectorMC:D0")
@@ -198,7 +199,7 @@ process.ddana_new.TrackCollection = cms.untracked.InputTag("generalTracks")
 process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
 process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
 process.ddana_new.useAnyMVA = cms.bool(True)
-process.ddana_new.debug = cms.untracked.bool(True)
+process.ddana_new.debug = cms.untracked.bool(False)
 process.ddana_new.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValuesDD1")
 process.ddana_new.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
 
@@ -222,9 +223,9 @@ process.printTree = cms.EDAnalyzer("ParticleTreeDrawer",
                                    src = cms.InputTag("genParticles"),                                                                 
                                    printP4 = cms.untracked.bool(False),
                                    printPtEtaPhi = cms.untracked.bool(False),
-                                   printVertex = cms.untracked.bool(False),
+                                   printVertex = cms.untracked.bool(True),
                                    printStatus = cms.untracked.bool(False),
-                                   printIndex = cms.untracked.bool(False),
+                                   printIndex = cms.untracked.bool(True),
                                    status = cms.untracked.vint32( 3 )
                                    )
 
