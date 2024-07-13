@@ -15,6 +15,7 @@
 // Original Author:  Wei Li
 //
 //
+//
 
 
 // system include files
@@ -47,6 +48,8 @@ DPlus3PProducer::~DPlus3PProducer() {
 // Producer Method
 void DPlus3PProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    using namespace edm;
+   using std::cout;
+   using std::endl;
 
    // Create DPlus3PFitter object which reconstructs the vertices and creates
 //   DPlus3PFitter theVees(theParams, iEvent, iSetup);

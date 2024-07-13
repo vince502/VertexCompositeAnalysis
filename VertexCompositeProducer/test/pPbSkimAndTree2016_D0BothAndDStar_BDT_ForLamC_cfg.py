@@ -56,6 +56,7 @@ process.hltFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltFilter.andOr = cms.bool(True)
 process.hltFilter.throw = cms.bool(False)
 process.hltFilter.HLTPaths = [
+    "HLT_HIMinimumBiasHF1AND_v*", #24
     "HLT_HIMinimumBiasHF1ANDZDC2nOR_v*", #25
     "HLT_HIMinimumBiasHF1ANDZDC1nOR_v*", #26
 ]
@@ -86,9 +87,9 @@ process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
 process.generalD0CandidatesNew.alphaCut = cms.double(0.20)
 process.generalD0CandidatesNew.alpha2DCut = cms.double(0.20)
-process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.005)
-process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.8)
+process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -99,8 +100,8 @@ process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(0.0)
 process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(11)
 process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
-process.generalDStarCandidatesNew.alphaCut = cms.double(0.5)
-process.generalDStarCandidatesNew.alpha2DCut = cms.double(0.5)
+process.generalDStarCandidatesNew.alphaCut = cms.double(0.4)
+process.generalDStarCandidatesNew.alpha2DCut = cms.double(0.4)
 process.generalDStarCandidatesNew.dPtCut = cms.double(0.0)
 
 
@@ -146,8 +147,8 @@ process.d0selectorNewReduced = process.d0selector.clone()
 process.d0selectorNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
 process.d0selectorNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
-process.d0selectorNewReduced.mvaMin = cms.untracked.double(0.5)
-process.d0selectorNewReduced.cand3DDecayLengthSigMin = cms.untracked.double(4.)
+process.d0selectorNewReduced.mvaMin = cms.untracked.double(0.3)
+process.d0selectorNewReduced.cand3DDecayLengthSigMin = cms.untracked.double(3.)
 process.d0selectorNewReduced.cand3DPointingAngleMax = cms.untracked.double(0.2)
 
 process.generalDStarCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
@@ -176,6 +177,7 @@ process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0s
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
 process.eventinfoana.triggerPathNames = cms.untracked.vstring(
+    "HLT_HIMinimumBiasHF1AND_v*", #24
     "HLT_HIMinimumBiasHF1ANDZDC2nOR_v", #25
     "HLT_HIMinimumBiasHF1ANDZDC1nOR_v", #26
     )

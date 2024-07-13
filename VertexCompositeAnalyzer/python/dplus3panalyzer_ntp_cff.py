@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from VertexCompositeAnalysis.VertexCompositeAnalyzer.lamc3panalyzer_ntp_cfi import *
+from VertexCompositeAnalysis.VertexCompositeAnalyzer.dplus3panalyzer_ntp_cfi import *
 
 dplus3pana_wrongsign = dplus3pana.clone(
   VertexCompositeCollection = cms.untracked.InputTag("generalDPlus3PCandidatesNewWrongSign:DPlus3P"),

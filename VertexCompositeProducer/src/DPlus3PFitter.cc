@@ -48,6 +48,9 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
+#define DEBUG true
+
+
 const float piMassDPlus3P = 0.13957018;
 const float piMassDPlus3PSquared = piMassDPlus3P*piMassDPlus3P;
 const float kaonMassDPlus3P = 0.493677;
@@ -102,7 +105,7 @@ DPlus3PFitter::DPlus3PFitter(const edm::ParameterSet& theParameters,  edm::Consu
   dauTransImpactSigCut = theParameters.getParameter<double>(string("dauTransImpactSigCut"));
   dauLongImpactSigCut = theParameters.getParameter<double>(string("dauLongImpactSigCut"));
   VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
-  dPt3Cut = theParameters.getParameter<double>(string("dPt3Cut"));
+  dPtCut = theParameters.getParameter<double>(string("dPtCut"));
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
@@ -264,6 +267,10 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   if(!isWrongSign)
   {
+#if DEBUG == true
+cout << "NEG = " << theTrackRefs_pos.size() << ", POS = " << theTrackRefs_neg.size() << endl; 
+
+#endif
     fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,411);
     fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-411);
   }
@@ -345,7 +352,7 @@ void DPlus3PFitter::fitDPlusCandidates(
       // Measure distance between tracks at their closest approach
       ClosestApproachInRPhi cApp;
       cApp.calculate(trkState1, trkState2);
-      if( !cApp.status() ) continue;
+      if( !cApp.status()) continue;
       float dca = fabs( cApp.distance() );
       GlobalPoint cxPt = cApp.crossingPoint();
 
@@ -359,31 +366,44 @@ void DPlus3PFitter::fitDPlusCandidates(
 
       if( !trkTSCP1.isValid() || !trkTSCP2.isValid() ) continue;
 
-      double totalE1 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
-                      sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared );
-      double totalE1Sq = totalE1*totalE1;
+//       double totalE1 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+//                       sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared );
+//       double totalE1Sq = totalE1*totalE1;
+//       double totalPSq =
+//         ( trkTSCP1.momentum() + trkTSCP2.momentum() ).mag2();
 
-      double totalE2 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
-                      sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared );
-      double totalE2Sq = totalE2*totalE2;
-
-      double totalPSq =
-        ( trkTSCP1.momentum() + trkTSCP2.momentum() ).mag2();
 
 //      double totalPt =
 //        ( trkTSCP1.momentum() + trkTSCP2.momentum() ).perp();
 
-      double mass1 = sqrt( totalE1Sq - totalPSq);
-      double mass2 = sqrt( totalE2Sq - totalPSq);
+//       double mass1 = sqrt( totalE1Sq - totalPSq);
+//       double minp = 
+//       double mintotE = totalE1 + sqrt(kaonMassDPlus3PSquared + (tkPtCut*tkPtCut));
+//       double minTotMass = sqrt( mintotE*mintotE - totalPSq - (tkPtCut*tkPtCut) );
 
-      // if( (mass1 > mKPCutMax || mass1 < mKPCutMin) && (mass2 > mKPCutMax || mass2 < mKPCutMin)) continue;
+// #if DEBUG == true
+// cout << minTotMass << ", cut off at " << tkPtCut*tkPtCut << endl;
+// #endif
+//       if( minTotMass > mPiKPCutMax) continue;
+
+//       if( (mass1 > mKPCutMax || mass1 < mKPCutMin) && (mass2 > mKPCutMax || mass2 < mKPCutMin)) continue;
 //      if( totalPt < dPtCut ) continue;
+//
 
       for(unsigned int trdx3 = 0; trdx3 < theTrackRefs_sgn2.size(); trdx3++) {
 
         TrackRef trackRef3 = theTrackRefs_sgn2[trdx3];
         if (trackRef3 == trackRef1 || trackRef3 == trackRef2) continue;
         TransientTrack* transTkPtr3 = &theTransTracks_sgn2[trdx3];
+        if( !trkTSCP31.isValid() ) continue;
+        double totalE31 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
+                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
+        double totalE31Sq = totalE31*totalE31;
+        double mass31 = sqrt( totalE31Sq - totalP3Sq);
+
+        if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) ) continue;
+        if( totalPt3 < dPtCut ) continue;
   
 //        double dzvtx3 = trackRef3->dz(bestvtx);
 //        double dxyvtx3 = trackRef3->dxy(bestvtx);
@@ -411,37 +431,20 @@ void DPlus3PFitter::fitDPlusCandidates(
         TrajectoryStateClosestToPoint trkTSCP31 =
           transTkPtr3->trajectoryStateClosestToPoint( cxPt13 );
 
-        if( !trkTSCP31.isValid() ) continue;
 
-        double totalE31 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
-                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
-        double totalE31Sq = totalE31*totalE31;
-
-        double totalE32 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
-                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
-        double totalE32Sq = totalE32*totalE32;
 
         double totalP3Sq =
           ( trkTSCP1.momentum() + trkTSCP2.momentum() + trkTSCP31.momentum()).mag2();
-
         double totalPt3 =
           ( trkTSCP1.momentum() + trkTSCP2.momentum() + trkTSCP31.momentum()).perp();
 
-        double mass31 = sqrt( totalE31Sq - totalP3Sq);
-        double mass32 = sqrt( totalE32Sq - totalP3Sq);
-
-        if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) && (mass32 > mPiKPCutMax || mass32 < mPiKPCutMin)) continue;
-        if( totalPt3 < dPt3Cut ) continue;
 
         // Create the vertex fitter object and vertex the tracks
         float cand1TotalE[2]={0.0};
         float cand2TotalE[2]={0.0};
         float DPlusTotalE[2]={0.0};
 
-        for(int i=0;i<2;i++)
-        {
+        for(int i=0;i<1;i++) {
           //Creating a KinematicParticleFactory
           KinematicParticleFactoryFromTransientTrack pFactory;
         
@@ -466,8 +469,8 @@ void DPlus3PFitter::fitDPlusCandidates(
           RefCountedKinematicVertex DPlusDecayVertex = DPlusVertex->currentDecayVertex();
           if(!DPlusDecayVertex->vertexIsValid()) continue;
 
-  	  float DPlusC2Prob = TMath::Prob(DPlusDecayVertex->chiSquared(),DPlusDecayVertex->degreesOfFreedom());
-  	  if (DPlusC2Prob < VtxChiProbCut) continue;
+  	      float DPlusC2Prob = TMath::Prob(DPlusDecayVertex->chiSquared(),DPlusDecayVertex->degreesOfFreedom());
+  	      if (DPlusC2Prob < VtxChiProbCut) continue;
 
           DPlusVertex->movePointerToTheFirstChild();
           RefCountedKinematicParticle cand1 = DPlusVertex->currentParticle();
@@ -547,7 +550,7 @@ void DPlus3PFitter::fitDPlusCandidates(
 
         // DCA error
         tsos = extrapolator.extrapolate(DPlusCand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
-	if( !tsos.isValid() ) continue;
+	      if( !tsos.isValid() ) continue;
         Measurement1D cur3DIP;
         VertexDistance3D a3d;
         GlobalPoint refPoint          = tsos.globalPosition();
@@ -556,49 +559,49 @@ void DPlus3PFitter::fitDPlusCandidates(
         GlobalError vertexPositionErr = RecoVertex::convertError(vtxPrimary->error());
         cur3DIP =  (a3d.distance(VertexState(vertexPosition,vertexPositionErr), VertexState(refPoint, refPointErr)));
 
-          if( DPlusNormalizedChi2 > chi2Cut ||
-              rVtxMag < rVtxCut ||
-              rVtxMag / sigmaRvtxMag < rVtxSigCut ||
-              lVtxMag < lVtxCut ||
-              lVtxMag / sigmaLvtxMag < lVtxSigCut ||
-              cos(DPlusAngle3D) < collinCut3D || cos(DPlusAngle2D) < collinCut2D || DPlusAngle3D > alphaCut || DPlusAngle2D > alpha2DCut
-          ) continue;
+        if( DPlusNormalizedChi2 > chi2Cut ||
+            rVtxMag < rVtxCut ||
+            rVtxMag / sigmaRvtxMag < rVtxSigCut ||
+            lVtxMag < lVtxCut ||
+            lVtxMag / sigmaLvtxMag < lVtxSigCut ||
+            cos(DPlusAngle3D) < collinCut3D || cos(DPlusAngle2D) < collinCut2D || DPlusAngle3D > alphaCut || DPlusAngle2D > alpha2DCut
+        ) continue;
 
-          VertexCompositeCandidate* theDPlus3P = 0;
-          theDPlus3P = new VertexCompositeCandidate(DPlusCharge, DPlusP4, DPlusVtx, DPlusVtxCov, DPlusVtxChi2, DPlusVtxNdof);
+        VertexCompositeCandidate* theDPlus3P = 0;
+        theDPlus3P = new VertexCompositeCandidate(DPlusCharge, DPlusP4, DPlusVtx, DPlusVtxCov, DPlusVtxChi2, DPlusVtxNdof);
 
-          RecoChargedCandidate
-            theCand1(DPlusCharge, Particle::LorentzVector(cand1TotalP.x(),
-                                                  cand1TotalP.y(), cand1TotalP.z(),
-                                                  cand1TotalE[i]), DPlusVtx);
-            theCand1.setTrack(trackRef1);
+        RecoChargedCandidate
+          theCand1(DPlusCharge, Particle::LorentzVector(cand1TotalP.x(),
+                                                cand1TotalP.y(), cand1TotalP.z(),
+                                                cand1TotalE[i]), DPlusVtx);
+          theCand1.setTrack(trackRef1);
 
-          RecoChargedCandidate
-            theCand2(DPlusCharge, Particle::LorentzVector(cand2TotalP.x(),
-                                                   cand2TotalP.y(), cand2TotalP.z(),
-                                                   cand2TotalE[i]), DPlusVtx);
-            theCand2.setTrack(trackRef2);
+        RecoChargedCandidate
+          theCand2(DPlusCharge, Particle::LorentzVector(cand2TotalP.x(),
+                                                 cand2TotalP.y(), cand2TotalP.z(),
+                                                 cand2TotalE[i]), DPlusVtx);
+          theCand2.setTrack(trackRef2);
 
-          RecoChargedCandidate
-            theCand3(-DPlusCharge, Particle::LorentzVector(cand3TotalP.x(),
-                                                   cand3TotalP.y(), cand3TotalP.z(),
-                                                   cand3TotalE), DPlusVtx);
-            theCand3.setTrack(trackRef3);
+        RecoChargedCandidate
+          theCand3(-DPlusCharge, Particle::LorentzVector(cand3TotalP.x(),
+                                                 cand3TotalP.y(), cand3TotalP.z(),
+                                                 cand3TotalE), DPlusVtx);
+          theCand3.setTrack(trackRef3);
 
-          AddFourMomenta addp4;
-          theDPlus3P->addDaughter(theCand1);
-          theDPlus3P->addDaughter(theCand2);
-          theDPlus3P->addDaughter(theCand3);
-          theDPlus3P->setPdgId(pdg_id);
-          addp4.set( *theDPlus3P );
-          if( theDPlus3P->mass() < DPlusMassDPlus3P + DPlusMassCut &&
-              theDPlus3P->mass() > DPlusMassDPlus3P - DPlusMassCut ) //&&
-	     // theDPlus3P->pt() > dPtCut ) {
-          {
-            theDPlus3Ps.push_back( *theDPlus3P );
-            dcaVals_.push_back(cur3DIP.value());
-            dcaErrs_.push_back(cur3DIP.error());
-          }
+        AddFourMomenta addp4;
+        theDPlus3P->addDaughter(theCand1);
+        theDPlus3P->addDaughter(theCand2);
+        theDPlus3P->addDaughter(theCand3);
+        theDPlus3P->setPdgId(pdg_id);
+        addp4.set( *theDPlus3P );
+        if( theDPlus3P->mass() < DPlusMassDPlus3P + DPlusMassCut &&
+            theDPlus3P->mass() > DPlusMassDPlus3P - DPlusMassCut ) //&&
+	     //heDPlus3P->pt() > dPtCut ) {
+        {
+          theDPlus3Ps.push_back( *theDPlus3P );
+          dcaVals_.push_back(cur3DIP.value());
+          dcaErrs_.push_back(cur3DIP.error());
+        }
 // perform MVA evaluation
 /*
           if(useAnyMVA_)

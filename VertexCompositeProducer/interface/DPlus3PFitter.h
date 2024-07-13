@@ -142,7 +142,7 @@ class DPlus3PFitter {
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
   double VtxChiProbCut;
-  double dPt3Cut;
+  double dPtCut;
   double alphaCut;
   double alpha2DCut;
   bool   isWrongSign;

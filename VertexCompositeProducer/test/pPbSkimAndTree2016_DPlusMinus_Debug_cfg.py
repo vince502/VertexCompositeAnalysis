@@ -18,7 +18,7 @@ process.source = cms.Source("PoolSource",
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
@@ -40,12 +40,13 @@ process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
 process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
 process.GlobalTag.toGet.extend([
     cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374289"),
-        connect = cms.string("sqlite_file:CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374289.db"),
+        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810"),
+        connect = cms.string("sqlite_file:CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db"),
         label = cms.untracked.string("HFtowers")
         )
     ]
 )
+process.cent_seq = cms.Sequence(process.centralityBin)
 process.cent_seq = cms.Sequence(process.centralityBin)
 
 # =============== Import Sequences =====================
@@ -79,14 +80,16 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 ########## DPlus3P candidate rereco ###############################################################
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDPlus3PCandidates_cff")
 process.generalDPlus3PCandidatesNew = process.generalDPlus3PCandidates.clone()
-process.generalDPlus3PCandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalDPlus3PCandidatesNew.trkEtaDiffCut = cms.double(2.0)
+#process.generalDPlus3PCandidatesNew.trkPtSumCut = cms.double(0.0)
+#process.generalDPlus3PCandidatesNew.trkEtaDiffCut = cms.double(4.0)
+process.generalDPlus3PCandidatesNew.tkChi2Cut = cms.double(7) #trk Chi2 <
+process.generalDPlus3PCandidatesNew.tkEtaCut = cms.double(2.4) #trk abs(eta) <
 process.generalDPlus3PCandidatesNew.tkNhitsCut = cms.int32(11)
 process.generalDPlus3PCandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalDPlus3PCandidatesNew.tkPtCut = cms.double(0.6)
-process.generalDPlus3PCandidatesNew.alphaCut = cms.double(2.0)
-process.generalDPlus3PCandidatesNew.alpha2DCut = cms.double(2.0)
-process.generalDPlus3PCandidatesNew.dPtCut = cms.double(1.9)
+process.generalDPlus3PCandidatesNew.tkPtCut = cms.double(1.0)
+process.generalDPlus3PCandidatesNew.alphaCut = cms.double(1.4)
+process.generalDPlus3PCandidatesNew.alpha2DCut = cms.double(1.4)
+process.generalDPlus3PCandidatesNew.dPtCut = cms.double(0.0)
 
 process.generalDPlus3PCandidatesNewWrongSign = process.generalDPlus3PCandidatesNew.clone(isWrongSign = cms.bool(True))
 process.dplus3prereco_step = cms.Path( process.eventFilter_HM * process.generalDPlus3PCandidatesNew)
@@ -96,9 +99,10 @@ process.dplus3prereco_wrongsign_step = cms.Path( process.eventFilter_HM * proces
 
 # produce DPlus3P trees
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dplus3pselector_cff")
-process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dplus3panalyzer_tree_cff")
+process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dplus3panalyzer_ntp_cff")
+#process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dplus3panalyzer_tree_cff")
 #process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dStarselector_cff")
-#process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dStaranalyzer_tree_cff")
+##process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dStaranalyzer_tree_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.eventinfotree_cff")
 
 process.TFileService = cms.Service("TFileService",
@@ -140,18 +144,19 @@ process.dplus3pselectorWSNewReduced.DCAErrCollection = cms.InputTag("generalDPlu
 
 process.dplus3pana_newreduced = process.dplus3pana.clone()
 process.dplus3pana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("dplus3pselectorNewReduced:DPlus3P")
-process.dplus3pana_newreduced.MVACollection = cms.InputTag("dplus3pselectorNewReduced:MVAValuesDPlus3P")
+process.dplus3pana_newreduced.MVACollection = cms.InputTag("dplus3pselectorNewReduced:MVAValuesNewDPlus3P")
 process.dplus3pana_newreduced.DCAValCollection = cms.InputTag("dplus3pselectorNewReduced:DCAValuesNewDPlus3P")
 process.dplus3pana_newreduced.DCAErrCollection = cms.InputTag("dplus3pselectorNewReduced:DCAErrorsNewDPlus3P")
 
 process.dplus3pana_wrongsign_newreduced = process.dplus3pana_wrongsign.clone()
 process.dplus3pana_wrongsign_newreduced.VertexCompositeCollection = cms.untracked.InputTag("dplus3pselectorWSNewReduced:DPlus3P")
-process.dplus3pana_wrongsign_newreduced.MVACollection = cms.InputTag("dplus3pselectorWSNewReduced:MVAValuesDPlus3P")
+process.dplus3pana_wrongsign_newreduced.MVACollection = cms.InputTag("dplus3pselectorWSNewReduced:MVAValuesNewDPlus3P")
 process.dplus3pana_wrongsign_newreduced.DCAValCollection = cms.InputTag("dplus3pselectorWSNewReduced:DCAValuesNewDPlus3P")
 process.dplus3pana_wrongsign_newreduced.DCAErrCollection = cms.InputTag("dplus3pselectorWSNewReduced:DCAErrorsNewDPlus3P")
 
 
 process.dplus3pana_seq2 = cms.Sequence(process.eventFilter_HM * process.dplus3pselectorNewReduced * process.dplus3pana_newreduced)
+#process.dplus3pana_seq2 = cms.Sequence(process.eventFilter_HM * process.dplus3pselectorNewReduced )
 process.dplus3pana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.dplus3pselectorWSNewReduced * process.dplus3pana_wrongsign_newreduced)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
@@ -188,4 +193,14 @@ for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
 changeToMiniAOD(process)
-process.options.numberOfThreads = 1
+process.options.numberOfThreads = 8
+process.options.numberOfStreams = 8
+
+# Define the output
+process.output = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring("keep *"),
+    fileName = cms.untracked.string("output.root"),
+)
+process.output_path = cms.EndPath(process.output)
+
+#process.schedule.append( process.output_path )

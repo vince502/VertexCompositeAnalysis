@@ -71,6 +71,8 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 
+#define DEBUG true
+
 
 //
 // class decleration
@@ -502,6 +504,10 @@ iSetup)
 void
 VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+#ifdef DEBUG
+    using std::cout;
+    using std::endl;
+#endif
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
     iEvent.getByToken(tok_offlinePV_,vertices);
@@ -528,6 +534,9 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
     
     edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle2;
     iEvent.getByToken(Dedx_Token2_, dEdxHandle2);
+#ifdef DEBUG
+cout << "Loaded tokens" << endl;
+#endif
     
     centrality=-1;
     if(isCentrality_)
@@ -612,6 +621,9 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
         Ntrkoffline++;
       }
     }
+#ifdef DEBUG
+cout << "Calculated offline Ntrk's" << endl;
+#endif
 
     //Gen info for matching
     if(doGenMatching_)
@@ -701,6 +713,9 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
             }
         }
     }
+#ifdef DEBUG
+cout << "Gen matching done" << endl;
+#endif
 
     //RECO Candidate info
     candSize = v0candidates_->size();
@@ -1512,6 +1527,9 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
             
             grand_dlos2D[it] = gdl2D/gdl2Derror;
         }
+#ifdef DEBUG
+cout << "Done reco single iter" << endl;
+#endif
 
         if(saveHistogram_)
         {
@@ -1572,6 +1590,9 @@ VertexCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::Event
         }
 
     }
+#ifdef DEBUG
+cout << "Fill reco done" << endl;
+#endif
 }
 
 void
