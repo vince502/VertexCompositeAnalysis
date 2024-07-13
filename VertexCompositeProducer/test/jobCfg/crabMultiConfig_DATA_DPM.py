@@ -5,7 +5,7 @@ from http.client import HTTPException
 from CRABClient.UserUtilities import config
 config = config()
 
-userName = "Soohwan"
+userName = "User"
 date = "11Jul2024"
 
 config.section_("General")
@@ -16,7 +16,7 @@ config.General.transferLogs = False
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
 #config.JobType.inputFiles = ['HeavyIonRPRcd_PbPb2018_offline.db']
-config.JobType.psetName = 'pPbSkimAndTree2016_DPlusMinus_Debug_cfg.py'
+config.JobType.psetName = '../PbPb2023_DPlusMinus_MB_cfg_v0.py'
 
 config.section_('Data')
 config.Data.inputDBS = 'global'
@@ -29,18 +29,7 @@ config.Data.publication = False
 config.JobType.allowUndistributedCMSSW = True
 config.Data.allowNonValidInputDataset = False
 
-#config.section_('Data')
-#config.Data.inputDBS = 'global'
-#config.Data.splitting = 'EventAwareLumiBased'
-#config.Data.lumiMask = 'Cert_Collisions2023HI_374288_375659_Muon.json'
-#config.Data.runRange = '374345-375823'
-#config.Data.unitsPerJob = 40
-#config.Data.totalUnits = -1 
-#config.Data.publication = False
-#config.JobType.allowUndistributedCMSSW = True
-#config.Data.allowNonValidInputDataset = False
-
-config.JobType.inputFiles = ["CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db"]
+config.JobType.inputFiles = ["../CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db"]
 
 config.section_('Site')
 #config.Data.ignoreLocality = True
@@ -79,7 +68,6 @@ for key, val in dataMap.items():
     config.JobType.maxMemoryMB = val["Memory"]
     config.JobType.maxJobRuntimeMin = val["RunTime"]
     config.Data.outputDatasetTag = config.General.requestName
-#    config.Data.outLFNDirBase = '/store/group/phys_heavyions/soohwan/Run3_2023/Skim/Data2023/OniaTree/MuonGolden_call6/%s' % (config.General.requestName)
     config.Data.outLFNDirBase = '/store/user/soohwan/Analysis/DStar_D0/%s/PbPb2023MinimumBias/%s' % (date, config.General.requestName)
 
     print("Submitting CRAB job for: "+val["PD"])
