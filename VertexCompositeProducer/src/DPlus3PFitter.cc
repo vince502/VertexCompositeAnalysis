@@ -392,19 +392,6 @@ void DPlus3PFitter::fitDPlusCandidates(
 
       for(unsigned int trdx3 = 0; trdx3 < theTrackRefs_sgn2.size(); trdx3++) {
 
-        TrackRef trackRef3 = theTrackRefs_sgn2[trdx3];
-        if (trackRef3 == trackRef1 || trackRef3 == trackRef2) continue;
-        TransientTrack* transTkPtr3 = &theTransTracks_sgn2[trdx3];
-        if( !trkTSCP31.isValid() ) continue;
-        double totalE31 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
-                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
-        double totalE31Sq = totalE31*totalE31;
-        double mass31 = sqrt( totalE31Sq - totalP3Sq);
-
-        if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) ) continue;
-        if( totalPt3 < dPtCut ) continue;
-  
 //        double dzvtx3 = trackRef3->dz(bestvtx);
 //        double dxyvtx3 = trackRef3->dxy(bestvtx);
 //        double dzerror3 = sqrt(trackRef3->dzError()*trackRef3->dzError()+bestvtxError.z()*bestvtxError.z());
@@ -414,12 +401,15 @@ void DPlus3PFitter::fitDPlusCandidates(
 
 //        double nhits3 = trackRef3->numberOfValidHits();
 //        double ptErr3 = trackRef3->ptError();
+//
+        TrackRef trackRef3 = theTrackRefs_sgn2[trdx3];
+        if (trackRef3 == trackRef1 || trackRef3 == trackRef2) continue;
+        TransientTrack* transTkPtr3 = &theTransTracks_sgn2[trdx3];
 
         transTracks.push_back(*transTkPtr3);
         FreeTrajectoryState trkState3 = transTkPtr3->impactPointTSCP().theState();
         if( !transTkPtr3->impactPointTSCP().isValid() ) continue;
 
-        // Measure distance between tracks at their closest approach
         ClosestApproachInRPhi cApp13;
         cApp13.calculate(trkState1, trkState3);
         if( !cApp13.status() ) continue;
@@ -427,17 +417,28 @@ void DPlus3PFitter::fitDPlusCandidates(
         GlobalPoint cxPt13 = cApp13.crossingPoint();
         if (dca13 < 0. || dca13 > tkDCACut) continue;
 
-        // Get trajectory states for the tracks at POCA for later cuts
         TrajectoryStateClosestToPoint trkTSCP31 =
           transTkPtr3->trajectoryStateClosestToPoint( cxPt13 );
-
-
-
+        if( !trkTSCP31.isValid() ) continue;
+        double totalE31 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
+                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
+                          sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
+        double totalE31Sq = totalE31*totalE31;
         double totalP3Sq =
           ( trkTSCP1.momentum() + trkTSCP2.momentum() + trkTSCP31.momentum()).mag2();
         double totalPt3 =
           ( trkTSCP1.momentum() + trkTSCP2.momentum() + trkTSCP31.momentum()).perp();
+        double mass31 = sqrt( totalE31Sq - totalP3Sq);
 
+
+
+
+        if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) ) continue;
+        if( totalPt3 < dPtCut ) continue;
+  
+
+        // Measure distance between tracks at their closest approach
+        // Get trajectory states for the tracks at POCA for later cuts
 
         // Create the vertex fitter object and vertex the tracks
         float cand1TotalE[2]={0.0};
