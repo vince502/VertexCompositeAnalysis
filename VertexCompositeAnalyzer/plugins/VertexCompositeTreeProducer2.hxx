@@ -1099,7 +1099,7 @@ void VertexCompositeTreeProducer2::initTree(){
     }
 };
 
-bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle* _gen_) const {
+bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
     reco::Candidate const* reco_trk1 = _dmeson_->daughter(0);
     reco::Candidate const* reco_trk2 = _dmeson_->daughter(1);
 
@@ -1123,7 +1123,7 @@ bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, 
 
 };
 
-bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle* _gen_) const {
+bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
     return _dmeson_->pdgId() != _gen_->pdgId();
 };
 
