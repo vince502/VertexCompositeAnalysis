@@ -391,21 +391,24 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm:
                   genDecayLength(*theGen, gen_D1decayLength2D_[it], gen_D1decayLength3D_[it], gen_D1angle2D_[it], gen_D1angle3D_[it] );
                   getAncestorId(*theGen, gen_D1ancestorId_[it], gen_D1ancestorFlavor_[it] );
 
-                  gen_D1pTD1_[it] = genDaus[0]->pt();
-                  gen_D1etaD1_[it] = genDaus[0]->eta();
-                  gen_D1phiD1_[it] = genDaus[0]->phi();
-                  gen_D1massD1_[it] = genDaus[0]->mass();
-                  gen_D1yD1_[it] = genDaus[0]->rapidity();
-                  gen_D1chargeD1_[it] = genDaus[0]->charge();
-                  gen_D1pdgIdD1_[it] = genDaus[0]->pdgId();
+                  const auto* genDau0 = theGen->daughter(0);
+                  const auto* genDau1 = theGen->daughter(1);
 
-                  gen_D1pTD2_[it] = genDaus[1]->pt();
-                  gen_D1etaD2_[it] = genDaus[1]->eta();
-                  gen_D1phiD2_[it] = genDaus[1]->phi();
-                  gen_D1massD2_[it] = genDaus[1]->mass();
-                  gen_D1yD2_[it] = genDaus[1]->rapidity();
-                  gen_D1chargeD2_[it] = genDaus[1]->charge();
-                  gen_D1pdgIdD2_[it] = genDaus[1]->pdgId();
+                  gen_D1pTD1_[it] = genDau0->pt();
+                  gen_D1etaD1_[it] = genDau0->eta();
+                  gen_D1phiD1_[it] = genDau0->phi();
+                  gen_D1massD1_[it] = genDau0->mass();
+                  gen_D1yD1_[it] = genDau0->rapidity();
+                  gen_D1chargeD1_[it] = genDau0->charge();
+                  gen_D1pdgIdD1_[it] = genDau0->pdgId();
+
+                  gen_D1pTD2_[it] = genDau1->pt();
+                  gen_D1etaD2_[it] = genDau1->eta();
+                  gen_D1phiD2_[it] = genDau1->phi();
+                  gen_D1massD2_[it] = genDau1->mass();
+                  gen_D1yD2_[it] = genDau1->rapidity();
+                  gen_D1chargeD2_[it] = genDau1->charge();
+                  gen_D1pdgIdD2_[it] = genDau1->pdgId();
                 }
 
                 matchGEN2[it] += matchHadron(recoD2, theGen);
@@ -438,21 +441,24 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm:
                   genDecayLength(*theGen, gen_D2decayLength2D_[it], gen_D2decayLength3D_[it], gen_D2angle2D_[it], gen_D2angle3D_[it] );
                   getAncestorId(*theGen, gen_D2ancestorId_[it], gen_D2ancestorFlavor_[it] );
 
-                  gen_D2pTD1_[it] = genDaus[0]->pt();
-                  gen_D2etaD1_[it] = genDaus[0]->eta();
-                  gen_D2phiD1_[it] = genDaus[0]->phi();
-                  gen_D2massD1_[it] = genDaus[0]->mass();
-                  gen_D2yD1_[it] = genDaus[0]->rapidity();
-                  gen_D2chargeD1_[it] = genDaus[0]->charge();
-                  gen_D2pdgIdD1_[it] = genDaus[0]->pdgId();
+                  const auto* genDau0 = theGen->daughter(0);
+                  const auto* genDau1 = theGen->daughter(1);
 
-                  gen_D2pTD2_[it] = genDaus[1]->pt();
-                  gen_D2etaD2_[it] = genDaus[1]->eta();
-                  gen_D2phiD2_[it] = genDaus[1]->phi();
-                  gen_D2massD2_[it] = genDaus[1]->mass();
-                  gen_D2yD2_[it] = genDaus[1]->rapidity();
-                  gen_D2chargeD2_[it] = genDaus[1]->charge();
-                  gen_D2pdgIdD2_[it] = genDaus[1]->pdgId();
+                  gen_D2pTD1_[it] = genDau0->pt();
+                  gen_D2etaD1_[it] = genDau0->eta();
+                  gen_D2phiD1_[it] = genDau0->phi();
+                  gen_D2massD1_[it] = genDau0->mass();
+                  gen_D2yD1_[it] = genDau0->rapidity();
+                  gen_D2chargeD1_[it] = genDau0->charge();
+                  gen_D2pdgIdD1_[it] = genDau0->pdgId();
+
+                  gen_D2pTD2_[it] = genDau1->pt();
+                  gen_D2etaD2_[it] = genDau1->eta();
+                  gen_D2phiD2_[it] = genDau1->phi();
+                  gen_D2massD2_[it] = genDau1->mass();
+                  gen_D2yD2_[it] = genDau1->rapidity();
+                  gen_D2chargeD2_[it] = genDau1->charge();
+                  gen_D2pdgIdD2_[it] = genDau1->pdgId();
                 }
                 
                 // std::vector<unsigned int> perm = {0, 1};
@@ -1527,9 +1533,7 @@ if( debug_ ) std::cout << "pass decay" << std::endl;
 
 // ------------ method called once each job just before starting event
 //loop  ------------
-void
-VertexCompositeTreeProducer2::beginJob()
-{
+void VertexCompositeTreeProducer2::beginJob(){
     TH1D::SetDefaultSumw2();
     
     if(!doRecoNtuple_ && !doGenNtuple_)
@@ -1544,7 +1548,7 @@ VertexCompositeTreeProducer2::beginJob()
     
     if(saveHistogram_) initHistogram();
     if(saveTree_) initTree();
-}
+};
 
 
 
@@ -1556,14 +1560,10 @@ int VertexCompositeTreeProducer2::muAssocToTrack( const reco::TrackRef& trackref
                                       m.track() == trackref    );
                            });
   return ( muon != muonh->cend() ? std::distance(muonh->cbegin(),muon) : -1 );
-}
+};
 
-// ------------ method called once each job just after ending the event
-//loop  ------------
-void 
 
-reco::GenParticleRef
-VertexCompositeTreeProducer2::findMother(const reco::GenParticleRef& genParRef)
+reco::GenParticleRef VertexCompositeTreeProducer2::findMother(const reco::GenParticleRef& genParRef)
 {
   if(genParRef.isNull()) return genParRef;
   reco::GenParticleRef genMomRef = genParRef;
@@ -1575,11 +1575,9 @@ VertexCompositeTreeProducer2::findMother(const reco::GenParticleRef& genParRef)
   }
   if(pdg==pdg_OLD) genMomRef = reco::GenParticleRef();
   return genMomRef;
-}
+};
 
-void
-VertexCompositeTreeProducer2::genDecayLength(const reco::GenParticle& gCand, float& gen_decayLength2D_, float& gen_decayLength3D_, float& gen_angle2D_, float& gen_angle3D_)
-{
+void VertexCompositeTreeProducer2::genDecayLength(const reco::GenParticle& gCand, float& gen_decayLength2D_, float& gen_decayLength3D_, float& gen_angle2D_, float& gen_angle3D_){
   gen_decayLength2D_ = -99.;
   gen_decayLength3D_ = -99.;
   gen_angle2D_ = -99;
@@ -1595,11 +1593,9 @@ VertexCompositeTreeProducer2::genDecayLength(const reco::GenParticle& gCand, flo
   TVector3 secvec2D(gCand.px(), gCand.py(), 0.0);
   gen_angle2D_ = secvec2D.Angle(ptosvec2D);
   gen_decayLength2D_ = ptosvec2D.Mag();
-}
+};
 
-void
-VertexCompositeTreeProducer2::getAncestorId(const reco::GenParticle& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ )
-{
+void VertexCompositeTreeProducer2::getAncestorId(const reco::GenParticle& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ ){
   gen_ancestorId_ = 0;
   gen_ancestorFlavor_ = 0;
   for (auto mothers = gCand.motherRefVector();
@@ -1614,5 +1610,5 @@ VertexCompositeTreeProducer2::getAncestorId(const reco::GenParticle& gCand, int&
     }
     if (std::abs(gen_ancestorId_) <= 40) break;
   }
-}
+};
 
