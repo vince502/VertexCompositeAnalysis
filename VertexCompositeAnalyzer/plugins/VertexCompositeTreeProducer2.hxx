@@ -654,7 +654,7 @@ VertexCompositeTreeProducer2::~VertexCompositeTreeProducer2()
 
 };
 
-VertexCompositeTreeProducer2::endJob() {
+void VertexCompositeTreeProducer2::endJob() {
     
 };
 
@@ -1099,7 +1099,7 @@ void VertexCompositeTreeProducer2::initTree(){
     }
 };
 
-bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle* _gen_){
+bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle* _gen_) const {
     reco::Candidate const* reco_trk1 = _dmeson_->daughter(0);
     reco::Candidate const* reco_trk2 = _dmeson_->daughter(1);
 
@@ -1123,11 +1123,11 @@ bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, 
 
 };
 
-bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle* _gen_){
+bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle* _gen_) const {
     return _dmeson_->pdgId() != _gen_->pdgId();
 };
 
-bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg= true){
+bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg= true) const {
     bool pass= false;
     // _deltaR_
     if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) return false;

@@ -355,11 +355,8 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm:
               for( unsigned int igen=0; igen<nGen; igen++){
                 auto const& theGen = genRefs.at(igen);
                 // Only works for 2 body two layer decay
-                reco::Candidate const* recoD1 = trk->daughter(0);
-                reco::Candidate const* recoD2 = trk->daughter(1);
-                // reco::Candidate const* recoDaus1[2] = {recoD1->daughter(0), recoD1->daughter(1)};
-                // reco::Candidate const* recoDaus2[2] = {recoD2->daughter(0), recoD2->daughter(1)};
-                // reco::Candidate const* genDaus[2] = {theGen->daughter(0), theGen->daughter(1)};
+                reco::Candidate const* recoD1 = trk.daughter(0);
+                reco::Candidate const* recoD2 = trk.daughter(1);
 
                 const auto nGenDau = theGen->numberOfDaughters();
                 if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
