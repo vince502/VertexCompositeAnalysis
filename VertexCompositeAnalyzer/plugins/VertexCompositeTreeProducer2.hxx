@@ -62,6 +62,8 @@
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 #include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
 
+// #define DEBUG
+
 #define PI 3.1415926
 #define MAXCAN 2000
 
@@ -85,7 +87,7 @@ private:
 
   bool matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const;
   bool checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const;
-  bool matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_) const;
+  bool matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg) const;
 
   int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
 
@@ -910,7 +912,7 @@ void VertexCompositeTreeProducer2::initTree(){
             VertexCompositeNtuple->Branch("EtaGrandD11",&grand_eta1,"EtaGrandD11[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD12",&grand_eta2,"EtaGrandD12[candSize]/F");
             VertexCompositeNtuple->Branch("PhiGrandD11",&grand_phi1,"PhiGrandD11[candSize]/F");
-            VertexCompositeNtuple->Branch("PhiGrandD12",&grand_phi1,"PhiGrandD12[candSize]/F");
+            VertexCompositeNtuple->Branch("PhiGrandD12",&grand_phi2,"PhiGrandD12[candSize]/F");
 //            VertexCompositeNtuple->Branch("chargeGrandD11",&grand_charge1,"chargeGrandD11[candSize]/I");
 //            VertexCompositeNtuple->Branch("chargeGrandD12",&grand_charge2,"chargeGrandD12[candSize]/I");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD11",&grand_H2dedx1,"dedxHarmonic2GrandD11[candSize]/F");
@@ -1080,13 +1082,13 @@ void VertexCompositeTreeProducer2::initTree(){
           VertexCompositeNtuple->Branch("pt_gen1",&pt_gen1,"pt_gen1[candSize_gen]/F");
           VertexCompositeNtuple->Branch("eta_gen1",&eta_gen1,"eta_gen1[candSize_gen]/F");
           VertexCompositeNtuple->Branch("phi_gen1",&phi_gen1,"phi_gen1[candSize_gen]/F");
-          VertexCompositeNtuple->Branch("status_gen1",&status_gen1,"status_gen1[candSize_gen]/F");
+          VertexCompositeNtuple->Branch("status_gen1",&status_gen1,"status_gen1[candSize_gen]/I");
 
           VertexCompositeNtuple->Branch("id_gen2",&idself2,"id_gen2[candSize_gen]/I");
-          VertexCompositeNtuple->Branch("mass_gen2",&mass_gen2,"mass_gen2[candSize_gen]/I");
-          VertexCompositeNtuple->Branch("pt_gen2",&pt_gen2,"pt_gen2[candSize_gen]/I");
-          VertexCompositeNtuple->Branch("eta_gen2",&eta_gen2,"eta_gen2[candSize_gen]/I");
-          VertexCompositeNtuple->Branch("phi_gen2",&phi_gen2,"phi_gen2[candSize_gen]/I");
+          VertexCompositeNtuple->Branch("mass_gen2",&mass_gen2,"mass_gen2[candSize_gen]/F");
+          VertexCompositeNtuple->Branch("pt_gen2",&pt_gen2,"pt_gen2[candSize_gen]/F");
+          VertexCompositeNtuple->Branch("eta_gen2",&eta_gen2,"eta_gen2[candSize_gen]/F");
+          VertexCompositeNtuple->Branch("phi_gen2",&phi_gen2,"phi_gen2[candSize_gen]/F");
           VertexCompositeNtuple->Branch("status_gen2",&status_gen2,"status_gen2[candSize_gen]/I");
         }
 
@@ -1103,36 +1105,71 @@ bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, 
     reco::Candidate const* reco_trk1 = _dmeson_->daughter(0);
     reco::Candidate const* reco_trk2 = _dmeson_->daughter(1);
 
-    reco::Candidate const* gen_trk1 = _gen_->daughter(0);
-    reco::Candidate const* gen_trk2 = _gen_->daughter(1);
+    reco::Candidate const* gen_trk1 = _gen_.daughter(0);
+    reco::Candidate const* gen_trk2 = _gen_.daughter(1);
 
     bool match = false;
-    if( matchTrackdR(reco_trk1, gen_trk1)){
-        if( matchTrackdR(reco_trk2, gen_trk2)) {
+#ifdef DEBUG
+    // cout << "Match 1 on 1 " ;
+#endif
+    if( matchTrackdR(reco_trk1, gen_trk1, true)){
+#ifdef DEBUG
+    // cout << "Match 2 on 2 " ;
+#endif
+        if( matchTrackdR(reco_trk2, gen_trk2, true)) {
             match = true;
+#ifdef DEBUG
+    // cout << endl ;
+#endif
             return match;
         }
     }    
-    if( matchTrackdR(reco_trk2, gen_trk1)){
-        if( matchTrackdR(reco_trk1, gen_trk2)) {
+#ifdef DEBUG
+    // cout << "Match 2 on 1 " ;
+#endif
+    if( matchTrackdR(reco_trk2, gen_trk1, true)){
+#ifdef DEBUG
+    // cout << "Match 1 on 2 " ;
+#endif
+        if( matchTrackdR(reco_trk1, gen_trk2, true)) {
             match = true;
+#ifdef DEBUG
+    // cout << endl ;
+#endif
             return match;
         }
     }    
+#ifdef DEBUG
+    // cout << endl ;
+#endif
     return match;
 
 };
 
 bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
-    return _dmeson_->pdgId() != _gen_->pdgId();
+    return _dmeson_->pdgId() != _gen_.pdgId();
 };
 
-bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg= true) const {
+bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg) const {
     bool pass= false;
-    // _deltaR_
-    if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) return false;
+    // deltaR_
+#ifdef DEBUG
+    // cout << "Charge : " << _recoTrk_->charge() << ", " <<  _genTrk_->charge() ;
+#endif
+    if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) {
+#ifdef DEBUG
+    // cout << endl ;
+#endif
+      return false;
+    }
     const double dR = reco::deltaR(*_recoTrk_, *_genTrk_);
-    if(dR < _deltaR_) pass = true;
+#ifdef DEBUG
+    // cout << ", mathTrk : (" << _recoTrk_->eta() << ", " << _genTrk_->eta() << "), (" << _recoTrk_->phi() << ", " << _genTrk_->phi() << ") -> dR = "<< dR ; 
+#endif
+    if(dR < deltaR_) pass = true;
+#ifdef DEBUG
+    // cout << Form(", dR, deltaR_ pass : %.3f %.3f %d", dR, deltaR_, pass) << endl;
+#endif
     return pass;
 };
 

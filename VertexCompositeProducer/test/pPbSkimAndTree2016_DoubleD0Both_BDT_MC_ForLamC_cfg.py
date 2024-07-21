@@ -31,9 +31,10 @@ process.source = cms.Source("PoolSource",
 #'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/5C4D85CB-959A-E711-8E76-0CC47A7EEE80.root',
 #'file:682C6215-7F9A-E711-AB29-0025901D49AC.root'
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/EvtGenMod/CMSSW_8_0_30/src/HIN-pPb816Summer16DR-00033.root'
-
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_1.root',
-'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_10.root',
+'file:HIN-pPb816Summer16DR-00033_68.root',
+'file:HIN-pPb816Summer16DR-00033_97.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_1.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_10.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_11.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_12.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_13.root',
@@ -84,7 +85,7 @@ process.source = cms.Source("PoolSource",
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20000))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_mcRun2_pA_v4'
 
@@ -100,6 +101,7 @@ process.hltHM.throw = cms.bool(False)
 
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
 process.colEvtSel = cms.Sequence(process.hfCoincFilter * process.primaryVertexFilterPA * process.NoScraping)
+
 
 process.eventFilter_HM = cms.Sequence(
 #    process.hltHM *
@@ -124,12 +126,12 @@ process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 
 process.generalD0CandidatesNew.trkPtSumCut = cms.double(0.0)
 process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(10.0)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(6)
-process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.3)
-process.generalD0CandidatesNew.alphaCut = cms.double(2.0)
-process.generalD0CandidatesNew.alpha2DCut = cms.double(2.0)
-process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(7)
+process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.12)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.7)
+process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
+process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -182,6 +184,7 @@ process.d0selectorMCNewReduced = process.d0selectorMC.clone()
 process.d0selectorMCNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
 process.d0selectorMCNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorMCNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
+process.d0selectorMCNewReduced.mvaMin = cms.untracked.double(0.0)
 
 process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorMCNewReduced:D0")
 process.generalDDCandidatesNew.MVACollection = cms.InputTag("d0selectorMCNewReduced:MVAValuesNewD0")
@@ -199,12 +202,24 @@ process.ddana_new.TrackCollection = cms.untracked.InputTag("generalTracks")
 process.ddana_new.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
 process.ddana_new.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
 process.ddana_new.useAnyMVA = cms.bool(True)
+# process.ddana_new.doGenMatching = cms.bool(True)
 process.ddana_new.debug = cms.untracked.bool(False)
 process.ddana_new.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValuesDD1")
 process.ddana_new.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
 
+process.ddana_old = process.ddana_mc_old.clone()
+process.ddana_old.twoLayerDecay = cms.untracked.bool(True)
+process.ddana_old.TrackCollection = cms.untracked.InputTag("generalTracks")
+process.ddana_old.DCAValCollection = cms.InputTag("generalDDCandidatesNew:DCAValuesDD")
+process.ddana_old.DCAErrCollection = cms.InputTag("generalDDCandidatesNew:DCAErrorsDD")
+process.ddana_old.useAnyMVA = cms.bool(True)
+# process.ddana_old.doGenMatching = cms.bool(True)
+process.ddana_old.debug = cms.untracked.bool(False)
+process.ddana_old.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValuesDD1")
+process.ddana_old.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.generalDDCandidatesNew * process.ddana_new)
+
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.generalDDCandidatesNew * process.ddana_new )
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
@@ -261,3 +276,5 @@ process.schedule = cms.Schedule(
 
 #process.outputPath = cms.EndPath(process.output)
 #process.schedule.append(process.outputPath)
+
+#process.options.numberOfThreads = cms.untracked.int32(1)

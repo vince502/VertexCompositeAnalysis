@@ -71,13 +71,14 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 
+// #define DEBUG2
 
 //
 // class decleration
 //
 
 #define PI 3.1416
-#define MAXCAN 1000
+#define MAXCAN 2000
 
 using namespace std;
 
@@ -336,6 +337,8 @@ private:
     float grand_p2[MAXCAN];
     float grand_eta1[MAXCAN];
     float grand_eta2[MAXCAN];
+    float grand_phi1[MAXCAN];
+    float grand_phi2[MAXCAN];
     int grand_charge1[MAXCAN];
     int grand_charge2[MAXCAN];
     float grand_H2dedx1[MAXCAN];
@@ -361,6 +364,8 @@ private:
     float grand_p22[MAXCAN];
     float grand_eta21[MAXCAN];
     float grand_eta22[MAXCAN];
+    float grand_phi21[MAXCAN];
+    float grand_phi22[MAXCAN];
     int grand_charge21[MAXCAN];
     int grand_charge22[MAXCAN];
     float grand_H2dedx21[MAXCAN];
@@ -1043,6 +1048,9 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                     const bool unMatchDR = dR > deltaR_;
                     const bool unMatchDPt = dPt > 0.5;
                     _matchGEN_ = !(unMatchCharge || unMatchDR || unMatchDPt);
+#ifdef DEBUG2
+cout << Form("gen %d etas: (%.4f, %.4f), phis: (%.4f, %.4f), match : %d", igen, recoDaus1[iDau]->eta(), genDaus[iDau]->eta(), recoDaus1[iDau]->phi(), recoDaus1[iDau]->phi(), _matchGEN_)  << endl;
+#endif
                     if(_matchGEN_) { 
                       // isSwap1[it] = ((recoDaus1[iDau]->pdgId()/abs(recoDaus1[iDau]->pdgId())) != (theGen->pdgId()/abs(theGen->pdgId()))); 
                       isSwap1[it] = ((trk.daughter(0)->pdgId()) != (theGen->pdgId())); 
@@ -1050,6 +1058,9 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                       matchToGen1[it] = igen; 
                       break;
                     }
+#ifdef DEBUG2
+cout << Form("it %d match : %d, swap: %d", it, _matchGEN_, isSwap1[it]) <<  nGen << endl;
+#endif
                   }
                   if(matchGEN1[it]) break;
                   matchGEN1[it] = _matchGEN_;
@@ -1728,6 +1739,9 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
             //track eta
             grand_eta1[it] = gd1->eta();
             grand_eta2[it] = gd2->eta();
+
+            grand_phi1[it] = gd1->phi();
+            grand_phi2[it] = gd2->phi();
             
             //track charge
             grand_charge1[it] = gd1->charge();
@@ -1868,6 +1882,9 @@ if( debug_ && d1->pt()== d2->pt()  ) std::cout << "Two daughter is same" << std:
                 //track eta
                 grand_eta21[it] = gd21->eta();
                 grand_eta22[it] = gd22->eta();
+
+                grand_phi21[it] = gd21->phi();
+                grand_phi22[it] = gd22->phi();
 
                 //track charge
                 grand_charge21[it] = gd21->charge();
@@ -2368,6 +2385,8 @@ VertexCompositeTreeProducerNew::initTree()
 //            VertexCompositeNtuple->Branch("pGrandD12",&grand_p2,"pGrandD12[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD11",&grand_eta1,"EtaGrandD11[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD12",&grand_eta2,"EtaGrandD12[candSize]/F");
+            VertexCompositeNtuple->Branch("PhiGrandD11",&grand_phi1,"PhiGrandD11[candSize]/F");
+            VertexCompositeNtuple->Branch("PhiGrandD12",&grand_phi2,"PhiGrandD12[candSize]/F");
 //            VertexCompositeNtuple->Branch("chargeGrandD11",&grand_charge1,"chargeGrandD11[candSize]/I");
 //            VertexCompositeNtuple->Branch("chargeGrandD12",&grand_charge2,"chargeGrandD12[candSize]/I");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD11",&grand_H2dedx1,"dedxHarmonic2GrandD11[candSize]/F");
@@ -2410,6 +2429,8 @@ VertexCompositeTreeProducerNew::initTree()
 //            VertexCompositeNtuple->Branch("pGrandD22",&grand_p22,"pGrandD2[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD21",&grand_eta21,"EtaGrandD21[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD22",&grand_eta22,"EtaGrandD22[candSize]/F");
+            VertexCompositeNtuple->Branch("PhiGrandD21",&grand_phi21,"PhiGrandD21[candSize]/F");
+            VertexCompositeNtuple->Branch("PhiGrandD22",&grand_phi22,"PhiGrandD22[candSize]/F");
 //            VertexCompositeNtuple->Branch("chargeGrandD21",&grand_charge21,"chargeGrandD1[candSize]/I");
 //            VertexCompositeNtuple->Branch("chargeGrandD22",&grand_charge22,"chargeGrandD2[candSize]/I");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD21",&grand_H2dedx21,"dedxHarmonic2GrandD21[candSize]/F");

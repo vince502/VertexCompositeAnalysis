@@ -1628,7 +1628,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
           auto gbrVal = forest->GetClassifier(gbrVals_);
 
           if(gbrVal < mvaMin_ || gbrVal > mvaMax_) continue;
-          if(gbrVal < GetMVACut(y,pt)) continue;
+          // if(gbrVal < GetMVACut(y,pt)) continue;
 
           theMVANew.push_back( gbrVal );
         } 
@@ -1647,10 +1647,22 @@ VertexCompositeSelector::GetMVACut(double y, double pt)
   if(fabs(y)>2.4) return 1.0;
 
   //temporary
-  if(pt<4) return 0.3;
-  else if(pt>4 && pt<6) return 0.3;
-  else if(pt>6 && pt<8) return -0.2;
-  else return -1.0;
+  if(pt<4) {
+    // cout << "CUT!!" << endl;
+    return 0.3;
+  }
+  else if(pt>4 && pt<6){
+    // cout << "CUT!!" << endl;
+     return 0.3;
+  }
+  else if(pt>6 && pt<8){
+    cout << "CUT!!" << endl;
+    return -0.2;
+  } 
+  else{
+    // cout << "CUT!!" << endl;
+     return -1.0;
+  }
 
   if(!hist_bdtcut) return mvacut;
 

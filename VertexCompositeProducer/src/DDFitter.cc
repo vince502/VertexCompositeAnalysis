@@ -52,6 +52,9 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
+
+#define DEBUG
+
 const float piMassDD = 0.13957018;
 const float piMassDDSquared = piMassDD*piMassDD;
 const float dStarMassDD = 2.010000;
