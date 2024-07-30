@@ -50,6 +50,9 @@ d0selectorMCBDTPreCut = d0selectorMC.clone(
   trkEtaDiffMax = cms.untracked.double(1.),
   trkNHitMin = cms.untracked.int32(11),
 
+  cand3DPointingAngleMax = cms.untracked.double(1.0),
+  cand2DPointingAngleMax = cms.untracked.double(1.0),
+
   GBRForestFileName = cms.string(''),
 )
 

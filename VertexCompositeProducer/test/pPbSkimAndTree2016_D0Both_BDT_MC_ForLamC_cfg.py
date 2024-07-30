@@ -43,7 +43,7 @@ process.source = cms.Source("PoolSource",
 )
 
 # =============== Other Statements =====================
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(400))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_mcRun2_pA_v4'
 
@@ -116,6 +116,10 @@ process.d0selectorMCNewReduced = process.d0selectorMC.clone()
 process.d0selectorMCNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
 process.d0selectorMCNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorMCNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
+process.d0selectorMCNewReduced.candpTMin = cms.untracked.double(2.0)
+process.d0selectorMCNewReduced.candYMin = cms.untracked.double(-1.0)
+process.d0selectorMCNewReduced.candYMax = cms.untracked.double(1.0)
+process.d0selectorMCNewReduced.mvaMin = cms.untracked.double(-1)
 process.d0selectorMCNewReducedWS = process.d0selectorMCWS.clone()
 process.d0selectorMCNewReducedWS.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
 process.d0selectorMCNewReducedWS.DCAValCollection = cms.InputTag("generalD0CandidatesNewWrongSign:DCAValuesD0")
@@ -147,7 +151,7 @@ process.p2 = cms.Path(process.eventFilter_HM * process.d0ana_wrongsign_seq2)
 process.schedule = cms.Schedule(
     process.eventFilter_HM_step,
     process.d0rereco_step,
-    process.d0rereco_wrongsign_step,
+#    process.d0rereco_wrongsign_step,
     process.p1,
-    process.p2,
+#    process.p2,
 )
