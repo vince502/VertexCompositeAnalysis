@@ -1,413 +1,11 @@
-//// system include files
-//#include <memory>
-//#include <string>
-//#include <vector>
-//#include <iostream>
-//#include <math.h>
-//
-//#include <TH1.h>
-//#include <TH2.h>
-//#include <TTree.h>
-//#include <TFile.h>
-//#include <TROOT.h>
-//#include <TSystem.h>
-//#include <TString.h>
-//#include <TObjString.h>
-//#include <TCanvas.h>
-//#include <TVector3.h>
-//#include <TMatrixD.h>
-//#include <TRandom.h>
-//#include <TMath.h>
-//
-//// user include files
-//#include "FWCore/Framework/interface/Frameworkfwd.h"
-//#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-//
-//#include "FWCore/Framework/interface/Event.h"
-//#include "FWCore/Framework/interface/MakerMacros.h"
-//
-//#include "FWCore/ParameterSet/interface/ParameterSet.h"
-//#include "FWCore/Utilities/interface/InputTag.h"
-//
-//#include "DataFormats/TrackReco/interface/Track.h"
-//#include "DataFormats/TrackReco/interface/TrackFwd.h"
-//#include "FWCore/MessageLogger/interface/MessageLogger.h"
-//
-//#include "DataFormats/VertexReco/interface/Vertex.h"
-//#include "DataFormats/VertexReco/interface/VertexFwd.h"
-//
-//#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
-//
-//#include "DataFormats/Candidate/interface/Candidate.h"
-//#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
-//#include "DataFormats/Candidate/interface/VertexCompositeCandidateFwd.h"
-//
-//#include "FWCore/ServiceRegistry/interface/Service.h"
-//#include "CommonTools/UtilAlgos/interface/TFileService.h"
-//
-//#include "DataFormats/TrackReco/interface/DeDxData.h"
-//
-//#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-//#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-//#include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
-//#include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
-//
-//#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-//
-//#include "DataFormats/PatCandidates/interface/Muon.h"
-//#include "DataFormats/MuonReco/interface/Muon.h"
-//#include "DataFormats/MuonReco/interface/MuonFwd.h"
-//#include "DataFormats/MuonReco/interface/MuonChamberMatch.h"
-//#include "DataFormats/MuonReco/interface/MuonSegmentMatch.h"
-//#include "DataFormats/HeavyIonEvent/interface/CentralityBins.h"
-//#include "DataFormats/HeavyIonEvent/interface/Centrality.h"
-//#include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
 #include "VertexCompositeAnalysis/VertexCompositeAnalyzer/plugins/VertexCompositeTreeProducer2.h"
-//
-////#include "RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneFlatten.h"
-////#include "RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h"
-////#include "RecoHI/HiEvtPlaneAlgos/interface/LoadEPDB.h"
-//
-//#include <Math/Functions.h>
-//#include <Math/SVector.h>
-//#include <Math/SMatrix.h>
-//
+
 #define DEBUG true
 
-
-//
-// class decleration
-//
 
 #define PI 3.1416
 #define MAXCAN 50000
 
-//using namespace std;
-//
-//class VertexCompositeTreeProducer : public edm::one::EDAnalyzer<> {
-//public:
-//  explicit VertexCompositeTreeProducer(const edm::ParameterSet&);
-//  ~VertexCompositeTreeProducer();
-//
-//  using MVACollection = std::vector<float>;
-//
-//private:
-//  virtual void beginJob() ;
-//  virtual void analyze(const edm::Event&, const edm::EventSetup&);
-//  virtual void fillRECO(const edm::Event&, const edm::EventSetup&) ;
-//  virtual void fillGEN(const edm::Event&, const edm::EventSetup&) ;
-//  virtual void endJob() ;
-//  virtual void initHistogram();
-//  virtual void initTree();
-//  void genDecayLength(const uint&, const reco::GenParticle&);
-//
-//  int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
-//
-//  // ----------member data ---------------------------
-//    
-//    edm::Service<TFileService> fs;
-//
-//    TTree* VertexCompositeNtuple;
-//    TH2F*  hMassVsMVA[6][10];
-//    TH2F*  hpTVsMVA[6][10];
-//    TH2F*  hetaVsMVA[6][10];
-//    TH2F*  hyVsMVA[6][10];
-//    TH2F*  hVtxProbVsMVA[6][10];
-//    TH2F*  h3DCosPointingAngleVsMVA[6][10];
-//    TH2F*  h3DPointingAngleVsMVA[6][10];
-//    TH2F*  h2DCosPointingAngleVsMVA[6][10];
-//    TH2F*  h2DPointingAngleVsMVA[6][10];
-//    TH2F*  h3DDecayLengthSignificanceVsMVA[6][10];
-//    TH2F*  h3DDecayLengthVsMVA[6][10];
-//    TH2F*  h2DDecayLengthSignificanceVsMVA[6][10];
-//    TH2F*  h2DDecayLengthVsMVA[6][10];
-//    TH2F*  h3DDCAVsMVA[6][10];
-//    TH2F*  h2DDCAVsMVA[6][10];
-//    TH2F*  hzDCASignificanceDaugther1VsMVA[6][10];
-//    TH2F*  hxyDCASignificanceDaugther1VsMVA[6][10];
-//    TH2F*  hNHitD1VsMVA[6][10];
-//    TH2F*  hpTD1VsMVA[6][10];
-//    TH2F*  hpTerrD1VsMVA[6][10];
-//    TH2F*  hEtaD1VsMVA[6][10];
-//    TH2F*  hdedxHarmonic2D1VsMVA[6][10];
-//    TH2F*  hdedxHarmonic2D1VsP[6][10];
-//    TH2F*  hzDCASignificanceDaugther2VsMVA[6][10];
-//    TH2F*  hxyDCASignificanceDaugther2VsMVA[6][10];
-//    TH2F*  hNHitD2VsMVA[6][10];
-//    TH2F*  hpTD2VsMVA[6][10];
-//    TH2F*  hpTerrD2VsMVA[6][10];
-//    TH2F*  hEtaD2VsMVA[6][10];
-//    TH2F*  hdedxHarmonic2D2VsMVA[6][10];
-//    TH2F*  hdedxHarmonic2D2VsP[6][10];
-//    TH2F*  hzDCASignificanceDaugther3VsMVA[6][10];
-//    TH2F*  hxyDCASignificanceDaugther3VsMVA[6][10];
-//    TH2F*  hNHitD3VsMVA[6][10];
-//    TH2F*  hpTD3VsMVA[6][10];
-//    TH2F*  hpTerrD3VsMVA[6][10];
-//    TH2F*  hEtaD3VsMVA[6][10];
-//    TH2F*  hdedxHarmonic2D3VsMVA[6][10];
-//    TH2F*  hdedxHarmonic2D3VsP[6][10];
-//    
-//    bool   saveTree_;
-//    bool   saveHistogram_;
-//    bool   saveAllHistogram_;
-//    double massHistPeak_;
-//    double massHistWidth_;
-//    int    massHistBins_;
-//
-//    //options
-//    bool doRecoNtuple_;
-//    bool doGenNtuple_;   
-//    bool doGenMatching_;
-//    bool doGenMatchingTOF_;
-//    bool hasSwap_;
-//    bool decayInGen_;
-//    bool twoLayerDecay_;
-//    bool threeProngDecay_;
-//    bool doMuon_;
-//    bool doMuonFull_;
-//    int PID_;
-//    int PID_dau1_;
-//    int PID_dau2_;
-//    int PID_dau3_;
-//    
-//    //cut variables
-//    double multMax_;
-//    double multMin_;
-//    double deltaR_; //deltaR for Gen matching
-//
-//    vector<double> pTBins_;
-//    vector<double> yBins_;
-//
-//    //tree branches
-//    //event info
-//    int centrality;
-//    int Ntrkoffline;
-//    int Npixel;
-//    float HFsumETPlus;
-//    float HFsumETMinus;
-//    float ZDCPlus;
-//    float ZDCMinus;
-//    float bestvx;
-//    float bestvy;
-//    float bestvz;
-//    int candSize;
-//    float ephfpAngle[3];
-//    float ephfmAngle[3];
-//    float ephfpQ[3];
-//    float ephfmQ[3];
-//    float ephfpSumW;
-//    float ephfmSumW;
-//    
-//    //Composite candidate info
-//    float mva[MAXCAN];
-//    float pt[MAXCAN];
-//    float eta[MAXCAN];
-//    float phi[MAXCAN];
-//    float flavor[MAXCAN];
-//    float y[MAXCAN];
-//    float mass[MAXCAN];
-//    float VtxProb[MAXCAN];
-//    float dlos[MAXCAN];
-//    float dl[MAXCAN];
-//    float dlerror[MAXCAN];
-//    float agl[MAXCAN];
-//    float vtxChi2[MAXCAN];
-//    float ndf[MAXCAN];
-//    float agl_abs[MAXCAN];
-//    float agl2D[MAXCAN];
-//    float agl2D_abs[MAXCAN];
-//    float dlos2D[MAXCAN];
-//    float dl2D[MAXCAN];
-//    bool isSwap[MAXCAN];
-//    bool matchGEN[MAXCAN];
-//    int idmom_reco[MAXCAN];
-//    float gen_agl_abs[MAXCAN];
-//    float gen_agl2D_abs[MAXCAN];
-//    float gen_dl[MAXCAN];
-//    float gen_dl2D[MAXCAN];
-//    
-//    //dau candidate info
-//    float grand_mass[MAXCAN];
-//    float grand_VtxProb[MAXCAN];
-//    float grand_dlos[MAXCAN];
-//    float grand_dl[MAXCAN];
-//    float grand_dlerror[MAXCAN];
-//    float grand_agl[MAXCAN];
-//    float grand_vtxChi2[MAXCAN];
-//    float grand_ndf[MAXCAN];
-//    float grand_agl_abs[MAXCAN];
-//    float grand_agl2D[MAXCAN];
-//    float grand_agl2D_abs[MAXCAN];
-//    float grand_dlos2D[MAXCAN];
-//
-//    //dau info
-//    float dzos1[MAXCAN];
-//    float dzos2[MAXCAN];
-//    float dzos3[MAXCAN];
-//    float dxyos1[MAXCAN];
-//    float dxyos2[MAXCAN];
-//    float dxyos3[MAXCAN];
-//    float nhit1[MAXCAN];
-//    float nhit2[MAXCAN];
-//    float nhit3[MAXCAN];
-//    bool trkquality1[MAXCAN];
-//    bool trkquality2[MAXCAN];
-//    bool trkquality3[MAXCAN];
-//    float pt1[MAXCAN];
-//    float pt2[MAXCAN];
-//    float pt3[MAXCAN];
-//    float ptErr1[MAXCAN];
-//    float ptErr2[MAXCAN];
-//    float ptErr3[MAXCAN];
-//    float p1[MAXCAN];
-//    float p2[MAXCAN];
-//    float p3[MAXCAN];
-//    float eta1[MAXCAN];
-//    float eta2[MAXCAN];
-//    float eta3[MAXCAN];
-//    float phi1[MAXCAN];
-//    float phi2[MAXCAN];
-//    float phi3[MAXCAN];
-//    int charge1[MAXCAN];
-//    int charge2[MAXCAN];
-//    int charge3[MAXCAN];
-//    int pid1[MAXCAN];
-//    int pid2[MAXCAN];
-//    int pid3[MAXCAN];
-//    float tof1[MAXCAN];
-//    float tof2[MAXCAN];
-//    float tof3[MAXCAN];
-//    float H2dedx1[MAXCAN];
-//    float H2dedx2[MAXCAN];
-//    float H2dedx3[MAXCAN];
-//    float T4dedx1[MAXCAN];
-//    float T4dedx2[MAXCAN];
-//    float T4dedx3[MAXCAN];
-//    float trkChi1[MAXCAN];
-//    float trkChi2[MAXCAN];
-//    float trkChi3[MAXCAN];
-//   
-//    //grand-dau info
-//    float grand_dzos1[MAXCAN];
-//    float grand_dzos2[MAXCAN];
-//    float grand_dxyos1[MAXCAN];
-//    float grand_dxyos2[MAXCAN];
-//    float grand_nhit1[MAXCAN];
-//    float grand_nhit2[MAXCAN];
-//    bool grand_trkquality1[MAXCAN];
-//    bool grand_trkquality2[MAXCAN];
-//    float grand_pt1[MAXCAN];
-//    float grand_pt2[MAXCAN];
-//    float grand_ptErr1[MAXCAN];
-//    float grand_ptErr2[MAXCAN];
-//    float grand_p1[MAXCAN];
-//    float grand_p2[MAXCAN];
-//    float grand_eta1[MAXCAN];
-//    float grand_eta2[MAXCAN];
-//    int grand_charge1[MAXCAN];
-//    int grand_charge2[MAXCAN];
-//    float grand_H2dedx1[MAXCAN];
-//    float grand_H2dedx2[MAXCAN];
-//    float grand_T4dedx1[MAXCAN];
-//    float grand_T4dedx2[MAXCAN];
-//    float grand_trkChi1[MAXCAN];
-//    float grand_trkChi2[MAXCAN];
-//    
-//    //dau muon info
-//    bool  onestmuon1[MAXCAN];
-//    bool  onestmuon2[MAXCAN];
-//    bool  pfmuon1[MAXCAN];
-//    bool  pfmuon2[MAXCAN];
-//    bool  glbmuon1[MAXCAN];
-//    bool  glbmuon2[MAXCAN];
-//    bool  trkmuon1[MAXCAN];
-//    bool  trkmuon2[MAXCAN];
-//    bool  calomuon1[MAXCAN];
-//    bool  calomuon2[MAXCAN];
-//    bool  softmuon1[MAXCAN];
-//    bool  softmuon2[MAXCAN];
-//    float nmatchedst1[MAXCAN];
-//    float nmatchedch1[MAXCAN];
-//    float ntrackerlayer1[MAXCAN];
-//    float npixellayer1[MAXCAN];
-//    float matchedenergy1[MAXCAN];
-//    float nmatchedst2[MAXCAN];
-//    float nmatchedch2[MAXCAN];
-//    float ntrackerlayer2[MAXCAN];
-//    float npixellayer2[MAXCAN];
-//    float matchedenergy2[MAXCAN];
-//    float dx1_seg_[MAXCAN];
-//    float dy1_seg_[MAXCAN];
-//    float dxSig1_seg_[MAXCAN];
-//    float dySig1_seg_[MAXCAN];
-//    float ddxdz1_seg_[MAXCAN];
-//    float ddydz1_seg_[MAXCAN];
-//    float ddxdzSig1_seg_[MAXCAN];
-//    float ddydzSig1_seg_[MAXCAN];
-//    float dx2_seg_[MAXCAN];
-//    float dy2_seg_[MAXCAN];
-//    float dxSig2_seg_[MAXCAN];
-//    float dySig2_seg_[MAXCAN];
-//    float ddxdz2_seg_[MAXCAN];
-//    float ddydz2_seg_[MAXCAN];
-//    float ddxdzSig2_seg_[MAXCAN];
-//    float ddydzSig2_seg_[MAXCAN];
-//
-//    // gen info    
-//    int candSize_gen;
-//    float pt_gen[MAXCAN];
-//    float eta_gen[MAXCAN];
-//    int status_gen[MAXCAN];
-//    int idmom[MAXCAN];
-//    float y_gen[MAXCAN];
-//    int iddau1[MAXCAN];
-//    int iddau2[MAXCAN];
-//    int iddau3[MAXCAN];
-//
-//    //vector for gen match
-//    vector< vector<double> > *pVect;
-//    vector<double> *Dvector1;
-//    vector<double> *Dvector2;
-//    vector<double> *Dvector3;
-//    vector<int> *pVectIDmom;
-//    
-//    bool useAnyMVA_;
-//    bool isSkimMVA_;
-//    bool isCentrality_;
-//    bool isEventPlane_;
-//
-//    edm::Handle<int> cbin_;
-//
-//    //tokens
-//    edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
-//    edm::EDGetTokenT<reco::TrackCollection> tok_generalTrk_;
-//    edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> recoVertexCompositeCandidateCollection_Token_;
-//    edm::EDGetTokenT<MVACollection> MVAValues_Token_;
-//
-//    edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
-//    edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token2_;
-//    edm::EDGetTokenT<reco::GenParticleCollection> tok_genParticle_;
-//    edm::EDGetTokenT<reco::MuonCollection> tok_muon_;
-//
-//    edm::EDGetTokenT<int> tok_centBinLabel_;
-//    edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
-//
-//    edm::EDGetTokenT<reco::EvtPlaneCollection> tok_eventplaneSrc_;
-//};
-//
-////
-//// constants, enums and typedefs
-////
-//
-////
-//// static data member definitions
-////
-//
-////
-//// constructors and destructor
-////
-//
 VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet& iConfig)
 {
     //options
@@ -630,160 +228,68 @@ cout << "Calculated offline Ntrk's" << endl;
           // cout << doGenMatching_ << endl;
           // cout << genpars.isValid() << endl;
           #endif
-    //Gen info for matching
-    if(doGenMatching_)
-    {
-        pVect = new vector< vector<double>>;
-        gpVect = new vector< vector<double>>;
-        pVectIDmom = new vector<int>;
-
-        
-//        edm::Handle<reco::GenParticleCollection> genpars;
-//        iEvent.getByToken(tok_genParticle_,genpars);
-        
-        if(!genpars.isValid())
-        {
-            cerr<<"Gen matching cannot be done without Gen collection!!"<<endl;
-            return;
-        }
-
-        for(unsigned it=0; it<genpars->size(); ++it){
-            
-            const reco::GenParticle & trk = (*genpars)[it];
-            
-            int id = trk.pdgId();
-            #ifdef DEBUG
-            // cout << "mom pdg Id : " << id << endl;
-            #endif
-            if(fabs(id)!=PID_) continue; //check is target
-            if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
-            if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
-            // if(!(trk.status()==1)) continue;
-            #ifdef DEBUG
-            cout << "pdg Id after filtering : " << id << endl;
-            cout << "trk status : "<< trk.status() << endl;
-            #endif
-            
-            int idmom_tmp = -77;
-
-            
-            
-            if(trk.numberOfMothers()!=0)
-            {
-                const reco::Candidate * mom = trk.mother();
-                idmom_tmp = mom->pdgId();
-            #ifdef DEBUG
-            cout << "# of mother particle : " <<trk.numberOfMothers() << endl;
-            cout << "mom pdg ID : " <<idmom_tmp << endl;
-            #endif
-            }
-            
-            const reco::Candidate * Dd1 = trk.daughter(0);
-            const reco::Candidate * Dd2 = trk.daughter(1);
-            const reco::Candidate * Dd3 = 0;            
-
-            if(!threeProngDecay_ && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_) && !(fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd1->pdgId())==PID_dau2_)) continue; //check daughter id                
-
-            if(threeProngDecay_)
-            {
-              Dd3 = trk.daughter(2);
-              if(!(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau2_ && fabs(Dd3->pdgId())==PID_dau3_)
-              && !(fabs(Dd1->pdgId())==PID_dau1_ && fabs(Dd2->pdgId())==PID_dau3_ && fabs(Dd3->pdgId())==PID_dau2_)
-              && !(fabs(Dd1->pdgId())==PID_dau2_ && fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd3->pdgId())==PID_dau3_)
-              && !(fabs(Dd1->pdgId())==PID_dau2_ && fabs(Dd2->pdgId())==PID_dau3_ && fabs(Dd3->pdgId())==PID_dau1_)
-              && !(fabs(Dd1->pdgId())==PID_dau3_ && fabs(Dd2->pdgId())==PID_dau1_ && fabs(Dd3->pdgId())==PID_dau2_)
-              && !(fabs(Dd1->pdgId())==PID_dau3_ && fabs(Dd2->pdgId())==PID_dau2_ && fabs(Dd3->pdgId())==PID_dau1_) ) continue;
-            }
-
-            Dvector1 = new vector<double>;
-            Dvector2 = new vector<double>;
-            GDvector1 = new vector<double>;
-            GDvector2 = new vector<double>;
-            
-            Dvector1->push_back(Dd1->pt());
-            Dvector1->push_back(Dd1->eta());
-            Dvector1->push_back(Dd1->phi());
-            Dvector1->push_back(Dd1->charge());
-            Dvector1->push_back(Dd1->mass());
-            Dvector1->push_back(Dd1->pdgId());
-            if(Dd1->pdgId()==PID_dau1_ && twoLayerDecay_)
-            {
-              if(!(fabs(Dd1->daughter(0)->pdgId())==321 &&fabs(Dd1->daughter(1)->pdgId())==211) && !(fabs(Dd1->daughter(0)->pdgId())==211 &&fabs(Dd1->daughter(1)->pdgId())==321)) continue;
-           GDvector1->push_back(Dd1->daughter(0)->pt());
-           GDvector1->push_back(Dd1->daughter(0)->eta());
-           GDvector1->push_back(Dd1->daughter(0)->phi());
-           GDvector1->push_back(Dd1->daughter(0)->charge());
-           GDvector1->push_back(Dd1->daughter(0)->mass());
-           GDvector1->push_back(Dd1->daughter(0)->pdgId());
-           GDvector2->push_back(Dd1->daughter(1)->pt());
-           GDvector2->push_back(Dd1->daughter(1)->eta());
-           GDvector2->push_back(Dd1->daughter(1)->phi());
-           GDvector2->push_back(Dd1->daughter(1)->charge());
-           GDvector2->push_back(Dd1->daughter(1)->mass());
-           GDvector2->push_back(Dd1->daughter(1)->pdgId());
-            gpVect->push_back(*GDvector1);
-            gpVect->push_back(*GDvector2);
-          delete GDvector1 ;
-          delete GDvector2 ;
-            }
-            Dvector1->push_back(it);
-            
-            Dvector2->push_back(Dd2->pt());
-            Dvector2->push_back(Dd2->eta());
-            Dvector2->push_back(Dd2->phi());
-            Dvector2->push_back(Dd2->charge());
-            Dvector2->push_back(Dd2->mass());
-            Dvector2->push_back(Dd2->pdgId());
-            if(Dd2->pdgId()==PID_dau1_ && twoLayerDecay_)
-            {
-              if(!(fabs(Dd2->daughter(0)->pdgId())==321 &&fabs(Dd2->daughter(1)->pdgId())==211) || !(fabs(Dd2->daughter(0)->pdgId())==211 &&fabs(Dd2->daughter(1)->pdgId())==321)) continue;
-           GDvector1->push_back(Dd2->daughter(0)->pt());
-           GDvector1->push_back(Dd2->daughter(0)->eta());
-           GDvector1->push_back(Dd2->daughter(0)->phi());
-           GDvector1->push_back(Dd2->daughter(0)->charge());
-           GDvector1->push_back(Dd2->daughter(0)->mass());
-           GDvector2->push_back(Dd2->daughter(1)->pt());
-           GDvector2->push_back(Dd2->daughter(1)->eta());
-           GDvector2->push_back(Dd2->daughter(1)->phi());
-           GDvector2->push_back(Dd2->daughter(1)->charge());
-           GDvector2->push_back(Dd2->daughter(1)->mass());
-            gpVect->push_back(*GDvector1);
-            gpVect->push_back(*GDvector2);
-          delete GDvector1; 
-          delete GDvector2;
-            }
-            
-            pVect->push_back(*Dvector1);
-            pVect->push_back(*Dvector2);
-            
-            pVectIDmom->push_back(idmom_tmp);
-            #ifdef DEBUG
-            cout << "Dd1 pdg Id : " << Dd1->pdgId() << endl;
-            cout << "Dd2 pdg Id : " << Dd2->pdgId() << endl;
-            #endif
-            
-            delete Dvector1;
-            delete Dvector2;
-
-            if(threeProngDecay_)
-            {
-              Dvector3 = new vector<double>;
-
-              Dvector3->push_back(Dd3->pt());
-              Dvector3->push_back(Dd3->eta());
-              Dvector3->push_back(Dd3->phi());
-              Dvector3->push_back(Dd3->charge());
-              Dvector3->push_back(Dd3->mass());
-              Dvector2->push_back(Dd2->pdgId());
-
-              pVect->push_back(*Dvector3);
-              delete Dvector3;
-            }
-        }
-    }
 #ifdef DEBUG
 cout << "Gen matching done" << endl;
 #endif
+
+    std::vector<reco::GenParticleRef> genRefs;
+    if(doGenMatching_){
+        if(!genpars.isValid())
+        { cout<<"Gen matching cannot be done without Gen collection!!"<<endl; return; }
+        for(unsigned int it=0; it<genpars->size(); ++it){
+            const reco::GenParticle & trk = (*genpars)[it];
+            int id = trk.pdgId();
+            if(fabs(id)!=PID_) continue; //check is target
+            if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
+            if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
+
+            // wrong when considering two layer decay
+            int nDau = threeProngDecay_ ? 3 : 2;
+            std::vector<unsigned int> idxs;
+            std::vector<unsigned int> permutations(nDau);
+            std::iota(permutations.begin(), permutations.end(), 0);
+            std::sort(permutations.begin(), permutations.end());
+            if (!threeProngDecay_) {
+              do {
+                auto Dd1 = trk.daughter( permutations.at(0) );
+                auto Dd2 = trk.daughter( permutations.at(1) );
+                if (abs(Dd1->pdgId()) == PID_dau1_ && abs(Dd2->pdgId()) == PID_dau2_) {
+                  if(twoLayerDecay_){
+                    // Magic numbers, _permutations -> number of D0 daughters;
+                    std::vector<unsigned int> _permutations(2);
+                    std::iota(_permutations.begin(), _permutations.end(), 0);
+                    std::sort(_permutations.begin(), _permutations.end());
+                    do {
+                      auto Ddd1 = Dd1->daughter( _permutations.at(0) );
+                      auto Ddd2 = Dd1->daughter( _permutations.at(1) );
+                      if (abs(Ddd1->pdgId()) == 211 && abs(Ddd2->pdgId()) == 321) {
+                        idxs = permutations;
+                        break;
+                      }
+                    } while (std::next_permutation(_permutations.begin(), _permutations.end()));
+                    if(!idxs.empty()) break;
+                  }
+                }
+              } while (std::next_permutation(permutations.begin(), permutations.end()));
+            } else {
+              do {
+                auto Dd1 = trk.daughter( permutations.at(0) );
+                auto Dd2 = trk.daughter( permutations.at(1) );
+                auto Dd3 = trk.daughter( permutations.at(2) );
+
+                if (abs(Dd1->pdgId()) == PID_dau1_
+                    && abs(Dd2->pdgId()) == PID_dau2_
+                    && abs(Dd3->pdgId() == PID_dau3_)) {
+                  idxs = permutations;
+                  break;
+                }
+              } while (std::next_permutation(permutations.begin(), permutations.end()));
+            }
+            if (decayInGen_ && idxs.empty()) continue;
+            genRefs.push_back(reco::GenParticleRef(genpars, it));
+        }
+        //if (genRefs.size()>1) std::cout << "More than one target of generated particles\n";
+    }
 
     //RECO Candidate info
     candSize = v0candidates_->size();
@@ -824,214 +330,84 @@ cout << "Gen matching done" << endl;
         if(threeProngDecay_) d3 = trk.daughter(2);
 
         //Gen match
-        if(doGenMatching_)
+        if(doGenMatching_ && twoLayerDecay_)
         {
             matchGEN[it] = false;
-            matchGEN[it] = false;
-            int nGenDau = (int)gpVect->size();
+            int nGen = ;
             isSwap[it] = false;
             idmom_reco[it] = -77;
-                  #ifdef DEBUG
-                  cout << "nGenDau :" << nGenDau << endl;
-                  #endif
-            
-            for(int i=0;i<nGenDau;i++)
-            {
-                  #ifdef DEBUG
-                  cout << "d1 pdg ID : " << d1->pdgId() << endl;
-                  cout << "d2 pdg ID : " << d2->pdgId() << endl;
-                  cout << "d1 # of daughter :" << d1->numberOfDaughters() << endl;
-                  cout << "d2 # of daughter :" << d2->numberOfDaughters() << endl;
-                  #endif
-                vector<double> Dvector1 = (*gpVect)[i]; //get GEN daugther vector
-                  #ifdef DEBUG
-                  cout << "d1 Charge : " << gd1->charge() << endl;
-                  cout << "Dd1 Charge : " << Dvector1.at(3) << endl;
-                  cout << "Dd1 pdgID : " << Dvector1.at(5) << endl;
-                  #endif
-                  
-                  // if(twoLayerDecay_ && Dvector.at(5)==PID_dau1_){
+            idBAnc_reco[it] = -77;
 
+              for( unsigned int igen=0; igen<nGen; igen++){
+                auto const& theGenDStar = genRefs.at(igen);
+                unsigned int idxD0 = -1;
+                if( abs(theGenDStar->daughter(0)->pdgId()) = 421 ) idxD0 = 0;
+                auto const& theGenD0 = genRefs.at(igen)->daughter(idxD0);
+                auto const& theGenPion = genRefs.at(igen)->daughter(1- idxD0);
+                // Only works for 2 body two layer decay
+                reco::Candidate const* recoD1;
+                reco::Candidate const* recoPi;
+                unsigned int idxRecoD0 = -1;
+                if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
+                recoD1 = trk.daughter(idxRecoD0);
+                recoPi = trk.daughter(1-idxRecoD0);
 
-                  // }
-                  // else continue;
-                  // {
-                  // const reco::Candidate * gd1 = d1->daughter(0);
-                  // const reco::Candidate * gd2 = d1->daughter(1);
-                  // double deltaR_1 = sqrt(pow(gd1->eta()-Dvector1.at(6),2)+pow(gd1->phi()-Dvector1.at(7),2));
-                  // double deltaR_2 = sqrt(pow(gd1->eta()-Dvector1.at(6),2)+pow(gd1->phi()-Dvector1.at(7),2));
-                  // #ifdef DEBUG
-                  // cout << "deltaR_1 : " << deltaR_1 << endl;
-                  // cout << "deltaR_2 : " << deltaR_2 << endl;
-                  // #endif
-                  // }
+                const auto nGenDau = theGen->numberOfDaughters();
+                if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
 
-                // if(d1->charge()!=Dvector1.at(3)) continue; //check match charge
-                // double deltaR = sqrt(pow(d1->eta()-Dvector1.at(1),2)+pow(d1->phi()-Dvector1.at(2),2));
-                if(gd1->charge()!=Dvector1.at(3)) continue; //check match charge
-                double deltaR = sqrt(pow(gd1->eta()-Dvector1.at(1),2)+pow(gd1->phi()-Dvector1.at(2),2));
-                  
-                
-                if(deltaR > deltaR_) continue; //check deltaR matching
-                if(fabs((gd1->pt()-Dvector1.at(0))/gd1->pt()) > 0.5) continue; //check deltaPt matching
-                double d1massGEN = Dvector1.at(4);
-                double d1mass = gd1->mass();
-                double d2massGEN=0, d2mass=0;
-                double d3massGEN=0, d3mass=0;
+                matchGEN[it] += (matchHadron(recoD1, theGenD0), matchHadron(recoPi, theGenPion));
+                if(matchGEN[it]){
+                  isSwap[it] = checkSwap(recoD1, theGenD0);
+                  auto mom_ref = findMother(theGenDStar);
+                  if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
+                  int __count_anc__ = 0;
+                  auto __ref_anc__ = mom_ref;
+                  while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
+                    __ref_anc__ = findMother(__ref_anc__);
+                    if( __ref_anc__.isNonnull()){
+                      if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
+                        idBAnc_reco[it] = __ref_anc__->pdgId();
+                  } } }
 
-                if(nGenDau%2==0)
-                {
-                  if(i%2==0)
-                  {
-                    vector<double> Dvector2 = (*gpVect)[i+1]; //get GEN daugther vector for track2
-                    if(gd2->charge()!=Dvector2.at(3)) continue; //check match charge
-                    double deltaR = sqrt(pow(gd2->eta()-Dvector2.at(1),2)+pow(gd2->phi()-Dvector2.at(2),2));
-                    
-                    if(deltaR > deltaR_) continue; //check deltaR matching
-                    if(fabs((gd2->pt()-Dvector2.at(0))/gd2->pt()) > 0.5) continue; //check deltaPt matching
-                    d2massGEN = Dvector2.at(4);
-                    d2mass = gd2->mass();
-                    
-                    matchGEN[it] = true; //matched gen
-                  #ifdef DEBUG
-                  cout << "gd2 charge : " << gd2->charge() << endl;
-                  cout << "gd1 charge : " << gd1->charge() << endl;
-                  cout << "gd2 massGEN : " << d2massGEN << endl;
-                  cout << "gd2 mass : " <<gd2->mass() << endl;
-                  cout << "gd1 mass : " << gd1->mass() << endl;
-                  #endif
-                  }
+                  matchGen_D0pT_[it] = theGenD0->pt();
+                  matchGen_D0eta_[it] = theGenD0->eta();
+                  matchGen_D0phi_[it] = theGenD0->phi();
+                  matchGen_D0mass_[it] = theGenD0->mass();
+                  matchGen_D0y_[it] = theGenD0->rapidity();
+                  matchGen_D0charge_[it] = theGenD0->charge();
+                  matchGen_D0pdgId_[it] = theGenD0->pdgId();
 
-                  if(i%2==1)
-                  {
-                    vector<double> Dvector2 = (*gpVect)[i-1]; //get GEN daugther vector for track2
-                    if(gd2->charge()!=Dvector2.at(3)) continue; //check match charge
-                    double deltaR = sqrt(pow(gd2->eta()-Dvector2.at(1),2)+pow(gd2->phi()-Dvector2.at(2),2));
-                    
-                    if(deltaR > deltaR_) continue; //check deltaR matching
-                    if(fabs((gd2->pt()-Dvector2.at(0))/gd2->pt()) > 0.5) continue; //check deltaPt matching
-                    d2massGEN = Dvector2.at(4);
-                    d2mass = gd2->mass();
-                    
-                    matchGEN[it] = true; //matched gen
-                    // pionFlavor[it]= d2.pdgId()==Dvector2.at(5)? 1 : 0  
-                  #ifdef DEBUG
-                  cout << gd2->charge() << endl;
-                  cout << "gd1 charge : " << gd1->charge() << endl;
-                  cout << "gd2 massGEN : " << d2massGEN << endl;
-                  cout << "gd2 mass : " <<gd2->mass() << endl;
-                  cout << "gd1 mass : " << gd1->mass() << endl;
-                  #endif
-                  }
+                  genDecayLength(*theGen, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+                  getAncestorId(*theGen, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
 
-                  //check swap
-                  if(abs(d1massGEN - d1mass)>0.01 || abs(d2massGEN - d2mass)>0.01) isSwap[it] = true;
+                  const auto* genDau0 = theGen->daughter(0);
+                  const auto* genDau1 = theGen->daughter(1);
 
-                  //check prompt & record mom id
-                  idmom_reco[it] = pVectIDmom->at(i/2);
+                  matchGen_D0Dau1pT_[it] = genDau0->pt();
+                  matchGen_D0Dau1eta_[it] = genDau0->eta();
+                  matchGen_D0Dau1phi_[it] = genDau0->phi();
+                  matchGen_D0Dau1mass_[it] = genDau0->mass();
+                  matchGen_D0Dau1y_[it] = genDau0->rapidity();
+                  matchGen_D0Dau1charge_[it] = genDau0->charge();
+                  matchGen_D0Dau1pdgId_[it] = genDau0->pdgId();
+
+                  matchGen_D0Dau2pT_[it] = genDau1->pt();
+                  matchGen_D0Dau2eta_[it] = genDau1->eta();
+                  matchGen_D0Dau2phi_[it] = genDau1->phi();
+                  matchGen_D0Dau2mass_[it] = genDau1->mass();
+                  matchGen_D0Dau2y_[it] = genDau1->rapidity();
+                  matchGen_D0Dau2charge_[it] = genDau1->charge();
+                  matchGen_D0Dau2pdgId_[it] = genDau1->pdgId();
+
+                  matchGen_D1pT_[it] = theGenPion->pt();
+                  matchGen_D1eta_[it] = theGenPion->eta();
+                  matchGen_D1phi_[it] = theGenPion->phi();
+                  matchGen_D1mass_[it] = theGenPion->mass();
+                  matchGen_D1y_[it] = theGenPion->rapidity();
+                  matchGen_D1charge_[it] = theGenPion->charge();
+                  matchGen_D1pdgId_[it] = theGenPion->pdgId();
                 }
-
-                if(nGenDau==3)
-                {
-                  if(i%3==0)
-                  {
-                    vector<double> Dvector2 = (*pVect)[i+1]; //get GEN daugther vector for track2
-                    vector<double> Dvector3 = (*pVect)[i+2]; //get GEN daugther vector for track3
-
-                    if(!(d2->charge()==Dvector2.at(3) && d3->charge()==Dvector3.at(3)) 
-                    && !(d3->charge()==Dvector2.at(3) && d2->charge()==Dvector3.at(3))) continue; //check match charge
-
-                    double deltaR22 = sqrt(pow(d2->eta()-Dvector2.at(1),2)+pow(d2->phi()-Dvector2.at(2),2));
-                    double deltaR33 = sqrt(pow(d3->eta()-Dvector3.at(1),2)+pow(d3->phi()-Dvector3.at(2),2));
-                    double deltaR23 = sqrt(pow(d2->eta()-Dvector3.at(1),2)+pow(d2->phi()-Dvector3.at(2),2));
-                    double deltaR32 = sqrt(pow(d3->eta()-Dvector2.at(1),2)+pow(d3->phi()-Dvector2.at(2),2));
-
-                    if(!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_) ) continue;
-
-                    double deltaPt22 = fabs((d2->pt()-Dvector2.at(0))/d2->pt());
-                    double deltaPt33 = fabs((d3->pt()-Dvector3.at(0))/d3->pt());
-                    double deltaPt23 = fabs((d2->pt()-Dvector3.at(0))/d2->pt());
-                    double deltaPt32 = fabs((d3->pt()-Dvector2.at(0))/d3->pt());
-
-                    if( !(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5) ) continue; //check deltaPt matching
-
-                    d2massGEN = Dvector2.at(4);
-                    d2mass = d2->mass();
-                    d3massGEN = Dvector3.at(4);
-                    d3mass = d3->mass();
-
-                    matchGEN[it] = true; //matched gen
-                  }
-
-                  if(i%3==1)
-                  {
-                    vector<double> Dvector2 = (*pVect)[i-1]; //get GEN daugther vector for track2
-                    vector<double> Dvector3 = (*pVect)[i+1]; //get GEN daugther vector for track3
-
-                    if(!(d2->charge()==Dvector2.at(3) && d3->charge()==Dvector3.at(3))
-                    && !(d3->charge()==Dvector2.at(3) && d2->charge()==Dvector3.at(3))) continue; //check match charge
-
-                    double deltaR22 = sqrt(pow(d2->eta()-Dvector2.at(1),2)+pow(d2->phi()-Dvector2.at(2),2));
-                    double deltaR33 = sqrt(pow(d3->eta()-Dvector3.at(1),2)+pow(d3->phi()-Dvector3.at(2),2));
-                    double deltaR23 = sqrt(pow(d2->eta()-Dvector3.at(1),2)+pow(d2->phi()-Dvector3.at(2),2));
-                    double deltaR32 = sqrt(pow(d3->eta()-Dvector2.at(1),2)+pow(d3->phi()-Dvector2.at(2),2));
-
-                    if(!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_) ) continue;
-
-                    double deltaPt22 = fabs((d2->pt()-Dvector2.at(0))/d2->pt());
-                    double deltaPt33 = fabs((d3->pt()-Dvector3.at(0))/d3->pt());
-                    double deltaPt23 = fabs((d2->pt()-Dvector3.at(0))/d2->pt());
-                    double deltaPt32 = fabs((d3->pt()-Dvector2.at(0))/d3->pt());
-
-                    if( !(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5) ) continue; //check deltaPt matching
-
-                    d2massGEN = Dvector2.at(4);
-                    d2mass = d2->mass();
-                    d3massGEN = Dvector3.at(4);
-                    d3mass = d3->mass();
-
-                    matchGEN[it] = true; //matched gen
-                  }
-
-                  if(i%3==2)
-                  { 
-                    vector<double> Dvector2 = (*pVect)[i-2]; //get GEN daugther vector for track2
-                    vector<double> Dvector3 = (*pVect)[i-1]; //get GEN daugther vector for track3
-
-                    if(!(d2->charge()==Dvector2.at(3) && d3->charge()==Dvector3.at(3))
-                    && !(d3->charge()==Dvector2.at(3) && d2->charge()==Dvector3.at(3))) continue; //check match charge
-
-                    double deltaR22 = sqrt(pow(d2->eta()-Dvector2.at(1),2)+pow(d2->phi()-Dvector2.at(2),2));
-                    double deltaR33 = sqrt(pow(d3->eta()-Dvector3.at(1),2)+pow(d3->phi()-Dvector3.at(2),2));
-                    double deltaR23 = sqrt(pow(d2->eta()-Dvector3.at(1),2)+pow(d2->phi()-Dvector3.at(2),2));
-                    double deltaR32 = sqrt(pow(d3->eta()-Dvector2.at(1),2)+pow(d3->phi()-Dvector2.at(2),2));
-
-                    if(!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_) ) continue;
-
-                    double deltaPt22 = fabs((d2->pt()-Dvector2.at(0))/d2->pt());
-                    double deltaPt33 = fabs((d3->pt()-Dvector3.at(0))/d3->pt());
-                    double deltaPt23 = fabs((d2->pt()-Dvector3.at(0))/d2->pt());
-                    double deltaPt32 = fabs((d3->pt()-Dvector2.at(0))/d3->pt());
-
-                    if( !(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5) ) continue; //check deltaPt matching
-
-                    d2massGEN = Dvector2.at(4);
-                    d2mass = d2->mass();
-                    d3massGEN = Dvector3.at(4);
-                    d3mass = d3->mass();
-
-                    matchGEN[it] = true; //matched gen
-                  }
-
-                  //check swap
-                  if(abs(d1massGEN - d1mass)>0.01 || abs(d2massGEN - d2mass)>0.01 || abs(d3massGEN - d3mass)>0.01) isSwap[it] = true;
-                  
-                  //check prompt & record mom id
-                  idmom_reco[it] = pVectIDmom->at(i/3);
-                }
-                genDecayLength(it, genpars->at(pVect->at(0).at(5)));
-
-            }
+              } // END for nGen
         }
         
         double pxd1 = d1->px();
@@ -1877,6 +1253,7 @@ VertexCompositeTreeProducer2::initTree()
     // particle info
     VertexCompositeNtuple->Branch("pT",&pt,"pT[candSize]/F");
     VertexCompositeNtuple->Branch("y",&y,"y[candSize]/F");
+    VertexCompositeNtuple->Branch("eta",&eta,"eta[candSize]/F");
     VertexCompositeNtuple->Branch("phi",&phi,"phi[candSize]/F");
     VertexCompositeNtuple->Branch("mass",&mass,"mass[candSize]/F");
     if(useAnyMVA_) VertexCompositeNtuple->Branch("mva",&mva,"mva[candSize]/F");
@@ -1885,17 +1262,15 @@ VertexCompositeTreeProducer2::initTree()
     {
         //Composite candidate info RECO
         VertexCompositeNtuple->Branch("flavor",&flavor,"flavor[candSize]/F");
-//        VertexCompositeNtuple->Branch("eta",&eta,"eta[candSize]/F");
         VertexCompositeNtuple->Branch("VtxProb",&VtxProb,"VtxProb[candSize]/F");
-//        VertexCompositeNtuple->Branch("VtxChi2",&vtxChi2,"VtxChi2[candSize]/F");
-//        VertexCompositeNtuple->Branch("VtxNDF",&ndf,"VtxNDF[candSize]/F");
+        VertexCompositeNtuple->Branch("VtxChi2",&vtxChi2,"VtxChi2[candSize]/F");
+        VertexCompositeNtuple->Branch("VtxNDF",&ndf,"VtxNDF[candSize]/F");
         VertexCompositeNtuple->Branch("3DCosPointingAngle",&agl,"3DCosPointingAngle[candSize]/F");
         VertexCompositeNtuple->Branch("3DPointingAngle",&agl_abs,"3DPointingAngle[candSize]/F");
         VertexCompositeNtuple->Branch("2DCosPointingAngle",&agl2D,"2DCosPointingAngle[candSize]/F");
         VertexCompositeNtuple->Branch("2DPointingAngle",&agl2D_abs,"2DPointingAngle[candSize]/F");
         VertexCompositeNtuple->Branch("3DDecayLengthSignificance",&dlos,"3DDecayLengthSignificance[candSize]/F");
         VertexCompositeNtuple->Branch("3DDecayLength",&dl,"3DDecayLength[candSize]/F");
-//        VertexCompositeNtuple->Branch("3DDecayLengthError",&dlerror,"3DDecayLengthError[candSize]/F");
         VertexCompositeNtuple->Branch("2DDecayLengthSignificance",&dlos2D,"2DDecayLengthSignificance[candSize]/F");
         VertexCompositeNtuple->Branch("2DDecayLength",&dl2D,"2DDecayLength[candSize]/F");
     
@@ -1904,10 +1279,50 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("isSwap",&isSwap,"isSwap[candSize]/O");
             VertexCompositeNtuple->Branch("idmom_reco",&idmom_reco,"idmom_reco[candSize]/I");
             VertexCompositeNtuple->Branch("matchGEN",&matchGEN,"matchGEN[candSize]/O");
-            VertexCompositeNtuple->Branch("gen3DPointingAngle",&gen_agl_abs,"gen3DPointingAngle[candSize]/F");
-            VertexCompositeNtuple->Branch("gen2DPointingAngle",&gen_agl2D_abs,"gen2DPointingAngle[candSize]/F");
-            VertexCompositeNtuple->Branch("gen3DDecayLength",&gen_dl,"gen3DDecayLength[candSize]/F");
-            VertexCompositeNtuple->Branch("gen2DDecayLength",&gen_dl2D,"gen2DDecayLength[candSize]/F");
+            VertexCompositeNtuple->Branch("matchGen3DPointingAngle",&gen_agl_abs,"gen3DPointingAngle[candSize]/F");
+            VertexCompositeNtuple->Branch("matchGen2DPointingAngle",&gen_agl2D_abs,"gen2DPointingAngle[candSize]/F");
+            VertexCompositeNtuple->Branch("matchGen3DDecayLength",&gen_dl,"gen3DDecayLength[candSize]/F");
+            VertexCompositeNtuple->Branch("matchGen2DDecayLength",&gen_dl2D,"gen2DDecayLength[candSize]/F");
+            VertexCompositeNtuple->Branch("matchGen_pT",&gen_pT_, "gen_pT[candSize]F");
+            VertexCompositeNtuple->Branch("matchGen_eta",&gen_eta_, "gen_eta[candSize]F");
+            VertexCompositeNtuple->Branch("matchGen_phi",&gen_phi_, "gen_phi[candSize]F");
+            VertexCompositeNtuple->Branch("matchGen_mass",&gen_mass_, "gen_mass[candSize]F");
+            VertexCompositeNtuple->Branch("matchGen_y",&gen_y_, "gen_y[candSize]F");
+            VertexCompositeNtuple->Branch("matchGen_charge",&gen_charge_, "gen_charge[candSize]F");
+            VertexCompositeNtuple->Branch("matchGen_pdgId",&gen_pdgId_, "gen_pdgId[candSize]I");
+            if(twoLayerDecay_){
+    					VertexCompositeNtuple->Branch("matchGen_D0pT",&matchGen_D0pT_, "matchGen_D0pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0eta",&matchGen_D0eta_, "matchGen_D0eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0phi",&matchGen_D0phi_, "matchGen_D0phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0mass",&matchGen_D0mass_, "matchGen_D0mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0y",&matchGen_D0y_, "matchGen_D0y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0charge",&matchGen_D0charge_, "matchGen_D0charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0pdgId",&matchGen_D0pdgId_, "matchGen_D0pdgId[candSize]I");
+
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_pT",&matchGen_D0Dau1_pT_, "matchGen_D0Dau1_pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_eta",&matchGen_D0Dau1_eta_, "matchGen_D0Dau1_eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_phi",&matchGen_D0Dau1_phi_, "matchGen_D0Dau1_phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_mass",&matchGen_D0Dau1_mass_, "matchGen_D0Dau1_mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_y",&matchGen_D0Dau1_y_, "matchGen_D0Dau1_y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_charge",&matchGen_D0Dau1_charge_, "matchGen_D0Dau1_charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_pdgId",&matchGen_D0Dau1_pdgId_, "matchGen_D0Dau1_pdgId[candSize]I");
+
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_pT",&matchGen_D0Dau2_pT_, "matchGen_D0Dau2_pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_eta",&matchGen_D0Dau2_eta_, "matchGen_D0Dau2_eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_phi",&matchGen_D0Dau2_phi_, "matchGen_D0Dau2_phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_mass",&matchGen_D0Dau2_mass_, "matchGen_D0Dau2_mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_y",&matchGen_D0Dau2_y_, "matchGen_D0Dau2_y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_charge",&matchGen_D0Dau2_charge_, "matchGen_D0Dau2_charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_pdgId",&matchGen_D0Dau2_pdgId_, "matchGen_D0Dau2_pdgId[candSize]I");
+
+    					VertexCompositeNtuple->Branch("matchGen_D1pT",&matchGen_D1pT_, "matchGen_D1pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D1eta",&matchGen_D1eta_, "matchGen_D1eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D1phi",&matchGen_D1phi_, "matchGen_D1phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D1mass",&matchGen_D1mass_, "matchGen_D1mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D1y",&matchGen_D1y_, "matchGen_D1y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D1charge",&matchGen_D1charge_, "matchGen_D1charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_D1pdgId",&matchGen_D1pdgId_, "matchGen_D1pdgId[candSize]I");
+            }
         }
         
         if(doGenMatchingTOF_)
@@ -1926,8 +1341,8 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("EtaD1",&eta1,"EtaD1[candSize]/F");
             VertexCompositeNtuple->Branch("PhiD1",&phi1,"PhiD1[candSize]/F");
             VertexCompositeNtuple->Branch("VtxProbDaugther1",&grand_VtxProb,"VtxProbDaugther1[candSize]/F");
-//            VertexCompositeNtuple->Branch("VtxChi2Daugther1",&grand_vtxChi2,"VtxChi2Daugther1[candSize]/F");
-//            VertexCompositeNtuple->Branch("VtxNDFDaugther1",&grand_ndf,"VtxNDFDaugther1[candSize]/F");
+            VertexCompositeNtuple->Branch("VtxChi2Daugther1",&grand_vtxChi2,"VtxChi2Daugther1[candSize]/F");
+            VertexCompositeNtuple->Branch("VtxNDFDaugther1",&grand_ndf,"VtxNDFDaugther1[candSize]/F");
             VertexCompositeNtuple->Branch("3DCosPointingAngleDaugther1",&grand_agl,"3DCosPointingAngleDaugther1[candSize]/F");
             VertexCompositeNtuple->Branch("3DPointingAngleDaugther1",&grand_agl_abs,"3DPointingAngleDaugther1[candSize]/F");
             VertexCompositeNtuple->Branch("2DCosPointingAngleDaugther1",&grand_agl2D,"2DCosPointingAngleDaugther1[candSize]/F");
@@ -1941,13 +1356,11 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("NHitD2",&nhit2,"NHitD2[candSize]/F");
             VertexCompositeNtuple->Branch("HighPurityDaugther2",&trkquality2,"HighPurityDaugther2[candSize]/O");
             VertexCompositeNtuple->Branch("pTD2",&pt2,"pTD2[candSize]/F");
-            VertexCompositeNtuple->Branch("pTerrD2",&ptErr2,"pTerrD2[candSize]/F");
-//            VertexCompositeNtuple->Branch("pD2",&p2,"pD2[candSize]/F");
             VertexCompositeNtuple->Branch("EtaD2",&eta2,"EtaD2[candSize]/F");
             VertexCompositeNtuple->Branch("PhiD2",&phi2,"PhiD2[candSize]/F");
-//            VertexCompositeNtuple->Branch("chargeD2",&charge2,"chargeD2[candSize]/I");
+            VertexCompositeNtuple->Branch("pTerrD1",&ptErr2,"pTerrD2[candSize]/F");
+            VertexCompositeNtuple->Branch("pTerrD2",&ptErr2,"pTerrD2[candSize]/F");
             VertexCompositeNtuple->Branch("dedxHarmonic2D2",&H2dedx2,"dedxHarmonic2D2[candSize]/F");
-//            VertexCompositeNtuple->Branch("dedxTruncated40Daugther2",&T4dedx2,"dedxTruncated40Daugther2[candSize]/F");
 //            VertexCompositeNtuple->Branch("normalizedChi2Daugther2",&trkChi2,"normalizedChi2Daugther2[candSize]/F");
             VertexCompositeNtuple->Branch("zDCASignificanceGrandDaugther1",&grand_dzos1,"zDCASignificanceGrandDaugther1[candSize]/F");
             VertexCompositeNtuple->Branch("zDCASignificanceGrandDaugther2",&grand_dzos2,"zDCASignificanceGrandDaugther2[candSize]/F");
@@ -1961,18 +1374,10 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("pTGrandD2",&grand_pt2,"pTGrandD2[candSize]/F");
             VertexCompositeNtuple->Branch("pTerrGrandD1",&grand_ptErr1,"pTerrGrandD1[candSize]/F");
             VertexCompositeNtuple->Branch("pTerrGrandD2",&grand_ptErr2,"pTerrGrandD2[candSize]/F");
-//            VertexCompositeNtuple->Branch("pGrandD1",&grand_p1,"pGrandD1[candSize]/F");
-//            VertexCompositeNtuple->Branch("pGrandD2",&grand_p2,"pGrandD2[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD1",&grand_eta1,"EtaGrandD1[candSize]/F");
             VertexCompositeNtuple->Branch("EtaGrandD2",&grand_eta2,"EtaGrandD2[candSize]/F");
-//            VertexCompositeNtuple->Branch("chargeGrandD1",&grand_charge1,"chargeGrandD1[candSize]/I");
-//            VertexCompositeNtuple->Branch("chargeGrandD2",&grand_charge2,"chargeGrandD2[candSize]/I");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD1",&grand_H2dedx1,"dedxHarmonic2GrandD1[candSize]/F");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD2",&grand_H2dedx2,"dedxHarmonic2GrandD2[candSize]/F");
-//            VertexCompositeNtuple->Branch("dedxTruncated40GrandDaugther1",&grand_T4dedx1,"dedxTruncated40GrandDaugther1[candSize]/F");
-//            VertexCompositeNtuple->Branch("dedxTruncated40GrandDaugther2",&grand_T4dedx2,"dedxTruncated40GrandDaugther2[candSize]/F");
-//            VertexCompositeNtuple->Branch("normalizedChi2GrandDaugther1",&grand_trkChi1,"normalizedChi2GrandDaugther1[candSize]/F");
-//            VertexCompositeNtuple->Branch("normalizedChi2GrandDaugther2",&grand_trkChi2,"normalizedChi2GrandDaugther2[candSize]/F");
         }
         else
         {
@@ -2063,18 +1468,51 @@ VertexCompositeTreeProducer2::initTree()
     if(doGenNtuple_)
     {
         VertexCompositeNtuple->Branch("candSize_gen",&candSize_gen,"candSize_gen/I");
-        VertexCompositeNtuple->Branch("pT_gen",&pt_gen,"pT_gen[candSize_gen]/F");
-        VertexCompositeNtuple->Branch("eta_gen",&eta_gen,"eta_gen[candSize_gen]/F");
-        VertexCompositeNtuple->Branch("y_gen",&y_gen,"y_gen[candSize_gen]/F");
-        VertexCompositeNtuple->Branch("status_gen",&status_gen,"status_gen[candSize_gen]/I");
-        VertexCompositeNtuple->Branch("MotherID_gen",&idmom,"MotherID_gen[candSize_gen]/I");
+        VertexCompositeNtuple->Branch("gen_pT",&pt_gen,"pT_gen[candSize_gen]/F");
+        VertexCompositeNtuple->Branch("gen_eat",&eta_gen,"eta_gen[candSize_gen]/F");
+        VertexCompositeNtuple->Branch("gen_y",&y_gen,"y_gen[candSize_gen]/F");
+        VertexCompositeNtuple->Branch("gen_status",&status_gen,"status_gen[candSize_gen]/I");
+        VertexCompositeNtuple->Branch("gen_MotherID",&idmom,"MotherID_gen[candSize_gen]/I");
 
         if(decayInGen_)
         {
 
-            VertexCompositeNtuple->Branch("DauID1_gen",&iddau1,"DauID1_gen[candSize_gen]/I");
-            VertexCompositeNtuple->Branch("DauID2_gen",&iddau2,"DauID2_gen[candSize_gen]/I");
-            VertexCompositeNtuple->Branch("DauID3_gen",&iddau3,"DauID3_gen[candSize_gen]/I");
+            VertexCompositeNtuple->Branch("gen_DauID1",&iddau1,"DauID1_gen[candSize_gen]/I");
+            VertexCompositeNtuple->Branch("gen_DauID2",&iddau2,"DauID2_gen[candSize_gen]/I");
+            VertexCompositeNtuple->Branch("gen_DauID3",&iddau3,"DauID3_gen[candSize_gen]/I");
+        }
+        if(twoLayerDecay_){
+          VertexCompositeNtuple->Branch("gen_D0pT",&gen_D0pT_, "gen_D0pT[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0eta",&gen_D0eta_, "gen_D0eta[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0phi",&gen_D0phi_, "gen_D0phi[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0mass",&gen_D0mass_, "gen_D0mass[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0y",&gen_D0y_, "gen_D0y[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0charge",&gen_D0charge_, "gen_D0charge[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0pdgId",&gen_D0pdgId_, "gen_D0pdgId[candSize]I");
+
+          VertexCompositeNtuple->Branch("gen_D0Dau1_pT",&gen_D0Dau1_pT_, "gen_D0Dau1_pT[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau1_eta",&gen_D0Dau1_eta_, "gen_D0Dau1_eta[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau1_phi",&gen_D0Dau1_phi_, "gen_D0Dau1_phi[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau1_mass",&gen_D0Dau1_mass_, "gen_D0Dau1_mass[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau1_y",&gen_D0Dau1_y_, "gen_D0Dau1_y[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau1_charge",&gen_D0Dau1_charge_, "gen_D0Dau1_charge[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau1_pdgId",&gen_D0Dau1_pdgId_, "gen_D0Dau1_pdgId[candSize]I");
+
+          VertexCompositeNtuple->Branch("gen_D0Dau2_pT",&gen_D0Dau2_pT_, "gen_D0Dau2_pT[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau2_eta",&gen_D0Dau2_eta_, "gen_D0Dau2_eta[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau2_phi",&gen_D0Dau2_phi_, "gen_D0Dau2_phi[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau2_mass",&gen_D0Dau2_mass_, "gen_D0Dau2_mass[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau2_y",&gen_D0Dau2_y_, "gen_D0Dau2_y[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau2_charge",&gen_D0Dau2_charge_, "gen_D0Dau2_charge[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D0Dau2_pdgId",&gen_D0Dau2_pdgId_, "gen_D0Dau2_pdgId[candSize]I");
+
+          VertexCompositeNtuple->Branch("gen_D1pT",&gen_D1pT_, "gen_D1pT[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1eta",&gen_D1eta_, "gen_D1eta[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1phi",&gen_D1phi_, "gen_D1phi[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1mass",&gen_D1mass_, "gen_D1mass[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1y",&gen_D1y_, "gen_D1y[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1charge",&gen_D1charge_, "gen_D1charge[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1pdgId",&gen_D1pdgId_, "gen_D1pdgId[candSize]I");
         }
     }
 }
@@ -2095,21 +1533,6 @@ muAssocToTrack( const reco::TrackRef& trackref,
 void 
 VertexCompositeTreeProducer2::endJob() {
     
-}
-
-void
-VertexCompositeTreeProducer2::genDecayLength(const uint& it, const reco::GenParticle& gCand) {
-  gen_dl[it] = -99.; gen_agl_abs[it] = -99.; gen_dl2D[it] = -99.; gen_agl2D_abs[it] = -99.;
-  if(gCand.numberOfDaughters()==0 || !gCand.daughter(0)) return;
-  const auto& dauVtx = gCand.daughter(0)->vertex();
-  TVector3 ptosvec(dauVtx.X(), dauVtx.Y(), dauVtx.Z());
-  TVector3 secvec(gCand.px(), gCand.py(), gCand.pz());
-  gen_agl_abs[it] = secvec.Angle(ptosvec);
-  gen_dl[it]  = ptosvec.Mag();
-  TVector3 ptosvec2D(dauVtx.X(), dauVtx.Y(), 0.0);
-  TVector3 secvec2D(gCand.px(), gCand.py(), 0.0);
-  gen_agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
-  gen_dl2D[it]  = ptosvec2D.Mag();
 }
 
 //define this as a plug-in

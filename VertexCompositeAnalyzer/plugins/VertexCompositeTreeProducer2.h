@@ -101,7 +101,15 @@ private:
   virtual void initTree();
   void genDecayLength(const uint&, const reco::GenParticle&);
 
+  bool matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_, bool isMatchD0) const;
+  bool checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const;
+  bool matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_) const;
+
   int muAssocToTrack( const reco::TrackRef& trackref, const edm::Handle<reco::MuonCollection>& muonh) const;
+
+  reco::GenParticleRef findMother(const reco::GenParticleRef&);
+  void genDecayLength(const reco::GenParticle& gCand, float& gen_decayLength2D_, float& gen_decayLength3D_, float& gen_angle2D_, float& gen_angle3D_);
+  void getAncestorId(const reco::GenParticle& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ );
 
   // ----------member data ---------------------------
     
@@ -221,6 +229,7 @@ private:
     float dl2D[MAXCAN];
     bool isSwap[MAXCAN];
     bool matchGEN[MAXCAN];
+    int idBAnc_reco[MAXCAN];
     int pionFlavor[MAXCAN];
     int idmom_reco[MAXCAN];
     float gen_agl_abs[MAXCAN];
@@ -366,6 +375,70 @@ private:
     int iddau2[MAXCAN];
     int iddau3[MAXCAN];
 
+		float matchGen_D0pT_[MAXCAN];
+		float matchGen_D0eta_[MAXCAN];
+		float matchGen_D0phi_[MAXCAN];
+		float matchGen_D0mass_[MAXCAN];
+		float matchGen_D0y_[MAXCAN];
+		int matchGen_D0charge_[MAXCAN];
+		int matchGen_D0pdgId_[MAXCAN];
+
+		float matchGen_D0Dau1_pT_[MAXCAN];
+		float matchGen_D0Dau1_eta_[MAXCAN];
+		float matchGen_D0Dau1_phi_[MAXCAN];
+		float matchGen_D0Dau1_mass_[MAXCAN];
+		float matchGen_D0Dau1_y_[MAXCAN];
+		int matchGen_D0Dau1_charge_[MAXCAN];
+		int matchGen_D0Dau1_pdgId_[MAXCAN];
+
+		float matchGen_D0Dau2_pT_[MAXCAN];
+		float matchGen_D0Dau2_eta_[MAXCAN];
+		float matchGen_D0Dau2_phi_[MAXCAN];
+		float matchGen_D0Dau2_mass_[MAXCAN];
+		float matchGen_D0Dau2_y_[MAXCAN];
+		int matchGen_D0Dau2_charge_[MAXCAN];
+		int matchGen_D0Dau2_pdgId_[MAXCAN];
+
+		float matchGen_D1pT_[MAXCAN];
+		float matchGen_D1eta_[MAXCAN];
+		float matchGen_D1phi_[MAXCAN];
+		float matchGen_D1mass_[MAXCAN];
+		float matchGen_D1y_[MAXCAN];
+		int matchGen_D1charge_[MAXCAN];
+		int matchGen_D1pdgId_[MAXCAN];
+
+		float gen_D0pT_[MAXCAN];
+		float gen_D0eta_[MAXCAN];
+		float gen_D0phi_[MAXCAN];
+		float gen_D0mass_[MAXCAN];
+		float gen_D0y_[MAXCAN];
+		int gen_D0charge_[MAXCAN];
+		int gen_D0pdgId_[MAXCAN];
+
+		float gen_D0Dau1_pT_[MAXCAN];
+		float gen_D0Dau1_eta_[MAXCAN];
+		float gen_D0Dau1_phi_[MAXCAN];
+		float gen_D0Dau1_mass_[MAXCAN];
+		float gen_D0Dau1_y_[MAXCAN];
+		int gen_D0Dau1_charge_[MAXCAN];
+		int gen_D0Dau1_pdgId_[MAXCAN];
+
+		float gen_D0Dau2_pT_[MAXCAN];
+		float gen_D0Dau2_eta_[MAXCAN];
+		float gen_D0Dau2_phi_[MAXCAN];
+		float gen_D0Dau2_mass_[MAXCAN];
+		float gen_D0Dau2_y_[MAXCAN];
+		int gen_D0Dau2_charge_[MAXCAN];
+		int gen_D0Dau2_pdgId_[MAXCAN];
+
+		float gen_D1pT_[MAXCAN];
+		float gen_D1eta_[MAXCAN];
+		float gen_D1phi_[MAXCAN];
+		float gen_D1mass_[MAXCAN];
+		float gen_D1y_[MAXCAN];
+		int gen_D1charge_[MAXCAN];
+		int gen_D1pdgId_[MAXCAN];
+
     //vector for gen match
     vector< vector<double> > *pVect;
     vector< vector<double> > *gpVect;
@@ -412,3 +485,94 @@ private:
 // constructors and destructor
 //
 
+
+
+bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_, bool isMatchD0) const {
+  bool match = false;
+  if(isMatchD0){
+    reco::Candidate const* reco_trk1 = _dmeson_->daughter(0);
+    reco::Candidate const* reco_trk2 = _dmeson_->daughter(1);
+
+    reco::Candidate const* gen_trk1 = _gen_->daughter(0);
+    reco::Candidate const* gen_trk2 = _gen_->daughter(1);
+
+    if( matchTrackdR(reco_trk1, gen_trk1)){
+        if( matchTrackdR(reco_trk2, gen_trk2)) {
+            match = true;
+            return match;
+        }
+    }    
+    if( matchTrackdR(reco_trk2, gen_trk1)){
+        if( matchTrackdR(reco_trk1, gen_trk2)) {
+            match = true;
+            return match;
+        }
+    }    
+  }
+  if(!isMatchD0){
+    if(matchTrackdR(_demsson_, _gen_)) match = true;
+  }
+  return match;
+};
+
+bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
+    return _dmeson_->pdgId() != _gen_->pdgId();
+};
+
+bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg= true) const {
+    bool pass= false;
+    // _deltaR_
+    if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) return false;
+    const double dR = reco::deltaR(*_recoTrk_, *_genTrk_);
+    if(dR < _deltaR_) pass = true;
+    return pass;
+};
+
+reco::GenParticleRef VertexCompositeTreeProducer2::findMother(const reco::GenParticleRef& genParRef)
+{
+  if(genParRef.isNull()) return genParRef;
+  reco::GenParticleRef genMomRef = genParRef;
+  int pdg = genParRef->pdgId(); const int pdg_OLD = pdg;
+  while(pdg==pdg_OLD && genMomRef->numberOfMothers()>0)
+  {
+    genMomRef = genMomRef->motherRef(0);
+    pdg = genMomRef->pdgId();
+  }
+  if(pdg==pdg_OLD) genMomRef = reco::GenParticleRef();
+  return genMomRef;
+};
+
+void VertexCompositeTreeProducer2::genDecayLength(const reco::GenParticle& gCand, float& gen_decayLength2D_, float& gen_decayLength3D_, float& gen_angle2D_, float& gen_angle3D_){
+  gen_decayLength2D_ = -99.;
+  gen_decayLength3D_ = -99.;
+  gen_angle2D_ = -99;
+  gen_angle3D_ = -99;
+
+  if(gCand.numberOfDaughters()==0 || !gCand.daughter(0)) return;
+  const auto& dauVtx = gCand.daughter(0)->vertex();
+  TVector3 ptosvec(dauVtx.X() - genVertex_.x(), dauVtx.Y() - genVertex_.y(), dauVtx.Z() - genVertex_.z());
+  TVector3 secvec(gCand.px(), gCand.py(), gCand.pz());
+  gen_angle3D_ = secvec.Angle(ptosvec);
+  gen_decayLength3D_ = ptosvec.Mag();
+  TVector3 ptosvec2D(dauVtx.X() - genVertex_.x(), dauVtx.Y() - genVertex_.y(), 0.0);
+  TVector3 secvec2D(gCand.px(), gCand.py(), 0.0);
+  gen_angle2D_ = secvec2D.Angle(ptosvec2D);
+  gen_decayLength2D_ = ptosvec2D.Mag();
+};
+
+void VertexCompositeTreeProducer2::getAncestorId(const reco::GenParticle& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ ){
+  gen_ancestorId_ = 0;
+  gen_ancestorFlavor_ = 0;
+  for (auto mothers = gCand.motherRefVector();
+      !mothers.empty(); ) {
+    auto mom = mothers.at(0);
+    mothers = mom->motherRefVector();
+    gen_ancestorId_ = mom->pdgId();
+    const auto idstr = std::to_string(std::abs(gen_ancestorId_));
+    gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
+    if (idstr[0] == '5') {
+      break;
+    }
+    if (std::abs(gen_ancestorId_) <= 40) break;
+  }
+};
