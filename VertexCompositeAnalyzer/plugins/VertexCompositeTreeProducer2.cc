@@ -1278,6 +1278,7 @@ VertexCompositeTreeProducer2::initTree()
         {
             VertexCompositeNtuple->Branch("isSwap",&isSwap,"isSwap[candSize]/O");
             VertexCompositeNtuple->Branch("idmom_reco",&idmom_reco,"idmom_reco[candSize]/I");
+            VertexCompositeNtuple->Branch("idBAnc_reco",&idBAnc_reco,"idBAnc_reco[candSize]/I");
             VertexCompositeNtuple->Branch("matchGEN",&matchGEN,"matchGEN[candSize]/O");
             VertexCompositeNtuple->Branch("matchGen3DPointingAngle",&gen_agl_abs,"gen3DPointingAngle[candSize]/F");
             VertexCompositeNtuple->Branch("matchGen2DPointingAngle",&gen_agl2D_abs,"gen2DPointingAngle[candSize]/F");
