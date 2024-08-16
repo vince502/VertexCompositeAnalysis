@@ -71,7 +71,7 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 
-#define DEBUG true
+// #define DEBUG true
 
 
 //
