@@ -14,13 +14,15 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
+    #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
+    fileNames = cms.untracked.vstring("file:step4.root"),
 )
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(300))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
+#process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
+process.GlobalTag.globaltag = cms.string('132X_mcRun3_2023_realistic_HI_v9')
 
 ## Set ZDC information
 #process.es_pool = cms.ESSource("PoolDBESSource",
@@ -172,7 +174,7 @@ process.d0ana_newreduced.DCAErrCollection = cms.InputTag("d0selectorNewReduced:D
 #process.d0ana_wrongsign_newreduced.DCAErrCollection = cms.InputTag("d0selectorWSNewReduced:DCAErrorsNewD0")
 
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew * process.dStarana)
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew * process.dStarana_mc)
 # process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorWSNewReduced * process.d0ana_wrongsign_newreduced)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
