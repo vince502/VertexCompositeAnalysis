@@ -98,15 +98,12 @@ private:
   virtual void initHistogram();
   virtual void initTree();
 
-  int muAssocToTrack(const reco::TrackRef &trackref,
-                     const edm::Handle<reco::MuonCollection> &muonh) const;
+  int muAssocToTrack(const reco::TrackRef &trackref, const edm::Handle<reco::MuonCollection> &muonh) const;
 
   reco::GenParticleRef findMother(const reco::GenParticleRef &);
-  void genDecayLength(const reco::GenParticle &gCand, float &gen_decayLength2D_,
-                      float &gen_decayLength3D_, float &gen_angle2D_,
-                      float &gen_angle3D_);
-  void getAncestorId(const reco::GenParticle &gCand, int &gen_ancestorId_,
-                     int &gen_ancestorFlavor_);
+  void genDecayLength(const reco::GenParticle &gCand, float &gen_decayLength2D_, float &gen_decayLength3D_,
+                      float &gen_angle2D_, float &gen_angle3D_);
+  void getAncestorId(const reco::GenParticle &gCand, int &gen_ancestorId_, int &gen_ancestorFlavor_);
 
   // ----------member data ---------------------------
 
@@ -556,8 +553,7 @@ private:
   // tokens
   edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
   edm::EDGetTokenT<reco::TrackCollection> tok_generalTrk_;
-  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection>
-      recoVertexCompositeCandidateCollection_Token_;
+  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> recoVertexCompositeCandidateCollection_Token_;
   edm::EDGetTokenT<MVACollection> MVAValues_Token_;
   edm::EDGetTokenT<MVACollection> MVAValues_Token2_;
 
@@ -579,8 +575,7 @@ private:
 //
 // constants, enums and typedefs
 //
-typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>>
-    SMatrixSym3D;
+typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
 typedef ROOT::Math::SVector<double, 3> SVector3;
 typedef ROOT::Math::SVector<double, 6> SVector6;
 
@@ -592,8 +587,7 @@ typedef ROOT::Math::SVector<double, 6> SVector6;
 // constructors and destructor
 //
 
-VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(
-    const edm::ParameterSet &iConfig) {
+VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(const edm::ParameterSet &iConfig) {
   // options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
   doGenNtuple_ = iConfig.getUntrackedParameter<bool>("doGenNtuple");
@@ -639,58 +633,41 @@ VertexCompositeTreeProducerNew::VertexCompositeTreeProducerNew(
   yBins_ = iConfig.getUntrackedParameter<std::vector<double>>("yBins");
 
   // input tokens
-  tok_offlinePV_ = consumes<reco::VertexCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
-  tok_generalTrk_ = consumes<reco::TrackCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection"));
-  recoVertexCompositeCandidateCollection_Token_ =
-      consumes<reco::VertexCompositeCandidateCollection>(
-          iConfig.getUntrackedParameter<edm::InputTag>(
-              "VertexCompositeCollection"));
-  MVAValues_Token_ = consumes<MVACollection>(
-      iConfig.getParameter<edm::InputTag>("MVACollection"));
-  MVAValues_Token2_ = consumes<MVACollection>(
-      iConfig.getParameter<edm::InputTag>("MVACollection2"));
-  tok_muon_ = consumes<reco::MuonCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection"));
-  Dedx_Token1_ =
-      consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxHarmonic2"));
-  Dedx_Token2_ =
-      consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxTruncated40"));
-  tok_genParticle_ = consumes<reco::GenParticleCollection>(edm::InputTag(
-      iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
+  tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
+  tok_generalTrk_ = consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection"));
+  recoVertexCompositeCandidateCollection_Token_ = consumes<reco::VertexCompositeCandidateCollection>(
+      iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection"));
+  MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
+  MVAValues_Token2_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection2"));
+  tok_muon_ = consumes<reco::MuonCollection>(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection"));
+  Dedx_Token1_ = consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxHarmonic2"));
+  Dedx_Token2_ = consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxTruncated40"));
+  tok_genParticle_ = consumes<reco::GenParticleCollection>(
+      edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
 
   isCentrality_ = false;
   if (iConfig.exists("isCentrality"))
     isCentrality_ = iConfig.getParameter<bool>("isCentrality");
   if (isCentrality_) {
-    tok_centBinLabel_ = consumes<int>(
-        iConfig.getParameter<edm::InputTag>("centralityBinLabel"));
-    tok_centSrc_ = consumes<reco::Centrality>(
-        iConfig.getParameter<edm::InputTag>("centralitySrc"));
+    tok_centBinLabel_ = consumes<int>(iConfig.getParameter<edm::InputTag>("centralityBinLabel"));
+    tok_centSrc_ = consumes<reco::Centrality>(iConfig.getParameter<edm::InputTag>("centralitySrc"));
   }
 
   isEventPlane_ = false;
   if (iConfig.exists("isEventPlane"))
     isEventPlane_ = iConfig.getParameter<bool>("isEventPlane");
   if (isEventPlane_) {
-    tok_eventplaneSrc_ = consumes<reco::EvtPlaneCollection>(
-        iConfig.getParameter<edm::InputTag>("eventplaneSrc"));
+    tok_eventplaneSrc_ = consumes<reco::EvtPlaneCollection>(iConfig.getParameter<edm::InputTag>("eventplaneSrc"));
   }
 
   if (useAnyMVA_ && iConfig.exists("MVACollection"))
-    MVAValues_Token_ = consumes<MVACollection>(
-        iConfig.getParameter<edm::InputTag>("MVACollection"));
+    MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
   if (useAnyMVA_ && iConfig.exists("MVACollection2"))
-    MVAValues_Token2_ = consumes<MVACollection>(
-        iConfig.getParameter<edm::InputTag>("MVACollection2"));
-  if (iConfig.exists("DCAValCollection") &&
-      iConfig.exists("DCAErrCollection")) {
+    MVAValues_Token2_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection2"));
+  if (iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
     useDCA_ = true;
-    tok_DCAVal_ = consumes<std::vector<float>>(
-        iConfig.getParameter<edm::InputTag>("DCAValCollection"));
-    tok_DCAErr_ = consumes<std::vector<float>>(
-        iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
+    tok_DCAVal_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
+    tok_DCAErr_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
   }
 }
 
@@ -705,8 +682,7 @@ VertexCompositeTreeProducerNew::~VertexCompositeTreeProducerNew() {
 //
 
 // ------------ method called to for each event  ------------
-void VertexCompositeTreeProducerNew::analyze(const edm::Event &iEvent,
-                                             const edm::EventSetup &iSetup) {
+void VertexCompositeTreeProducerNew::analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   using std::vector;
   using namespace edm;
   using namespace reco;
@@ -720,8 +696,7 @@ void VertexCompositeTreeProducerNew::analyze(const edm::Event &iEvent,
     VertexCompositeNtuple->Fill();
 }
 
-void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
-                                              const edm::EventSetup &iSetup) {
+void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   // get collections
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
@@ -730,10 +705,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
   iEvent.getByToken(tok_generalTrk_, tracks);
 
   edm::Handle<reco::VertexCompositeCandidateCollection> v0candidates;
-  iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_,
-                    v0candidates);
-  const reco::VertexCompositeCandidateCollection *v0candidates_ =
-      v0candidates.product();
+  iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_, v0candidates);
+  const reco::VertexCompositeCandidateCollection *v0candidates_ = v0candidates.product();
 
   edm::Handle<MVACollection> mvavalues;
   edm::Handle<MVACollection> mvavalues2;
@@ -832,10 +805,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
 
       double dzvtx = trk.dz(bestvtx);
       double dxyvtx = trk.dxy(bestvtx);
-      double dzerror =
-          sqrt(trk.dzError() * trk.dzError() + bestvzError * bestvzError);
-      double dxyerror =
-          sqrt(trk.d0Error() * trk.d0Error() + bestvxError * bestvyError);
+      double dzerror = sqrt(trk.dzError() * trk.dzError() + bestvzError * bestvzError);
+      double dxyerror = sqrt(trk.d0Error() * trk.d0Error() + bestvxError * bestvyError);
 
       if (!trk.quality(reco::TrackBase::highPurity))
         continue;
@@ -884,27 +855,22 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         do {
           auto Dd1 = trk.daughter(permutations.at(0));
           auto Dd2 = trk.daughter(permutations.at(1));
-          if (abs(Dd1->pdgId()) == PID_dau1_ &&
-              abs(Dd2->pdgId()) == PID_dau2_) {
+          if (abs(Dd1->pdgId()) == PID_dau1_ && abs(Dd2->pdgId()) == PID_dau2_) {
             idxs = permutations;
             break;
           }
-        } while (
-            std::next_permutation(permutations.begin(), permutations.end()));
+        } while (std::next_permutation(permutations.begin(), permutations.end()));
       } else {
         do {
           auto Dd1 = trk.daughter(permutations.at(0));
           auto Dd2 = trk.daughter(permutations.at(1));
           auto Dd3 = trk.daughter(permutations.at(2));
 
-          if (abs(Dd1->pdgId()) == PID_dau1_ &&
-              abs(Dd2->pdgId()) == PID_dau2_ &&
-              abs(Dd3->pdgId() == PID_dau3_)) {
+          if (abs(Dd1->pdgId()) == PID_dau1_ && abs(Dd2->pdgId()) == PID_dau2_ && abs(Dd3->pdgId() == PID_dau3_)) {
             idxs = permutations;
             break;
           }
-        } while (
-            std::next_permutation(permutations.begin(), permutations.end()));
+        } while (std::next_permutation(permutations.begin(), permutations.end()));
       }
       if (decayInGen_ && idxs.empty())
         continue;
@@ -990,26 +956,20 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
             }
 
             for (unsigned int iDau = 0; iDau < nGenDau; ++iDau) {
-              const double dR =
-                  reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(),
-                               recoDaus[iDau]->eta(), recoDaus[iDau]->phi());
-              const double dPt =
-                  abs(genDaus[iDau]->pt() - recoDaus[iDau]->pt()) /
-                  recoDaus[iDau]->pt();
-              const bool unMatchCharge =
-                  genDaus[iDau]->charge() != recoDaus[iDau]->charge();
+              const double dR = reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(), recoDaus[iDau]->eta(),
+                                             recoDaus[iDau]->phi());
+              const double dPt = abs(genDaus[iDau]->pt() - recoDaus[iDau]->pt()) / recoDaus[iDau]->pt();
+              const bool unMatchCharge = genDaus[iDau]->charge() != recoDaus[iDau]->charge();
               const bool unMatchDR = dR > deltaR_;
               const bool unMatchDPt = dPt > 0.5;
-              matchGEN[it] =
-                  matchGEN[it] || unMatchCharge || unMatchDR || unMatchDPt;
+              matchGEN[it] = matchGEN[it] || unMatchCharge || unMatchDR || unMatchDPt;
               if (!matchGEN[it]) {
                 isSwap[it] = (recoDaus[iDau]->pdgId() != genRef->pdgId());
                 break;
               };
             }
             matchGEN[it] = !matchGEN[it];
-          } while (
-              std::next_permutation(permutations.begin(), permutations.end()));
+          } while (std::next_permutation(permutations.begin(), permutations.end()));
 
           if (matchGEN[it]) {
             auto mom_ref = findMother(genRef);
@@ -1041,11 +1001,9 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
             // gen_decayLength2D_;
             // gen_angle3D_;
             // gen_angle2D_;
-            genDecayLength(*genRef, gen_D1decayLength2D_[it],
-                           gen_D1decayLength3D_[it], gen_D1angle2D_[it],
+            genDecayLength(*genRef, gen_D1decayLength2D_[it], gen_D1decayLength3D_[it], gen_D1angle2D_[it],
                            gen_D1angle3D_[it]);
-            getAncestorId(*genRef, gen_D1ancestorId_[it],
-                          gen_D1ancestorFlavor_[it]);
+            getAncestorId(*genRef, gen_D1ancestorId_[it], gen_D1ancestorFlavor_[it]);
 
             gen_D1pTD1_[it] = genDaus[0]->pt();
             gen_D1etaD1_[it] = genDaus[0]->eta();
@@ -1120,23 +1078,18 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               recoDaus1[iDau] = trk.daughter(0)->daughter(iDau);
             }
             for (unsigned int iDau = 0; iDau < nGenDau; ++iDau) {
-              const double dR =
-                  reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(),
-                               recoDaus1[iDau]->eta(), recoDaus1[iDau]->phi());
-              const double dPt =
-                  abs(genDaus[iDau]->pt() - recoDaus1[iDau]->pt()) /
-                  recoDaus1[iDau]->pt();
-              const bool unMatchCharge =
-                  genDaus[iDau]->charge() != recoDaus1[iDau]->charge();
+              const double dR = reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(), recoDaus1[iDau]->eta(),
+                                             recoDaus1[iDau]->phi());
+              const double dPt = abs(genDaus[iDau]->pt() - recoDaus1[iDau]->pt()) / recoDaus1[iDau]->pt();
+              const bool unMatchCharge = genDaus[iDau]->charge() != recoDaus1[iDau]->charge();
               const bool unMatchDR = dR > deltaR_;
               const bool unMatchDPt = dPt > 0.5;
               _matchGEN_ = !(unMatchCharge || unMatchDR || unMatchDPt);
 #ifdef DEBUG2
               cout << Form("gen %d etas: (%.4f, %.4f), phis: (%.4f, %.4f), "
                            "match : %d",
-                           igen, recoDaus1[iDau]->eta(), genDaus[iDau]->eta(),
-                           recoDaus1[iDau]->phi(), recoDaus1[iDau]->phi(),
-                           _matchGEN_)
+                           igen, recoDaus1[iDau]->eta(), genDaus[iDau]->eta(), recoDaus1[iDau]->phi(),
+                           recoDaus1[iDau]->phi(), _matchGEN_)
                    << endl;
 #endif
               if (_matchGEN_) {
@@ -1145,15 +1098,13 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
                 // (theGen->pdgId()/abs(theGen->pdgId())));
                 isSwap1[it] = ((trk.daughter(0)->pdgId()) != (theGen->pdgId()));
                 if (matchToGen1[it] < MAXCAN + 1)
-                  std::cout << "Double matching! occurred with igen "
-                            << matchToGen1[it] << " and " << igen << std::endl;
+                  std::cout << "Double matching! occurred with igen " << matchToGen1[it] << " and " << igen
+                            << std::endl;
                 matchToGen1[it] = igen;
                 break;
               }
 #ifdef DEBUG2
-              cout << Form("it %d match : %d, swap: %d", it, _matchGEN_,
-                           isSwap1[it])
-                   << nGen << endl;
+              cout << Form("it %d match : %d, swap: %d", it, _matchGEN_, isSwap1[it]) << nGen << endl;
 #endif
             }
             if (matchGEN1[it])
@@ -1189,11 +1140,9 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               // gen_decayLength2D_;
               // gen_angle3D_;
               // gen_angle2D_;
-              genDecayLength(*theGen, gen_D1decayLength2D_[it],
-                             gen_D1decayLength3D_[it], gen_D1angle2D_[it],
+              genDecayLength(*theGen, gen_D1decayLength2D_[it], gen_D1decayLength3D_[it], gen_D1angle2D_[it],
                              gen_D1angle3D_[it]);
-              getAncestorId(*theGen, gen_D1ancestorId_[it],
-                            gen_D1ancestorFlavor_[it]);
+              getAncestorId(*theGen, gen_D1ancestorId_[it], gen_D1ancestorFlavor_[it]);
 
               gen_D1pTD1_[it] = genDaus[0]->pt();
               gen_D1etaD1_[it] = genDaus[0]->eta();
@@ -1221,14 +1170,10 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               recoDaus2[iDau] = trk.daughter(1)->daughter(iDau);
             }
             for (unsigned int iDau = 0; iDau < nGenDau; ++iDau) {
-              const double dR =
-                  reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(),
-                               recoDaus2[iDau]->eta(), recoDaus2[iDau]->phi());
-              const double dPt =
-                  abs(genDaus[iDau]->pt() - recoDaus2[iDau]->pt()) /
-                  recoDaus2[iDau]->pt();
-              const bool unMatchCharge =
-                  genDaus[iDau]->charge() != recoDaus2[iDau]->charge();
+              const double dR = reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(), recoDaus2[iDau]->eta(),
+                                             recoDaus2[iDau]->phi());
+              const double dPt = abs(genDaus[iDau]->pt() - recoDaus2[iDau]->pt()) / recoDaus2[iDau]->pt();
+              const bool unMatchCharge = genDaus[iDau]->charge() != recoDaus2[iDau]->charge();
               const bool unMatchDR = dR > deltaR_;
               const bool unMatchDPt = dPt > 0.5;
               _matchGEN_ = !(unMatchCharge || unMatchDR || unMatchDPt);
@@ -1238,8 +1183,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
                 // ((recoDaus2[iDau]->pdgId()/abs(recoDaus2[iDau]->pdgId())) !=
                 // (theGen->pdgId()/abs(theGen->pdgId())));
                 if (matchToGen2[it] < MAXCAN + 1)
-                  std::cout << "Double matching! occurred with igen "
-                            << matchToGen2[it] << " and " << igen << std::endl;
+                  std::cout << "Double matching! occurred with igen " << matchToGen2[it] << " and " << igen
+                            << std::endl;
                 matchToGen2[it] = igen;
                 break;
               }
@@ -1277,11 +1222,9 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               // gen_decayLength2D_;
               // gen_angle3D_;
               // gen_angle2D_;
-              genDecayLength(*theGen, gen_D2decayLength2D_[it],
-                             gen_D2decayLength3D_[it], gen_D2angle2D_[it],
+              genDecayLength(*theGen, gen_D2decayLength2D_[it], gen_D2decayLength3D_[it], gen_D2angle2D_[it],
                              gen_D2angle3D_[it]);
-              getAncestorId(*theGen, gen_D2ancestorId_[it],
-                            gen_D2ancestorFlavor_[it]);
+              getAncestorId(*theGen, gen_D2ancestorId_[it], gen_D2ancestorFlavor_[it]);
 
               gen_D2pTD1_[it] = genDaus[0]->pt();
               gen_D2etaD1_[it] = genDaus[0]->eta();
@@ -1410,15 +1353,15 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         if (fabs(id) != PID_ && trk.charge()) {
           // matching daughter 1
           double deltaR = trkvect.DeltaR(dauvec1);
-          if (deltaR < deltaR_ && fabs((trk.pt() - pt1[it]) / pt1[it]) < 0.5 &&
-              trk.charge() == charge1[it] && pid1[it] == -99999) {
+          if (deltaR < deltaR_ && fabs((trk.pt() - pt1[it]) / pt1[it]) < 0.5 && trk.charge() == charge1[it] &&
+              pid1[it] == -99999) {
             pid1[it] = id;
           }
 
           // matching daughter 2
           deltaR = trkvect.DeltaR(dauvec2);
-          if (deltaR < deltaR_ && fabs((trk.pt() - pt2[it]) / pt2[it]) < 0.5 &&
-              trk.charge() == charge2[it] && pid2[it] == -99999) {
+          if (deltaR < deltaR_ && fabs((trk.pt() - pt2[it]) / pt2[it]) < 0.5 && trk.charge() == charge2[it] &&
+              pid2[it] == -99999) {
             pid2[it] = id;
           }
         }
@@ -1432,24 +1375,24 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
           int id2 = Dd2->pdgId();
 
           double deltaR = d1vect.DeltaR(dauvec1);
-          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt1[it]) / pt1[it]) < 0.5 &&
-              Dd1->charge() == charge1[it] && pid1[it] == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt1[it]) / pt1[it]) < 0.5 && Dd1->charge() == charge1[it] &&
+              pid1[it] == -99999) {
             pid1[it] = id1;
           }
           deltaR = d2vect.DeltaR(dauvec1);
-          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt1[it]) / pt1[it]) < 0.5 &&
-              Dd2->charge() == charge1[it] && pid1[it] == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt1[it]) / pt1[it]) < 0.5 && Dd2->charge() == charge1[it] &&
+              pid1[it] == -99999) {
             pid1[it] = id1;
           }
 
           deltaR = d1vect.DeltaR(dauvec2);
-          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt2[it]) / pt2[it]) < 0.5 &&
-              Dd1->charge() == charge2[it] && pid2[it] == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt2[it]) / pt2[it]) < 0.5 && Dd1->charge() == charge2[it] &&
+              pid2[it] == -99999) {
             pid2[it] = id2;
           }
           deltaR = d2vect.DeltaR(dauvec2);
-          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt2[it]) / pt2[it]) < 0.5 &&
-              Dd2->charge() == charge2[it] && pid2[it] == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt2[it]) / pt2[it]) < 0.5 && Dd2->charge() == charge2[it] &&
+              pid2[it] == -99999) {
             pid2[it] = id2;
           }
         }
@@ -1478,8 +1421,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
     agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
 
     // Decay length 3D
-    typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>>
-        SMatrixSym3D;
+    typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
     typedef ROOT::Math::SVector<double, 3> SVector3;
     typedef ROOT::Math::SVector<double, 6> SVector6;
 
@@ -1487,8 +1429,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
     SVector3 distanceVector(secvx - bestvx, secvy - bestvy, secvz - bestvz);
 
     dl[it] = ROOT::Math::Mag(distanceVector);
-    dlerror[it] =
-        sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / dl[it];
+    dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / dl[it];
 
     dlos[it] = dl[it] / dlerror[it];
 
@@ -1499,10 +1440,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
     // dlerror[it]* std::sin(agl_abs[it]) <<"\n"; std::cout << "\n";
 
     // Decay length 2D
-    SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                vtx.covariance(1, 1), 0, 0, 0);
-    SVector6 v2(trk.vertexCovariance(0, 0), trk.vertexCovariance(0, 1),
-                trk.vertexCovariance(1, 1), 0, 0, 0);
+    SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+    SVector6 v2(trk.vertexCovariance(0, 0), trk.vertexCovariance(0, 1), trk.vertexCovariance(1, 1), 0, 0, 0);
 
     SMatrixSym3D sv1(v1);
     SMatrixSym3D sv2(v2);
@@ -1511,8 +1450,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
     SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
 
     dl2D[it] = ROOT::Math::Mag(distanceVector2D);
-    double dl2Derror =
-        sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / dl2D[it];
+    double dl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / dl2D[it];
 
     dlos2D[it] = dl2D[it] / dl2Derror;
 
@@ -1556,10 +1494,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
 
       double dzbest1 = dau1->dz(bestvtx);
       double dxybest1 = dau1->dxy(bestvtx);
-      double dzerror1 =
-          sqrt(dau1->dzError() * dau1->dzError() + bestvzError * bestvzError);
-      double dxyerror1 =
-          sqrt(dau1->d0Error() * dau1->d0Error() + bestvxError * bestvyError);
+      double dzerror1 = sqrt(dau1->dzError() * dau1->dzError() + bestvzError * bestvzError);
+      double dxyerror1 = sqrt(dau1->d0Error() * dau1->d0Error() + bestvxError * bestvyError);
 
       dzos1[it] = dzbest1 / dzerror1;
       dxyos1[it] = dxybest1 / dxyerror1;
@@ -1604,10 +1540,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
 
       double dzbest2 = dau2->dz(bestvtx);
       double dxybest2 = dau2->dxy(bestvtx);
-      double dzerror2 =
-          sqrt(dau2->dzError() * dau2->dzError() + bestvzError * bestvzError);
-      double dxyerror2 =
-          sqrt(dau2->d0Error() * dau2->d0Error() + bestvxError * bestvyError);
+      double dzerror2 = sqrt(dau2->dzError() * dau2->dzError() + bestvzError * bestvzError);
+      double dxyerror2 = sqrt(dau2->d0Error() * dau2->d0Error() + bestvxError * bestvyError);
 
       dzos2[it] = dzbest2 / dzerror2;
       dxyos2[it] = dxybest2 / dxyerror2;
@@ -1673,40 +1607,30 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         if (muId1 != -1) {
           const reco::Muon &cand = (*theMuonHandle)[muId1];
 
-          onestmuon1[it] = muon::isGoodMuon(
-              cand, muon::selectionTypeFromString("TMOneStationTight"));
+          onestmuon1[it] = muon::isGoodMuon(cand, muon::selectionTypeFromString("TMOneStationTight"));
           pfmuon1[it] = cand.isPFMuon();
           glbmuon1[it] = cand.isGlobalMuon();
           trkmuon1[it] = cand.isTrackerMuon();
           calomuon1[it] = cand.isCaloMuon();
 
-          if (glbmuon1[it] && trkmuon1[it] &&
-              cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() >
-                  5 &&
-              cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() >
-                  0 &&
-              fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 &&
-              fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
+          if (glbmuon1[it] && trkmuon1[it] && cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 &&
+              cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 &&
+              fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 && fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
             softmuon1[it] = true;
         }
 
         if (muId2 != -1) {
           const reco::Muon &cand = (*theMuonHandle)[muId2];
 
-          onestmuon2[it] = muon::isGoodMuon(
-              cand, muon::selectionTypeFromString("TMOneStationTight"));
+          onestmuon2[it] = muon::isGoodMuon(cand, muon::selectionTypeFromString("TMOneStationTight"));
           pfmuon2[it] = cand.isPFMuon();
           glbmuon2[it] = cand.isGlobalMuon();
           trkmuon2[it] = cand.isTrackerMuon();
           calomuon2[it] = cand.isCaloMuon();
 
-          if (glbmuon2[it] && trkmuon2[it] &&
-              cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() >
-                  5 &&
-              cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() >
-                  0 &&
-              fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 &&
-              fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
+          if (glbmuon2[it] && trkmuon2[it] && cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 &&
+              cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 &&
+              fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 && fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
             softmuon2[it] = true;
         }
 
@@ -1721,8 +1645,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
             reco::MuonEnergy muenergy = cand.calEnergy();
             matchedenergy1[it] = muenergy.hadMax;
 
-            const std::vector<reco::MuonChamberMatch> &muchmatches =
-                cand.matches();
+            const std::vector<reco::MuonChamberMatch> &muchmatches = cand.matches();
 
             for (unsigned int ich = 0; ich < muchmatches.size(); ich++) {
               x_exp = muchmatches[ich].x;
@@ -1734,8 +1657,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               dxdzerr_exp = muchmatches[ich].dXdZErr;
               dydzerr_exp = muchmatches[ich].dYdZErr;
 
-              std::vector<reco::MuonSegmentMatch> musegmatches =
-                  muchmatches[ich].segmentMatches;
+              std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
 
               if (!musegmatches.size())
                 continue;
@@ -1749,8 +1671,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
                 dxdzerr_seg = musegmatches[jseg].dXdZErr;
                 dydzerr_seg = musegmatches[jseg].dYdZErr;
 
-                if (sqrt((x_seg - x_exp) * (x_seg - x_exp) +
-                         (y_seg - y_exp) * (y_seg - y_exp)) <
+                if (sqrt((x_seg - x_exp) * (x_seg - x_exp) + (y_seg - y_exp) * (y_seg - y_exp)) <
                     sqrt(dx_seg * dx_seg + dy_seg * dy_seg)) {
                   dx_seg = x_seg - x_exp;
                   dy_seg = y_seg - y_exp;
@@ -1760,10 +1681,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
                   dySig_seg = dy_seg / dyerr_seg;
                   ddxdz_seg = dxdz_seg - dxdz_exp;
                   ddydz_seg = dydz_seg - dydz_exp;
-                  ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg +
-                                      dxdzerr_exp * dxdzerr_exp);
-                  ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg +
-                                      dydzerr_exp * dydzerr_exp);
+                  ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+                  ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
                   ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
                   ddydzSig_seg = ddydz_seg / ddydzerr_seg;
                 }
@@ -1789,8 +1708,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
             reco::MuonEnergy muenergy = cand.calEnergy();
             matchedenergy2[it] = muenergy.hadMax;
 
-            const std::vector<reco::MuonChamberMatch> &muchmatches =
-                cand.matches();
+            const std::vector<reco::MuonChamberMatch> &muchmatches = cand.matches();
             for (unsigned int ich = 0; ich < muchmatches.size(); ich++)
             //                        for(unsigned int ich=0;ich<1;ich++)
             {
@@ -1803,8 +1721,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               dxdzerr_exp = muchmatches[ich].dXdZErr;
               dydzerr_exp = muchmatches[ich].dYdZErr;
 
-              std::vector<reco::MuonSegmentMatch> musegmatches =
-                  muchmatches[ich].segmentMatches;
+              std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
 
               if (!musegmatches.size())
                 continue;
@@ -1818,8 +1735,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
                 dxdzerr_seg = musegmatches[jseg].dXdZErr;
                 dydzerr_seg = musegmatches[jseg].dYdZErr;
 
-                if (sqrt((x_seg - x_exp) * (x_seg - x_exp) +
-                         (y_seg - y_exp) * (y_seg - y_exp)) <
+                if (sqrt((x_seg - x_exp) * (x_seg - x_exp) + (y_seg - y_exp) * (y_seg - y_exp)) <
                     sqrt(dx_seg * dx_seg + dy_seg * dy_seg)) {
                   dx_seg = x_seg - x_exp;
                   dy_seg = y_seg - y_exp;
@@ -1829,10 +1745,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
                   dySig_seg = dy_seg / dyerr_seg;
                   ddxdz_seg = dxdz_seg - dxdz_exp;
                   ddydz_seg = dydz_seg - dydz_exp;
-                  ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg +
-                                      dxdzerr_exp * dxdzerr_exp);
-                  ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg +
-                                      dydzerr_exp * dydzerr_exp);
+                  ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+                  ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
                   ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
                   ddydzSig_seg = ddydz_seg / ddydzerr_seg;
                 }
@@ -1937,20 +1851,16 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
 
       double gdzbest1 = gdau1->dz(bestvtx);
       double gdxybest1 = gdau1->dxy(bestvtx);
-      double gdzerror1 =
-          sqrt(gdau1->dzError() * gdau1->dzError() + bestvzError * bestvzError);
-      double gdxyerror1 =
-          sqrt(gdau1->d0Error() * gdau1->d0Error() + bestvxError * bestvyError);
+      double gdzerror1 = sqrt(gdau1->dzError() * gdau1->dzError() + bestvzError * bestvzError);
+      double gdxyerror1 = sqrt(gdau1->d0Error() * gdau1->d0Error() + bestvxError * bestvyError);
 
       grand_dzos1[it] = gdzbest1 / gdzerror1;
       grand_dxyos1[it] = gdxybest1 / gdxyerror1;
 
       double gdzbest2 = gdau2->dz(bestvtx);
       double gdxybest2 = gdau2->dxy(bestvtx);
-      double gdzerror2 =
-          sqrt(gdau2->dzError() * gdau2->dzError() + bestvzError * bestvzError);
-      double gdxyerror2 =
-          sqrt(gdau2->d0Error() * gdau2->d0Error() + bestvxError * bestvyError);
+      double gdzerror2 = sqrt(gdau2->dzError() * gdau2->dzError() + bestvzError * bestvzError);
+      double gdxyerror2 = sqrt(gdau2->d0Error() * gdau2->d0Error() + bestvxError * bestvyError);
 
       grand_dzos2[it] = gdzbest2 / gdzerror2;
       grand_dxyos2[it] = gdxybest2 / gdxyerror2;
@@ -1974,9 +1884,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
       grand_agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
 
       // Decay length 3D
-      typedef ROOT::Math::SMatrix<double, 3, 3,
-                                  ROOT::Math::MatRepSym<double, 3>>
-          SMatrixSym3D;
+      typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
       typedef ROOT::Math::SVector<double, 3> SVector3;
       typedef ROOT::Math::SVector<double, 6> SVector6;
 
@@ -1984,16 +1892,13 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
       SVector3 distanceVector(secvx - bestvx, secvy - bestvy, secvz - bestvz);
 
       grand_dl[it] = ROOT::Math::Mag(distanceVector);
-      grand_dlerror[it] =
-          sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl[it];
+      grand_dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl[it];
 
       grand_dlos[it] = grand_dl[it] / grand_dlerror[it];
 
       // Decay length 2D
-      SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                  vtx.covariance(1, 1), 0, 0, 0);
-      SVector6 v2(d1->vertexCovariance(0, 0), d1->vertexCovariance(0, 1),
-                  d1->vertexCovariance(1, 1), 0, 0, 0);
+      SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+      SVector6 v2(d1->vertexCovariance(0, 0), d1->vertexCovariance(0, 1), d1->vertexCovariance(1, 1), 0, 0, 0);
 
       SMatrixSym3D sv1(v1);
       SMatrixSym3D sv2(v2);
@@ -2002,8 +1907,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
       SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
 
       double gdl2D = ROOT::Math::Mag(distanceVector2D);
-      double gdl2Derror =
-          sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
+      double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
 
       grand_dlos2D[it] = gdl2D / gdl2Derror;
       if (doubleCand_) {
@@ -2036,8 +1940,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         grand_H2dedx22[it] = -999.9;
 
         if (dEdxHandle1.isValid()) {
-          const edm::ValueMap<reco::DeDxData> dEdxTrack =
-              *dEdxHandle1.product();
+          const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
           grand_H2dedx21[it] = dEdxTrack[gdau21].dEdx();
           grand_H2dedx22[it] = dEdxTrack[gdau22].dEdx();
         }
@@ -2046,8 +1949,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         grand_T4dedx22[it] = -999.9;
 
         if (dEdxHandle2.isValid()) {
-          const edm::ValueMap<reco::DeDxData> dEdxTrack =
-              *dEdxHandle2.product();
+          const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
           grand_T4dedx21[it] = dEdxTrack[gdau21].dEdx();
           grand_T4dedx22[it] = dEdxTrack[gdau22].dEdx();
         }
@@ -2093,20 +1995,16 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
 
         double gdzbest21 = gdau21->dz(bestvtx);
         double gdxybest21 = gdau21->dxy(bestvtx);
-        double gdzerror21 = sqrt(gdau21->dzError() * gdau21->dzError() +
-                                 bestvzError * bestvzError);
-        double gdxyerror21 = sqrt(gdau21->d0Error() * gdau21->d0Error() +
-                                  bestvxError * bestvyError);
+        double gdzerror21 = sqrt(gdau21->dzError() * gdau21->dzError() + bestvzError * bestvzError);
+        double gdxyerror21 = sqrt(gdau21->d0Error() * gdau21->d0Error() + bestvxError * bestvyError);
 
         grand_dzos21[it] = gdzbest21 / gdzerror21;
         grand_dxyos21[it] = gdxybest21 / gdxyerror21;
 
         double gdzbest22 = gdau22->dz(bestvtx);
         double gdxybest22 = gdau22->dxy(bestvtx);
-        double gdzerror22 = sqrt(gdau22->dzError() * gdau22->dzError() +
-                                 bestvzError * bestvzError);
-        double gdxyerror22 = sqrt(gdau22->d0Error() * gdau22->d0Error() +
-                                  bestvxError * bestvyError);
+        double gdzerror22 = sqrt(gdau22->dzError() * gdau22->dzError() + bestvzError * bestvzError);
+        double gdxyerror22 = sqrt(gdau22->d0Error() * gdau22->d0Error() + bestvxError * bestvyError);
 
         grand_dzos22[it] = gdzbest22 / gdzerror22;
         grand_dxyos22[it] = gdxybest22 / gdxyerror22;
@@ -2130,28 +2028,21 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         grand_agl2D_abs2[it] = secvec2D2.Angle(ptosvec2D2);
 
         // Decay length 3D
-        typedef ROOT::Math::SMatrix<double, 3, 3,
-                                    ROOT::Math::MatRepSym<double, 3>>
-            SMatrixSym3D;
+        typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
         typedef ROOT::Math::SVector<double, 3> SVector3;
         typedef ROOT::Math::SVector<double, 6> SVector6;
 
         SMatrixSym3D totalCov2 = vtx.covariance() + d2->vertexCovariance();
-        SVector3 distanceVector2(secvx - bestvx, secvy - bestvy,
-                                 secvz - bestvz);
+        SVector3 distanceVector2(secvx - bestvx, secvy - bestvy, secvz - bestvz);
 
         grand_dl2[it] = ROOT::Math::Mag(distanceVector2);
-        grand_dlerror2[it] =
-            sqrt(ROOT::Math::Similarity(totalCov2, distanceVector2)) /
-            grand_dl2[it];
+        grand_dlerror2[it] = sqrt(ROOT::Math::Similarity(totalCov2, distanceVector2)) / grand_dl2[it];
 
         grand_dlos2[it] = grand_dl2[it] / grand_dlerror2[it];
 
         // Decay length 2D
-        SVector6 v21(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                     vtx.covariance(1, 1), 0, 0, 0);
-        SVector6 v22(d2->vertexCovariance(0, 0), d2->vertexCovariance(0, 1),
-                     d2->vertexCovariance(1, 1), 0, 0, 0);
+        SVector6 v21(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+        SVector6 v22(d2->vertexCovariance(0, 0), d2->vertexCovariance(0, 1), d2->vertexCovariance(1, 1), 0, 0, 0);
 
         SMatrixSym3D sv21(v1);
         SMatrixSym3D sv22(v2);
@@ -2160,9 +2051,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
         SVector3 distanceVector2D2(secvx - bestvx, secvy - bestvy, 0);
 
         double gdl2D2 = ROOT::Math::Mag(distanceVector2D2);
-        double gdl2Derror2 =
-            sqrt(ROOT::Math::Similarity(totalCov2D2, distanceVector2D2)) /
-            gdl2D2;
+        double gdl2Derror2 = sqrt(ROOT::Math::Similarity(totalCov2D2, distanceVector2D2)) / gdl2D2;
 
         grand_dlos2D2[it] = gdl2D2 / gdl2Derror2;
       }
@@ -2171,8 +2060,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
     if (saveHistogram_) {
       for (unsigned int ipt = 0; ipt < pTBins_.size() - 1; ipt++)
         for (unsigned int iy = 0; iy < yBins_.size() - 1; iy++) {
-          if (pt[it] < pTBins_[ipt + 1] && pt[it] > pTBins_[ipt] &&
-              y[it] < yBins_[iy + 1] && y[it] > yBins_[iy]) {
+          if (pt[it] < pTBins_[ipt + 1] && pt[it] > pTBins_[ipt] && y[it] < yBins_[iy + 1] && y[it] > yBins_[iy]) {
             hMassVsMVA[iy][ipt]->Fill(mva[it], mass[it]);
             //                h3DDCAVsMVA[iy][ipt]->Fill(mva[it],dl[it]*sin(agl_abs[it]));
             //                h2DDCAVsMVA[iy][ipt]->Fill(mva[it],dl2D[it]*sin(agl2D_abs[it]));
@@ -2188,23 +2076,18 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               h2DPointingAngleVsMVA[iy][ipt]->Fill(mva[it], agl2D_abs[it]);
               h3DDecayLengthSignificanceVsMVA[iy][ipt]->Fill(mva[it], dlos[it]);
               h3DDecayLengthVsMVA[iy][ipt]->Fill(mva[it], dl[it]);
-              h2DDecayLengthSignificanceVsMVA[iy][ipt]->Fill(mva[it],
-                                                             dlos2D[it]);
+              h2DDecayLengthSignificanceVsMVA[iy][ipt]->Fill(mva[it], dlos2D[it]);
               h2DDecayLengthVsMVA[iy][ipt]->Fill(mva[it], dl2D[it]);
-              hzDCASignificancedaughter1VsMVA[iy][ipt]->Fill(mva[it],
-                                                             dzos1[it]);
-              hxyDCASignificancedaughter1VsMVA[iy][ipt]->Fill(mva[it],
-                                                              dxyos1[it]);
+              hzDCASignificancedaughter1VsMVA[iy][ipt]->Fill(mva[it], dzos1[it]);
+              hxyDCASignificancedaughter1VsMVA[iy][ipt]->Fill(mva[it], dxyos1[it]);
               hNHitD1VsMVA[iy][ipt]->Fill(mva[it], nhit1[it]);
               hpTD1VsMVA[iy][ipt]->Fill(mva[it], pt1[it]);
               hpTerrD1VsMVA[iy][ipt]->Fill(mva[it], ptErr1[it] / pt1[it]);
               hEtaD1VsMVA[iy][ipt]->Fill(mva[it], eta1[it]);
               hdedxHarmonic2D1VsMVA[iy][ipt]->Fill(mva[it], H2dedx1[it]);
               hdedxHarmonic2D1VsP[iy][ipt]->Fill(p1[it], H2dedx1[it]);
-              hzDCASignificancedaughter2VsMVA[iy][ipt]->Fill(mva[it],
-                                                             dzos2[it]);
-              hxyDCASignificancedaughter2VsMVA[iy][ipt]->Fill(mva[it],
-                                                              dxyos2[it]);
+              hzDCASignificancedaughter2VsMVA[iy][ipt]->Fill(mva[it], dzos2[it]);
+              hxyDCASignificancedaughter2VsMVA[iy][ipt]->Fill(mva[it], dxyos2[it]);
               hNHitD2VsMVA[iy][ipt]->Fill(mva[it], nhit2[it]);
               hpTD2VsMVA[iy][ipt]->Fill(mva[it], pt2[it]);
               hpTerrD2VsMVA[iy][ipt]->Fill(mva[it], ptErr2[it] / pt2[it]);
@@ -2212,10 +2095,8 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
               hdedxHarmonic2D2VsMVA[iy][ipt]->Fill(mva[it], H2dedx2[it]);
               hdedxHarmonic2D2VsP[iy][ipt]->Fill(p2[it], H2dedx2[it]);
               if (threeProngDecay_) {
-                hzDCASignificancedaughter3VsMVA[iy][ipt]->Fill(mva[it],
-                                                               dzos3[it]);
-                hxyDCASignificancedaughter3VsMVA[iy][ipt]->Fill(mva[it],
-                                                                dxyos3[it]);
+                hzDCASignificancedaughter3VsMVA[iy][ipt]->Fill(mva[it], dzos3[it]);
+                hxyDCASignificancedaughter3VsMVA[iy][ipt]->Fill(mva[it], dxyos3[it]);
                 hNHitD3VsMVA[iy][ipt]->Fill(mva[it], nhit3[it]);
                 hpTD3VsMVA[iy][ipt]->Fill(mva[it], pt3[it]);
                 hpTerrD3VsMVA[iy][ipt]->Fill(mva[it], ptErr3[it] / pt3[it]);
@@ -2230,8 +2111,7 @@ void VertexCompositeTreeProducerNew::fillRECO(const edm::Event &iEvent,
   }
 }
 
-void VertexCompositeTreeProducerNew::fillGEN(const edm::Event &iEvent,
-                                             const edm::EventSetup &iSetup) {
+void VertexCompositeTreeProducerNew::fillGEN(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   edm::Handle<reco::GenParticleCollection> genpars;
   iEvent.getByToken(tok_genParticle_, genpars);
 
@@ -2253,11 +2133,9 @@ void VertexCompositeTreeProducerNew::fillGEN(const edm::Event &iEvent,
     // == 421) ) continue; //check is target if(!(trk.statusFlags().isLastCopy()
     // && (trk.pdgId()==21 || std::abs(trk.pdgId())<=6))) continue;
     if (debug_)
-      std::cout << "pass id, decay dau : " << trk.numberOfDaughters()
-                << std::endl;
+      std::cout << "pass id, decay dau : " << trk.numberOfDaughters() << std::endl;
 
-    if (decayInGen_ &&
-        (trk.numberOfDaughters() != 2 && trk.numberOfDaughters() != 3))
+    if (decayInGen_ && (trk.numberOfDaughters() != 2 && trk.numberOfDaughters() != 3))
       continue; // check 2-pron decay if target decays in Gen
 
     if (debug_)
@@ -2278,8 +2156,7 @@ void VertexCompositeTreeProducerNew::fillGEN(const edm::Event &iEvent,
     phimom[candSize_gen - 1] = -999.0;
     ymom[candSize_gen - 1] = -999.0;
     statusmom[candSize_gen - 1] = -999;
-    genDecayLength(trk, dl2D_gen[candSize_gen - 1], dl3D_gen[candSize_gen - 1],
-                   angle2D_gen[candSize_gen - 1],
+    genDecayLength(trk, dl2D_gen[candSize_gen - 1], dl3D_gen[candSize_gen - 1], angle2D_gen[candSize_gen - 1],
                    angle3D_gen[candSize_gen - 1]);
 
     if (trk.numberOfMothers() != 0) {
@@ -2328,8 +2205,7 @@ void VertexCompositeTreeProducerNew::beginJob() {
   }
 
   if (twoLayerDecay_ && doMuon_) {
-    cout << "Muons cannot be coming from two layer decay!! Fix config!!"
-         << endl;
+    cout << "Muons cannot be coming from two layer decay!! Fix config!!" << endl;
     return;
   }
 
@@ -2342,10 +2218,9 @@ void VertexCompositeTreeProducerNew::beginJob() {
 void VertexCompositeTreeProducerNew::initHistogram() {
   for (unsigned int ipt = 0; ipt < pTBins_.size() - 1; ipt++) {
     for (unsigned int iy = 0; iy < yBins_.size() - 1; iy++) {
-      hMassVsMVA[iy][ipt] = fs->make<TH2F>(
-          Form("hMassVsMVA_y%d_pt%d", iy, ipt), ";mva;mass(GeV)", 100, -1., 1.,
-          massHistBins_, massHistPeak_ - massHistWidth_,
-          massHistPeak_ + massHistWidth_);
+      hMassVsMVA[iy][ipt] =
+          fs->make<TH2F>(Form("hMassVsMVA_y%d_pt%d", iy, ipt), ";mva;mass(GeV)", 100, -1., 1., massHistBins_,
+                         massHistPeak_ - massHistWidth_, massHistPeak_ + massHistWidth_);
       //   h3DDCAVsMVA[iy][ipt] =
       //   fs->make<TH2F>(Form("h3DDCAVsMVA_y%d_pt%d",iy,ipt),";mva;3D
       //   DCA;",100,-1.,1.,1000,0,10); h2DDCAVsMVA[iy][ipt] =
@@ -2353,114 +2228,85 @@ void VertexCompositeTreeProducerNew::initHistogram() {
       //   DCA;",100,-1.,1.,1000,0,10);
 
       if (saveAllHistogram_) {
-        hpTVsMVA[iy][ipt] = fs->make<TH2F>(Form("hpTVsMVA_y%d_pt%d", iy, ipt),
-                                           ";mva;pT;", 100, -1, 1, 100, 0, 10);
-        hetaVsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hetaVsMVA_y%d_pt%d", iy, ipt), ";mva;eta;",
-                           100, -1., 1., 40, -4, 4);
-        hyVsMVA[iy][ipt] = fs->make<TH2F>(Form("hyVsMVA_y%d_pt%d", iy, ipt),
-                                          ";mva;y;", 100, -1., 1., 40, -4, 4);
+        hpTVsMVA[iy][ipt] = fs->make<TH2F>(Form("hpTVsMVA_y%d_pt%d", iy, ipt), ";mva;pT;", 100, -1, 1, 100, 0, 10);
+        hetaVsMVA[iy][ipt] = fs->make<TH2F>(Form("hetaVsMVA_y%d_pt%d", iy, ipt), ";mva;eta;", 100, -1., 1., 40, -4, 4);
+        hyVsMVA[iy][ipt] = fs->make<TH2F>(Form("hyVsMVA_y%d_pt%d", iy, ipt), ";mva;y;", 100, -1., 1., 40, -4, 4);
         hVtxProbVsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hVtxProbVsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;VtxProb;", 100, -1., 1., 100, 0, 1);
-        h3DCosPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("h3DCosPointingAngleVsMVA_y%d_pt%d", iy, ipt),
-            ";mva;3DCosPointingAngle;", 100, -1., 1., 100, -1, 1);
-        h3DPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("h3DPointingAngleVsMVA_y%d_pt%d", iy, ipt),
-            ";mva;3DPointingAngle;", 100, -1., 1., 50, -3.14, 3.14);
-        h2DCosPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("h2DCosPointingAngleVsMVA_y%d_pt%d", iy, ipt),
-            ";mva;2DCosPointingAngle;", 100, -1., 1., 100, -1, 1);
-        h2DPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("h2DPointingAngleVsMVA_y%d_pt%d", iy, ipt),
-            ";mva;2DPointingAngle;", 100, -1., 1., 50, -3.14, 3.14);
-        h3DDecayLengthSignificanceVsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("h3DDecayLengthSignificanceVsMVA_y%d_pt%d", iy, ipt),
-            ";mva;3DDecayLengthSignificance;", 100, -1., 1., 300, 0, 30);
-        h2DDecayLengthSignificanceVsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("h2DDecayLengthSignificanceVsMVA_y%d_pt%d", iy, ipt),
-            ";mva;2DDecayLengthSignificance;", 100, -1., 1., 300, 0, 30);
-        h3DDecayLengthVsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("h3DDecayLengthVsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;3DDecayLength;", 100, -1., 1., 300, 0, 30);
-        h2DDecayLengthVsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("h2DDecayLengthVsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;2DDecayLength;", 100, -1., 1., 300, 0, 30);
-        hzDCASignificancedaughter1VsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("hzDCASignificancedaughter1VsMVA_y%d_pt%d", iy, ipt),
-            ";mva;zDCASignificancedaughter1;", 100, -1., 1., 100, -10, 10);
-        hxyDCASignificancedaughter1VsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("hxyDCASignificancedaughter1VsMVA_y%d_pt%d", iy, ipt),
-            ";mva;xyDCASignificancedaughter1;", 100, -1., 1., 100, -10, 10);
+            fs->make<TH2F>(Form("hVtxProbVsMVA_y%d_pt%d", iy, ipt), ";mva;VtxProb;", 100, -1., 1., 100, 0, 1);
+        h3DCosPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DCosPointingAngleVsMVA_y%d_pt%d", iy, ipt),
+                                                           ";mva;3DCosPointingAngle;", 100, -1., 1., 100, -1, 1);
+        h3DPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DPointingAngleVsMVA_y%d_pt%d", iy, ipt),
+                                                        ";mva;3DPointingAngle;", 100, -1., 1., 50, -3.14, 3.14);
+        h2DCosPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DCosPointingAngleVsMVA_y%d_pt%d", iy, ipt),
+                                                           ";mva;2DCosPointingAngle;", 100, -1., 1., 100, -1, 1);
+        h2DPointingAngleVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DPointingAngleVsMVA_y%d_pt%d", iy, ipt),
+                                                        ";mva;2DPointingAngle;", 100, -1., 1., 50, -3.14, 3.14);
+        h3DDecayLengthSignificanceVsMVA[iy][ipt] =
+            fs->make<TH2F>(Form("h3DDecayLengthSignificanceVsMVA_y%d_pt%d", iy, ipt), ";mva;3DDecayLengthSignificance;",
+                           100, -1., 1., 300, 0, 30);
+        h2DDecayLengthSignificanceVsMVA[iy][ipt] =
+            fs->make<TH2F>(Form("h2DDecayLengthSignificanceVsMVA_y%d_pt%d", iy, ipt), ";mva;2DDecayLengthSignificance;",
+                           100, -1., 1., 300, 0, 30);
+        h3DDecayLengthVsMVA[iy][ipt] = fs->make<TH2F>(Form("h3DDecayLengthVsMVA_y%d_pt%d", iy, ipt),
+                                                      ";mva;3DDecayLength;", 100, -1., 1., 300, 0, 30);
+        h2DDecayLengthVsMVA[iy][ipt] = fs->make<TH2F>(Form("h2DDecayLengthVsMVA_y%d_pt%d", iy, ipt),
+                                                      ";mva;2DDecayLength;", 100, -1., 1., 300, 0, 30);
+        hzDCASignificancedaughter1VsMVA[iy][ipt] =
+            fs->make<TH2F>(Form("hzDCASignificancedaughter1VsMVA_y%d_pt%d", iy, ipt), ";mva;zDCASignificancedaughter1;",
+                           100, -1., 1., 100, -10, 10);
+        hxyDCASignificancedaughter1VsMVA[iy][ipt] =
+            fs->make<TH2F>(Form("hxyDCASignificancedaughter1VsMVA_y%d_pt%d", iy, ipt),
+                           ";mva;xyDCASignificancedaughter1;", 100, -1., 1., 100, -10, 10);
         hNHitD1VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hNHitD1VsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;NHitD1;", 100, -1., 1., 100, 0, 100);
+            fs->make<TH2F>(Form("hNHitD1VsMVA_y%d_pt%d", iy, ipt), ";mva;NHitD1;", 100, -1., 1., 100, 0, 100);
         hpTD1VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hpTD1VsMVA_y%d_pt%d", iy, ipt), ";mva;pTD1;",
-                           100, -1., 1., 100, 0, 10);
+            fs->make<TH2F>(Form("hpTD1VsMVA_y%d_pt%d", iy, ipt), ";mva;pTD1;", 100, -1., 1., 100, 0, 10);
         hpTerrD1VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hpTerrD1VsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;pTerrD1;", 100, -1., 1., 50, 0, 0.5);
+            fs->make<TH2F>(Form("hpTerrD1VsMVA_y%d_pt%d", iy, ipt), ";mva;pTerrD1;", 100, -1., 1., 50, 0, 0.5);
         hEtaD1VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hEtaD1VsMVA_y%d_pt%d", iy, ipt), ";mva;EtaD1;",
-                           100, -1., 1., 40, -4, 4);
-        hdedxHarmonic2D1VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hdedxHarmonic2D1VsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;dedxHarmonic2D1;", 100, -1., 1., 100, 0, 10);
-        hdedxHarmonic2D1VsP[iy][ipt] =
-            fs->make<TH2F>(Form("hdedxHarmonic2D1VsP_y%d_pt%d", iy, ipt),
-                           ";p (GeV);dedxHarmonic2D1", 100, 0, 10, 100, 0, 10);
-        hzDCASignificancedaughter2VsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("hzDCASignificancedaughter2VsMVA_y%d_pt%d", iy, ipt),
-            ";mva;zDCASignificancedaughter2;", 100, -1., 1., 100, -10, 10);
-        hxyDCASignificancedaughter2VsMVA[iy][ipt] = fs->make<TH2F>(
-            Form("hxyDCASignificancedaughter2VsMVA_y%d_pt%d", iy, ipt),
-            ";mva;xyDCASignificancedaughter2;", 100, -1., 1., 100, -10, 10);
+            fs->make<TH2F>(Form("hEtaD1VsMVA_y%d_pt%d", iy, ipt), ";mva;EtaD1;", 100, -1., 1., 40, -4, 4);
+        hdedxHarmonic2D1VsMVA[iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D1VsMVA_y%d_pt%d", iy, ipt),
+                                                        ";mva;dedxHarmonic2D1;", 100, -1., 1., 100, 0, 10);
+        hdedxHarmonic2D1VsP[iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D1VsP_y%d_pt%d", iy, ipt),
+                                                      ";p (GeV);dedxHarmonic2D1", 100, 0, 10, 100, 0, 10);
+        hzDCASignificancedaughter2VsMVA[iy][ipt] =
+            fs->make<TH2F>(Form("hzDCASignificancedaughter2VsMVA_y%d_pt%d", iy, ipt), ";mva;zDCASignificancedaughter2;",
+                           100, -1., 1., 100, -10, 10);
+        hxyDCASignificancedaughter2VsMVA[iy][ipt] =
+            fs->make<TH2F>(Form("hxyDCASignificancedaughter2VsMVA_y%d_pt%d", iy, ipt),
+                           ";mva;xyDCASignificancedaughter2;", 100, -1., 1., 100, -10, 10);
         hNHitD2VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hNHitD2VsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;NHitD2;", 100, -1., 1., 100, 0, 100);
+            fs->make<TH2F>(Form("hNHitD2VsMVA_y%d_pt%d", iy, ipt), ";mva;NHitD2;", 100, -1., 1., 100, 0, 100);
         hpTD2VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hpTD2VsMVA_y%d_pt%d", iy, ipt), ";mva;pTD2;",
-                           100, -1., 1., 100, 0, 10);
+            fs->make<TH2F>(Form("hpTD2VsMVA_y%d_pt%d", iy, ipt), ";mva;pTD2;", 100, -1., 1., 100, 0, 10);
         hpTerrD2VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hpTerrD2VsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;pTerrD2;", 100, -1., 1., 50, 0, 0.5);
+            fs->make<TH2F>(Form("hpTerrD2VsMVA_y%d_pt%d", iy, ipt), ";mva;pTerrD2;", 100, -1., 1., 50, 0, 0.5);
         hEtaD2VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hEtaD2VsMVA_y%d_pt%d", iy, ipt), ";mva;EtaD2;",
-                           100, -1., 1., 40, -4, 4);
-        hdedxHarmonic2D2VsMVA[iy][ipt] =
-            fs->make<TH2F>(Form("hdedxHarmonic2D2VsMVA_y%d_pt%d", iy, ipt),
-                           ";mva;dedxHarmonic2D2;", 100, -1., 1., 100, 0, 10);
-        hdedxHarmonic2D2VsP[iy][ipt] =
-            fs->make<TH2F>(Form("hdedxHarmonic2D2VsP_y%d_pt%d", iy, ipt),
-                           ";p (GeV);dedxHarmonic2D2", 100, 0, 10, 100, 0, 10);
+            fs->make<TH2F>(Form("hEtaD2VsMVA_y%d_pt%d", iy, ipt), ";mva;EtaD2;", 100, -1., 1., 40, -4, 4);
+        hdedxHarmonic2D2VsMVA[iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D2VsMVA_y%d_pt%d", iy, ipt),
+                                                        ";mva;dedxHarmonic2D2;", 100, -1., 1., 100, 0, 10);
+        hdedxHarmonic2D2VsP[iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D2VsP_y%d_pt%d", iy, ipt),
+                                                      ";p (GeV);dedxHarmonic2D2", 100, 0, 10, 100, 0, 10);
 
         if (threeProngDecay_) {
-          hzDCASignificancedaughter3VsMVA[iy][ipt] = fs->make<TH2F>(
-              Form("hzDCASignificancedaughter3VsMVA_y%d_pt%d", iy, ipt),
-              ";mva;zDCASignificancedaughter3;", 100, -1., 1., 100, -10, 10);
-          hxyDCASignificancedaughter3VsMVA[iy][ipt] = fs->make<TH2F>(
-              Form("hxyDCASignificancedaughter3VsMVA_y%d_pt%d", iy, ipt),
-              ";mva;xyDCASignificancedaughter3;", 100, -1., 1., 100, -10, 10);
+          hzDCASignificancedaughter3VsMVA[iy][ipt] =
+              fs->make<TH2F>(Form("hzDCASignificancedaughter3VsMVA_y%d_pt%d", iy, ipt),
+                             ";mva;zDCASignificancedaughter3;", 100, -1., 1., 100, -10, 10);
+          hxyDCASignificancedaughter3VsMVA[iy][ipt] =
+              fs->make<TH2F>(Form("hxyDCASignificancedaughter3VsMVA_y%d_pt%d", iy, ipt),
+                             ";mva;xyDCASignificancedaughter3;", 100, -1., 1., 100, -10, 10);
           hNHitD3VsMVA[iy][ipt] =
-              fs->make<TH2F>(Form("hNHitD3VsMVA_y%d_pt%d", iy, ipt),
-                             ";mva;NHitD3;", 100, -1., 1., 100, 0, 100);
+              fs->make<TH2F>(Form("hNHitD3VsMVA_y%d_pt%d", iy, ipt), ";mva;NHitD3;", 100, -1., 1., 100, 0, 100);
           hpTD3VsMVA[iy][ipt] =
-              fs->make<TH2F>(Form("hpTD3VsMVA_y%d_pt%d", iy, ipt), ";mva;pTD3;",
-                             100, -1., 1., 100, 0, 10);
+              fs->make<TH2F>(Form("hpTD3VsMVA_y%d_pt%d", iy, ipt), ";mva;pTD3;", 100, -1., 1., 100, 0, 10);
           hpTerrD3VsMVA[iy][ipt] =
-              fs->make<TH2F>(Form("hpTerrD3VsMVA_y%d_pt%d", iy, ipt),
-                             ";mva;pTerrD3;", 100, -1., 1., 50, 0, 0.5);
+              fs->make<TH2F>(Form("hpTerrD3VsMVA_y%d_pt%d", iy, ipt), ";mva;pTerrD3;", 100, -1., 1., 50, 0, 0.5);
           hEtaD3VsMVA[iy][ipt] =
-              fs->make<TH2F>(Form("hEtaD3VsMVA_y%d_pt%d", iy, ipt),
-                             ";mva;EtaD3;", 100, -1., 1., 40, -4, 4);
-          hdedxHarmonic2D3VsMVA[iy][ipt] =
-              fs->make<TH2F>(Form("hdedxHarmonic2D3VsMVA_y%d_pt%d", iy, ipt),
-                             ";mva;dedxHarmonic2D3;", 100, -1., 1., 100, 0, 10);
-          hdedxHarmonic2D3VsP[iy][ipt] = fs->make<TH2F>(
-              Form("hdedxHarmonic2D3VsP_y%d_pt%d", iy, ipt),
-              ";p (GeV);dedxHarmonic2D3", 100, 0, 10, 100, 0, 10);
+              fs->make<TH2F>(Form("hEtaD3VsMVA_y%d_pt%d", iy, ipt), ";mva;EtaD3;", 100, -1., 1., 40, -4, 4);
+          hdedxHarmonic2D3VsMVA[iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D3VsMVA_y%d_pt%d", iy, ipt),
+                                                          ";mva;dedxHarmonic2D3;", 100, -1., 1., 100, 0, 10);
+          hdedxHarmonic2D3VsP[iy][ipt] = fs->make<TH2F>(Form("hdedxHarmonic2D3VsP_y%d_pt%d", iy, ipt),
+                                                        ";p (GeV);dedxHarmonic2D3", 100, 0, 10, 100, 0, 10);
         }
       }
     }
@@ -2468,8 +2314,7 @@ void VertexCompositeTreeProducerNew::initHistogram() {
 }
 
 void VertexCompositeTreeProducerNew::initTree() {
-  VertexCompositeNtuple =
-      fs->make<TTree>("VertexCompositeNtuple", "VertexCompositeNtuple");
+  VertexCompositeNtuple = fs->make<TTree>("VertexCompositeNtuple", "VertexCompositeNtuple");
 
   if (doRecoNtuple_) {
 
@@ -2484,10 +2329,8 @@ void VertexCompositeTreeProducerNew::initTree() {
     if (isCentrality_)
       VertexCompositeNtuple->Branch("centrality", &centrality, "centrality/I");
     if (isEventPlane_) {
-      VertexCompositeNtuple->Branch("ephfpAngle", &ephfpAngle,
-                                    "ephfpAngle[3]/F");
-      VertexCompositeNtuple->Branch("ephfmAngle", &ephfmAngle,
-                                    "ephfmAngle[3]/F");
+      VertexCompositeNtuple->Branch("ephfpAngle", &ephfpAngle, "ephfpAngle[3]/F");
+      VertexCompositeNtuple->Branch("ephfmAngle", &ephfmAngle, "ephfmAngle[3]/F");
       VertexCompositeNtuple->Branch("ephfpQ", &ephfpQ, "ephfpQ[3]/F");
       VertexCompositeNtuple->Branch("ephfmQ", &ephfmQ, "ephfmQ[3]/F");
       VertexCompositeNtuple->Branch("ephfpSumW", &ephfpSumW, "ephfpSumW/F");
@@ -2503,16 +2346,13 @@ void VertexCompositeTreeProducerNew::initTree() {
     if (useAnyMVA_) {
       VertexCompositeNtuple->Branch("mva", &mva, "mva[candSize]/F");
       if (doubleCand_) {
-        VertexCompositeNtuple->Branch("mvaDaughter1", &mva1,
-                                      "mvaDaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("mvaDaughter2", &mva2,
-                                      "mvaDaughter2[candSize]/F");
+        VertexCompositeNtuple->Branch("mvaDaughter1", &mva1, "mvaDaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("mvaDaughter2", &mva2, "mvaDaughter2[candSize]/F");
       }
     }
     if (useDCA_) {
       VertexCompositeNtuple->Branch("dca3D", &dca3D, "dca3D[candSize]/F");
-      VertexCompositeNtuple->Branch("dcaErr3D", &dcaErr3D,
-                                    "dcaErr3D[candSize]/F");
+      VertexCompositeNtuple->Branch("dcaErr3D", &dcaErr3D, "dcaErr3D[candSize]/F");
     }
 
     if (!isSkimMVA_) {
@@ -2521,186 +2361,102 @@ void VertexCompositeTreeProducerNew::initTree() {
       VertexCompositeNtuple->Branch("VtxProb", &VtxProb, "VtxProb[candSize]/F");
       //        VertexCompositeNtuple->Branch("VtxChi2",&vtxChi2,"VtxChi2[candSize]/F");
       //        VertexCompositeNtuple->Branch("VtxNDF",&ndf,"VtxNDF[candSize]/F");
-      VertexCompositeNtuple->Branch("3DCosPointingAngle", &agl,
-                                    "3DCosPointingAngle[candSize]/F");
-      VertexCompositeNtuple->Branch("3DPointingAngle", &agl_abs,
-                                    "3DPointingAngle[candSize]/F");
-      VertexCompositeNtuple->Branch("2DCosPointingAngle", &agl2D,
-                                    "2DCosPointingAngle[candSize]/F");
-      VertexCompositeNtuple->Branch("2DPointingAngle", &agl2D_abs,
-                                    "2DPointingAngle[candSize]/F");
-      VertexCompositeNtuple->Branch("3DDecayLengthSignificance", &dlos,
-                                    "3DDecayLengthSignificance[candSize]/F");
-      VertexCompositeNtuple->Branch("3DDecayLength", &dl,
-                                    "3DDecayLength[candSize]/F");
-      VertexCompositeNtuple->Branch("2DDecayLengthSignificance", &dlos2D,
-                                    "2DDecayLengthSignificance[candSize]/F");
-      VertexCompositeNtuple->Branch("2DDecayLength", &dl2D,
-                                    "2DDecayLength[candSize]/F");
+      VertexCompositeNtuple->Branch("3DCosPointingAngle", &agl, "3DCosPointingAngle[candSize]/F");
+      VertexCompositeNtuple->Branch("3DPointingAngle", &agl_abs, "3DPointingAngle[candSize]/F");
+      VertexCompositeNtuple->Branch("2DCosPointingAngle", &agl2D, "2DCosPointingAngle[candSize]/F");
+      VertexCompositeNtuple->Branch("2DPointingAngle", &agl2D_abs, "2DPointingAngle[candSize]/F");
+      VertexCompositeNtuple->Branch("3DDecayLengthSignificance", &dlos, "3DDecayLengthSignificance[candSize]/F");
+      VertexCompositeNtuple->Branch("3DDecayLength", &dl, "3DDecayLength[candSize]/F");
+      VertexCompositeNtuple->Branch("2DDecayLengthSignificance", &dlos2D, "2DDecayLengthSignificance[candSize]/F");
+      VertexCompositeNtuple->Branch("2DDecayLength", &dl2D, "2DDecayLength[candSize]/F");
 
       if (doGenMatching_) {
         VertexCompositeNtuple->Branch("isSwap", &isSwap, "isSwap[candSize]/O");
-        VertexCompositeNtuple->Branch("idmom_reco", &idmom_reco1,
-                                      "idmom_reco[candSize]/I");
-        VertexCompositeNtuple->Branch("matchGEN", &matchGEN,
-                                      "matchGEN[candSize]/O");
-        VertexCompositeNtuple->Branch("idmom_reco1", &idmom_reco1,
-                                      "idmom_reco1[candSize]/I");
-        VertexCompositeNtuple->Branch("idBAnc_reco1", &idBAnc_reco1,
-                                      "idBAnc_reco1[candSize]/I");
-        VertexCompositeNtuple->Branch("matchToGen1", &matchToGen1,
-                                      "matchToGen1[candSize]/I");
+        VertexCompositeNtuple->Branch("idmom_reco", &idmom_reco1, "idmom_reco[candSize]/I");
+        VertexCompositeNtuple->Branch("matchGEN", &matchGEN, "matchGEN[candSize]/O");
+        VertexCompositeNtuple->Branch("idmom_reco1", &idmom_reco1, "idmom_reco1[candSize]/I");
+        VertexCompositeNtuple->Branch("idBAnc_reco1", &idBAnc_reco1, "idBAnc_reco1[candSize]/I");
+        VertexCompositeNtuple->Branch("matchToGen1", &matchToGen1, "matchToGen1[candSize]/I");
         if (doGenDoubleDecay_) {
-          VertexCompositeNtuple->Branch("isSwap1", &isSwap1,
-                                        "isSwap1[candSize]/O");
-          VertexCompositeNtuple->Branch("isSwap2", &isSwap2,
-                                        "isSwap2[candSize]/O");
-          VertexCompositeNtuple->Branch("matchGEN1", &matchGEN1,
-                                        "matchGEN1[candSize]/O");
-          VertexCompositeNtuple->Branch("matchGEN2", &matchGEN2,
-                                        "matchGEN2[candSize]/O");
-          VertexCompositeNtuple->Branch("idmom_reco2", &idmom_reco2,
-                                        "idmom_reco2[candSize]/I");
-          VertexCompositeNtuple->Branch("idBAnc_reco2", &idBAnc_reco2,
-                                        "idBAnc_reco2[candSize]/I");
-          VertexCompositeNtuple->Branch("matchToGen2", &matchToGen2,
-                                        "matchToGen2[candSize]/I");
+          VertexCompositeNtuple->Branch("isSwap1", &isSwap1, "isSwap1[candSize]/O");
+          VertexCompositeNtuple->Branch("isSwap2", &isSwap2, "isSwap2[candSize]/O");
+          VertexCompositeNtuple->Branch("matchGEN1", &matchGEN1, "matchGEN1[candSize]/O");
+          VertexCompositeNtuple->Branch("matchGEN2", &matchGEN2, "matchGEN2[candSize]/O");
+          VertexCompositeNtuple->Branch("idmom_reco2", &idmom_reco2, "idmom_reco2[candSize]/I");
+          VertexCompositeNtuple->Branch("idBAnc_reco2", &idBAnc_reco2, "idBAnc_reco2[candSize]/I");
+          VertexCompositeNtuple->Branch("matchToGen2", &matchToGen2, "matchToGen2[candSize]/I");
 
-          VertexCompositeNtuple->Branch("gen_D1ancestorFlavor",
-                                        &gen_D1ancestorFlavor_,
+          VertexCompositeNtuple->Branch("gen_D1ancestorFlavor", &gen_D1ancestorFlavor_,
                                         "gen_D1ancestorFlavor[candSize]I");
-          VertexCompositeNtuple->Branch("gen_D1ancestorId", &gen_D1ancestorId_,
-                                        "gen_D1ancestorId[candSize]I");
-          VertexCompositeNtuple->Branch("gen_D1PVx", &gen_D1PVx_,
-                                        "gen_D1PVx[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1PVy", &gen_D1PVy_,
-                                        "gen_D1PVy[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1PVz", &gen_D1PVz_,
-                                        "gen_D1PVz[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1ancestorId", &gen_D1ancestorId_, "gen_D1ancestorId[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D1PVx", &gen_D1PVx_, "gen_D1PVx[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1PVy", &gen_D1PVy_, "gen_D1PVy[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1PVz", &gen_D1PVz_, "gen_D1PVz[candSize]F");
 
-          VertexCompositeNtuple->Branch("gen_D1pT", &gen_D1pT_,
-                                        "gen_D1pT[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1eta", &gen_D1eta_,
-                                        "gen_D1eta[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1phi", &gen_D1phi_,
-                                        "gen_D1phi[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1mass", &gen_D1mass_,
-                                        "gen_D1mass[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1y", &gen_D1y_,
-                                        "gen_D1y[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1charge", &gen_D1charge_,
-                                        "gen_D1charge[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1pdgId", &gen_D1pdgId_,
-                                        "gen_D1pdgId[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D1pT", &gen_D1pT_, "gen_D1pT[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1eta", &gen_D1eta_, "gen_D1eta[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1phi", &gen_D1phi_, "gen_D1phi[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1mass", &gen_D1mass_, "gen_D1mass[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1y", &gen_D1y_, "gen_D1y[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1charge", &gen_D1charge_, "gen_D1charge[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1pdgId", &gen_D1pdgId_, "gen_D1pdgId[candSize]I");
 
-          VertexCompositeNtuple->Branch("gen_D1decayLength3D",
-                                        &gen_D1decayLength3D_,
-                                        "gen_D1decayLength3D[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1decayLength2D",
-                                        &gen_D1decayLength2D_,
-                                        "gen_D1decayLength2D[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1angle3D", &gen_D1angle3D_,
-                                        "gen_D1angle3D[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1angle2D", &gen_D1angle2D_,
-                                        "gen_D1angle2D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1decayLength3D", &gen_D1decayLength3D_, "gen_D1decayLength3D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1decayLength2D", &gen_D1decayLength2D_, "gen_D1decayLength2D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1angle3D", &gen_D1angle3D_, "gen_D1angle3D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1angle2D", &gen_D1angle2D_, "gen_D1angle2D[candSize]F");
 
-          VertexCompositeNtuple->Branch("gen_D1pTD1", &gen_D1pTD1_,
-                                        "gen_D1pTD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1etaD1", &gen_D1etaD1_,
-                                        "gen_D1etaD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1phiD1", &gen_D1phiD1_,
-                                        "gen_D1phiD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1massD1", &gen_D1massD1_,
-                                        "gen_D1massD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1yD1", &gen_D1yD1_,
-                                        "gen_D1yD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1chargeD1", &gen_D1chargeD1_,
-                                        "gen_D1chargeD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1pdgIdD1", &gen_D1pdgIdD1_,
-                                        "gen_D1pdgIdD1[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D1pTD1", &gen_D1pTD1_, "gen_D1pTD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1etaD1", &gen_D1etaD1_, "gen_D1etaD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1phiD1", &gen_D1phiD1_, "gen_D1phiD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1massD1", &gen_D1massD1_, "gen_D1massD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1yD1", &gen_D1yD1_, "gen_D1yD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1chargeD1", &gen_D1chargeD1_, "gen_D1chargeD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1pdgIdD1", &gen_D1pdgIdD1_, "gen_D1pdgIdD1[candSize]I");
 
-          VertexCompositeNtuple->Branch("gen_D1pTD2", &gen_D1pTD2_,
-                                        "gen_D1pTD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1etaD2", &gen_D1etaD2_,
-                                        "gen_D1etaD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1phiD2", &gen_D1phiD2_,
-                                        "gen_D1phiD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1massD2", &gen_D1massD2_,
-                                        "gen_D1massD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1yD2", &gen_D1yD2_,
-                                        "gen_D1yD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1chargeD2", &gen_D1chargeD2_,
-                                        "gen_D1chargeD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D1pdgIdD2", &gen_D1pdgIdD2_,
-                                        "gen_D1pdgIdD2[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D1pTD2", &gen_D1pTD2_, "gen_D1pTD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1etaD2", &gen_D1etaD2_, "gen_D1etaD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1phiD2", &gen_D1phiD2_, "gen_D1phiD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1massD2", &gen_D1massD2_, "gen_D1massD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1yD2", &gen_D1yD2_, "gen_D1yD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1chargeD2", &gen_D1chargeD2_, "gen_D1chargeD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D1pdgIdD2", &gen_D1pdgIdD2_, "gen_D1pdgIdD2[candSize]I");
 
-          VertexCompositeNtuple->Branch("gen_D2ancestorFlavor",
-                                        &gen_D2ancestorFlavor_,
+          VertexCompositeNtuple->Branch("gen_D2ancestorFlavor", &gen_D2ancestorFlavor_,
                                         "gen_D2ancestorFlavor[candSize]I");
-          VertexCompositeNtuple->Branch("gen_D2ancestorId", &gen_D2ancestorId_,
-                                        "gen_D2ancestorId[candSize]I");
-          VertexCompositeNtuple->Branch("gen_D2PVx", &gen_D2PVx_,
-                                        "gen_D2PVx[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2PVy", &gen_D2PVy_,
-                                        "gen_D2PVy[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2PVz", &gen_D2PVz_,
-                                        "gen_D2PVz[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2ancestorId", &gen_D2ancestorId_, "gen_D2ancestorId[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D2PVx", &gen_D2PVx_, "gen_D2PVx[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2PVy", &gen_D2PVy_, "gen_D2PVy[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2PVz", &gen_D2PVz_, "gen_D2PVz[candSize]F");
 
-          VertexCompositeNtuple->Branch("gen_D2pT", &gen_D2pT_,
-                                        "gen_D2pT[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2eta", &gen_D2eta_,
-                                        "gen_D2eta[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2phi", &gen_D2phi_,
-                                        "gen_D2phi[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2mass", &gen_D2mass_,
-                                        "gen_D2mass[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2y", &gen_D2y_,
-                                        "gen_D2y[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2charge", &gen_D2charge_,
-                                        "gen_D2charge[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2pdgId", &gen_D2pdgId_,
-                                        "gen_D2pdgId[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D2pT", &gen_D2pT_, "gen_D2pT[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2eta", &gen_D2eta_, "gen_D2eta[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2phi", &gen_D2phi_, "gen_D2phi[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2mass", &gen_D2mass_, "gen_D2mass[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2y", &gen_D2y_, "gen_D2y[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2charge", &gen_D2charge_, "gen_D2charge[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2pdgId", &gen_D2pdgId_, "gen_D2pdgId[candSize]I");
 
-          VertexCompositeNtuple->Branch("gen_D2decayLength3D",
-                                        &gen_D2decayLength3D_,
-                                        "gen_D2decayLength3D[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2decayLength2D",
-                                        &gen_D2decayLength2D_,
-                                        "gen_D2decayLength2D[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2angle3D", &gen_D2angle3D_,
-                                        "gen_D2angle3D[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2angle2D", &gen_D2angle2D_,
-                                        "gen_D2angle2D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2decayLength3D", &gen_D2decayLength3D_, "gen_D2decayLength3D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2decayLength2D", &gen_D2decayLength2D_, "gen_D2decayLength2D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2angle3D", &gen_D2angle3D_, "gen_D2angle3D[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2angle2D", &gen_D2angle2D_, "gen_D2angle2D[candSize]F");
 
-          VertexCompositeNtuple->Branch("gen_D2pTD1", &gen_D2pTD1_,
-                                        "gen_D2pTD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2etaD1", &gen_D2etaD1_,
-                                        "gen_D2etaD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2phiD1", &gen_D2phiD1_,
-                                        "gen_D2phiD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2massD1", &gen_D2massD1_,
-                                        "gen_D2massD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2yD1", &gen_D2yD1_,
-                                        "gen_D2yD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2chargeD1", &gen_D2chargeD1_,
-                                        "gen_D2chargeD1[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2pdgIdD1", &gen_D2pdgIdD1_,
-                                        "gen_D2pdgIdD1[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D2pTD1", &gen_D2pTD1_, "gen_D2pTD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2etaD1", &gen_D2etaD1_, "gen_D2etaD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2phiD1", &gen_D2phiD1_, "gen_D2phiD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2massD1", &gen_D2massD1_, "gen_D2massD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2yD1", &gen_D2yD1_, "gen_D2yD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2chargeD1", &gen_D2chargeD1_, "gen_D2chargeD1[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2pdgIdD1", &gen_D2pdgIdD1_, "gen_D2pdgIdD1[candSize]I");
 
-          VertexCompositeNtuple->Branch("gen_D2pTD2", &gen_D2pTD2_,
-                                        "gen_D2pTD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2etaD2", &gen_D2etaD2_,
-                                        "gen_D2etaD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2phiD2", &gen_D2phiD2_,
-                                        "gen_D2phiD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2massD2", &gen_D2massD2_,
-                                        "gen_D2massD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2yD2", &gen_D2yD2_,
-                                        "gen_D2yD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2chargeD2", &gen_D2chargeD2_,
-                                        "gen_D2chargeD2[candSize]F");
-          VertexCompositeNtuple->Branch("gen_D2pdgIdD2", &gen_D2pdgIdD2_,
-                                        "gen_D2pdgIdD2[candSize]I");
+          VertexCompositeNtuple->Branch("gen_D2pTD2", &gen_D2pTD2_, "gen_D2pTD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2etaD2", &gen_D2etaD2_, "gen_D2etaD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2phiD2", &gen_D2phiD2_, "gen_D2phiD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2massD2", &gen_D2massD2_, "gen_D2massD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2yD2", &gen_D2yD2_, "gen_D2yD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2chargeD2", &gen_D2chargeD2_, "gen_D2chargeD2[candSize]F");
+          VertexCompositeNtuple->Branch("gen_D2pdgIdD2", &gen_D2pdgIdD2_, "gen_D2pdgIdD2[candSize]I");
         }
       }
 
@@ -2713,307 +2469,197 @@ void VertexCompositeTreeProducerNew::initTree() {
 
       // daughter & grand daughter info
       if (twoLayerDecay_) {
-        VertexCompositeNtuple->Branch("flavordaughter1", &flavor1,
-                                      "flavordaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("massdaughter1", &grand_mass,
-                                      "massdaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("flavordaughter1", &flavor1, "flavordaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("massdaughter1", &grand_mass, "massdaughter1[candSize]/F");
         VertexCompositeNtuple->Branch("pTD1", &pt1, "pTD1[candSize]/F");
         VertexCompositeNtuple->Branch("EtaD1", &eta1, "EtaD1[candSize]/F");
         VertexCompositeNtuple->Branch("PhiD1", &phi1, "PhiD1[candSize]/F");
-        VertexCompositeNtuple->Branch("VtxProbdaughter1", &grand_VtxProb,
-                                      "VtxProbdaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("VtxProbdaughter1", &grand_VtxProb, "VtxProbdaughter1[candSize]/F");
         //            VertexCompositeNtuple->Branch("VtxChi2daughter1",&grand_vtxChi2,"VtxChi2daughter1[candSize]/F");
         //            VertexCompositeNtuple->Branch("VtxNDFdaughter1",&grand_ndf,"VtxNDFdaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "3DCosPointingAngle1daughter1", &grand_agl,
-            "3DCosPointingAngledaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("3DPointingAngledaughter1",
-                                      &grand_agl_abs,
+        VertexCompositeNtuple->Branch("3DCosPointingAngle1daughter1", &grand_agl,
+                                      "3DCosPointingAngledaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("3DPointingAngledaughter1", &grand_agl_abs,
                                       "3DPointingAngledaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "2DCosPointingAngledaughter1", &grand_agl2D,
-            "2DCosPointingAngledaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("2DPointingAngledaughter1",
-                                      &grand_agl2D_abs,
+        VertexCompositeNtuple->Branch("2DCosPointingAngledaughter1", &grand_agl2D,
+                                      "2DCosPointingAngledaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("2DPointingAngledaughter1", &grand_agl2D_abs,
                                       "2DPointingAngledaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "3DDecayLengthSignificancedaughter1", &grand_dlos,
-            "3DDecayLengthSignificancedaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("3DDecayLengthdaughter1", &grand_dl,
-                                      "3DDecayLengthdaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "3DDecayLengthErrordaughter1", &grand_dlerror,
-            "3DDecayLengthErrordaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "2DDecayLengthSignificancedaughter1", &grand_dlos2D,
-            "2DDecayLengthSignificancedaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("3DDecayLengthSignificancedaughter1", &grand_dlos,
+                                      "3DDecayLengthSignificancedaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("3DDecayLengthdaughter1", &grand_dl, "3DDecayLengthdaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("3DDecayLengthErrordaughter1", &grand_dlerror,
+                                      "3DDecayLengthErrordaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("2DDecayLengthSignificancedaughter1", &grand_dlos2D,
+                                      "2DDecayLengthSignificancedaughter1[candSize]/F");
 
-        VertexCompositeNtuple->Branch(
-            "zDCASignificanceGranddaughter11", &grand_dzos1,
-            "zDCASignificanceGranddaughter11[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "zDCASignificanceGranddaughter12", &grand_dzos2,
-            "zDCASignificanceGranddaughter12[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "xyDCASignificanceGranddaughter11", &grand_dxyos1,
-            "xyDCASignificanceGranddaughter11[candSize]/F");
-        VertexCompositeNtuple->Branch(
-            "xyDCASignificanceGranddaughter12", &grand_dxyos2,
-            "xyDCASignificanceGranddaughter12[candSize]/F");
-        VertexCompositeNtuple->Branch("NHitGrandD11", &grand_nhit1,
-                                      "NHitGrandD11[candSize]/F");
-        VertexCompositeNtuple->Branch("NHitGrandD12", &grand_nhit2,
-                                      "NHitGrandD12[candSize]/F");
-        VertexCompositeNtuple->Branch("HighPurityGranddaughter11",
-                                      &grand_trkquality1,
+        VertexCompositeNtuple->Branch("zDCASignificanceGranddaughter11", &grand_dzos1,
+                                      "zDCASignificanceGranddaughter11[candSize]/F");
+        VertexCompositeNtuple->Branch("zDCASignificanceGranddaughter12", &grand_dzos2,
+                                      "zDCASignificanceGranddaughter12[candSize]/F");
+        VertexCompositeNtuple->Branch("xyDCASignificanceGranddaughter11", &grand_dxyos1,
+                                      "xyDCASignificanceGranddaughter11[candSize]/F");
+        VertexCompositeNtuple->Branch("xyDCASignificanceGranddaughter12", &grand_dxyos2,
+                                      "xyDCASignificanceGranddaughter12[candSize]/F");
+        VertexCompositeNtuple->Branch("NHitGrandD11", &grand_nhit1, "NHitGrandD11[candSize]/F");
+        VertexCompositeNtuple->Branch("NHitGrandD12", &grand_nhit2, "NHitGrandD12[candSize]/F");
+        VertexCompositeNtuple->Branch("HighPurityGranddaughter11", &grand_trkquality1,
                                       "HighPurityGranddaughter11[candSize]/O");
-        VertexCompositeNtuple->Branch("HighPurityGranddaughter12",
-                                      &grand_trkquality2,
+        VertexCompositeNtuple->Branch("HighPurityGranddaughter12", &grand_trkquality2,
                                       "HighPurityGranddaughter12[candSize]/O");
-        VertexCompositeNtuple->Branch("pTGrandD11", &grand_pt1,
-                                      "pTGrandD11[candSize]/F");
-        VertexCompositeNtuple->Branch("pTGrandD12", &grand_pt2,
-                                      "pTGrandD12[candSize]/F");
-        VertexCompositeNtuple->Branch("pTerrGrandD11", &grand_ptErr1,
-                                      "pTerrGrandD11[candSize]/F");
-        VertexCompositeNtuple->Branch("pTerrGrandD12", &grand_ptErr2,
-                                      "pTerrGrandD12[candSize]/F");
+        VertexCompositeNtuple->Branch("pTGrandD11", &grand_pt1, "pTGrandD11[candSize]/F");
+        VertexCompositeNtuple->Branch("pTGrandD12", &grand_pt2, "pTGrandD12[candSize]/F");
+        VertexCompositeNtuple->Branch("pTerrGrandD11", &grand_ptErr1, "pTerrGrandD11[candSize]/F");
+        VertexCompositeNtuple->Branch("pTerrGrandD12", &grand_ptErr2, "pTerrGrandD12[candSize]/F");
         //            VertexCompositeNtuple->Branch("pGrandD11",&grand_p1,"pGrandD11[candSize]/F");
         //            VertexCompositeNtuple->Branch("pGrandD12",&grand_p2,"pGrandD12[candSize]/F");
-        VertexCompositeNtuple->Branch("EtaGrandD11", &grand_eta1,
-                                      "EtaGrandD11[candSize]/F");
-        VertexCompositeNtuple->Branch("EtaGrandD12", &grand_eta2,
-                                      "EtaGrandD12[candSize]/F");
-        VertexCompositeNtuple->Branch("PhiGrandD11", &grand_phi1,
-                                      "PhiGrandD11[candSize]/F");
-        VertexCompositeNtuple->Branch("PhiGrandD12", &grand_phi2,
-                                      "PhiGrandD12[candSize]/F");
+        VertexCompositeNtuple->Branch("EtaGrandD11", &grand_eta1, "EtaGrandD11[candSize]/F");
+        VertexCompositeNtuple->Branch("EtaGrandD12", &grand_eta2, "EtaGrandD12[candSize]/F");
+        VertexCompositeNtuple->Branch("PhiGrandD11", &grand_phi1, "PhiGrandD11[candSize]/F");
+        VertexCompositeNtuple->Branch("PhiGrandD12", &grand_phi2, "PhiGrandD12[candSize]/F");
         //            VertexCompositeNtuple->Branch("chargeGrandD11",&grand_charge1,"chargeGrandD11[candSize]/I");
         //            VertexCompositeNtuple->Branch("chargeGrandD12",&grand_charge2,"chargeGrandD12[candSize]/I");
-        VertexCompositeNtuple->Branch("dedxHarmonic2GrandD11", &grand_H2dedx1,
-                                      "dedxHarmonic2GrandD11[candSize]/F");
-        VertexCompositeNtuple->Branch("dedxHarmonic2GrandD12", &grand_H2dedx2,
-                                      "dedxHarmonic2GrandD12[candSize]/F");
+        VertexCompositeNtuple->Branch("dedxHarmonic2GrandD11", &grand_H2dedx1, "dedxHarmonic2GrandD11[candSize]/F");
+        VertexCompositeNtuple->Branch("dedxHarmonic2GrandD12", &grand_H2dedx2, "dedxHarmonic2GrandD12[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter1",&grand_T4dedx1,"dedxTruncated40Granddaughter1[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter2",&grand_T4dedx2,"dedxTruncated40Granddaughter2[candSize]/F");
         //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter1",&grand_trkChi1,"normalizedChi2Granddaughter1[candSize]/F");
         //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter2",&grand_trkChi2,"normalizedChi2Granddaughter2[candSize]/F");
         if (doubleCand_) {
-          VertexCompositeNtuple->Branch("flavordaughter2", &flavor2,
-                                        "flavordaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch("massdaughter2", &grand_mass2,
-                                        "massdaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("flavordaughter2", &flavor2, "flavordaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("massdaughter2", &grand_mass2, "massdaughter2[candSize]/F");
           VertexCompositeNtuple->Branch("pTD2", &pt2, "pTD2[candSize]/F");
           VertexCompositeNtuple->Branch("EtaD2", &eta2, "EtaD2[candSize]/F");
           VertexCompositeNtuple->Branch("PhiD2", &phi2, "PhiD2[candSize]/F");
-          VertexCompositeNtuple->Branch("VtxProbdaughter2", &grand_VtxProb2,
-                                        "VtxProbdaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("VtxProbdaughter2", &grand_VtxProb2, "VtxProbdaughter2[candSize]/F");
           //            VertexCompositeNtuple->Branch("VtxChi2daughter1",&grand_vtxChi2,"VtxChi2daughter1[candSize]/F");
           //            VertexCompositeNtuple->Branch("VtxNDFdaughter1",&grand_ndf,"VtxNDFdaughter1[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "3DCosPointingAngle1daughter2", &grand_agl2,
-              "3DCosPointingAngledaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch("3DPointingAngledaughter2",
-                                        &grand_agl_abs2,
+          VertexCompositeNtuple->Branch("3DCosPointingAngle1daughter2", &grand_agl2,
+                                        "3DCosPointingAngledaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("3DPointingAngledaughter2", &grand_agl_abs2,
                                         "3DPointingAngledaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "2DCosPointingAngledaughter2", &grand_agl2D2,
-              "2DCosPointingAngledaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch("2DPointingAngledaughter2",
-                                        &grand_agl2D_abs2,
+          VertexCompositeNtuple->Branch("2DCosPointingAngledaughter2", &grand_agl2D2,
+                                        "2DCosPointingAngledaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("2DPointingAngledaughter2", &grand_agl2D_abs2,
                                         "2DPointingAngledaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "3DDecayLengthSignificancedaughter2", &grand_dlos2,
-              "3DDecayLengthSignificancedaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch("3DDecayLengthdaughter2", &grand_dl2,
-                                        "3DDecayLengthdaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "3DDecayLengthErrordaughter2", &grand_dlerror2,
-              "3DDecayLengthErrordaughter2[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "2DDecayLengthSignificancedaughter2", &grand_dlos2D2,
-              "2DDecayLengthSignificancedaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("3DDecayLengthSignificancedaughter2", &grand_dlos2,
+                                        "3DDecayLengthSignificancedaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("3DDecayLengthdaughter2", &grand_dl2, "3DDecayLengthdaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("3DDecayLengthErrordaughter2", &grand_dlerror2,
+                                        "3DDecayLengthErrordaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("2DDecayLengthSignificancedaughter2", &grand_dlos2D2,
+                                        "2DDecayLengthSignificancedaughter2[candSize]/F");
 
-          VertexCompositeNtuple->Branch(
-              "zDCASignificanceGranddaughter21", &grand_dzos21,
-              "zDCASignificanceGranddaughter21[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "zDCASignificanceGranddaughter22", &grand_dzos22,
-              "zDCASignificanceGranddaughter22[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "xyDCASignificanceGranddaughter21", &grand_dxyos21,
-              "xyDCASignificanceGranddaughter21[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "xyDCASignificanceGranddaughter22", &grand_dxyos22,
-              "xyDCASignificanceGranddaughter22[candSize]/F");
-          VertexCompositeNtuple->Branch("NHitGrandD21", &grand_nhit21,
-                                        "NHitGrandD21[candSize]/F");
-          VertexCompositeNtuple->Branch("NHitGrandD22", &grand_nhit22,
-                                        "NHitGrandD22[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "HighPurityGranddaughter21", &grand_trkquality21,
-              "HighPurityGranddaughter21[candSize]/O");
-          VertexCompositeNtuple->Branch(
-              "HighPurityGranddaughter22", &grand_trkquality22,
-              "HighPurityGranddaughter22[candSize]/O");
-          VertexCompositeNtuple->Branch("pTGrandD21", &grand_pt21,
-                                        "pTGrandD21[candSize]/F");
-          VertexCompositeNtuple->Branch("pTGrandD22", &grand_pt22,
-                                        "pTGrandD22[candSize]/F");
-          VertexCompositeNtuple->Branch("pTerrGrandD21", &grand_ptErr21,
-                                        "pTerrGrandD21[candSize]/F");
-          VertexCompositeNtuple->Branch("pTerrGrandD22", &grand_ptErr22,
-                                        "pTerrGrandD22[candSize]/F");
+          VertexCompositeNtuple->Branch("zDCASignificanceGranddaughter21", &grand_dzos21,
+                                        "zDCASignificanceGranddaughter21[candSize]/F");
+          VertexCompositeNtuple->Branch("zDCASignificanceGranddaughter22", &grand_dzos22,
+                                        "zDCASignificanceGranddaughter22[candSize]/F");
+          VertexCompositeNtuple->Branch("xyDCASignificanceGranddaughter21", &grand_dxyos21,
+                                        "xyDCASignificanceGranddaughter21[candSize]/F");
+          VertexCompositeNtuple->Branch("xyDCASignificanceGranddaughter22", &grand_dxyos22,
+                                        "xyDCASignificanceGranddaughter22[candSize]/F");
+          VertexCompositeNtuple->Branch("NHitGrandD21", &grand_nhit21, "NHitGrandD21[candSize]/F");
+          VertexCompositeNtuple->Branch("NHitGrandD22", &grand_nhit22, "NHitGrandD22[candSize]/F");
+          VertexCompositeNtuple->Branch("HighPurityGranddaughter21", &grand_trkquality21,
+                                        "HighPurityGranddaughter21[candSize]/O");
+          VertexCompositeNtuple->Branch("HighPurityGranddaughter22", &grand_trkquality22,
+                                        "HighPurityGranddaughter22[candSize]/O");
+          VertexCompositeNtuple->Branch("pTGrandD21", &grand_pt21, "pTGrandD21[candSize]/F");
+          VertexCompositeNtuple->Branch("pTGrandD22", &grand_pt22, "pTGrandD22[candSize]/F");
+          VertexCompositeNtuple->Branch("pTerrGrandD21", &grand_ptErr21, "pTerrGrandD21[candSize]/F");
+          VertexCompositeNtuple->Branch("pTerrGrandD22", &grand_ptErr22, "pTerrGrandD22[candSize]/F");
           //            VertexCompositeNtuple->Branch("pGrandD21",&grand_p21,"pGrandD1[candSize]/F");
           //            VertexCompositeNtuple->Branch("pGrandD22",&grand_p22,"pGrandD2[candSize]/F");
-          VertexCompositeNtuple->Branch("EtaGrandD21", &grand_eta21,
-                                        "EtaGrandD21[candSize]/F");
-          VertexCompositeNtuple->Branch("EtaGrandD22", &grand_eta22,
-                                        "EtaGrandD22[candSize]/F");
-          VertexCompositeNtuple->Branch("PhiGrandD21", &grand_phi21,
-                                        "PhiGrandD21[candSize]/F");
-          VertexCompositeNtuple->Branch("PhiGrandD22", &grand_phi22,
-                                        "PhiGrandD22[candSize]/F");
+          VertexCompositeNtuple->Branch("EtaGrandD21", &grand_eta21, "EtaGrandD21[candSize]/F");
+          VertexCompositeNtuple->Branch("EtaGrandD22", &grand_eta22, "EtaGrandD22[candSize]/F");
+          VertexCompositeNtuple->Branch("PhiGrandD21", &grand_phi21, "PhiGrandD21[candSize]/F");
+          VertexCompositeNtuple->Branch("PhiGrandD22", &grand_phi22, "PhiGrandD22[candSize]/F");
           //            VertexCompositeNtuple->Branch("chargeGrandD21",&grand_charge21,"chargeGrandD1[candSize]/I");
           //            VertexCompositeNtuple->Branch("chargeGrandD22",&grand_charge22,"chargeGrandD2[candSize]/I");
-          VertexCompositeNtuple->Branch("dedxHarmonic2GrandD21",
-                                        &grand_H2dedx21,
-                                        "dedxHarmonic2GrandD21[candSize]/F");
-          VertexCompositeNtuple->Branch("dedxHarmonic2GrandD22",
-                                        &grand_H2dedx22,
-                                        "dedxHarmonic2GrandD22[candSize]/F");
+          VertexCompositeNtuple->Branch("dedxHarmonic2GrandD21", &grand_H2dedx21, "dedxHarmonic2GrandD21[candSize]/F");
+          VertexCompositeNtuple->Branch("dedxHarmonic2GrandD22", &grand_H2dedx22, "dedxHarmonic2GrandD22[candSize]/F");
           //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter1",&grand_T4dedx21,"dedxTruncated40Granddaughter1[candSize]/F");
           //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter2",&grand_T4dedx22,"dedxTruncated40Granddaughter2[candSize]/F");
           //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter1",&grand_trkChi21,"normalizedChi2Granddaughter1[candSize]/F");
           //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter2",&grand_trkChi22,"normalizedChi2Granddaughter2[candSize]/F");
         }
       } else {
-        VertexCompositeNtuple->Branch("zDCASignificancedaughter1", &dzos1,
-                                      "zDCASignificancedaughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("xyDCASignificancedaughter1", &dxyos1,
-                                      "xyDCASignificancedaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("zDCASignificancedaughter1", &dzos1, "zDCASignificancedaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("xyDCASignificancedaughter1", &dxyos1, "xyDCASignificancedaughter1[candSize]/F");
         VertexCompositeNtuple->Branch("NHitD1", &nhit1, "NHitD1[candSize]/F");
-        VertexCompositeNtuple->Branch("HighPuritydaughter1", &trkquality1,
-                                      "HighPuritydaughter1[candSize]/O");
+        VertexCompositeNtuple->Branch("HighPuritydaughter1", &trkquality1, "HighPuritydaughter1[candSize]/O");
         VertexCompositeNtuple->Branch("pTD1", &pt1, "pTD1[candSize]/F");
-        VertexCompositeNtuple->Branch("pTerrD1", &ptErr1,
-                                      "pTerrD1[candSize]/F");
+        VertexCompositeNtuple->Branch("pTerrD1", &ptErr1, "pTerrD1[candSize]/F");
         //            VertexCompositeNtuple->Branch("pD1",&p1,"pD1[candSize]/F");
         VertexCompositeNtuple->Branch("EtaD1", &eta1, "EtaD1[candSize]/F");
         VertexCompositeNtuple->Branch("PhiD1", &phi1, "PhiD1[candSize]/F");
         //            VertexCompositeNtuple->Branch("chargeD1",&charge1,"chargeD1[candSize]/I");
-        VertexCompositeNtuple->Branch("dedxHarmonic2D1", &H2dedx1,
-                                      "dedxHarmonic2D1[candSize]/F");
+        VertexCompositeNtuple->Branch("dedxHarmonic2D1", &H2dedx1, "dedxHarmonic2D1[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40daughter1",&T4dedx1,"dedxTruncated40daughter1[candSize]/F");
         //            VertexCompositeNtuple->Branch("normalizedChi2daughter1",&trkChi1,"normalizedChi2daughter1[candSize]/F");
-        VertexCompositeNtuple->Branch("zDCASignificancedaughter2", &dzos2,
-                                      "zDCASignificancedaughter2[candSize]/F");
-        VertexCompositeNtuple->Branch("xyDCASignificancedaughter2", &dxyos2,
-                                      "xyDCASignificancedaughter2[candSize]/F");
+        VertexCompositeNtuple->Branch("zDCASignificancedaughter2", &dzos2, "zDCASignificancedaughter2[candSize]/F");
+        VertexCompositeNtuple->Branch("xyDCASignificancedaughter2", &dxyos2, "xyDCASignificancedaughter2[candSize]/F");
         VertexCompositeNtuple->Branch("NHitD2", &nhit2, "NHitD2[candSize]/F");
-        VertexCompositeNtuple->Branch("HighPuritydaughter2", &trkquality2,
-                                      "HighPuritydaughter2[candSize]/O");
+        VertexCompositeNtuple->Branch("HighPuritydaughter2", &trkquality2, "HighPuritydaughter2[candSize]/O");
         VertexCompositeNtuple->Branch("pTD2", &pt2, "pTD2[candSize]/F");
-        VertexCompositeNtuple->Branch("pTerrD2", &ptErr2,
-                                      "pTerrD2[candSize]/F");
+        VertexCompositeNtuple->Branch("pTerrD2", &ptErr2, "pTerrD2[candSize]/F");
         //            VertexCompositeNtuple->Branch("pD2",&p2,"pD2[candSize]/F");
         VertexCompositeNtuple->Branch("EtaD2", &eta2, "EtaD2[candSize]/F");
         VertexCompositeNtuple->Branch("PhiD2", &phi2, "PhiD2[candSize]/F");
         //            VertexCompositeNtuple->Branch("chargeD2",&charge2,"chargeD2[candSize]/I");
-        VertexCompositeNtuple->Branch("dedxHarmonic2D2", &H2dedx2,
-                                      "dedxHarmonic2D2[candSize]/F");
+        VertexCompositeNtuple->Branch("dedxHarmonic2D2", &H2dedx2, "dedxHarmonic2D2[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40daughter2",&T4dedx2,"dedxTruncated40daughter2[candSize]/F");
         //            VertexCompositeNtuple->Branch("normalizedChi2daughter2",&trkChi2,"normalizedChi2daughter2[candSize]/F");
         if (threeProngDecay_) {
-          VertexCompositeNtuple->Branch(
-              "zDCASignificancedaughter3", &dzos3,
-              "zDCASignificancedaughter3[candSize]/F");
-          VertexCompositeNtuple->Branch(
-              "xyDCASignificancedaughter3", &dxyos3,
-              "xyDCASignificancedaughter3[candSize]/F");
+          VertexCompositeNtuple->Branch("zDCASignificancedaughter3", &dzos3, "zDCASignificancedaughter3[candSize]/F");
+          VertexCompositeNtuple->Branch("xyDCASignificancedaughter3", &dxyos3,
+                                        "xyDCASignificancedaughter3[candSize]/F");
           VertexCompositeNtuple->Branch("NHitD3", &nhit3, "NHitD3[candSize]/F");
-          VertexCompositeNtuple->Branch("HighPuritydaughter3", &trkquality3,
-                                        "HighPuritydaughter3[candSize]/O");
+          VertexCompositeNtuple->Branch("HighPuritydaughter3", &trkquality3, "HighPuritydaughter3[candSize]/O");
           VertexCompositeNtuple->Branch("pTD3", &pt1, "pTD3[candSize]/F");
-          VertexCompositeNtuple->Branch("pTerrD3", &ptErr3,
-                                        "pTerrD3[candSize]/F");
+          VertexCompositeNtuple->Branch("pTerrD3", &ptErr3, "pTerrD3[candSize]/F");
           VertexCompositeNtuple->Branch("EtaD3", &eta1, "EtaD3[candSize]/F");
-          VertexCompositeNtuple->Branch("dedxHarmonic2D3", &H2dedx1,
-                                        "dedxHarmonic2D3[candSize]/F");
+          VertexCompositeNtuple->Branch("dedxHarmonic2D3", &H2dedx1, "dedxHarmonic2D3[candSize]/F");
         }
       }
 
       if (doMuon_) {
-        VertexCompositeNtuple->Branch("OneStMuon1", &onestmuon1,
-                                      "OneStMuon1[candSize]/O");
-        VertexCompositeNtuple->Branch("OneStMuon2", &onestmuon2,
-                                      "OneStMuon2[candSize]/O");
-        VertexCompositeNtuple->Branch("PFMuon1", &pfmuon1,
-                                      "PFMuon1[candSize]/O");
-        VertexCompositeNtuple->Branch("PFMuon2", &pfmuon2,
-                                      "PFMuon2[candSize]/O");
-        VertexCompositeNtuple->Branch("GlbMuon1", &glbmuon1,
-                                      "GlbMuon1[candSize]/O");
-        VertexCompositeNtuple->Branch("GlbMuon2", &glbmuon2,
-                                      "GlbMuon2[candSize]/O");
-        VertexCompositeNtuple->Branch("trkMuon1", &trkmuon1,
-                                      "trkMuon1[candSize]/O");
-        VertexCompositeNtuple->Branch("trkMuon2", &trkmuon2,
-                                      "trkMuon2[candSize]/O");
-        VertexCompositeNtuple->Branch("caloMuon1", &calomuon1,
-                                      "caloMuon1[candSize]/O");
-        VertexCompositeNtuple->Branch("caloMuon2", &calomuon2,
-                                      "caloMuon2[candSize]/O");
-        VertexCompositeNtuple->Branch("SoftMuon1", &softmuon1,
-                                      "SoftMuon1[candSize]/O");
-        VertexCompositeNtuple->Branch("SoftMuon2", &softmuon2,
-                                      "SoftMuon2[candSize]/O");
+        VertexCompositeNtuple->Branch("OneStMuon1", &onestmuon1, "OneStMuon1[candSize]/O");
+        VertexCompositeNtuple->Branch("OneStMuon2", &onestmuon2, "OneStMuon2[candSize]/O");
+        VertexCompositeNtuple->Branch("PFMuon1", &pfmuon1, "PFMuon1[candSize]/O");
+        VertexCompositeNtuple->Branch("PFMuon2", &pfmuon2, "PFMuon2[candSize]/O");
+        VertexCompositeNtuple->Branch("GlbMuon1", &glbmuon1, "GlbMuon1[candSize]/O");
+        VertexCompositeNtuple->Branch("GlbMuon2", &glbmuon2, "GlbMuon2[candSize]/O");
+        VertexCompositeNtuple->Branch("trkMuon1", &trkmuon1, "trkMuon1[candSize]/O");
+        VertexCompositeNtuple->Branch("trkMuon2", &trkmuon2, "trkMuon2[candSize]/O");
+        VertexCompositeNtuple->Branch("caloMuon1", &calomuon1, "caloMuon1[candSize]/O");
+        VertexCompositeNtuple->Branch("caloMuon2", &calomuon2, "caloMuon2[candSize]/O");
+        VertexCompositeNtuple->Branch("SoftMuon1", &softmuon1, "SoftMuon1[candSize]/O");
+        VertexCompositeNtuple->Branch("SoftMuon2", &softmuon2, "SoftMuon2[candSize]/O");
 
         if (doMuonFull_) {
-          VertexCompositeNtuple->Branch("nMatchedChamberD1", &nmatchedch1,
-                                        "nMatchedChamberD1[candSize]/F");
-          VertexCompositeNtuple->Branch("nMatchedStationD1", &nmatchedst1,
-                                        "nMatchedStationD1[candSize]/F");
-          VertexCompositeNtuple->Branch("EnergyDepositionD1", &matchedenergy1,
-                                        "EnergyDepositionD1[candSize]/F");
-          VertexCompositeNtuple->Branch("nMatchedChamberD2", &nmatchedch2,
-                                        "nMatchedChamberD2[candSize]/F");
-          VertexCompositeNtuple->Branch("nMatchedStationD2", &nmatchedst2,
-                                        "nMatchedStationD2[candSize]/F");
-          VertexCompositeNtuple->Branch("EnergyDepositionD2", &matchedenergy2,
-                                        "EnergyDepositionD2[candSize]/F");
-          VertexCompositeNtuple->Branch("dx1_seg", &dx1_seg_,
-                                        "dx1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dy1_seg", &dy1_seg_,
-                                        "dy1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dxSig1_seg", &dxSig1_seg_,
-                                        "dxSig1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dySig1_seg", &dySig1_seg_,
-                                        "dySig1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddxdz1_seg", &ddxdz1_seg_,
-                                        "ddxdz1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddydz1_seg", &ddydz1_seg_,
-                                        "ddydz1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddxdzSig1_seg", &ddxdzSig1_seg_,
-                                        "ddxdzSig1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddydzSig1_seg", &ddydzSig1_seg_,
-                                        "ddydzSig1_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dx2_seg", &dx2_seg_,
-                                        "dx2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dy2_seg", &dy2_seg_,
-                                        "dy2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dxSig2_seg", &dxSig2_seg_,
-                                        "dxSig2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("dySig2_seg", &dySig2_seg_,
-                                        "dySig2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddxdz2_seg", &ddxdz2_seg_,
-                                        "ddxdz2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddydz2_seg", &ddydz2_seg_,
-                                        "ddydz2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddxdzSig2_seg", &ddxdzSig2_seg_,
-                                        "ddxdzSig2_seg[candSize]/F");
-          VertexCompositeNtuple->Branch("ddydzSig2_seg", &ddydzSig2_seg_,
-                                        "ddydzSig2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("nMatchedChamberD1", &nmatchedch1, "nMatchedChamberD1[candSize]/F");
+          VertexCompositeNtuple->Branch("nMatchedStationD1", &nmatchedst1, "nMatchedStationD1[candSize]/F");
+          VertexCompositeNtuple->Branch("EnergyDepositionD1", &matchedenergy1, "EnergyDepositionD1[candSize]/F");
+          VertexCompositeNtuple->Branch("nMatchedChamberD2", &nmatchedch2, "nMatchedChamberD2[candSize]/F");
+          VertexCompositeNtuple->Branch("nMatchedStationD2", &nmatchedst2, "nMatchedStationD2[candSize]/F");
+          VertexCompositeNtuple->Branch("EnergyDepositionD2", &matchedenergy2, "EnergyDepositionD2[candSize]/F");
+          VertexCompositeNtuple->Branch("dx1_seg", &dx1_seg_, "dx1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dy1_seg", &dy1_seg_, "dy1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dxSig1_seg", &dxSig1_seg_, "dxSig1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dySig1_seg", &dySig1_seg_, "dySig1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddxdz1_seg", &ddxdz1_seg_, "ddxdz1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddydz1_seg", &ddydz1_seg_, "ddydz1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddxdzSig1_seg", &ddxdzSig1_seg_, "ddxdzSig1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddydzSig1_seg", &ddydzSig1_seg_, "ddydzSig1_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dx2_seg", &dx2_seg_, "dx2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dy2_seg", &dy2_seg_, "dy2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dxSig2_seg", &dxSig2_seg_, "dxSig2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("dySig2_seg", &dySig2_seg_, "dySig2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddxdz2_seg", &ddxdz2_seg_, "ddxdz2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddydz2_seg", &ddydz2_seg_, "ddydz2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddxdzSig2_seg", &ddxdzSig2_seg_, "ddxdzSig2_seg[candSize]/F");
+          VertexCompositeNtuple->Branch("ddydzSig2_seg", &ddydzSig2_seg_, "ddydzSig2_seg[candSize]/F");
         }
       }
     }
@@ -3021,86 +2667,53 @@ void VertexCompositeTreeProducerNew::initTree() {
   } // doRecoNtuple_
 
   if (doGenNtuple_) {
-    VertexCompositeNtuple->Branch("candSize_gen", &candSize_gen,
-                                  "candSize_gen/I");
+    VertexCompositeNtuple->Branch("candSize_gen", &candSize_gen, "candSize_gen/I");
     VertexCompositeNtuple->Branch("id_gen", &idself, "id_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("mass_gen", &mass_gen,
-                                  "mass_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("mass_gen", &mass_gen, "mass_gen[candSize_gen]/F");
     VertexCompositeNtuple->Branch("pT_gen", &pt_gen, "pT_gen[candSize_gen]/F");
-    VertexCompositeNtuple->Branch("eta_gen", &eta_gen,
-                                  "eta_gen[candSize_gen]/F");
-    VertexCompositeNtuple->Branch("phi_gen", &phi_gen,
-                                  "phi_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("eta_gen", &eta_gen, "eta_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("phi_gen", &phi_gen, "phi_gen[candSize_gen]/F");
     VertexCompositeNtuple->Branch("y_gen", &y_gen, "y_gen[candSize_gen]/F");
-    VertexCompositeNtuple->Branch("status_gen", &status_gen,
-                                  "status_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("MotherID_gen", &idmom,
-                                  "MotherID_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("MotherPt_gen", &ptmom,
-                                  "MotherPt_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("MotherEta_gen", &etamom,
-                                  "MotherEta_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("MotherPhi_gen", &phimom,
-                                  "MotherPhi_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("MotherY_gen", &ymom,
-                                  "MotherY_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("MotherStatus_gen", &statusmom,
-                                  "MotherStatus_gen[candSize_gen]/I");
-    VertexCompositeNtuple->Branch("dl2D_gen", &dl2D_gen,
-                                  "dl2D_gen[candSize_gen]/F");
-    VertexCompositeNtuple->Branch("dl3D_gen", &dl3D_gen,
-                                  "dl3D_gen[candSize_gen]/F");
-    VertexCompositeNtuple->Branch("angle2D_gen", &angle2D_gen,
-                                  "angle2D_gen[candSize_gen]/F");
-    VertexCompositeNtuple->Branch("angle3D_gen", &angle3D_gen,
-                                  "angle3D_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("status_gen", &status_gen, "status_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("MotherID_gen", &idmom, "MotherID_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("MotherPt_gen", &ptmom, "MotherPt_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("MotherEta_gen", &etamom, "MotherEta_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("MotherPhi_gen", &phimom, "MotherPhi_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("MotherY_gen", &ymom, "MotherY_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("MotherStatus_gen", &statusmom, "MotherStatus_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("dl2D_gen", &dl2D_gen, "dl2D_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("dl3D_gen", &dl3D_gen, "dl3D_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("angle2D_gen", &angle2D_gen, "angle2D_gen[candSize_gen]/F");
+    VertexCompositeNtuple->Branch("angle3D_gen", &angle3D_gen, "angle3D_gen[candSize_gen]/F");
     if (doGenDoubleDecay_) {
-      VertexCompositeNtuple->Branch("id_gen1", &idself1,
-                                    "id_gen1[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("mass_gen1", &mass_gen1,
-                                    "mass_gen1[candSize_gen]/F");
-      VertexCompositeNtuple->Branch("pt_gen1", &pt_gen1,
-                                    "pt_gen1[candSize_gen]/F");
-      VertexCompositeNtuple->Branch("eta_gen1", &eta_gen1,
-                                    "eta_gen1[candSize_gen]/F");
-      VertexCompositeNtuple->Branch("phi_gen1", &phi_gen1,
-                                    "phi_gen1[candSize_gen]/F");
-      VertexCompositeNtuple->Branch("status_gen1", &status_gen1,
-                                    "status_gen1[candSize_gen]/F");
+      VertexCompositeNtuple->Branch("id_gen1", &idself1, "id_gen1[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("mass_gen1", &mass_gen1, "mass_gen1[candSize_gen]/F");
+      VertexCompositeNtuple->Branch("pt_gen1", &pt_gen1, "pt_gen1[candSize_gen]/F");
+      VertexCompositeNtuple->Branch("eta_gen1", &eta_gen1, "eta_gen1[candSize_gen]/F");
+      VertexCompositeNtuple->Branch("phi_gen1", &phi_gen1, "phi_gen1[candSize_gen]/F");
+      VertexCompositeNtuple->Branch("status_gen1", &status_gen1, "status_gen1[candSize_gen]/F");
 
-      VertexCompositeNtuple->Branch("id_gen2", &idself2,
-                                    "id_gen2[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("mass_gen2", &mass_gen2,
-                                    "mass_gen2[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("pt_gen2", &pt_gen2,
-                                    "pt_gen2[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("eta_gen2", &eta_gen2,
-                                    "eta_gen2[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("phi_gen2", &phi_gen2,
-                                    "phi_gen2[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("status_gen2", &status_gen2,
-                                    "status_gen2[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("id_gen2", &idself2, "id_gen2[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("mass_gen2", &mass_gen2, "mass_gen2[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("pt_gen2", &pt_gen2, "pt_gen2[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("eta_gen2", &eta_gen2, "eta_gen2[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("phi_gen2", &phi_gen2, "phi_gen2[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("status_gen2", &status_gen2, "status_gen2[candSize_gen]/I");
     }
 
     if (decayInGen_) {
 
-      VertexCompositeNtuple->Branch("DauID1_gen", &iddau1,
-                                    "DauID1_gen[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("DauID2_gen", &iddau2,
-                                    "DauID2_gen[candSize_gen]/I");
-      VertexCompositeNtuple->Branch("DauID3_gen", &iddau3,
-                                    "DauID3_gen[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("DauID1_gen", &iddau1, "DauID1_gen[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("DauID2_gen", &iddau2, "DauID2_gen[candSize_gen]/I");
+      VertexCompositeNtuple->Branch("DauID3_gen", &iddau3, "DauID3_gen[candSize_gen]/I");
     }
   }
 }
 
-int VertexCompositeTreeProducerNew::muAssocToTrack(
-    const reco::TrackRef &trackref,
-    const edm::Handle<reco::MuonCollection> &muonh) const {
-  auto muon =
-      std::find_if(muonh->cbegin(), muonh->cend(), [&](const reco::Muon &m) {
-        return (m.track().isNonnull() && m.track() == trackref);
-      });
+int VertexCompositeTreeProducerNew::muAssocToTrack(const reco::TrackRef &trackref,
+                                                   const edm::Handle<reco::MuonCollection> &muonh) const {
+  auto muon = std::find_if(muonh->cbegin(), muonh->cend(),
+                           [&](const reco::Muon &m) { return (m.track().isNonnull() && m.track() == trackref); });
   return (muon != muonh->cend() ? std::distance(muonh->cbegin(), muon) : -1);
 }
 
@@ -3108,8 +2721,7 @@ int VertexCompositeTreeProducerNew::muAssocToTrack(
 // loop  ------------
 void VertexCompositeTreeProducerNew::endJob() {}
 
-reco::GenParticleRef VertexCompositeTreeProducerNew::findMother(
-    const reco::GenParticleRef &genParRef) {
+reco::GenParticleRef VertexCompositeTreeProducerNew::findMother(const reco::GenParticleRef &genParRef) {
   if (genParRef.isNull())
     return genParRef;
   reco::GenParticleRef genMomRef = genParRef;
@@ -3124,9 +2736,9 @@ reco::GenParticleRef VertexCompositeTreeProducerNew::findMother(
   return genMomRef;
 }
 
-void VertexCompositeTreeProducerNew::genDecayLength(
-    const reco::GenParticle &gCand, float &gen_decayLength2D_,
-    float &gen_decayLength3D_, float &gen_angle2D_, float &gen_angle3D_) {
+void VertexCompositeTreeProducerNew::genDecayLength(const reco::GenParticle &gCand, float &gen_decayLength2D_,
+                                                    float &gen_decayLength3D_, float &gen_angle2D_,
+                                                    float &gen_angle3D_) {
   gen_decayLength2D_ = -99.;
   gen_decayLength3D_ = -99.;
   gen_angle2D_ = -99;
@@ -3135,21 +2747,18 @@ void VertexCompositeTreeProducerNew::genDecayLength(
   if (gCand.numberOfDaughters() == 0 || !gCand.daughter(0))
     return;
   const auto &dauVtx = gCand.daughter(0)->vertex();
-  TVector3 ptosvec(dauVtx.X() - genVertex_.x(), dauVtx.Y() - genVertex_.y(),
-                   dauVtx.Z() - genVertex_.z());
+  TVector3 ptosvec(dauVtx.X() - genVertex_.x(), dauVtx.Y() - genVertex_.y(), dauVtx.Z() - genVertex_.z());
   TVector3 secvec(gCand.px(), gCand.py(), gCand.pz());
   gen_angle3D_ = secvec.Angle(ptosvec);
   gen_decayLength3D_ = ptosvec.Mag();
-  TVector3 ptosvec2D(dauVtx.X() - genVertex_.x(), dauVtx.Y() - genVertex_.y(),
-                     0.0);
+  TVector3 ptosvec2D(dauVtx.X() - genVertex_.x(), dauVtx.Y() - genVertex_.y(), 0.0);
   TVector3 secvec2D(gCand.px(), gCand.py(), 0.0);
   gen_angle2D_ = secvec2D.Angle(ptosvec2D);
   gen_decayLength2D_ = ptosvec2D.Mag();
 }
 
-void VertexCompositeTreeProducerNew::getAncestorId(
-    const reco::GenParticle &gCand, int &gen_ancestorId_,
-    int &gen_ancestorFlavor_) {
+void VertexCompositeTreeProducerNew::getAncestorId(const reco::GenParticle &gCand, int &gen_ancestorId_,
+                                                   int &gen_ancestorFlavor_) {
   gen_ancestorId_ = 0;
   gen_ancestorFlavor_ = 0;
   for (auto mothers = gCand.motherRefVector(); !mothers.empty();) {
@@ -3157,8 +2766,7 @@ void VertexCompositeTreeProducerNew::getAncestorId(
     mothers = mom->motherRefVector();
     gen_ancestorId_ = mom->pdgId();
     const auto idstr = std::to_string(std::abs(gen_ancestorId_));
-    gen_ancestorFlavor_ =
-        std::stoi(std::string{idstr.begin(), idstr.begin() + 1});
+    gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin() + 1});
     if (idstr[0] == '5') {
       break;
     }

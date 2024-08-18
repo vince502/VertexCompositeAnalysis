@@ -141,43 +141,31 @@ private:
 //
 
 EventInfoTreeProducer::EventInfoTreeProducer(const edm::ParameterSet &iConfig)
-    : triggerNames_(iConfig.getUntrackedParameter<std::vector<std::string>>(
-          "triggerPathNames")),
-      filterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>(
-          "triggerFilterNames")),
+    : triggerNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("triggerPathNames")),
+      filterNames_(iConfig.getUntrackedParameter<std::vector<std::string>>("triggerFilterNames")),
       NTRG_(triggerNames_.size() > MAXTRG ? MAXTRG : triggerNames_.size()),
-      eventFilters_(iConfig.getUntrackedParameter<std::vector<std::string>>(
-          "eventFilterNames")),
+      eventFilters_(iConfig.getUntrackedParameter<std::vector<std::string>>("eventFilterNames")),
       NSEL_(eventFilters_.size() > MAXSEL ? MAXSEL : eventFilters_.size()),
       selectEvents_(iConfig.getUntrackedParameter<std::string>("selectEvents")),
       hltPrescaleProvider_(iConfig, consumesCollector(), *this) {
   // input tokens
-  tok_offlineBS_ = consumes<reco::BeamSpot>(
-      iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
-  tok_offlinePV_ = consumes<reco::VertexCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
+  tok_offlineBS_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc"));
+  tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
 
-  isCentrality_ = (iConfig.exists("isCentrality")
-                       ? iConfig.getParameter<bool>("isCentrality")
-                       : false);
+  isCentrality_ = (iConfig.exists("isCentrality") ? iConfig.getParameter<bool>("isCentrality") : false);
   if (isCentrality_) {
-    tok_centBinLabel_ = consumes<int>(
-        iConfig.getParameter<edm::InputTag>("centralityBinLabel"));
-    tok_centSrc_ = consumes<reco::Centrality>(
-        iConfig.getParameter<edm::InputTag>("centralitySrc"));
+    tok_centBinLabel_ = consumes<int>(iConfig.getParameter<edm::InputTag>("centralityBinLabel"));
+    tok_centSrc_ = consumes<reco::Centrality>(iConfig.getParameter<edm::InputTag>("centralitySrc"));
   }
 
-  isEventPlane_ = (iConfig.exists("isEventPlane")
-                       ? iConfig.getParameter<bool>("isEventPlane")
-                       : false);
+  isEventPlane_ = (iConfig.exists("isEventPlane") ? iConfig.getParameter<bool>("isEventPlane") : false);
   if (isEventPlane_)
-    tok_eventplaneSrc_ = consumes<reco::EvtPlaneCollection>(
-        iConfig.getParameter<edm::InputTag>("eventplaneSrc"));
+    tok_eventplaneSrc_ = consumes<reco::EvtPlaneCollection>(iConfig.getParameter<edm::InputTag>("eventplaneSrc"));
 
-  tok_triggerResults_ = consumes<edm::TriggerResults>(
-      iConfig.getUntrackedParameter<edm::InputTag>("TriggerResultCollection"));
-  tok_filterResults_ = consumes<edm::TriggerResults>(
-      iConfig.getUntrackedParameter<edm::InputTag>("FilterResultCollection"));
+  tok_triggerResults_ =
+      consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("TriggerResultCollection"));
+  tok_filterResults_ =
+      consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("FilterResultCollection"));
 }
 
 EventInfoTreeProducer::~EventInfoTreeProducer() {
@@ -191,32 +179,28 @@ EventInfoTreeProducer::~EventInfoTreeProducer() {
 //
 
 // ------------ method called to for each event  ------------
-void EventInfoTreeProducer::analyze(const edm::Event &iEvent,
-                                    const edm::EventSetup &iSetup) {
+void EventInfoTreeProducer::analyze(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   // check event
   if (selectEvents_ != "") {
     edm::Handle<edm::TriggerResults> filterResults;
     iEvent.getByToken(tok_filterResults_, filterResults);
     const auto &filterNames = iEvent.triggerNames(*filterResults);
     const auto &index = filterNames.triggerIndex(selectEvents_);
-    if (index < filterNames.size() && filterResults->wasrun(index) &&
-        !filterResults->accept(index))
+    if (index < filterNames.size() && filterResults->wasrun(index) && !filterResults->accept(index))
       return;
   }
   fillRECO(iEvent, iSetup);
   EventInfoNtuple->Fill();
 }
 
-void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
-                                     const edm::EventSetup &iSetup) {
+void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   // get collection
   edm::Handle<reco::BeamSpot> beamspot;
   iEvent.getByToken(tok_offlineBS_, beamspot);
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
   if (!vertices.isValid())
-    throw cms::Exception("EventInfoTreeProducer")
-        << "Primary vertices  collection not found!" << std::endl;
+    throw cms::Exception("EventInfoTreeProducer") << "Primary vertices  collection not found!" << std::endl;
 
   runNb = iEvent.id().run();
   eventNb = iEvent.id().event();
@@ -226,8 +210,7 @@ void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
   edm::Handle<edm::TriggerResults> triggerResults;
   iEvent.getByToken(tok_triggerResults_, triggerResults);
   if (triggerNames_.size() > 0) {
-    const edm::TriggerNames &triggerNames =
-        iEvent.triggerNames(*triggerResults);
+    const edm::TriggerNames &triggerNames = iEvent.triggerNames(*triggerResults);
     for (ushort iTr = 0; iTr < NTRG_; iTr++) {
       // Initiliaze the arrays
       trigHLT[iTr] = false;
@@ -236,9 +219,7 @@ void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
       const auto &trigName = triggerNames_.at(iTr);
       std::vector<ushort> trgIdxFound;
       for (ushort trgIdx = 0; trgIdx < triggerNames.size(); trgIdx++) {
-        if (triggerNames.triggerName(trgIdx).find(trigName) !=
-                std::string::npos &&
-            triggerResults->wasrun(trgIdx)) {
+        if (triggerNames.triggerName(trgIdx).find(trigName) != std::string::npos && triggerResults->wasrun(trgIdx)) {
           trgIdxFound.push_back(trgIdx);
         }
       }
@@ -262,14 +243,12 @@ void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
         isTriggerFired = true;
       // Get the trigger prescale
       int prescaleValue = -1;
-      if (hltPrescaleProvider_.hltConfigProvider().inited() &&
-          hltPrescaleProvider_.prescaleSet(iEvent, iSetup) >= 0) {
-        const auto &presInfo = hltPrescaleProvider_.prescaleValuesInDetail(
-            iEvent, iSetup, triggerNames.triggerName(triggerIndex));
+      if (hltPrescaleProvider_.hltConfigProvider().inited() && hltPrescaleProvider_.prescaleSet(iEvent, iSetup) >= 0) {
+        const auto &presInfo =
+            hltPrescaleProvider_.prescaleValuesInDetail(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
         const auto &hltPres = presInfo.second;
-        const short &l1Pres = ((presInfo.first.size() == 1)
-                                   ? presInfo.first.at(0).second
-                                   : ((presInfo.first.size() > 1) ? 1 : -1));
+        const short &l1Pres =
+            ((presInfo.first.size() == 1) ? presInfo.first.at(0).second : ((presInfo.first.size() > 1) ? 1 : -1));
         prescaleValue = hltPres * l1Pres;
       }
       trigPrescale[iTr] = prescaleValue;
@@ -287,8 +266,7 @@ void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
       evtSel[iFr] = false;
       const auto &index = filterNames.triggerIndex(eventFilters_.at(iFr));
       if (index < filterNames.size())
-        evtSel[iFr] =
-            (filterResults->wasrun(index) && filterResults->accept(index));
+        evtSel[iFr] = (filterResults->wasrun(index) && filterResults->accept(index));
     }
   }
 
@@ -314,13 +292,11 @@ void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
 
     ephfpAngle[0] = (eventplanes.isValid() ? (*eventplanes)[0].angle(2) : -99.);
     ephfpAngle[1] = (eventplanes.isValid() ? (*eventplanes)[6].angle(2) : -99.);
-    ephfpAngle[2] =
-        (eventplanes.isValid() ? (*eventplanes)[13].angle(2) : -99.);
+    ephfpAngle[2] = (eventplanes.isValid() ? (*eventplanes)[13].angle(2) : -99.);
 
     ephfmAngle[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(2) : -99.);
     ephfmAngle[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(2) : -99.);
-    ephfmAngle[2] =
-        (eventplanes.isValid() ? (*eventplanes)[14].angle(2) : -99.);
+    ephfmAngle[2] = (eventplanes.isValid() ? (*eventplanes)[14].angle(2) : -99.);
 
     ephfpQ[0] = (eventplanes.isValid() ? (*eventplanes)[0].q(2) : -99.);
     ephfpQ[1] = (eventplanes.isValid() ? (*eventplanes)[6].q(2) : -99.);
@@ -336,12 +312,9 @@ void EventInfoTreeProducer::fillRECO(const edm::Event &iEvent,
 
   nPV = vertices->size();
   // best vertex
-  const auto &vtxPrimary =
-      (vertices->size() > 0 ? (*vertices)[0] : reco::Vertex());
+  const auto &vtxPrimary = (vertices->size() > 0 ? (*vertices)[0] : reco::Vertex());
   const bool &isPV = (!vtxPrimary.isFake() && vtxPrimary.tracksSize() >= 2);
-  const auto &bs =
-      (!isPV ? reco::Vertex(beamspot->position(), beamspot->covariance3D())
-             : reco::Vertex());
+  const auto &bs = (!isPV ? reco::Vertex(beamspot->position(), beamspot->covariance3D()) : reco::Vertex());
   const reco::Vertex &vtx = (isPV ? vtxPrimary : bs);
   bestvz = vtx.z();
   bestvx = vtx.x();
@@ -384,15 +357,13 @@ void EventInfoTreeProducer::initTree() {
     EventInfoNtuple->Branch("ephfpSumW", &ephfpSumW, "ephfpSumW/F");
     EventInfoNtuple->Branch("ephfmSumW", &ephfmSumW, "ephfmSumW/F");
   }
-  EventInfoNtuple->Branch("trigPrescale", trigPrescale,
-                          Form("trigPrescale[%d]/S", NTRG_));
+  EventInfoNtuple->Branch("trigPrescale", trigPrescale, Form("trigPrescale[%d]/S", NTRG_));
   EventInfoNtuple->Branch("trigHLT", trigHLT, Form("trigHLT[%d]/O", NTRG_));
   EventInfoNtuple->Branch("evtSel", evtSel, Form("evtSel[%d]/O", NSEL_));
 }
 
 //--------------------------------------------------------------------------------------------------
-void EventInfoTreeProducer::beginRun(const edm::Run &iRun,
-                                     const edm::EventSetup &iSetup) {
+void EventInfoTreeProducer::beginRun(const edm::Run &iRun, const edm::EventSetup &iSetup) {
   bool changed = true;
   EDConsumerBase::Labels triggerResultsLabel;
   EDConsumerBase::labelsForToken(tok_triggerResults_, triggerResultsLabel);

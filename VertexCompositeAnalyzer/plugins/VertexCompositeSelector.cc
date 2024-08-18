@@ -90,8 +90,7 @@ private:
   virtual void endJob();
 
   double GetMVACut(double y, double pt);
-  int muAssocToTrack(const reco::TrackRef &trackref,
-                     const edm::Handle<reco::MuonCollection> &muonh) const;
+  int muAssocToTrack(const reco::TrackRef &trackref, const edm::Handle<reco::MuonCollection> &muonh) const;
 
   // ----------member data ---------------------------
 
@@ -321,8 +320,7 @@ private:
   // tokens
   edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
   edm::EDGetTokenT<reco::TrackCollection> tok_generalTrk_;
-  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection>
-      recoVertexCompositeCandidateCollection_Token_;
+  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> recoVertexCompositeCandidateCollection_Token_;
   edm::EDGetTokenT<MVACollection> MVAValues_Token_;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData>> Dedx_Token1_;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData>> Dedx_Token2_;
@@ -354,8 +352,7 @@ private:
 // constructors and destructor
 //
 
-VertexCompositeSelector::VertexCompositeSelector(
-    const edm::ParameterSet &iConfig) {
+VertexCompositeSelector::VertexCompositeSelector(const edm::ParameterSet &iConfig) {
   // options
   twoLayerDecay_ = iConfig.getUntrackedParameter<bool>("twoLayerDecay");
   threeProngDecay_ = iConfig.getUntrackedParameter<bool>("threeProngDecay");
@@ -365,10 +362,8 @@ VertexCompositeSelector::VertexCompositeSelector(
   doMuon_ = iConfig.getUntrackedParameter<bool>("doMuon");
   selectGenMatch_ = iConfig.getUntrackedParameter<bool>("selectGenMatch");
   selectGenUnMatch_ = iConfig.getUntrackedParameter<bool>("selectGenUnMatch");
-  selectGenMatchSwap_ =
-      iConfig.getUntrackedParameter<bool>("selectGenMatchSwap");
-  selectGenMatchUnSwap_ =
-      iConfig.getUntrackedParameter<bool>("selectGenMatchUnSwap");
+  selectGenMatchSwap_ = iConfig.getUntrackedParameter<bool>("selectGenMatchSwap");
+  selectGenMatchUnSwap_ = iConfig.getUntrackedParameter<bool>("selectGenMatchUnSwap");
 
   PID_ = iConfig.getUntrackedParameter<int>("PID");
   PID_dau1_ = iConfig.getUntrackedParameter<int>("PID_dau1");
@@ -399,14 +394,10 @@ VertexCompositeSelector::VertexCompositeSelector(
   candpTMax_ = iConfig.getUntrackedParameter<double>("candpTMax");
   candYMin_ = iConfig.getUntrackedParameter<double>("candYMin");
   candYMax_ = iConfig.getUntrackedParameter<double>("candYMax");
-  cand3DDecayLengthSigMin_ =
-      iConfig.getUntrackedParameter<double>("cand3DDecayLengthSigMin");
-  cand2DDecayLengthSigMin_ =
-      iConfig.getUntrackedParameter<double>("cand2DDecayLengthSigMin");
-  cand3DPointingAngleMax_ =
-      iConfig.getUntrackedParameter<double>("cand3DPointingAngleMax");
-  cand2DPointingAngleMax_ =
-      iConfig.getUntrackedParameter<double>("cand2DPointingAngleMax");
+  cand3DDecayLengthSigMin_ = iConfig.getUntrackedParameter<double>("cand3DDecayLengthSigMin");
+  cand2DDecayLengthSigMin_ = iConfig.getUntrackedParameter<double>("cand2DDecayLengthSigMin");
+  cand3DPointingAngleMax_ = iConfig.getUntrackedParameter<double>("cand3DPointingAngleMax");
+  cand2DPointingAngleMax_ = iConfig.getUntrackedParameter<double>("cand2DPointingAngleMax");
   cand3DDCAMin_ = iConfig.getUntrackedParameter<double>("cand3DDCAMin");
   cand3DDCAMax_ = iConfig.getUntrackedParameter<double>("cand3DDCAMax");
   cand2DDCAMin_ = iConfig.getUntrackedParameter<double>("cand2DDCAMin");
@@ -414,27 +405,18 @@ VertexCompositeSelector::VertexCompositeSelector(
   candVtxProbMin_ = iConfig.getUntrackedParameter<double>("candVtxProbMin");
 
   // input tokens
-  tok_offlinePV_ = consumes<reco::VertexCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
-  tok_generalTrk_ = consumes<reco::TrackCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection"));
-  recoVertexCompositeCandidateCollection_Token_ =
-      consumes<reco::VertexCompositeCandidateCollection>(
-          iConfig.getUntrackedParameter<edm::InputTag>(
-              "VertexCompositeCollection"));
-  tok_muon_ = consumes<reco::MuonCollection>(
-      iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection"));
-  Dedx_Token1_ =
-      consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxHarmonic2"));
-  Dedx_Token2_ =
-      consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxTruncated40"));
-  tok_genParticle_ = consumes<reco::GenParticleCollection>(edm::InputTag(
-      iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
+  tok_offlinePV_ = consumes<reco::VertexCollection>(iConfig.getUntrackedParameter<edm::InputTag>("VertexCollection"));
+  tok_generalTrk_ = consumes<reco::TrackCollection>(iConfig.getUntrackedParameter<edm::InputTag>("TrackCollection"));
+  recoVertexCompositeCandidateCollection_Token_ = consumes<reco::VertexCompositeCandidateCollection>(
+      iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection"));
+  tok_muon_ = consumes<reco::MuonCollection>(iConfig.getUntrackedParameter<edm::InputTag>("MuonCollection"));
+  Dedx_Token1_ = consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxHarmonic2"));
+  Dedx_Token2_ = consumes<edm::ValueMap<reco::DeDxData>>(edm::InputTag("dedxTruncated40"));
+  tok_genParticle_ = consumes<reco::GenParticleCollection>(
+      edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
 
-  tok_DCAVal_ = consumes<std::vector<float>>(
-      iConfig.getParameter<edm::InputTag>("DCAValCollection"));
-  tok_DCAErr_ = consumes<std::vector<float>>(
-      iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
+  tok_DCAVal_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
+  tok_DCAErr_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
 
   usePID_ = false;
   selectFlavor_ = 0;
@@ -458,10 +440,8 @@ VertexCompositeSelector::VertexCompositeSelector(
   if (iConfig.exists("isCentrality"))
     isCentrality_ = iConfig.getParameter<bool>("isCentrality");
   if (isCentrality_) {
-    tok_centBinLabel_ = consumes<int>(
-        iConfig.getParameter<edm::InputTag>("centralityBinLabel"));
-    tok_centSrc_ = consumes<reco::Centrality>(
-        iConfig.getParameter<edm::InputTag>("centralitySrc"));
+    tok_centBinLabel_ = consumes<int>(iConfig.getParameter<edm::InputTag>("centralityBinLabel"));
+    tok_centSrc_ = consumes<reco::Centrality>(iConfig.getParameter<edm::InputTag>("centralitySrc"));
   }
 
   if (iConfig.exists("useAnyMVA"))
@@ -471,8 +451,7 @@ VertexCompositeSelector::VertexCompositeSelector(
 
   if (useAnyMVA_) {
     if (useExistingMVA_ && iConfig.exists("MVACollection")) {
-      MVAValues_Token_ = consumes<MVACollection>(
-          iConfig.getParameter<edm::InputTag>("MVACollection"));
+      MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
     } else {
       if (iConfig.exists("mvaType"))
         type = iConfig.getParameter<std::string>("mvaType");
@@ -491,9 +470,7 @@ VertexCompositeSelector::VertexCompositeSelector(
       bdtcut_filename = iConfig.getParameter<string>("BDTCutFileName");
     hist_bdtcut = 0;
     if (!bdtcut_filename.IsNull()) {
-      edm::FileInPath fip(
-          Form("VertexCompositeAnalysis/VertexCompositeAnalyzer/data/%s",
-               bdtcut_filename.Data()));
+      edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeAnalyzer/data/%s", bdtcut_filename.Data()));
       TFile ff(fip.fullPath().c_str(), "READ");
       hist_bdtcut = (TH2D *)ff.Get("hist_bdtcut");
       ff.Close();
@@ -503,14 +480,12 @@ VertexCompositeSelector::VertexCompositeSelector(
                        "[0]*(1+[1]*x+[2]*x*x+[3]*x*x*x)*(1+[4]*y+[5]*y*y+[6]*y*"
                        "y*y+[7]*y*y*y*y)",
                        0, 5.0, 0, 100);
-    func_mva->SetParameters(mvaCuts_[0], mvaCuts_[1], mvaCuts_[2], mvaCuts_[3],
-                            mvaCuts_[4], mvaCuts_[5], mvaCuts_[6], mvaCuts_[7]);
+    func_mva->SetParameters(mvaCuts_[0], mvaCuts_[1], mvaCuts_[2], mvaCuts_[3], mvaCuts_[4], mvaCuts_[5], mvaCuts_[6],
+                            mvaCuts_[7]);
   }
 
   if (!useForestFromDB_) {
-    edm::FileInPath fip(
-        Form("VertexCompositeAnalysis/VertexCompositeAnalyzer/data/%s",
-             dbFileName_.c_str()));
+    edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeAnalyzer/data/%s", dbFileName_.c_str()));
     TFile gbrfile(fip.fullPath().c_str(), "READ");
     forest_ = (GBRForest *)gbrfile.Get(forestLabel_.c_str());
     gbrfile.Close();
@@ -518,9 +493,7 @@ VertexCompositeSelector::VertexCompositeSelector(
 
   mvaType_ = type;
 
-  v0IDName_ = (iConfig.getUntrackedParameter<edm::InputTag>(
-                   "VertexCompositeCollection"))
-                  .instance();
+  v0IDName_ = (iConfig.getUntrackedParameter<edm::InputTag>("VertexCompositeCollection")).instance();
 
   produces<reco::VertexCompositeCandidateCollection>(v0IDName_);
   produces<MVACollection>(Form("MVAValuesNew%s", v0IDName_.c_str()));
@@ -544,8 +517,7 @@ VertexCompositeSelector::~VertexCompositeSelector() {
 //
 
 // ------------ method called to for each event  ------------
-void VertexCompositeSelector::produce(edm::Event &iEvent,
-                                      const edm::EventSetup &iSetup) {
+void VertexCompositeSelector::produce(edm::Event &iEvent, const edm::EventSetup &iSetup) {
   using std::vector;
   using namespace edm;
 
@@ -553,36 +525,30 @@ void VertexCompositeSelector::produce(edm::Event &iEvent,
 
   //    std::make_unique< reco::VertexCompositeCandidateCollection >
   //    theNewV0Cands( new reco::VertexCompositeCandidateCollection );
-  auto theNewV0Cands =
-      std::make_unique<reco::VertexCompositeCandidateCollection>();
+  auto theNewV0Cands = std::make_unique<reco::VertexCompositeCandidateCollection>();
 
   theNewV0Cands->reserve(theVertexComps.size());
 
-  std::copy(theVertexComps.begin(), theVertexComps.end(),
-            std::back_inserter(*theNewV0Cands));
+  std::copy(theVertexComps.begin(), theVertexComps.end(), std::back_inserter(*theNewV0Cands));
 
   iEvent.put(std::move(theNewV0Cands), v0IDName_);
   theVertexComps.clear();
 
   if (useAnyMVA_) {
-    auto mvas =
-        std::make_unique<MVACollection>(theMVANew.begin(), theMVANew.end());
+    auto mvas = std::make_unique<MVACollection>(theMVANew.begin(), theMVANew.end());
     iEvent.put(std::move(mvas), Form("MVAValuesNew%s", v0IDName_.c_str()));
     theMVANew.clear();
   }
 
-  auto dcaVals = std::make_unique<std::vector<float>>(theDCAValNew_.begin(),
-                                                      theDCAValNew_.end());
+  auto dcaVals = std::make_unique<std::vector<float>>(theDCAValNew_.begin(), theDCAValNew_.end());
   iEvent.put(std::move(dcaVals), Form("DCAValuesNew%s", v0IDName_.c_str()));
-  auto dcaErrs = std::make_unique<std::vector<float>>(theDCAErrNew_.begin(),
-                                                      theDCAErrNew_.end());
+  auto dcaErrs = std::make_unique<std::vector<float>>(theDCAErrNew_.begin(), theDCAErrNew_.end());
   iEvent.put(std::move(dcaErrs), Form("DCAErrorsNew%s", v0IDName_.c_str()));
   theDCAValNew_.clear();
   theDCAErrNew_.clear();
 }
 
-void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
-                                       const edm::EventSetup &iSetup) {
+void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup &iSetup) {
   // get collections
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
@@ -591,10 +557,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
   iEvent.getByToken(tok_generalTrk_, tracks);
 
   edm::Handle<reco::VertexCompositeCandidateCollection> v0candidates;
-  iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_,
-                    v0candidates);
-  const reco::VertexCompositeCandidateCollection *v0candidates_ =
-      v0candidates.product();
+  iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_, v0candidates);
+  const reco::VertexCompositeCandidateCollection *v0candidates_ = v0candidates.product();
 
   edm::Handle<MVACollection> mvavalues;
   if (useAnyMVA_ && useExistingMVA_) {
@@ -656,10 +620,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
       double dzvtx = trk.dz(bestvtx);
       double dxyvtx = trk.dxy(bestvtx);
-      double dzerror =
-          sqrt(trk.dzError() * trk.dzError() + bestvzError * bestvzError);
-      double dxyerror =
-          sqrt(trk.d0Error() * trk.d0Error() + bestvxError * bestvyError);
+      double dzerror = sqrt(trk.dzError() * trk.dzError() + bestvzError * bestvzError);
+      double dxyerror = sqrt(trk.d0Error() * trk.d0Error() + bestvxError * bestvyError);
 
       if (!trk.quality(reco::TrackBase::highPurity))
         continue;
@@ -720,32 +682,18 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       const reco::Candidate *Dd2 = trk.daughter(1);
       const reco::Candidate *Dd3 = 0;
 
-      if (!threeProngDecay_ &&
-          !(fabs(Dd1->pdgId()) == PID_dau1_ &&
-            fabs(Dd2->pdgId()) == PID_dau2_) &&
+      if (!threeProngDecay_ && !(fabs(Dd1->pdgId()) == PID_dau1_ && fabs(Dd2->pdgId()) == PID_dau2_) &&
           !(fabs(Dd2->pdgId()) == PID_dau1_ && fabs(Dd1->pdgId()) == PID_dau2_))
         continue; // check daughter id
 
       if (threeProngDecay_) {
         Dd3 = trk.daughter(2);
-        if (!(fabs(Dd1->pdgId()) == PID_dau1_ &&
-              fabs(Dd2->pdgId()) == PID_dau2_ &&
-              fabs(Dd3->pdgId()) == PID_dau3_) &&
-            !(fabs(Dd1->pdgId()) == PID_dau1_ &&
-              fabs(Dd2->pdgId()) == PID_dau3_ &&
-              fabs(Dd3->pdgId()) == PID_dau2_) &&
-            !(fabs(Dd1->pdgId()) == PID_dau2_ &&
-              fabs(Dd2->pdgId()) == PID_dau1_ &&
-              fabs(Dd3->pdgId()) == PID_dau3_) &&
-            !(fabs(Dd1->pdgId()) == PID_dau2_ &&
-              fabs(Dd2->pdgId()) == PID_dau3_ &&
-              fabs(Dd3->pdgId()) == PID_dau1_) &&
-            !(fabs(Dd1->pdgId()) == PID_dau3_ &&
-              fabs(Dd2->pdgId()) == PID_dau1_ &&
-              fabs(Dd3->pdgId()) == PID_dau2_) &&
-            !(fabs(Dd1->pdgId()) == PID_dau3_ &&
-              fabs(Dd2->pdgId()) == PID_dau2_ &&
-              fabs(Dd3->pdgId()) == PID_dau1_))
+        if (!(fabs(Dd1->pdgId()) == PID_dau1_ && fabs(Dd2->pdgId()) == PID_dau2_ && fabs(Dd3->pdgId()) == PID_dau3_) &&
+            !(fabs(Dd1->pdgId()) == PID_dau1_ && fabs(Dd2->pdgId()) == PID_dau3_ && fabs(Dd3->pdgId()) == PID_dau2_) &&
+            !(fabs(Dd1->pdgId()) == PID_dau2_ && fabs(Dd2->pdgId()) == PID_dau1_ && fabs(Dd3->pdgId()) == PID_dau3_) &&
+            !(fabs(Dd1->pdgId()) == PID_dau2_ && fabs(Dd2->pdgId()) == PID_dau3_ && fabs(Dd3->pdgId()) == PID_dau1_) &&
+            !(fabs(Dd1->pdgId()) == PID_dau3_ && fabs(Dd2->pdgId()) == PID_dau1_ && fabs(Dd3->pdgId()) == PID_dau2_) &&
+            !(fabs(Dd1->pdgId()) == PID_dau3_ && fabs(Dd2->pdgId()) == PID_dau2_ && fabs(Dd3->pdgId()) == PID_dau1_))
           continue;
       }
 
@@ -834,8 +782,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
         vector<double> Dvector1 = (*pVect)[i]; // get GEN daugther vector
         if (d1->charge() != Dvector1.at(3))
           continue; // check match charge
-        double deltaR = sqrt(pow(d1->eta() - Dvector1.at(1), 2) +
-                             pow(d1->phi() - Dvector1.at(2), 2));
+        double deltaR = sqrt(pow(d1->eta() - Dvector1.at(1), 2) + pow(d1->phi() - Dvector1.at(2), 2));
 
         if (deltaR > deltaR_)
           continue; // check deltaR matching
@@ -848,12 +795,10 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
         if (nGenDau == 2) {
           if (i % 2 == 0) {
-            vector<double> Dvector2 =
-                (*pVect)[i + 1]; // get GEN daugther vector for track2
+            vector<double> Dvector2 = (*pVect)[i + 1]; // get GEN daugther vector for track2
             if (d2->charge() != Dvector2.at(3))
               continue; // check match charge
-            double deltaR = sqrt(pow(d2->eta() - Dvector2.at(1), 2) +
-                                 pow(d2->phi() - Dvector2.at(2), 2));
+            double deltaR = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
 
             if (deltaR > deltaR_)
               continue; // check deltaR matching
@@ -866,12 +811,10 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
           }
 
           if (i % 2 == 1) {
-            vector<double> Dvector2 =
-                (*pVect)[i - 1]; // get GEN daugther vector for track2
+            vector<double> Dvector2 = (*pVect)[i - 1]; // get GEN daugther vector for track2
             if (d2->charge() != Dvector2.at(3))
               continue; // check match charge
-            double deltaR = sqrt(pow(d2->eta() - Dvector2.at(1), 2) +
-                                 pow(d2->phi() - Dvector2.at(2), 2));
+            double deltaR = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
 
             if (deltaR > deltaR_)
               continue; // check deltaR matching
@@ -891,28 +834,19 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
         if (nGenDau == 3) {
           if (i % 3 == 0) {
-            vector<double> Dvector2 =
-                (*pVect)[i + 1]; // get GEN daugther vector for track2
-            vector<double> Dvector3 =
-                (*pVect)[i + 2]; // get GEN daugther vector for track3
+            vector<double> Dvector2 = (*pVect)[i + 1]; // get GEN daugther vector for track2
+            vector<double> Dvector3 = (*pVect)[i + 2]; // get GEN daugther vector for track3
 
-            if (!(d2->charge() == Dvector2.at(3) &&
-                  d3->charge() == Dvector3.at(3)) &&
-                !(d3->charge() == Dvector2.at(3) &&
-                  d2->charge() == Dvector3.at(3)))
+            if (!(d2->charge() == Dvector2.at(3) && d3->charge() == Dvector3.at(3)) &&
+                !(d3->charge() == Dvector2.at(3) && d2->charge() == Dvector3.at(3)))
               continue; // check match charge
 
-            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) +
-                                   pow(d2->phi() - Dvector2.at(2), 2));
-            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) +
-                                   pow(d3->phi() - Dvector3.at(2), 2));
-            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) +
-                                   pow(d2->phi() - Dvector3.at(2), 2));
-            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) +
-                                   pow(d3->phi() - Dvector2.at(2), 2));
+            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
+            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) + pow(d3->phi() - Dvector3.at(2), 2));
+            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) + pow(d2->phi() - Dvector3.at(2), 2));
+            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) + pow(d3->phi() - Dvector2.at(2), 2));
 
-            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) &&
-                !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
+            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
               continue;
 
             double deltaPt22 = fabs((d2->pt() - Dvector2.at(0)) / d2->pt());
@@ -920,8 +854,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
             double deltaPt23 = fabs((d2->pt() - Dvector3.at(0)) / d2->pt());
             double deltaPt32 = fabs((d3->pt() - Dvector2.at(0)) / d3->pt());
 
-            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) &&
-                !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
+            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
               continue; // check deltaPt matching
 
             d2massGEN = Dvector2.at(4);
@@ -933,28 +866,19 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
           }
 
           if (i % 3 == 1) {
-            vector<double> Dvector2 =
-                (*pVect)[i - 1]; // get GEN daugther vector for track2
-            vector<double> Dvector3 =
-                (*pVect)[i + 1]; // get GEN daugther vector for track3
+            vector<double> Dvector2 = (*pVect)[i - 1]; // get GEN daugther vector for track2
+            vector<double> Dvector3 = (*pVect)[i + 1]; // get GEN daugther vector for track3
 
-            if (!(d2->charge() == Dvector2.at(3) &&
-                  d3->charge() == Dvector3.at(3)) &&
-                !(d3->charge() == Dvector2.at(3) &&
-                  d2->charge() == Dvector3.at(3)))
+            if (!(d2->charge() == Dvector2.at(3) && d3->charge() == Dvector3.at(3)) &&
+                !(d3->charge() == Dvector2.at(3) && d2->charge() == Dvector3.at(3)))
               continue; // check match charge
 
-            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) +
-                                   pow(d2->phi() - Dvector2.at(2), 2));
-            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) +
-                                   pow(d3->phi() - Dvector3.at(2), 2));
-            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) +
-                                   pow(d2->phi() - Dvector3.at(2), 2));
-            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) +
-                                   pow(d3->phi() - Dvector2.at(2), 2));
+            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
+            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) + pow(d3->phi() - Dvector3.at(2), 2));
+            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) + pow(d2->phi() - Dvector3.at(2), 2));
+            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) + pow(d3->phi() - Dvector2.at(2), 2));
 
-            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) &&
-                !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
+            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
               continue;
 
             double deltaPt22 = fabs((d2->pt() - Dvector2.at(0)) / d2->pt());
@@ -962,8 +886,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
             double deltaPt23 = fabs((d2->pt() - Dvector3.at(0)) / d2->pt());
             double deltaPt32 = fabs((d3->pt() - Dvector2.at(0)) / d3->pt());
 
-            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) &&
-                !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
+            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
               continue; // check deltaPt matching
 
             d2massGEN = Dvector2.at(4);
@@ -975,28 +898,19 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
           }
 
           if (i % 3 == 2) {
-            vector<double> Dvector2 =
-                (*pVect)[i - 2]; // get GEN daugther vector for track2
-            vector<double> Dvector3 =
-                (*pVect)[i - 1]; // get GEN daugther vector for track3
+            vector<double> Dvector2 = (*pVect)[i - 2]; // get GEN daugther vector for track2
+            vector<double> Dvector3 = (*pVect)[i - 1]; // get GEN daugther vector for track3
 
-            if (!(d2->charge() == Dvector2.at(3) &&
-                  d3->charge() == Dvector3.at(3)) &&
-                !(d3->charge() == Dvector2.at(3) &&
-                  d2->charge() == Dvector3.at(3)))
+            if (!(d2->charge() == Dvector2.at(3) && d3->charge() == Dvector3.at(3)) &&
+                !(d3->charge() == Dvector2.at(3) && d2->charge() == Dvector3.at(3)))
               continue; // check match charge
 
-            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) +
-                                   pow(d2->phi() - Dvector2.at(2), 2));
-            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) +
-                                   pow(d3->phi() - Dvector3.at(2), 2));
-            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) +
-                                   pow(d2->phi() - Dvector3.at(2), 2));
-            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) +
-                                   pow(d3->phi() - Dvector2.at(2), 2));
+            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
+            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) + pow(d3->phi() - Dvector3.at(2), 2));
+            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) + pow(d2->phi() - Dvector3.at(2), 2));
+            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) + pow(d3->phi() - Dvector2.at(2), 2));
 
-            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) &&
-                !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
+            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
               continue;
 
             double deltaPt22 = fabs((d2->pt() - Dvector2.at(0)) / d2->pt());
@@ -1004,8 +918,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
             double deltaPt23 = fabs((d2->pt() - Dvector3.at(0)) / d2->pt());
             double deltaPt32 = fabs((d3->pt() - Dvector2.at(0)) / d3->pt());
 
-            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) &&
-                !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
+            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
               continue; // check deltaPt matching
 
             d2massGEN = Dvector2.at(4);
@@ -1016,8 +929,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
             matchGEN = true; // matched gen
           }
 
-          if (abs(d1massGEN - d1mass) > 0.01 ||
-              abs(d2massGEN - d2mass) > 0.01 || abs(d3massGEN - d3mass) > 0.01)
+          if (abs(d1massGEN - d1mass) > 0.01 || abs(d2massGEN - d2mass) > 0.01 || abs(d3massGEN - d3mass) > 0.01)
             isSwap = true;
 
           idmom_reco = pVectIDmom->at(i / 3);
@@ -1129,8 +1041,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       continue;
 
     // Decay length 3D
-    typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>>
-        SMatrixSym3D;
+    typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
     typedef ROOT::Math::SVector<double, 3> SVector3;
     typedef ROOT::Math::SVector<double, 6> SVector6;
 
@@ -1145,10 +1056,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       continue;
 
     // Decay length 2D
-    SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                vtx.covariance(1, 1), 0, 0, 0);
-    SVector6 v2(trk.vertexCovariance(0, 0), trk.vertexCovariance(0, 1),
-                trk.vertexCovariance(1, 1), 0, 0, 0);
+    SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+    SVector6 v2(trk.vertexCovariance(0, 0), trk.vertexCovariance(0, 1), trk.vertexCovariance(1, 1), 0, 0, 0);
 
     SMatrixSym3D sv1(v1);
     SMatrixSym3D sv2(v2);
@@ -1157,8 +1066,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
     SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
 
     double dl2D = ROOT::Math::Mag(distanceVector2D);
-    double dl2Derror =
-        sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / dl2D;
+    double dl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / dl2D;
 
     dlos2D = dl2D / dl2Derror;
     if (dlos2D < cand2DDecayLengthSigMin_ || dlos2D > 1000.)
@@ -1185,17 +1093,14 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       T4dedx1 = -999.9;
       if (usePID_) {
         if (dEdxHandle1.isValid()) {
-          const edm::ValueMap<reco::DeDxData> dEdxTrack =
-              *dEdxHandle1.product();
+          const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
           H2dedx1 = dEdxTrack[dau1].dEdx();
           if (H2dedx1 > (2.8 / pow(pt1 * cosh(eta1), 0.4) + 0.2) &&
-              H2dedx1 < (2.8 / pow(pt1 * cosh(eta1), 0.9) + 1.8) &&
-              H2dedx1 > (2.8 / pow(0.75, 0.4) + 0.2)) {
+              H2dedx1 < (2.8 / pow(pt1 * cosh(eta1), 0.9) + 1.8) && H2dedx1 > (2.8 / pow(0.75, 0.4) + 0.2)) {
             isKaonD1 = true;
             isPionD1 = false;
           }
-          if ((H2dedx1 < (2.8 / pow(pt1 * cosh(eta1), 0.4) + 0.2) ||
-               H2dedx1 < (2.8 / pow(0.75, 0.4) + 0.2)) &&
+          if ((H2dedx1 < (2.8 / pow(pt1 * cosh(eta1), 0.4) + 0.2) || H2dedx1 < (2.8 / pow(0.75, 0.4) + 0.2)) &&
               H2dedx1 > 0) {
             isPionD1 = true;
             isKaonD1 = false;
@@ -1203,8 +1108,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
         }
 
         if (dEdxHandle2.isValid()) {
-          const edm::ValueMap<reco::DeDxData> dEdxTrack =
-              *dEdxHandle2.product();
+          const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
           T4dedx1 = dEdxTrack[dau1].dEdx();
         }
       }
@@ -1232,10 +1136,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
       double dzbest1 = dau1->dz(bestvtx);
       double dxybest1 = dau1->dxy(bestvtx);
-      double dzerror1 =
-          sqrt(dau1->dzError() * dau1->dzError() + bestvzError * bestvzError);
-      double dxyerror1 =
-          sqrt(dau1->d0Error() * dau1->d0Error() + bestvxError * bestvyError);
+      double dzerror1 = sqrt(dau1->dzError() * dau1->dzError() + bestvzError * bestvzError);
+      double dxyerror1 = sqrt(dau1->d0Error() * dau1->d0Error() + bestvxError * bestvyError);
 
       dzos1 = dzbest1 / dzerror1;
       dxyos1 = dxybest1 / dxyerror1;
@@ -1256,14 +1158,12 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
         const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
         H2dedx2 = dEdxTrack[dau2].dEdx();
 
-        if (H2dedx2 > (2.8 / pow(pt2 * cosh(eta2), 0.4) + 0.2) &&
-            H2dedx2 < (2.8 / pow(pt2 * cosh(eta2), 0.9) + 1.8) &&
+        if (H2dedx2 > (2.8 / pow(pt2 * cosh(eta2), 0.4) + 0.2) && H2dedx2 < (2.8 / pow(pt2 * cosh(eta2), 0.9) + 1.8) &&
             H2dedx2 > (2.8 / pow(0.75, 0.4) + 0.2)) {
           isKaonD2 = true;
           isPionD2 = false;
         }
-        if ((H2dedx2 < (2.8 / pow(pt2 * cosh(eta2), 0.4) + 0.2) ||
-             H2dedx2 < (2.8 / pow(0.75, 0.4) + 0.2)) &&
+        if ((H2dedx2 < (2.8 / pow(pt2 * cosh(eta2), 0.4) + 0.2) || H2dedx2 < (2.8 / pow(0.75, 0.4) + 0.2)) &&
             H2dedx2 > 0) {
           isPionD2 = true;
           isKaonD2 = false;
@@ -1304,10 +1204,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
     double dzbest2 = dau2->dz(bestvtx);
     double dxybest2 = dau2->dxy(bestvtx);
-    double dzerror2 =
-        sqrt(dau2->dzError() * dau2->dzError() + bestvzError * bestvzError);
-    double dxyerror2 =
-        sqrt(dau2->d0Error() * dau2->d0Error() + bestvxError * bestvyError);
+    double dzerror2 = sqrt(dau2->dzError() * dau2->dzError() + bestvzError * bestvzError);
+    double dxyerror2 = sqrt(dau2->d0Error() * dau2->d0Error() + bestvxError * bestvyError);
 
     dzos2 = dzbest2 / dzerror2;
     dxyos2 = dxybest2 / dxyerror2;
@@ -1328,10 +1226,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
       double dzbest3 = dau3->dz(bestvtx);
       double dxybest3 = dau3->dxy(bestvtx);
-      double dzerror3 =
-          sqrt(dau3->dzError() * dau3->dzError() + bestvzError * bestvzError);
-      double dxyerror3 =
-          sqrt(dau3->d0Error() * dau3->d0Error() + bestvxError * bestvyError);
+      double dzerror3 = sqrt(dau3->dzError() * dau3->dzError() + bestvzError * bestvzError);
+      double dxyerror3 = sqrt(dau3->d0Error() * dau3->d0Error() + bestvxError * bestvyError);
       dzos3 = dzbest3 / dzerror3;
       dxyos3 = dxybest3 / dxyerror3;
     }
@@ -1399,8 +1295,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
           dxdzerr_exp = muchmatches[ich].dXdZErr;
           dydzerr_exp = muchmatches[ich].dYdZErr;
 
-          std::vector<reco::MuonSegmentMatch> musegmatches =
-              muchmatches[ich].segmentMatches;
+          std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
 
           if (!musegmatches.size())
             continue;
@@ -1414,8 +1309,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
             dxdzerr_seg = musegmatches[jseg].dXdZErr;
             dydzerr_seg = musegmatches[jseg].dYdZErr;
 
-            if (sqrt((x_seg - x_exp) * (x_seg - x_exp) +
-                     (y_seg - y_exp) * (y_seg - y_exp)) <
+            if (sqrt((x_seg - x_exp) * (x_seg - x_exp) + (y_seg - y_exp) * (y_seg - y_exp)) <
                 sqrt(dx_seg * dx_seg + dy_seg * dy_seg)) {
               dx_seg = x_seg - x_exp;
               dy_seg = y_seg - y_exp;
@@ -1425,10 +1319,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
               dySig_seg = dy_seg / dyerr_seg;
               ddxdz_seg = dxdz_seg - dxdz_exp;
               ddydz_seg = dydz_seg - dydz_exp;
-              ddxdzerr_seg =
-                  sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
-              ddydzerr_seg =
-                  sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
+              ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+              ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
               ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
               ddydzSig_seg = ddydz_seg / ddydzerr_seg;
             }
@@ -1466,8 +1358,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
           dxdzerr_exp = muchmatches[ich].dXdZErr;
           dydzerr_exp = muchmatches[ich].dYdZErr;
 
-          std::vector<reco::MuonSegmentMatch> musegmatches =
-              muchmatches[ich].segmentMatches;
+          std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
 
           if (!musegmatches.size())
             continue;
@@ -1481,8 +1372,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
             dxdzerr_seg = musegmatches[jseg].dXdZErr;
             dydzerr_seg = musegmatches[jseg].dYdZErr;
 
-            if (sqrt((x_seg - x_exp) * (x_seg - x_exp) +
-                     (y_seg - y_exp) * (y_seg - y_exp)) <
+            if (sqrt((x_seg - x_exp) * (x_seg - x_exp) + (y_seg - y_exp) * (y_seg - y_exp)) <
                 sqrt(dx_seg * dx_seg + dy_seg * dy_seg)) {
               dx_seg = x_seg - x_exp;
               dy_seg = y_seg - y_exp;
@@ -1492,10 +1382,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
               dySig_seg = dy_seg / dyerr_seg;
               ddxdz_seg = dxdz_seg - dxdz_exp;
               ddydz_seg = dydz_seg - dydz_exp;
-              ddxdzerr_seg =
-                  sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
-              ddydzerr_seg =
-                  sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
+              ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+              ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
               ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
               ddydzSig_seg = ddydz_seg / ddydzerr_seg;
             }
@@ -1594,20 +1482,16 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
 
       double gdzbest1 = gdau1->dz(bestvtx);
       double gdxybest1 = gdau1->dxy(bestvtx);
-      double gdzerror1 =
-          sqrt(gdau1->dzError() * gdau1->dzError() + bestvzError * bestvzError);
-      double gdxyerror1 =
-          sqrt(gdau1->d0Error() * gdau1->d0Error() + bestvxError * bestvyError);
+      double gdzerror1 = sqrt(gdau1->dzError() * gdau1->dzError() + bestvzError * bestvzError);
+      double gdxyerror1 = sqrt(gdau1->d0Error() * gdau1->d0Error() + bestvxError * bestvyError);
 
       grand_dzos1 = gdzbest1 / gdzerror1;
       grand_dxyos1 = gdxybest1 / gdxyerror1;
 
       double gdzbest2 = gdau2->dz(bestvtx);
       double gdxybest2 = gdau2->dxy(bestvtx);
-      double gdzerror2 =
-          sqrt(gdau2->dzError() * gdau2->dzError() + bestvzError * bestvzError);
-      double gdxyerror2 =
-          sqrt(gdau2->d0Error() * gdau2->d0Error() + bestvxError * bestvyError);
+      double gdzerror2 = sqrt(gdau2->dzError() * gdau2->dzError() + bestvzError * bestvzError);
+      double gdxyerror2 = sqrt(gdau2->d0Error() * gdau2->d0Error() + bestvxError * bestvyError);
 
       grand_dzos2 = gdzbest2 / gdzerror2;
       grand_dxyos2 = gdxybest2 / gdxyerror2;
@@ -1631,9 +1515,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       grand_agl2D_abs = secvec2D.Angle(ptosvec2D);
 
       // Decay length 3D
-      typedef ROOT::Math::SMatrix<double, 3, 3,
-                                  ROOT::Math::MatRepSym<double, 3>>
-          SMatrixSym3D;
+      typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
       typedef ROOT::Math::SVector<double, 3> SVector3;
       typedef ROOT::Math::SVector<double, 6> SVector6;
 
@@ -1641,16 +1523,13 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       SVector3 distanceVector(secvx - bestvx, secvy - bestvy, secvz - bestvz);
 
       grand_dl = ROOT::Math::Mag(distanceVector);
-      grand_dlerror =
-          sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl;
+      grand_dlerror = sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl;
 
       grand_dlos = grand_dl / grand_dlerror;
 
       // Decay length 2D
-      SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                  vtx.covariance(1, 1), 0, 0, 0);
-      SVector6 v2(d1->vertexCovariance(0, 0), d1->vertexCovariance(0, 1),
-                  d1->vertexCovariance(1, 1), 0, 0, 0);
+      SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+      SVector6 v2(d1->vertexCovariance(0, 0), d1->vertexCovariance(0, 1), d1->vertexCovariance(1, 1), 0, 0, 0);
 
       SMatrixSym3D sv1(v1);
       SMatrixSym3D sv2(v2);
@@ -1659,8 +1538,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
 
       double gdl2D = ROOT::Math::Mag(distanceVector2D);
-      double gdl2Derror =
-          sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
+      double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
 
       grand_dlos2D = gdl2D / gdl2Derror;
     }
@@ -1678,8 +1556,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
       theMVANew.push_back(mva);
     } else if (useAnyMVA_ && !useExistingMVA_) {
       float gbrVals_[50] = {0};
-      if (forestLabel_ == "D0InpPb" || forestLabel_ == "D0Inpp" ||
-          forestLabel_ == "D0InPbPb") {
+      if (forestLabel_ == "D0InpPb" || forestLabel_ == "D0Inpp" || forestLabel_ == "D0InPbPb") {
         /*
                     gbrVals_[0] = pt;
                     gbrVals_[1] = y;
@@ -1746,8 +1623,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
         */
       }
 
-      if (forestLabel_ == "DsInpPb" || forestLabel_ == "DsInpp" ||
-          forestLabel_ == "DsInPbPb") {
+      if (forestLabel_ == "DsInpPb" || forestLabel_ == "DsInpp" || forestLabel_ == "DsInPbPb") {
         gbrVals_[0] = pt;
         gbrVals_[1] = y;
         gbrVals_[2] = VtxProb;
@@ -1767,8 +1643,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent,
         gbrVals_[16] = H2dedx2;
       }
 
-      if (forestLabel_ == "DiMuInpPb" || forestLabel_ == "DiMuInpp" ||
-          forestLabel_ == "DiMuInPbPb") {
+      if (forestLabel_ == "DiMuInpPb" || forestLabel_ == "DiMuInpp" || forestLabel_ == "DiMuInPbPb") {
         gbrVals_[0] = pt;
         gbrVals_[1] = y;
         gbrVals_[2] = VtxProb;
@@ -1849,25 +1724,19 @@ double VertexCompositeSelector::GetMVACut(double y, double pt) {
   if (!hist_bdtcut)
     return mvacut;
 
-  mvacut = hist_bdtcut->GetBinContent(hist_bdtcut->GetXaxis()->FindBin(y),
-                                      hist_bdtcut->GetYaxis()->FindBin(pt));
+  mvacut = hist_bdtcut->GetBinContent(hist_bdtcut->GetXaxis()->FindBin(y), hist_bdtcut->GetYaxis()->FindBin(pt));
   if (pt > 7.4)
-    mvacut = hist_bdtcut->GetBinContent(hist_bdtcut->GetXaxis()->FindBin(y),
-                                        hist_bdtcut->GetYaxis()->FindBin(7.4));
+    mvacut = hist_bdtcut->GetBinContent(hist_bdtcut->GetXaxis()->FindBin(y), hist_bdtcut->GetYaxis()->FindBin(7.4));
   if (pt < 1.37)
-    mvacut = hist_bdtcut->GetBinContent(hist_bdtcut->GetXaxis()->FindBin(y),
-                                        hist_bdtcut->GetYaxis()->FindBin(1.37));
+    mvacut = hist_bdtcut->GetBinContent(hist_bdtcut->GetXaxis()->FindBin(y), hist_bdtcut->GetYaxis()->FindBin(1.37));
 
   return mvacut;
 }
 
-int VertexCompositeSelector::muAssocToTrack(
-    const reco::TrackRef &trackref,
-    const edm::Handle<reco::MuonCollection> &muonh) const {
-  auto muon =
-      std::find_if(muonh->cbegin(), muonh->cend(), [&](const reco::Muon &m) {
-        return (m.track().isNonnull() && m.track() == trackref);
-      });
+int VertexCompositeSelector::muAssocToTrack(const reco::TrackRef &trackref,
+                                            const edm::Handle<reco::MuonCollection> &muonh) const {
+  auto muon = std::find_if(muonh->cbegin(), muonh->cend(),
+                           [&](const reco::Muon &m) { return (m.track().isNonnull() && m.track() == trackref); });
   return (muon != muonh->cend() ? std::distance(muonh->cbegin(), muon) : -1);
 }
 

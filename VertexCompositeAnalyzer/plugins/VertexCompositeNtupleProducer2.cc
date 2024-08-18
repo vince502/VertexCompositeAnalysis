@@ -1,7 +1,6 @@
 #include "VertexCompositeNtupleProducer2.hxx"
 
-void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
-                                              const edm::EventSetup &iSetup) {
+void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   // get collections
   edm::Handle<reco::VertexCollection> vertices;
   iEvent.getByToken(tok_offlinePV_, vertices);
@@ -10,10 +9,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
   iEvent.getByToken(tok_generalTrk_, tracks);
 
   edm::Handle<reco::VertexCompositeCandidateCollection> v0candidates;
-  iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_,
-                    v0candidates);
-  const reco::VertexCompositeCandidateCollection *v0candidates_ =
-      v0candidates.product();
+  iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_, v0candidates);
+  const reco::VertexCompositeCandidateCollection *v0candidates_ = v0candidates.product();
 
   edm::Handle<MVACollection> mvavalues;
   if (useAnyMVA_) {
@@ -79,10 +76,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
       double dzvtx = trk.dz(bestvtx);
       double dxyvtx = trk.dxy(bestvtx);
-      double dzerror =
-          sqrt(trk.dzError() * trk.dzError() + bestvzError * bestvzError);
-      double dxyerror =
-          sqrt(trk.d0Error() * trk.d0Error() + bestvxError * bestvyError);
+      double dzerror = sqrt(trk.dzError() * trk.dzError() + bestvzError * bestvzError);
+      double dxyerror = sqrt(trk.d0Error() * trk.d0Error() + bestvxError * bestvyError);
 
       if (!trk.quality(reco::TrackBase::highPurity))
         continue;
@@ -135,27 +130,22 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
           auto Dd1 = trk.daughter(permutations.at(0));
           auto Dd2 = trk.daughter(permutations.at(1));
 
-          if (abs(Dd1->pdgId()) == PID_dau1_ &&
-              abs(Dd2->pdgId()) == PID_dau2_) {
+          if (abs(Dd1->pdgId()) == PID_dau1_ && abs(Dd2->pdgId()) == PID_dau2_) {
             idxs = permutations;
             break;
           }
-        } while (
-            std::next_permutation(permutations.begin(), permutations.end()));
+        } while (std::next_permutation(permutations.begin(), permutations.end()));
       } else {
         do {
           auto Dd1 = trk.daughter(permutations.at(0));
           auto Dd2 = trk.daughter(permutations.at(1));
           auto Dd3 = trk.daughter(permutations.at(2));
 
-          if (abs(Dd1->pdgId()) == PID_dau1_ &&
-              abs(Dd2->pdgId()) == PID_dau2_ &&
-              abs(Dd3->pdgId() == PID_dau3_)) {
+          if (abs(Dd1->pdgId()) == PID_dau1_ && abs(Dd2->pdgId()) == PID_dau2_ && abs(Dd3->pdgId() == PID_dau3_)) {
             idxs = permutations;
             break;
           }
-        } while (
-            std::next_permutation(permutations.begin(), permutations.end()));
+        } while (std::next_permutation(permutations.begin(), permutations.end()));
       }
 
       if (decayInGen_ && idxs.empty())
@@ -231,12 +221,9 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
           for (unsigned int iDau = 0; iDau < nGenDau; ++iDau) {
             const double dR =
-                reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(),
-                             recoDaus[iDau]->eta(), recoDaus[iDau]->phi());
-            const double dPt = abs(genDaus[iDau]->pt() - recoDaus[iDau]->pt()) /
-                               recoDaus[iDau]->pt();
-            const bool unMatchCharge =
-                genDaus[iDau]->charge() != recoDaus[iDau]->charge();
+                reco::deltaR(genDaus[iDau]->eta(), genDaus[iDau]->phi(), recoDaus[iDau]->eta(), recoDaus[iDau]->phi());
+            const double dPt = abs(genDaus[iDau]->pt() - recoDaus[iDau]->pt()) / recoDaus[iDau]->pt();
+            const bool unMatchCharge = genDaus[iDau]->charge() != recoDaus[iDau]->charge();
             const bool unMatchDR = dR > deltaR_;
             const bool unMatchDPt = dPt > 0.5;
             matchGEN = matchGEN || unMatchCharge || unMatchDR || unMatchDPt;
@@ -244,12 +231,10 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
           matchGEN = !matchGEN;
           if (matchGEN)
             break;
-        } while (
-            std::next_permutation(permutations.begin(), permutations.end()));
+        } while (std::next_permutation(permutations.begin(), permutations.end()));
 
         for (unsigned int iDau = 0; iDau < nGenDau; ++iDau) {
-          const double diffMass =
-              abs(genDaus[iDau]->mass() - recoDaus[iDau]->mass());
+          const double diffMass = abs(genDaus[iDau]->mass() - recoDaus[iDau]->mass());
           isSwap = isSwap || diffMass > 0.01;
         }
         if (matchGEN) {
@@ -378,16 +363,14 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
         if (fabs(id) != PID_ && trk.charge()) {
           // matching daughter 1
           double deltaR = trkvect.DeltaR(dauvec1);
-          if (deltaR < deltaR_ && fabs((trk.pt() - pt1) / pt1) < 0.5 &&
-              trk.charge() == charge1 && pid1 == -99999) {
+          if (deltaR < deltaR_ && fabs((trk.pt() - pt1) / pt1) < 0.5 && trk.charge() == charge1 && pid1 == -99999) {
             pid1 = id;
             //      tof1 = ;
           }
 
           // matching daughter 2
           deltaR = trkvect.DeltaR(dauvec2);
-          if (deltaR < deltaR_ && fabs((trk.pt() - pt2) / pt2) < 0.5 &&
-              trk.charge() == charge2 && pid2 == -99999) {
+          if (deltaR < deltaR_ && fabs((trk.pt() - pt2) / pt2) < 0.5 && trk.charge() == charge2 && pid2 == -99999) {
             pid2 = id;
             //      tof2 = ;
           }
@@ -402,24 +385,20 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
           int id2 = Dd2->pdgId();
 
           double deltaR = d1vect.DeltaR(dauvec1);
-          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt1) / pt1) < 0.5 &&
-              Dd1->charge() == charge1 && pid1 == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt1) / pt1) < 0.5 && Dd1->charge() == charge1 && pid1 == -99999) {
             pid1 = id1;
           }
           deltaR = d2vect.DeltaR(dauvec1);
-          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt1) / pt1) < 0.5 &&
-              Dd2->charge() == charge1 && pid1 == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt1) / pt1) < 0.5 && Dd2->charge() == charge1 && pid1 == -99999) {
             pid1 = id1;
           }
 
           deltaR = d1vect.DeltaR(dauvec2);
-          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt2) / pt2) < 0.5 &&
-              Dd1->charge() == charge2 && pid2 == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd1->pt() - pt2) / pt2) < 0.5 && Dd1->charge() == charge2 && pid2 == -99999) {
             pid2 = id2;
           }
           deltaR = d2vect.DeltaR(dauvec2);
-          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt2) / pt2) < 0.5 &&
-              Dd2->charge() == charge2 && pid2 == -99999) {
+          if (deltaR < deltaR_ && fabs((Dd2->pt() - pt2) / pt2) < 0.5 && Dd2->charge() == charge2 && pid2 == -99999) {
             pid2 = id2;
           }
         }
@@ -458,10 +437,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
     dlos = dl / dlerror;
 
     // Decay length 2D
-    SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                vtx.covariance(1, 1), 0, 0, 0);
-    SVector6 v2(trk.vertexCovariance(0, 0), trk.vertexCovariance(0, 1),
-                trk.vertexCovariance(1, 1), 0, 0, 0);
+    SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+    SVector6 v2(trk.vertexCovariance(0, 0), trk.vertexCovariance(0, 1), trk.vertexCovariance(1, 1), 0, 0, 0);
 
     SMatrixSym3D sv1(v1);
     SMatrixSym3D sv2(v2);
@@ -470,8 +447,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
     SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
 
     dl2D = ROOT::Math::Mag(distanceVector2D);
-    double dl2Derror =
-        sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / dl2D;
+    double dl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / dl2D;
 
     dlos2D = dl2D / dl2Derror;
 
@@ -515,10 +491,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
       double dzbest1 = dau1->dz(bestvtx);
       double dxybest1 = dau1->dxy(bestvtx);
-      double dzerror1 =
-          sqrt(dau1->dzError() * dau1->dzError() + bestvzError * bestvzError);
-      double dxyerror1 =
-          sqrt(dau1->d0Error() * dau1->d0Error() + bestvxError * bestvyError);
+      double dzerror1 = sqrt(dau1->dzError() * dau1->dzError() + bestvzError * bestvzError);
+      double dxyerror1 = sqrt(dau1->d0Error() * dau1->d0Error() + bestvxError * bestvyError);
 
       dzos1 = dzbest1 / dzerror1;
       dxyos1 = dxybest1 / dxyerror1;
@@ -563,10 +537,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
     double dzbest2 = dau2->dz(bestvtx);
     double dxybest2 = dau2->dxy(bestvtx);
-    double dzerror2 =
-        sqrt(dau2->dzError() * dau2->dzError() + bestvzError * bestvzError);
-    double dxyerror2 =
-        sqrt(dau2->d0Error() * dau2->d0Error() + bestvxError * bestvyError);
+    double dzerror2 = sqrt(dau2->dzError() * dau2->dzError() + bestvzError * bestvzError);
+    double dxyerror2 = sqrt(dau2->d0Error() * dau2->d0Error() + bestvxError * bestvyError);
 
     dzos2 = dzbest2 / dzerror2;
     dxyos2 = dxybest2 / dxyerror2;
@@ -632,8 +604,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
       if (muId1 != -1) {
         const reco::Muon &cand = (*theMuonHandle)[muId1];
 
-        onestmuon1 = muon::isGoodMuon(
-            cand, muon::selectionTypeFromString("TMOneStationTight"));
+        onestmuon1 = muon::isGoodMuon(cand, muon::selectionTypeFromString("TMOneStationTight"));
         pfmuon1 = cand.isPFMuon();
         glbmuon1 = cand.isGlobalMuon();
         trkmuon1 = cand.isTrackerMuon();
@@ -641,20 +612,16 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
         if (
             // glbmuon1 &&
-            trkmuon1 &&
-            cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() >
-                5 &&
+            trkmuon1 && cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 &&
             cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 &&
-            fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 &&
-            fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
+            fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 && fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
           softmuon1 = true;
       }
 
       if (muId2 != -1) {
         const reco::Muon &cand = (*theMuonHandle)[muId2];
 
-        onestmuon2 = muon::isGoodMuon(
-            cand, muon::selectionTypeFromString("TMOneStationTight"));
+        onestmuon2 = muon::isGoodMuon(cand, muon::selectionTypeFromString("TMOneStationTight"));
         pfmuon2 = cand.isPFMuon();
         glbmuon2 = cand.isGlobalMuon();
         trkmuon2 = cand.isTrackerMuon();
@@ -662,12 +629,9 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
         if (
             // glbmuon2 &&
-            trkmuon2 &&
-            cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() >
-                5 &&
+            trkmuon2 && cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 &&
             cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 &&
-            fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 &&
-            fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
+            fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 && fabs(cand.innerTrack()->dz(vtx.position())) < 20.)
           softmuon2 = true;
       }
 
@@ -682,8 +646,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
           reco::MuonEnergy muenergy = cand.calEnergy();
           matchedenergy1 = muenergy.hadMax;
 
-          const std::vector<reco::MuonChamberMatch> &muchmatches =
-              cand.matches();
+          const std::vector<reco::MuonChamberMatch> &muchmatches = cand.matches();
 
           for (unsigned int ich = 0; ich < muchmatches.size(); ich++) {
             x_exp = muchmatches[ich].x;
@@ -695,8 +658,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
             dxdzerr_exp = muchmatches[ich].dXdZErr;
             dydzerr_exp = muchmatches[ich].dYdZErr;
 
-            std::vector<reco::MuonSegmentMatch> musegmatches =
-                muchmatches[ich].segmentMatches;
+            std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
 
             if (!musegmatches.size())
               continue;
@@ -710,8 +672,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
               dxdzerr_seg = musegmatches[jseg].dXdZErr;
               dydzerr_seg = musegmatches[jseg].dYdZErr;
 
-              if (sqrt((x_seg - x_exp) * (x_seg - x_exp) +
-                       (y_seg - y_exp) * (y_seg - y_exp)) <
+              if (sqrt((x_seg - x_exp) * (x_seg - x_exp) + (y_seg - y_exp) * (y_seg - y_exp)) <
                   sqrt(dx_seg * dx_seg + dy_seg * dy_seg)) {
                 dx_seg = x_seg - x_exp;
                 dy_seg = y_seg - y_exp;
@@ -721,10 +682,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
                 dySig_seg = dy_seg / dyerr_seg;
                 ddxdz_seg = dxdz_seg - dxdz_exp;
                 ddydz_seg = dydz_seg - dydz_exp;
-                ddxdzerr_seg =
-                    sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
-                ddydzerr_seg =
-                    sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
+                ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+                ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
                 ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
                 ddydzSig_seg = ddydz_seg / ddydzerr_seg;
               }
@@ -750,8 +709,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
           reco::MuonEnergy muenergy = cand.calEnergy();
           matchedenergy2 = muenergy.hadMax;
 
-          const std::vector<reco::MuonChamberMatch> &muchmatches =
-              cand.matches();
+          const std::vector<reco::MuonChamberMatch> &muchmatches = cand.matches();
           for (unsigned int ich = 0; ich < muchmatches.size(); ich++) {
             x_exp = muchmatches[ich].x;
             y_exp = muchmatches[ich].y;
@@ -762,8 +720,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
             dxdzerr_exp = muchmatches[ich].dXdZErr;
             dydzerr_exp = muchmatches[ich].dYdZErr;
 
-            std::vector<reco::MuonSegmentMatch> musegmatches =
-                muchmatches[ich].segmentMatches;
+            std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
 
             if (!musegmatches.size())
               continue;
@@ -777,8 +734,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
               dxdzerr_seg = musegmatches[jseg].dXdZErr;
               dydzerr_seg = musegmatches[jseg].dYdZErr;
 
-              if (sqrt((x_seg - x_exp) * (x_seg - x_exp) +
-                       (y_seg - y_exp) * (y_seg - y_exp)) <
+              if (sqrt((x_seg - x_exp) * (x_seg - x_exp) + (y_seg - y_exp) * (y_seg - y_exp)) <
                   sqrt(dx_seg * dx_seg + dy_seg * dy_seg)) {
                 dx_seg = x_seg - x_exp;
                 dy_seg = y_seg - y_exp;
@@ -788,10 +744,8 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
                 dySig_seg = dy_seg / dyerr_seg;
                 ddxdz_seg = dxdz_seg - dxdz_exp;
                 ddydz_seg = dydz_seg - dydz_exp;
-                ddxdzerr_seg =
-                    sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
-                ddydzerr_seg =
-                    sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
+                ddxdzerr_seg = sqrt(dxdzerr_seg * dxdzerr_seg + dxdzerr_exp * dxdzerr_exp);
+                ddydzerr_seg = sqrt(dydzerr_seg * dydzerr_seg + dydzerr_exp * dydzerr_exp);
                 ddxdzSig_seg = ddxdz_seg / ddxdzerr_seg;
                 ddydzSig_seg = ddydz_seg / ddydzerr_seg;
               }
@@ -891,20 +845,16 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
 
       double gdzbest1 = gdau1->dz(bestvtx);
       double gdxybest1 = gdau1->dxy(bestvtx);
-      double gdzerror1 =
-          sqrt(gdau1->dzError() * gdau1->dzError() + bestvzError * bestvzError);
-      double gdxyerror1 =
-          sqrt(gdau1->d0Error() * gdau1->d0Error() + bestvxError * bestvyError);
+      double gdzerror1 = sqrt(gdau1->dzError() * gdau1->dzError() + bestvzError * bestvzError);
+      double gdxyerror1 = sqrt(gdau1->d0Error() * gdau1->d0Error() + bestvxError * bestvyError);
 
       grand_dzos1 = gdzbest1 / gdzerror1;
       grand_dxyos1 = gdxybest1 / gdxyerror1;
 
       double gdzbest2 = gdau2->dz(bestvtx);
       double gdxybest2 = gdau2->dxy(bestvtx);
-      double gdzerror2 =
-          sqrt(gdau2->dzError() * gdau2->dzError() + bestvzError * bestvzError);
-      double gdxyerror2 =
-          sqrt(gdau2->d0Error() * gdau2->d0Error() + bestvxError * bestvyError);
+      double gdzerror2 = sqrt(gdau2->dzError() * gdau2->dzError() + bestvzError * bestvzError);
+      double gdxyerror2 = sqrt(gdau2->d0Error() * gdau2->d0Error() + bestvxError * bestvyError);
 
       grand_dzos2 = gdzbest2 / gdzerror2;
       grand_dxyos2 = gdxybest2 / gdxyerror2;
@@ -932,16 +882,13 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
       SVector3 distanceVector(secvx - bestvx, secvy - bestvy, secvz - bestvz);
 
       grand_dl = ROOT::Math::Mag(distanceVector);
-      grand_dlerror =
-          sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl;
+      grand_dlerror = sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl;
 
       grand_dlos = grand_dl / grand_dlerror;
 
       // Decay length 2D
-      SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1),
-                  vtx.covariance(1, 1), 0, 0, 0);
-      SVector6 v2(d1->vertexCovariance(0, 0), d1->vertexCovariance(0, 1),
-                  d1->vertexCovariance(1, 1), 0, 0, 0);
+      SVector6 v1(vtx.covariance(0, 0), vtx.covariance(0, 1), vtx.covariance(1, 1), 0, 0, 0);
+      SVector6 v2(d1->vertexCovariance(0, 0), d1->vertexCovariance(0, 1), d1->vertexCovariance(1, 1), 0, 0, 0);
 
       SMatrixSym3D sv1(v1);
       SMatrixSym3D sv2(v2);
@@ -950,8 +897,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
       SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
 
       double gdl2D = ROOT::Math::Mag(distanceVector2D);
-      double gdl2Derror =
-          sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
+      double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
 
       grand_dlos2D = gdl2D / gdl2Derror;
     }
@@ -961,8 +907,7 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
     if (saveHistogram_) {
       for (unsigned int ipt = 0; ipt < pTBins_.size() - 1; ipt++)
         for (unsigned int iy = 0; iy < yBins_.size() - 1; iy++) {
-          if (pt < pTBins_[ipt + 1] && pt > pTBins_[ipt] &&
-              y < yBins_[iy + 1] && y > yBins_[iy]) {
+          if (pt < pTBins_[ipt + 1] && pt > pTBins_[ipt] && y < yBins_[iy + 1] && y > yBins_[iy]) {
             hMassVsMVA[iy][ipt]->Fill(mva, mass);
             //  h3DDCAVsMVA[iy][ipt]->Fill(mva,dl*sin(agl_abs));
             //  h2DDCAVsMVA[iy][ipt]->Fill(mva,dl2D*sin(agl2D_abs));
@@ -1013,16 +958,14 @@ void VertexCompositeNtupleProducer2::fillRECO(const edm::Event &iEvent,
   }
 }
 
-void VertexCompositeNtupleProducer2::fillGEN(const edm::Event &iEvent,
-                                             const edm::EventSetup &iSetup) {
+void VertexCompositeNtupleProducer2::fillGEN(const edm::Event &iEvent, const edm::EventSetup &iSetup) {
   genVertex_ = reco::Vertex();
 
   edm::Handle<reco::GenParticleCollection> genpars;
   iEvent.getByToken(tok_genParticle_, genpars);
   // generated primary vertex information
   for (const auto &p : *genpars) {
-    if (p.statusFlags().isLastCopy() &&
-        (p.pdgId() == 21 || std::abs(p.pdgId()) <= 6)) {
+    if (p.statusFlags().isLastCopy() && (p.pdgId() == 21 || std::abs(p.pdgId()) <= 6)) {
       genVertex_ = p.vertex();
       break;
     }
