@@ -1486,7 +1486,7 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
           mva = (*mvavalues)[it];
           if(mva < mvaMin_ || mva > mvaMax_) continue;
 
-          if(mva<GetMVACut(y,pt)) continue;
+          //if(mva<GetMVACut(y,pt)) continue;
 
           theMVANew.push_back( mva );
         }

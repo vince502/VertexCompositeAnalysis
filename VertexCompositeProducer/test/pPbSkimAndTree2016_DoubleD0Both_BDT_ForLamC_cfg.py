@@ -9,7 +9,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
@@ -59,13 +59,13 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(1.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.6)
-process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
-process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
-process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.7)
+process.generalD0CandidatesNew.alphaCut = cms.double(1.2)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(1.2)
+process.generalD0CandidatesNew.dPtCut = cms.double(1.95)
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -123,7 +123,6 @@ process.d0selectorNewReduced = process.d0selector.clone()
 process.d0selectorNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
 process.d0selectorNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
-process.d0selectorNewReduced.mvaMin = cms.untracked.double(0.0)
 
 process.generalDDCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
 process.generalDDCandidatesNew.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
