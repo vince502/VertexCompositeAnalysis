@@ -1,6 +1,6 @@
 #include "VertexCompositeAnalysis/VertexCompositeAnalyzer/plugins/VertexCompositeTreeProducer2.h"
 
-#define DEBUG true
+//#define DEBUG false
 
 
 #define PI 3.1416
@@ -333,17 +333,20 @@ cout << "Gen matching done" << endl;
         if(doGenMatching_ && twoLayerDecay_)
         {
             matchGEN[it] = false;
-            int nGen = ;
+            unsigned int nGen = genRefs.size();
             isSwap[it] = false;
             idmom_reco[it] = -77;
             idBAnc_reco[it] = -77;
+    #ifdef DEBUG
+    cout << "nGen : " << nGen << endl;
+    #endif
 
               for( unsigned int igen=0; igen<nGen; igen++){
-                auto const& theGenDStar = genRefs.at(igen);
+                auto const theGenDStar = genRefs.at(igen);
                 unsigned int idxD0 = -1;
-                if( abs(theGenDStar->daughter(0)->pdgId()) = 421 ) idxD0 = 0;
-                auto const& theGenD0 = genRefs.at(igen)->daughter(idxD0);
-                auto const& theGenPion = genRefs.at(igen)->daughter(1- idxD0);
+                if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
+                auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
+                auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
                 // Only works for 2 body two layer decay
                 reco::Candidate const* recoD1;
                 reco::Candidate const* recoPi;
@@ -352,12 +355,27 @@ cout << "Gen matching done" << endl;
                 recoD1 = trk.daughter(idxRecoD0);
                 recoPi = trk.daughter(1-idxRecoD0);
 
-                const auto nGenDau = theGen->numberOfDaughters();
-                if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
+                const auto nGenDau = theGenD0->numberOfDaughters();
+    #ifdef DEBUG
+    cout << "nGenDau : " << nGenDau << endl;
+    cout << "D0_dau1 : " << theGenD0->daughter(0)->pdgId() << endl;
+    cout << "D0_dau2 : " << theGenD0->daughter(1)->pdgId() << endl;
+    cout << "GenDstar_dau1 : " << theGenD0->pdgId() << endl;
+    cout << "GenDstar_dau2 : " << theGenPion->pdgId() << endl;
+    cout << "RecoDstar_dau1 : " << recoD1->pdgId() << endl;
+    //cout << "RecoDstar_dau2 : " << recoPi->pdgId() << endl;
+    cout << "match D0 : " << matchHadron(recoD1, *theGenD0,true) << endl;
+    cout << "match Pion : " << matchHadron(recoPi, *theGenPion,false) << endl;
+    #endif
 
-                matchGEN[it] += (matchHadron(recoD1, theGenD0), matchHadron(recoPi, theGenPion));
+            //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
+
+                matchGEN[it] += (matchHadron(recoD1, *theGenD0,true) && matchHadron(recoPi, *theGenPion,false));
+                #ifdef DEBUG
+                //cout << matchGEN[it] << endl;
+                #endif
                 if(matchGEN[it]){
-                  isSwap[it] = checkSwap(recoD1, theGenD0);
+                  isSwap[it] = checkSwap(recoD1, *theGenD0);
                   auto mom_ref = findMother(theGenDStar);
                   if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
                   int __count_anc__ = 0;
@@ -377,27 +395,27 @@ cout << "Gen matching done" << endl;
                   matchGen_D0charge_[it] = theGenD0->charge();
                   matchGen_D0pdgId_[it] = theGenD0->pdgId();
 
-                  genDecayLength(*theGen, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
-                  getAncestorId(*theGen, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
+                  genDecayLength(*theGenD0, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+                  getAncestorId(*theGenD0, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
 
-                  const auto* genDau0 = theGen->daughter(0);
-                  const auto* genDau1 = theGen->daughter(1);
+                  const auto* genDau0 = theGenD0->daughter(0);
+                  const auto* genDau1 = theGenD0->daughter(1);
 
-                  matchGen_D0Dau1pT_[it] = genDau0->pt();
-                  matchGen_D0Dau1eta_[it] = genDau0->eta();
-                  matchGen_D0Dau1phi_[it] = genDau0->phi();
-                  matchGen_D0Dau1mass_[it] = genDau0->mass();
-                  matchGen_D0Dau1y_[it] = genDau0->rapidity();
-                  matchGen_D0Dau1charge_[it] = genDau0->charge();
-                  matchGen_D0Dau1pdgId_[it] = genDau0->pdgId();
+                  matchGen_D0Dau1_pT_[it] = genDau0->pt();
+                  matchGen_D0Dau1_eta_[it] = genDau0->eta();
+                  matchGen_D0Dau1_phi_[it] = genDau0->phi();
+                  matchGen_D0Dau1_mass_[it] = genDau0->mass();
+                  matchGen_D0Dau1_y_[it] = genDau0->rapidity();
+                  matchGen_D0Dau1_charge_[it] = genDau0->charge();
+                  matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
 
-                  matchGen_D0Dau2pT_[it] = genDau1->pt();
-                  matchGen_D0Dau2eta_[it] = genDau1->eta();
-                  matchGen_D0Dau2phi_[it] = genDau1->phi();
-                  matchGen_D0Dau2mass_[it] = genDau1->mass();
-                  matchGen_D0Dau2y_[it] = genDau1->rapidity();
-                  matchGen_D0Dau2charge_[it] = genDau1->charge();
-                  matchGen_D0Dau2pdgId_[it] = genDau1->pdgId();
+                  matchGen_D0Dau2_pT_[it] = genDau1->pt();
+                  matchGen_D0Dau2_eta_[it] = genDau1->eta();
+                  matchGen_D0Dau2_phi_[it] = genDau1->phi();
+                  matchGen_D0Dau2_mass_[it] = genDau1->mass();
+                  matchGen_D0Dau2_y_[it] = genDau1->rapidity();
+                  matchGen_D0Dau2_charge_[it] = genDau1->charge();
+                  matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
 
                   matchGen_D1pT_[it] = theGenPion->pt();
                   matchGen_D1eta_[it] = theGenPion->eta();
@@ -1284,13 +1302,13 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("matchGen2DPointingAngle",&gen_agl2D_abs,"gen2DPointingAngle[candSize]/F");
             VertexCompositeNtuple->Branch("matchGen3DDecayLength",&gen_dl,"gen3DDecayLength[candSize]/F");
             VertexCompositeNtuple->Branch("matchGen2DDecayLength",&gen_dl2D,"gen2DDecayLength[candSize]/F");
-            VertexCompositeNtuple->Branch("matchGen_pT",&gen_pT_, "gen_pT[candSize]F");
-            VertexCompositeNtuple->Branch("matchGen_eta",&gen_eta_, "gen_eta[candSize]F");
-            VertexCompositeNtuple->Branch("matchGen_phi",&gen_phi_, "gen_phi[candSize]F");
-            VertexCompositeNtuple->Branch("matchGen_mass",&gen_mass_, "gen_mass[candSize]F");
-            VertexCompositeNtuple->Branch("matchGen_y",&gen_y_, "gen_y[candSize]F");
-            VertexCompositeNtuple->Branch("matchGen_charge",&gen_charge_, "gen_charge[candSize]F");
-            VertexCompositeNtuple->Branch("matchGen_pdgId",&gen_pdgId_, "gen_pdgId[candSize]I");
+            VertexCompositeNtuple->Branch("matchgen_D0pT",&gen_D0pT_, "gen_D0pT[candSize]F");
+            VertexCompositeNtuple->Branch("matchgen_D0eta",&gen_D0eta_, "gen_D0eta[candSize]F");
+            VertexCompositeNtuple->Branch("matchgen_D0phi",&gen_D0phi_, "gen_D0phi[candSize]F");
+            VertexCompositeNtuple->Branch("matchgen_D0mass",&gen_D0mass_, "gen_D0mass[candSize]F");
+            VertexCompositeNtuple->Branch("matchgen_D0y",&gen_D0y_, "gen_D0y[candSize]F");
+            VertexCompositeNtuple->Branch("matchgen_D0charge",&gen_D0charge_, "gen_D0charge[candSize]F");
+            VertexCompositeNtuple->Branch("matchgen_D0pdgId",&gen_D0pdgId_, "gen_D0pdgId[candSize]I");
             if(twoLayerDecay_){
     					VertexCompositeNtuple->Branch("matchGen_D0pT",&matchGen_D0pT_, "matchGen_D0pT[candSize]F");
     					VertexCompositeNtuple->Branch("matchGen_D0eta",&matchGen_D0eta_, "matchGen_D0eta[candSize]F");
@@ -1323,6 +1341,12 @@ VertexCompositeTreeProducer2::initTree()
     					VertexCompositeNtuple->Branch("matchGen_D1y",&matchGen_D1y_, "matchGen_D1y[candSize]F");
     					VertexCompositeNtuple->Branch("matchGen_D1charge",&matchGen_D1charge_, "matchGen_D1charge[candSize]F");
     					VertexCompositeNtuple->Branch("matchGen_D1pdgId",&matchGen_D1pdgId_, "matchGen_D1pdgId[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_D1decayLength2D_",&matchGen_D1decayLength2D_, "matchGen_D1decayLength2D_[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_D1decayLength3D_",&matchGen_D1decayLength3D_, "matchGen_D1decayLength3D_[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_D1angle2D_",&matchGen_D1angle2D_, "matchGen_D1angle2D_[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_D1angle3D_",&matchGen_D1angle3D_, "matchGen_D1angle3D_[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_D1ancestorId_",&matchGen_D1ancestorId_, "matchGen_D1ancestorId_[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]I");
             }
         }
         
