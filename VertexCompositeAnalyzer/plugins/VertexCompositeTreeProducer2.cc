@@ -254,6 +254,14 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
                       }
                     } while (std::next_permutation(_permutations.begin(), _permutations.end()));
                     if(!idxs.empty()) break;
+                  } else {
+                    if (abs(Dd1->pdgId()) == PID_dau1_
+                        && abs(Dd2->pdgId()) == PID_dau2_
+                        ) {
+                      idxs = permutations;
+                      break;
+                    } while (std::next_permutation(permutations.begin(), permutations.end()));
+                    if(!idxs.empty()) break;
                   }
                 }
               } while (std::next_permutation(permutations.begin(), permutations.end()));
@@ -338,7 +346,6 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
               if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
               recoD1 = trk.daughter(idxRecoD0);
               recoPi = trk.daughter(1-idxRecoD0);
-
               const auto nGenDau = theGenD0->numberOfDaughters();
   #ifdef DEBUG
   cout << "nGenDau : " << nGenDau << endl;
@@ -352,7 +359,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
   cout << "match Pion : " << matchHadron(recoPi, *theGenPion,false) << endl;
   #endif
 
-          //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
+             if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
 
               matchGEN[it] += (matchHadron(recoD1, *theGenD0,true) && matchHadron(recoPi, *theGenPion,false));
               #ifdef DEBUG
