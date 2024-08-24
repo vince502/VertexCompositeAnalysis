@@ -133,9 +133,6 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
     
     edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle2;
     iEvent.getByToken(Dedx_Token2_, dEdxHandle2);
-#ifdef DEBUG
-cout << "Loaded tokens" << endl;
-#endif
     
     centrality=-1;
     if(isCentrality_)
@@ -220,17 +217,6 @@ cout << "Loaded tokens" << endl;
         Ntrkoffline++;
       }
     }
-#ifdef DEBUG
-cout << "Calculated offline Ntrk's" << endl;
-#endif
-
-          #ifdef DEBUG
-          // cout << doGenMatching_ << endl;
-          // cout << genpars.isValid() << endl;
-          #endif
-#ifdef DEBUG
-cout << "Gen matching done" << endl;
-#endif
 
     std::vector<reco::GenParticleRef> genRefs;
     if(doGenMatching_){
@@ -321,111 +307,165 @@ cout << "Gen matching done" << endl;
         const reco::Candidate * d1 = trk.daughter(0);
         const reco::Candidate * gd1;
         const reco::Candidate * gd2;
-        // if(twoLayerDecay_){
+        if(twoLayerDecay_){
           gd1 = d1->daughter(0);
           gd2 = d1->daughter(1);
-          // }
+        }
         const reco::Candidate * d2 = trk.daughter(1);
         const reco::Candidate * d3 = 0;        
         if(threeProngDecay_) d3 = trk.daughter(2);
 
         //Gen match
-        if(doGenMatching_ && twoLayerDecay_)
+        if(doGenMatching_ )
         {
+          if( twoLayerDecay_ ){
             matchGEN[it] = false;
             unsigned int nGen = genRefs.size();
             isSwap[it] = false;
             idmom_reco[it] = -77;
             idBAnc_reco[it] = -77;
-    #ifdef DEBUG
-    cout << "nGen : " << nGen << endl;
-    #endif
 
-              for( unsigned int igen=0; igen<nGen; igen++){
-                auto const theGenDStar = genRefs.at(igen);
-                unsigned int idxD0 = -1;
-                if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
-                auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
-                auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
-                // Only works for 2 body two layer decay
-                reco::Candidate const* recoD1;
-                reco::Candidate const* recoPi;
-                unsigned int idxRecoD0 = -1;
-                if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
-                recoD1 = trk.daughter(idxRecoD0);
-                recoPi = trk.daughter(1-idxRecoD0);
+            for( unsigned int igen=0; igen<nGen; igen++){
+              auto const theGenDStar = genRefs.at(igen);
+              unsigned int idxD0 = -1;
+              if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
+              auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
+              auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
+              // Only works for 2 body two layer decay
+              reco::Candidate const* recoD1;
+              reco::Candidate const* recoPi;
+              unsigned int idxRecoD0 = -1;
+              if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
+              recoD1 = trk.daughter(idxRecoD0);
+              recoPi = trk.daughter(1-idxRecoD0);
 
-                const auto nGenDau = theGenD0->numberOfDaughters();
-    #ifdef DEBUG
-    cout << "nGenDau : " << nGenDau << endl;
-    cout << "D0_dau1 : " << theGenD0->daughter(0)->pdgId() << endl;
-    cout << "D0_dau2 : " << theGenD0->daughter(1)->pdgId() << endl;
-    cout << "GenDstar_dau1 : " << theGenD0->pdgId() << endl;
-    cout << "GenDstar_dau2 : " << theGenPion->pdgId() << endl;
-    cout << "RecoDstar_dau1 : " << recoD1->pdgId() << endl;
-    //cout << "RecoDstar_dau2 : " << recoPi->pdgId() << endl;
-    cout << "match D0 : " << matchHadron(recoD1, *theGenD0,true) << endl;
-    cout << "match Pion : " << matchHadron(recoPi, *theGenPion,false) << endl;
-    #endif
+              const auto nGenDau = theGenD0->numberOfDaughters();
+  #ifdef DEBUG
+  cout << "nGenDau : " << nGenDau << endl;
+  cout << "D0_dau1 : " << theGenD0->daughter(0)->pdgId() << endl;
+  cout << "D0_dau2 : " << theGenD0->daughter(1)->pdgId() << endl;
+  cout << "GenDstar_dau1 : " << theGenD0->pdgId() << endl;
+  cout << "GenDstar_dau2 : " << theGenPion->pdgId() << endl;
+  cout << "RecoDstar_dau1 : " << recoD1->pdgId() << endl;
+  //cout << "RecoDstar_dau2 : " << recoPi->pdgId() << endl;
+  cout << "match D0 : " << matchHadron(recoD1, *theGenD0,true) << endl;
+  cout << "match Pion : " << matchHadron(recoPi, *theGenPion,false) << endl;
+  #endif
 
-            //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
+          //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
 
-                matchGEN[it] += (matchHadron(recoD1, *theGenD0,true) && matchHadron(recoPi, *theGenPion,false));
-                #ifdef DEBUG
-                //cout << matchGEN[it] << endl;
-                #endif
-                if(matchGEN[it]){
-                  isSwap[it] = checkSwap(recoD1, *theGenD0);
-                  auto mom_ref = findMother(theGenDStar);
-                  if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
-                  int __count_anc__ = 0;
-                  auto __ref_anc__ = mom_ref;
-                  while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
-                    __ref_anc__ = findMother(__ref_anc__);
-                    if( __ref_anc__.isNonnull()){
-                      if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
-                        idBAnc_reco[it] = __ref_anc__->pdgId();
-                  } } }
+              matchGEN[it] += (matchHadron(recoD1, *theGenD0,true) && matchHadron(recoPi, *theGenPion,false));
+              #ifdef DEBUG
+              //cout << matchGEN[it] << endl;
+              #endif
+              if(matchGEN[it]){
+                isSwap[it] = checkSwap(recoD1, *theGenD0);
+                auto mom_ref = findMother(theGenDStar);
+                if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
+                int __count_anc__ = 0;
+                auto __ref_anc__ = mom_ref;
+                while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
+                  __ref_anc__ = findMother(__ref_anc__);
+                  if( __ref_anc__.isNonnull()){
+                    if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
+                      idBAnc_reco[it] = __ref_anc__->pdgId();
+                } } }
 
-                  matchGen_D0pT_[it] = theGenD0->pt();
-                  matchGen_D0eta_[it] = theGenD0->eta();
-                  matchGen_D0phi_[it] = theGenD0->phi();
-                  matchGen_D0mass_[it] = theGenD0->mass();
-                  matchGen_D0y_[it] = theGenD0->rapidity();
-                  matchGen_D0charge_[it] = theGenD0->charge();
-                  matchGen_D0pdgId_[it] = theGenD0->pdgId();
+                matchGen_D0pT_[it] = theGenD0->pt();
+                matchGen_D0eta_[it] = theGenD0->eta();
+                matchGen_D0phi_[it] = theGenD0->phi();
+                matchGen_D0mass_[it] = theGenD0->mass();
+                matchGen_D0y_[it] = theGenD0->rapidity();
+                matchGen_D0charge_[it] = theGenD0->charge();
+                matchGen_D0pdgId_[it] = theGenD0->pdgId();
 
-                  genDecayLength(*theGenD0, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
-                  getAncestorId(*theGenD0, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
+                genDecayLength(*theGenD0, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+                getAncestorId(*theGenD0, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
 
-                  const auto* genDau0 = theGenD0->daughter(0);
-                  const auto* genDau1 = theGenD0->daughter(1);
+                const auto* genDau0 = theGenD0->daughter(0);
+                const auto* genDau1 = theGenD0->daughter(1);
 
-                  matchGen_D0Dau1_pT_[it] = genDau0->pt();
-                  matchGen_D0Dau1_eta_[it] = genDau0->eta();
-                  matchGen_D0Dau1_phi_[it] = genDau0->phi();
-                  matchGen_D0Dau1_mass_[it] = genDau0->mass();
-                  matchGen_D0Dau1_y_[it] = genDau0->rapidity();
-                  matchGen_D0Dau1_charge_[it] = genDau0->charge();
-                  matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
+                matchGen_D0Dau1_pT_[it] = genDau0->pt();
+                matchGen_D0Dau1_eta_[it] = genDau0->eta();
+                matchGen_D0Dau1_phi_[it] = genDau0->phi();
+                matchGen_D0Dau1_mass_[it] = genDau0->mass();
+                matchGen_D0Dau1_y_[it] = genDau0->rapidity();
+                matchGen_D0Dau1_charge_[it] = genDau0->charge();
+                matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
 
-                  matchGen_D0Dau2_pT_[it] = genDau1->pt();
-                  matchGen_D0Dau2_eta_[it] = genDau1->eta();
-                  matchGen_D0Dau2_phi_[it] = genDau1->phi();
-                  matchGen_D0Dau2_mass_[it] = genDau1->mass();
-                  matchGen_D0Dau2_y_[it] = genDau1->rapidity();
-                  matchGen_D0Dau2_charge_[it] = genDau1->charge();
-                  matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
+                matchGen_D0Dau2_pT_[it] = genDau1->pt();
+                matchGen_D0Dau2_eta_[it] = genDau1->eta();
+                matchGen_D0Dau2_phi_[it] = genDau1->phi();
+                matchGen_D0Dau2_mass_[it] = genDau1->mass();
+                matchGen_D0Dau2_y_[it] = genDau1->rapidity();
+                matchGen_D0Dau2_charge_[it] = genDau1->charge();
+                matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
 
-                  matchGen_D1pT_[it] = theGenPion->pt();
-                  matchGen_D1eta_[it] = theGenPion->eta();
-                  matchGen_D1phi_[it] = theGenPion->phi();
-                  matchGen_D1mass_[it] = theGenPion->mass();
-                  matchGen_D1y_[it] = theGenPion->rapidity();
-                  matchGen_D1charge_[it] = theGenPion->charge();
-                  matchGen_D1pdgId_[it] = theGenPion->pdgId();
-                }
-              } // END for nGen
+                matchGen_D1pT_[it] = theGenPion->pt();
+                matchGen_D1eta_[it] = theGenPion->eta();
+                matchGen_D1phi_[it] = theGenPion->phi();
+                matchGen_D1mass_[it] = theGenPion->mass();
+                matchGen_D1y_[it] = theGenPion->rapidity();
+                matchGen_D1charge_[it] = theGenPion->charge();
+                matchGen_D1pdgId_[it] = theGenPion->pdgId();
+              }
+            } // END for nGen
+          }
+          else {
+            matchGEN[it] = false;
+            unsigned int nGen = genRefs.size();
+            isSwap[it] = false;
+            idmom_reco[it] = -77;
+            idBAnc_reco[it] = -77;
+
+            for( unsigned int igen=0; igen<nGen; igen++){
+              auto const theGenP = genRefs.at(igen);
+              matchGEN[it] += matchHadron(&trk, *theGenP,true);
+              if(matchGEN[it]){
+                isSwap[it] = checkSwap(&trk, *theGenP);
+                auto mom_ref = findMother(theGenP);
+                if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
+                int __count_anc__ = 0;
+                auto __ref_anc__ = mom_ref;
+                while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
+                  __ref_anc__ = findMother(__ref_anc__);
+                  if( __ref_anc__.isNonnull()){
+                    if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
+                      idBAnc_reco[it] = __ref_anc__->pdgId();
+                } } }
+
+                matchGen_D0pT_[it] = theGenP->pt();
+                matchGen_D0eta_[it] = theGenP->eta();
+                matchGen_D0phi_[it] = theGenP->phi();
+                matchGen_D0mass_[it] = theGenP->mass();
+                matchGen_D0y_[it] = theGenP->rapidity();
+                matchGen_D0charge_[it] = theGenP->charge();
+                matchGen_D0pdgId_[it] = theGenP->pdgId();
+
+                genDecayLength(*theGenP, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+                getAncestorId(*theGenP, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
+
+                const auto* genDau0 = theGenP->daughter(0);
+                const auto* genDau1 = theGenP->daughter(1);
+
+                matchGen_D0Dau1_pT_[it] = genDau0->pt();
+                matchGen_D0Dau1_eta_[it] = genDau0->eta();
+                matchGen_D0Dau1_phi_[it] = genDau0->phi();
+                matchGen_D0Dau1_mass_[it] = genDau0->mass();
+                matchGen_D0Dau1_y_[it] = genDau0->rapidity();
+                matchGen_D0Dau1_charge_[it] = genDau0->charge();
+                matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
+
+                matchGen_D0Dau2_pT_[it] = genDau1->pt();
+                matchGen_D0Dau2_eta_[it] = genDau1->eta();
+                matchGen_D0Dau2_phi_[it] = genDau1->phi();
+                matchGen_D0Dau2_mass_[it] = genDau1->mass();
+                matchGen_D0Dau2_y_[it] = genDau1->rapidity();
+                matchGen_D0Dau2_charge_[it] = genDau1->charge();
+                matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
+              }
+            } // END for nGen
+          }
         }
         
         double pxd1 = d1->px();

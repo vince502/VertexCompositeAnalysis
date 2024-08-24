@@ -619,14 +619,10 @@ void VertexCompositeTreeProducer2::getAncestorId(const reco::Candidate& gCand, i
   //  }
   //  if (std::abs(gen_ancestorId_) <= 40) break;
   //}
-  cout << "asdasdasd" << endl;
   for (auto mom = gCand.mother(); !(mom==nullptr);){
           gen_ancestorId_=mom->pdgId();
-          
-    cout << "gen_ancestorId_ : " << gen_ancestorId_ << endl;
     const auto idstr = std::to_string(std::abs(gen_ancestorId_));
     gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
-    cout << "gen_ancestorFlavor_ : " << gen_ancestorFlavor_ << endl;
     if (idstr[0] == '5') {
       break;
     }

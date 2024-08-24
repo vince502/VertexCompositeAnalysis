@@ -16,9 +16,12 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
     #fileNames = cms.untracked.vstring("file:step4.root"),
-    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root"),
+    fileNames = cms.untracked.vstring(
+        # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
+        'file:/afs/cern.ch/work/s/soohwan/private/Analysis/DmesonAna/MCGen/CMSSW_13_2_11/src/step3PAT_PAT.root',
+        ),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -85,27 +88,27 @@ process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidate
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
 #process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
-#process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
-#process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-#process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
-#process.generalD0CandidatesNew.alphaCut = cms.double(0.20)
-#process.generalD0CandidatesNew.alpha2DCut = cms.double(0.20)
-#process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
-#process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
-#process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
-#process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(0)
+process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
+process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
+process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(1.00)
+process.generalD0CandidatesNew.dPtCut = cms.double(1.2)
+process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
+process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
+process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
 #process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
 process.generalDStarCandidatesNew = process.generalDStarCandidates.clone()
-#process.generalDStarCandidatesNew.trkPtSumCut = cms.double(0.0)
-#process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(0.0)
-#process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(11)
-#process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
-#process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
-#process.generalDStarCandidatesNew.alphaCut = cms.double(0.4)
-#process.generalDStarCandidatesNew.alpha2DCut = cms.double(0.4)
-#process.generalDStarCandidatesNew.dPtCut = cms.double(0.0)
+process.generalDStarCandidatesNew.trkPtSumCut = cms.double(0.0)
+process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(10.0)
+process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(0)
+process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
+process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
+process.generalDStarCandidatesNew.alphaCut = cms.double(999.0)
+process.generalDStarCandidatesNew.alpha2DCut = cms.double(999.0)
+process.generalDStarCandidatesNew.dPtCut = cms.double(0.0)
 
 
 process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew)
@@ -131,28 +134,31 @@ process.d0selector = process.d0selectorBDTPreCut.clone()
 process.d0selector.useAnyMVA = cms.bool(False)
 process.d0selector.multMin = cms.untracked.double(0)
 process.d0selector.multMax = cms.untracked.double(100000)
-process.d0selector.trkPtMin = cms.untracked.double(0),
-process.d0selector.trkPtSumMin = cms.untracked.double(0),
-process.d0selector.trkEtaDiffMax = cms.untracked.double(0),
-process.d0selector.trkNHitMin = cms.untracked.int32(0),
-process.d0selector.cand3DPointingAngleMax = cms.untracked.double(100.0),
-process.d0selector.cand2DPointingAngleMax = cms.untracked.double(100.0),
+process.d0selector.trkPtMin = cms.untracked.double(0)
+process.d0selector.trkPtSumMin = cms.untracked.double(0)
+process.d0selector.trkEtaDiffMax = cms.untracked.double(4.0)
+process.d0selector.trkNHitMin = cms.untracked.int32(0)
+process.d0selector.cand3DPointingAngleMax = cms.untracked.double(1.0)
+process.d0selector.cand2DPointingAngleMax = cms.untracked.double(1.0)
 
 #process.d0selectorWS = process.d0selector.clone(
 #    VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
 #    MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
 #)
 
-process.d0ana.useAnyMVA = cms.bool(False)
-process.d0ana.multMin = cms.untracked.double(0)
-process.d0ana.multMax = cms.untracked.double(100000)
-process.d0ana.VertexCompositeCollection = cms.untracked.InputTag("d0selector:D0")
-process.d0ana.MVACollection = cms.InputTag("d0selector:MVAValuesNewD0")
+process.d0ana_mc.GenParticleCollection =  cms.untracked.InputTag("prunedGenParticles")
+process.d0ana_mc.useAnyMVA = cms.bool(False)
+process.d0ana_mc.multMin = cms.untracked.double(0)
+process.d0ana_mc.multMax = cms.untracked.double(100000)
+process.d0ana_mc.VertexCompositeCollection = cms.untracked.InputTag("d0selectorNewReduced:D0")
+process.d0ana_mc.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
 #process.d0ana_wrongsign.useAnyMVA = cms.bool(False)
 #process.d0ana_wrongsign.multMin = cms.untracked.double(0)
 #process.d0ana_wrongsign.multMax = cms.untracked.double(100000)
 #process.d0ana_wrongsign.VertexCompositeCollection = cms.untracked.InputTag("d0selectorWS:D0")
 #process.d0ana_wrongsign.MVACollection = cms.InputTag("d0selectorWS:MVAValuesNewD0")
+
+process.dStarana_mc.GenParticleCollection =  cms.untracked.InputTag("prunedGenParticles")
 
 process.d0selectorNewReduced = process.d0selector.clone()
 # process.d0selectorNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
@@ -160,7 +166,7 @@ process.d0selectorNewReduced.DCAValCollection = cms.InputTag("generalD0Candidate
 process.d0selectorNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
 # process.d0selectorNewReduced.mvaMin = cms.untracked.double(0.3)
 process.d0selectorNewReduced.cand3DDecayLengthSigMin = cms.untracked.double(3.)
-process.d0selectorNewReduced.cand3DPointingAngleMax = cms.untracked.double(0.2)
+process.d0selectorNewReduced.cand3DPointingAngleMax = cms.untracked.double(3.)
 
 process.generalDStarCandidatesNew.d0Collection = cms.InputTag("d0selectorNewReduced:D0")
 
@@ -169,7 +175,7 @@ process.d0selectorWSNewReduced = process.d0selectorWS.clone()
 process.d0selectorWSNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNewWrongSign:DCAValuesD0")
 process.d0selectorWSNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNewWrongSign:DCAErrorsD0")
 
-process.d0ana_newreduced = process.d0ana.clone()
+process.d0ana_newreduced = process.d0ana_mc.clone()
 process.d0ana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0selectorNewReduced:D0")
 # process.d0ana_newreduced.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
 process.d0ana_newreduced.DCAValCollection = cms.InputTag("d0selectorNewReduced:DCAValuesNewD0")
@@ -227,7 +233,7 @@ for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
 changeToMiniAOD(process)
-process.options.numberOfThreads = 1
+process.options.numberOfThreads = 8
 
 #process.output = cms.OutputModule("PoolOutputModule",
 #    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM"),
