@@ -641,7 +641,7 @@ VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterS
 
   if (useAnyMVA_ && iConfig.exists("MVACollection"))
     MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
-  if (useAnyMVA_ && iConfig.exists("MVACollection2"))
+  if (doubleCand_ && useAnyMVA_ && iConfig.exists("MVACollection2"))
     MVAValues_Token2_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection2"));
   if (iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
     useDCA_ = true;

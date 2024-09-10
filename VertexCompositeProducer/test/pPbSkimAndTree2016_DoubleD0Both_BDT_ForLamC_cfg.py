@@ -15,7 +15,8 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #'/store/hidata/PARun2016C/PAHighMultiplicity1/AOD/PromptReco-v1/000/285/505/00000/006F1E14-85AF-E611-9F9E-02163E014508.root'
 #'/store/hidata/PARun2016C/PAMinimumBias19/AOD/PromptReco-v1/000/285/975/00000/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
-'file:/eos/home-s/soohwan/store/PARun2016CPAMinimumBias19AOD/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
+#'file:/eos/home-s/soohwan/store/PARun2016CPAMinimumBias19AOD/0012C1E3-DCB5-E611-AE2F-02163E011ABE.root',
+'file:MBPAAOD_Run286496_lumi100.root',
 #'file:output.root'
 )
 )
@@ -58,14 +59,24 @@ process.eventFilter_HM_step = cms.Path( process.eventFilter_HM )
 ########## D0 candidate rereco ###############################################################
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
-process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
-process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.7)
-process.generalD0CandidatesNew.alphaCut = cms.double(1.2)
-process.generalD0CandidatesNew.alpha2DCut = cms.double(1.2)
-process.generalD0CandidatesNew.dPtCut = cms.double(1.95)
+#process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
+#process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+#process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
+#process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
+#process.generalD0CandidatesNew.tkPtCut = cms.double(0.7)
+#process.generalD0CandidatesNew.alphaCut = cms.double(1.2)
+#process.generalD0CandidatesNew.alpha2DCut = cms.double(1.2)
+#process.generalD0CandidatesNew.dPtCut = cms.double(1.95)
+
+process.generalD0CandidatesNew.trkPtSumCut = cms.double(999.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(999.0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(-1)
+process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.2)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.0)
+process.generalD0CandidatesNew.alphaCut = cms.double(999.0)
+process.generalD0CandidatesNew.alpha2DCut = cms.double(999.0)
+process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
+
 
 process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -103,6 +114,15 @@ process.d0selector = process.d0selectorBDTPreCut.clone()
 process.d0selector.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_v2.root')
 process.d0selector.multMin = cms.untracked.double(0)
 process.d0selector.multMax = cms.untracked.double(100000)
+
+process.d0selector.trkPtMin = cms.untracked.double(0.0)
+process.d0selector.trkPtSumMin = cms.untracked.double(0.0)
+process.d0selector.trkEtaDiffMax = cms.untracked.double(999.0)
+process.d0selector.trkNHitMin = cms.untracked.int32(0)
+
+process.d0selector.cand3DPointingAngleMax = cms.untracked.double(999.0)
+process.d0selector.cand2DPointingAngleMax = cms.untracked.double(999.0)
+
 process.d0selectorWS = process.d0selector.clone(
     VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNewWrongSign:D0"),
     MVACollection = cms.InputTag("generalD0CandidatesNewWrongSign:MVAValues")
@@ -138,6 +158,7 @@ process.d0ana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0s
 process.d0ana_newreduced.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
 process.d0ana_newreduced.DCAValCollection = cms.InputTag("d0selectorNewReduced:DCAValuesNewD0")
 process.d0ana_newreduced.DCAErrCollection = cms.InputTag("d0selectorNewReduced:DCAErrorsNewD0")
+process.d0ana_newreduced.MVACollection2= cms.InputTag("")
 
 #process.d0ana_wrongsign_newreduced = process.d0ana_wrongsign.clone()
 #process.d0ana_wrongsign_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0selectorWSNewReduced:D0")
@@ -155,8 +176,8 @@ process.ddana_new.MVACollection = cms.InputTag("generalDDCandidatesNew:MVAValues
 process.ddana_new.MVACollection2= cms.InputTag("generalDDCandidatesNew:MVAValuesDD2")
 
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  * process.generalDDCandidatesNew * process.ddana_new)
-#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDDCandidatesNew )
+#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  * process.generalDDCandidatesNew * process.ddana_new)
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced  )
 # process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorWSNewReduced * process.d0ana_wrongsign_newreduced)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path

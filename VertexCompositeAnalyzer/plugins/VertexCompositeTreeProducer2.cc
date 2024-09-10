@@ -283,7 +283,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
     if (doGenMatching_) {
       const auto nGen = genRefs.size();
       if (!doGenDoubleDecay_) {
-        matchGEN[it] = false;
+        matchGEN1[it] = false;
         isSwap[it] = false;
         idmom_reco1[it] = -77;
         idBAnc_reco1[it] = -77;
@@ -350,7 +350,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
             gen_D1pdgIdD2_[it] = genDau1->pdgId();
           }
         }
-        if (!matchGEN[it]) {
+        if (!matchGEN1[it]) {
           gen_D1pT_[it] = -99;
           gen_D1eta_[it] = -99;
           gen_D1phi_[it] = -99;

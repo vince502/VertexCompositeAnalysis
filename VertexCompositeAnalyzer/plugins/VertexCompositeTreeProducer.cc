@@ -457,6 +457,7 @@ VertexCompositeTreeProducer::VertexCompositeTreeProducer(const edm::ParameterSet
   tok_genParticle_ = consumes<reco::GenParticleCollection>(
       edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
 
+
   isCentrality_ = false;
   if (iConfig.exists("isCentrality"))
     isCentrality_ = iConfig.getParameter<bool>("isCentrality");

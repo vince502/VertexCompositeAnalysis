@@ -386,10 +386,8 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        d02Daus.push_back(pFactory.particle(ttk20,dau20mass,chi,ndf,DDMassD0_sigma));
        d02Daus.push_back(pFactory.particle(ttk21,dau21mass,chi,ndf,DDMassD0_sigma));
 
-       if( ttk10 == ttk20 || ttk10 == ttk21){
- continue;}
-       if( ttk11 == ttk20 || ttk11 == ttk21){
- continue;}
+       if( ttk10 == ttk20 || ttk10 == ttk21){ continue; }
+       if( ttk11 == ttk20 || ttk11 == ttk21){ continue; }
 
        KinematicParticleVertexFitter kpvFitter;
        RefCountedKinematicTree d01Tree =  kpvFitter.fit(d01Daus);
