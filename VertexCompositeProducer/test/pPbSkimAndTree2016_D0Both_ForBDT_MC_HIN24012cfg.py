@@ -9,7 +9,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.MessageLogger.cerr.FwkReport.reportEvery = 50
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
@@ -31,7 +31,8 @@ process.source = cms.Source("PoolSource",
 #'/store/himc/pPb816Summer16DR/PromptD0_D0pT-1p2_pPb-EmbEPOS_8p16_Pythia8/AODSIM/pPbEmb_80X_mcRun2_pA_v4-v1/110000/5C4D85CB-959A-E711-8E76-0CC47A7EEE80.root',
 #'file:682C6215-7F9A-E711-AB29-0025901D49AC.root'
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/EvtGenMod/CMSSW_8_0_30/src/HIN-pPb816Summer16DR-00033.root'
-'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_EvtGen_MOD_DDbar_PbPemb_25Aug2024_v2/PromptD0_Pythia8_SoftQCD_8TeVpPb_8_0_36_patch1/RECOAODSIM_MC_PromptD0_EvtGen_MOD_DDbar_PbPemb_25Aug2024_v2/240826_030023/0000/HIN-pPb816Summer16DR-00033_10.root',
+#'file:HIN-pPb816Summer16DR-00033_68.root',
+#'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_EvtGen_MOD_DDbar_PbPemb_25Aug2024_v2/PromptD0_Pythia8_SoftQCD_8TeVpPb_8_0_36_patch1/RECOAODSIM_MC_PromptD0_EvtGen_MOD_DDbar_PbPemb_25Aug2024_v2/240826_030023/0000/HIN-pPb816Summer16DR-00033_10.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_1.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_10.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_11.root',
@@ -79,12 +80,14 @@ process.source = cms.Source("PoolSource",
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_7.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_8.root',
 #'file:/eos/home-s/soohwan/Analysis/DmesonpPb/VertexCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeProducer/test/MCAOD_DD_Part/HIN-pPb816Summer16DR-00033_9.root',
+#'file:/eos/home-s/soohwan/Analysis/DmesonpPb/MCGen/EvtGenMod/CMSSW_8_0_30/src/Closures/HIN-pPb816Summer16DR-00033.root',
+'/store/user/soohwan/Analysis/DDbarpPb/RECOAODSIM_MC_PromptD0_EvtGen_MOD_DDbar_PbPemb_29Jun2024_v1_p1/PromptD0_Pythia8_SoftQCD_8TeVpPb_8_0_36_patch1/RECOAODSIM_MC_PromptD0_EvtGen_MOD_DDbar_PbPemb_29Jun2024_v1_p1/240706_085118/0000/HIN-pPb816Summer16DR-00033_1.root',
 )
 )
 
 # =============== Other Statements =====================
 # process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(200))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.GlobalTag.globaltag = '80X_mcRun2_pA_v4'
 
@@ -124,8 +127,8 @@ process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.dPtCut = cms.double(1.9)
 
 process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(1.0)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(11)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(0)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalD0CandidatesNew.tkPtCut = cms.double(0.7)
 process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
@@ -181,19 +184,20 @@ process.d0selectorWS = process.d0selector.clone(
 )
 
 process.d0selectorMCNewReduced = process.d0selectorMC.clone()
-process.d0selectorMCNewReduced.GBRForestFileName = cms.string('GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt1p5MassPeak_NoPtErrNHitDLAngle2D_v3.root')
+process.d0selectorMCNewReduced.GBRForestLabel = cms.string('D0InpPbXGB')
+process.d0selectorMCNewReduced.GBRForestFileName = cms.string('GBRForestfile_XGBDT_PromptD0InpPb_default_MB_OnlyMC_v2.root')
 process.d0selectorMCNewReduced.DCAValCollection = cms.InputTag("generalD0CandidatesNew:DCAValuesD0")
 process.d0selectorMCNewReduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsD0")
-process.d0selectorMCNewReduced.trkPtMin = cms.untracked.double(0.4)
-process.d0selectorMCNewReduced.trkPtSumMin = cms.untracked.double(0.0)
-process.d0selectorMCNewReduced.trkEtaDiffMax = cms.untracked.double(2.0)
-process.d0selectorMCNewReduced.trkNHitMin = cms.untracked.int32(11)
-process.d0selectorMCNewReduced.cand3DPointingAngleMax = cms.untracked.double(1.0)
-process.d0selectorMCNewReduced.cand2DPointingAngleMax = cms.untracked.double(1.0)
-process.d0selectorMCNewReduced.candpTMin = cms.untracked.double(1.95)
+process.d0selectorMCNewReduced.trkPtMin = cms.untracked.double(0.3)
+process.d0selectorMCNewReduced.trkPtSumMin = cms.untracked.double(1.2)
+process.d0selectorMCNewReduced.trkEtaDiffMax = cms.untracked.double(100.0)
+process.d0selectorMCNewReduced.trkNHitMin = cms.untracked.int32(0)
+process.d0selectorMCNewReduced.cand3DPointingAngleMax = cms.untracked.double(100.0)
+process.d0selectorMCNewReduced.cand2DPointingAngleMax = cms.untracked.double(100.0)
+process.d0selectorMCNewReduced.candpTMin = cms.untracked.double(0.0)
 process.d0selectorMCNewReduced.candYMin = cms.untracked.double(-1.1)
 process.d0selectorMCNewReduced.candYMax = cms.untracked.double(1.1)
-process.d0selectorMCNewReduced.mvaMin = cms.untracked.double(-1)
+process.d0selectorMCNewReduced.mvaMin = cms.untracked.double(-1.0)
 
 
 #process.d0selectorMCNewReduced.trkPtMin = cms.untracked.double(0.0)
@@ -256,8 +260,8 @@ process.d0ana_ntp_mc.DCAErrCollection = cms.InputTag("d0selectorMCNewReduced:DCA
 
 
 
+#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.d0ana_ntp_mc  )
 process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced * process.d0ana_ntp_mc * process.generalDDCandidatesNew * process.ddana_new )
-#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorMCNewReduced * process.d0ana_mc_newreduced) # * process.generalDDCandidatesNew * process.ddana_new )
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')

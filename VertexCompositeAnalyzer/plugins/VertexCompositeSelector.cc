@@ -1556,6 +1556,22 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
       theMVANew.push_back(mva);
     } else if (useAnyMVA_ && !useExistingMVA_) {
       float gbrVals_[50] = {0};
+      if (forestLabel_ == "D0InpPbXGB") {
+        gbrVals_[0] = VtxProb;
+        gbrVals_[1] = dca3D;
+        gbrVals_[2] = agl;
+        gbrVals_[3] = agl_abs;
+        gbrVals_[4] = agl2D;
+        gbrVals_[5] = agl2D_abs;
+        gbrVals_[6] = dlos;
+        gbrVals_[7] = dl;
+        gbrVals_[8] = dlos2D;
+        gbrVals_[9] = dl2D;
+        gbrVals_[10] = pt1;
+        gbrVals_[11] = eta1;
+        gbrVals_[12] = pt2;
+        gbrVals_[13] = eta2;
+      }
       if (forestLabel_ == "D0InpPb" || forestLabel_ == "D0Inpp" || forestLabel_ == "D0InPbPb") {
         /*
                     gbrVals_[0] = pt;

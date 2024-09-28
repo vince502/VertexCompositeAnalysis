@@ -1441,8 +1441,9 @@ void VertexCompositeTreeProducer2::fillGEN(const edm::Event &iEvent, const edm::
     if (debug_)
       std::cout << "pass id, decay dau : " << trk.numberOfDaughters() << std::endl;
 
-    if (decayInGen_ && (trk.numberOfDaughters() != 2 && trk.numberOfDaughters() != 3))
+    if (decayInGen_ && (trk.numberOfDaughters() != 2 ))
       continue; // check 2-pron decay if target decays in Gen
+    // if (decayInGen_ && (trk.numberOfDaughters() != 2 && trk.numberOfDaughters() != 3))
 
     if (debug_)
       std::cout << "pass decay" << std::endl;

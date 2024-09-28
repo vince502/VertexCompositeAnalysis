@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 d0ana = cms.EDAnalyzer('VertexCompositeTreeProducer2',
-  debug = cms.untracked.bool(True),
+  debug = cms.untracked.bool(False),
   doRecoNtuple = cms.untracked.bool(True),
   doGenNtuple = cms.untracked.bool(False),
   doubleCand = cms.untracked.bool(False),
@@ -45,7 +45,7 @@ d0ana = cms.EDAnalyzer('VertexCompositeTreeProducer2',
                               )
 
 d0ana_mc = cms.EDAnalyzer('VertexCompositeTreeProducer2',
-  debug = cms.untracked.bool(True),
+  debug = cms.untracked.bool(False),
   doRecoNtuple = cms.untracked.bool(True),
   doGenNtuple = cms.untracked.bool(True),
   doGenDoubleDecay = cms.untracked.bool(False),
