@@ -214,8 +214,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
       for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefs.size(); trdx2++) {
         if ( theTrackRefs[trdx2].isNull() ) continue;
         if( theTrackRefs[trdx]->charge() == theTrackRefs[trdx2]->charge()) continue;
-        TransientTrack* trk1TransTkPtr = theTrackRefs[trdx];
-        TransientTrack* trk2TransTkPtr = theTrackRefs[trdx2];
+        TransientTrack* trk1TransTkPtr = &theTrackRefs[trdx];
+        TransientTrack* trk2TransTkPtr = &theTrackRefs[trdx2];
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
@@ -260,11 +260,6 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 	      float ottC2Prob = TMath::Prob(ottTopVertex->chiSquared(),ottTopVertex->degreesOfFreedom());
 	      if (ottC2Prob < bVtxChiProbCut) continue;
 
-        vector<RefCountedKinematicParticle> ottFitParticles;
-
-        ottFitParticles.push_back(pFactory.particle(batDau,piMassB,chi,ndf,piMassB_sigma));
-        ottFitParticles.push_back(d0_vFit_withMC);
-
         // get children from final B fit
         ottVertex->movePointerToTheFirstChild();
         RefCountedKinematicParticle ottOniaCand = ottVertex->currentParticle();
@@ -288,10 +283,10 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
         GlobalVector ottTrk2TotalP = GlobalVector(ottTrkCand2KP.momentum().x(),ottTrkCand2KP.momentum().y(),ottTrkCand2KP.momentum().z());
 
-        double ottOniaTotalP = sqrt( batPionTotalP.mag2() + oniaMass*oniMass piMassBSquared );
+        double ottOniaTotalE = sqrt( batPionTotalP.mag2() + oniaMass*oniMass piMassBSquared );
         double trk1TotalE = sqrt( ottTrk1TotalP.mag2() + piMassBSquared );
         double trk2TotalE = sqrt( ottTrk2TotalP.mag2() + piMassBSquared );
-        double ottTotalE = ottOniaTotalP + trk1TotalE + trk2TotalE ;
+        double ottTotalE = ottOniaTotalE + trk1TotalE + trk2TotalE ;
 
         const Particle::LorentzVector ottP4(ottTotalP.x(), ottTotalP.y(), ottTotalP.z(), ottTotalE);
 
