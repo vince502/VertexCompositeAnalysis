@@ -351,8 +351,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         VertexCompositeCandidate* theB = 0;
         theB = new VertexCompositeCandidate(0, ottP4, ottVtx, bVtxCov, bVtxChi2, bVtxNdof);
         theB->addDaughter(theOnia);
-        theB->addDaughter(PionCand);
-        theB->addDaughter(PionCand);
+        theB->addDaughter(pion1candidate);
+        theB->addDaughter(pion2candidate);
 
         // if(theOnia.pdgId()<0) {theB->setPdgId(521); theB->setCharge(theTrackRefs[trdx]->charge());}
         // else if(theOnia.pdgId()>0) {theB->setPdgId(-521); theB->setCharge(theTrackRefs[trdx]->charge());}
@@ -364,6 +364,7 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         if(theB) delete theB;
            theB = 0;
       }
+    }
   }
 }
 // Get methods
