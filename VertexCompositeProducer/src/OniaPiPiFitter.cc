@@ -41,15 +41,15 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
-const float piMassB = 0.13957018;
-const float piMassBSquared = piMassB*piMassB;
-const float kaonMassB = 0.493677;
-const float kaonMassBSquared = kaonMassB*kaonMassB;
+// const float piMassB = 0.13957018;
+// const float piMassBSquared = piMassB*piMassB;
+// const float kaonMassB = 0.493677;
+// const float kaonMassBSquared = kaonMassB*kaonMassB;
 const float oniaMass = 3.094;
-const float bMassB = 3.872;
-float piMassB_sigma = 3.5E-7f;
-float kaonMassB_sigma = 1.6E-5f;
-float d0MassB_sigma = bMassB*1.e-6;
+// const float bMassB = 3.872;
+// float piMassB_sigma = 3.5E-7f;
+// float kaonMassB_sigma = 1.6E-5f;
+// float d0MassB_sigma = bMassB*1.e-6;
 
 // Constructor and (empty) destructor
 OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
@@ -359,8 +359,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 
         addp4.set( *theB );
 
-        if( theB->mass() < bMassB + bMassCut &&
-            theB->mass() > bMassB - bMassCut ) theBs.push_back( *theB );
+        // if( theB->mass() < bMassB + bMassCut &&
+        //     theB->mass() > bMassB - bMassCut ) theBs.push_back( *theB );
         if(theB) delete theB;
            theB = 0;
       }
