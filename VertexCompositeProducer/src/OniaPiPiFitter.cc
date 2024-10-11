@@ -46,10 +46,10 @@ const float piMassBSquared = piMassB*piMassB;
 const float kaonMassB = 0.493677;
 const float kaonMassBSquared = kaonMassB*kaonMassB;
 const float oniaMass = 3.094;
-const float bMassB = 5.27929;
+const float bMassB = 3.872;
 float piMassB_sigma = 3.5E-7f;
 float kaonMassB_sigma = 1.6E-5f;
-float d0MassB_sigma = d0MassB*1.e-6;
+float d0MassB_sigma = bMassB*1.e-6;
 
 // Constructor and (empty) destructor
 OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
@@ -213,23 +213,23 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
       if ( theTrackRefs[trdx].isNull() ) continue;
       for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefs.size(); trdx2++) {
         if ( theTrackRefs[trdx2].isNull() ) continue;
-        if( theTrackRefs[trdx].charge() == theTrackRefs[trdx2].charge()) continue;
+        if( theTrackRefs[trdx]->charge() == theTrackRefs[trdx2]->charge()) continue;
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
         float ndf = 0.;
         KinematicParticleFactoryFromTransientTrack pFactory;
-        vector<RefCountedKinematicParticle> oniaDuas;
-        reco::Candidate* dau0 = theOnia.daughter(0);
-        reco::Candidate* dau1 = theOnia.daughter(1);
+        vector<RefCountedKinematicParticle> oniaDaus;
+        const reco::Candidate* dau0 = theOnia.daughter(0);
+        const reco::Candidate* dau1 = theOnia.daughter(1);
         reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
         reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
         float dau0mass =  dau0->mass();
         float dau1mass =  dau1->mass();
-        if(debug_) 
+        //if(debug_) 
           cout << "mass of two muons : " << dau0mass << ", " <<dau1mass << endl;
-        oniaDaus.push_back(pFactory.particle(ttk0,dau0mass,chi,ndf,1e-6));
-        oniaDaus.push_back(pFactory.particle(ttk1,dau1mass,chi,ndf,1e-6));
+        oniaDaus.push_back(pFactory.particle(ttk0,dau0mass,chi,ndf,piMassB_sigma));
+        oniaDaus.push_back(pFactory.particle(ttk1,dau1mass,chi,ndf,piMassB_sigma));
 
         KinematicParticleVertexFitter kpvFitter;
         RefCountedKinematicTree oniaTree =  kpvFitter.fit(oniaDaus);

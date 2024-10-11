@@ -46,6 +46,7 @@
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
 
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -99,7 +100,6 @@ class OniapipiFitter {
   edm::EDGetTokenT<pat::CompositeCandidateCollection> token_onias;
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
-  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> token_d0s;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
 

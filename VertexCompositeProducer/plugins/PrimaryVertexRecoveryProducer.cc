@@ -47,9 +47,10 @@ PrimaryVertexRecoveryProducer::PrimaryVertexRecoveryProducer(const edm::Paramete
   std::string clusteringAlgorithm=conf.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<std::string>("algorithm");
   if (clusteringAlgorithm=="gap"){
     theTrackClusterizer = new GapClusterizerInZ(conf.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<edm::ParameterSet>("TkGapClusParameters"));
-  }else if(clusteringAlgorithm=="DA"){
-    theTrackClusterizer = new DAClusterizerInZ(conf.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<edm::ParameterSet>("TkDAClusParameters"));
-  } 
+  }
+//else if(clusteringAlgorithm=="DA"){
+//    theTrackClusterizer = new DAClusterizerInZ(conf.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<edm::ParameterSet>("TkDAClusParameters"));
+//  } 
   // provide the vectorized version of the clusterizer, if supported by the build
    else if(clusteringAlgorithm == "DA_vect") {
     theTrackClusterizer = new DAClusterizerInZ_vect(conf.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<edm::ParameterSet>("TkDAClusParameters"));
