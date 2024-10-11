@@ -214,6 +214,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
       for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefs.size(); trdx2++) {
         if ( theTrackRefs[trdx2].isNull() ) continue;
         if( theTrackRefs[trdx]->charge() == theTrackRefs[trdx2]->charge()) continue;
+        TransientTrack* trk1TransTkPtr = theTrackRefs[trdx];
+        TransientTrack* trk2TransTkPtr = theTrackRefs[trdx2];
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
@@ -256,7 +258,7 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         RefCountedKinematicVertex ottTopVertex = ottVertex->currentDecayVertex();
 
 	      float ottC2Prob = TMath::Prob(ottTopVertex->chiSquared(),ottTopVertex->degreesOfFreedom());
-	      if (ottC2Prob < VtxChiProbCut) continue;
+	      if (ottC2Prob < bVtxChiProbCut) continue;
 
         vector<RefCountedKinematicParticle> ottFitParticles;
 
@@ -264,27 +266,27 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         ottFitParticles.push_back(d0_vFit_withMC);
 
         // get children from final B fit
-        ottTopVertex->movePointerToTheFirstChild();
-        RefCountedKinematicParticle ottOniaCand = ottTopVertex->currentParticle();
-        ottTopVertex->movePointerToTheNextChild();
-        RefCountedKinematicParticle ottTrkCand1 = ottTopVertex->currentParticle();
-        ottTopVertex->movePointerToTheNextChild();
-        RefCountedKinematicParticle ottTrkCand2 = ottTopVertex->currentParticle();
+        ottVertex->movePointerToTheFirstChild();
+        RefCountedKinematicParticle ottOniaCand = ottVertex->currentParticle();
+        ottVertex->movePointerToTheNextChild();
+        RefCountedKinematicParticle ottTrkCand1 = ottVertex->currentParticle();
+        ottVertex->movePointerToTheNextChild();
+        RefCountedKinematicParticle ottTrkCand2 = ottVertex->currentParticle();
 
         if(!ottOniaCand->currentState().isValid() || !ottTrkCand1->currentState().isValid()|| !ottTrkCand2->currentState().isValid()) continue;
 
         // get batchlor pion and D0 parameters from B fit
-        KinematicParameters ottOniaCand = ottOniaCand->currentState().kinematicParameters();
-        KinematicParameters ottTrkCand1 = ottTrkCand1->currentState().kinematicParameters();
-        KinematicParameters ottTrkCand2 = ottTrkCand2->currentState().kinematicParameters();
+        KinematicParameters ottOniaCandKP = ottOniaCand->currentState().kinematicParameters();
+        KinematicParameters ottTrkCand1KP = ottTrkCand1->currentState().kinematicParameters();
+        KinematicParameters ottTrkCand2KP = ottTrkCand2->currentState().kinematicParameters();
 
         GlobalVector ottTotalP = GlobalVector (ottCand->currentState().globalMomentum().x(),
                                              ottCand->currentState().globalMomentum().y(),
                                              ottCand->currentState().globalMomentum().z());
 
-        GlobalVector ottOniaTotalP = GlobalVector(ottOniaCand.momentum().x(),ottOniaCand.momentum().y(),ottOniaCand.momentum().z());
-        GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1.momentum().x(),ottTrkCand1.momentum().y(),ottTrkCand1.momentum().z());
-        GlobalVector ottTrk2TotalP = GlobalVector(ottTrkCand2.momentum().x(),ottTrkCand2.momentum().y(),ottTrkCand2.momentum().z());
+        GlobalVector ottOniaTotalP = GlobalVector(ottOniaCandKP.momentum().x(),ottOniaCandKP.momentum().y(),ottOniaCandKP.momentum().z());
+        GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
+        GlobalVector ottTrk2TotalP = GlobalVector(ottTrkCand2KP.momentum().x(),ottTrkCand2KP.momentum().y(),ottTrkCand2KP.momentum().z());
 
         double ottOniaTotalP = sqrt( batPionTotalP.mag2() + oniaMass*oniMass piMassBSquared );
         double trk1TotalE = sqrt( ottTrk1TotalP.mag2() + piMassBSquared );
