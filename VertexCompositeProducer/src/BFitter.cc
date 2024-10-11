@@ -41,15 +41,6 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
-const float piMassB = 0.13957018;
-const float piMassBSquared = piMassB*piMassB;
-const float kaonMassB = 0.493677;
-const float kaonMassBSquared = kaonMassB*kaonMassB;
-const float d0MassB = 1.86484;
-const float bMassB = 5.27929;
-float piMassB_sigma = 3.5E-7f;
-float kaonMassB_sigma = 1.6E-5f;
-float d0MassB_sigma = d0MassB*1.e-6;
 
 // Constructor and (empty) destructor
 BFitter::BFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
