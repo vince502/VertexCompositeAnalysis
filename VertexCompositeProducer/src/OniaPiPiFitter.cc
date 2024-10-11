@@ -214,8 +214,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
       for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefs.size(); trdx2++) {
         if ( theTrackRefs[trdx2].isNull() ) continue;
         if( theTrackRefs[trdx]->charge() == theTrackRefs[trdx2]->charge()) continue;
-        TransientTrack* trk1TransTkPtr = &theTrackRefs[trdx];
-        TransientTrack* trk2TransTkPtr = &theTrackRefs[trdx2];
+        TransientTrack* trk1TransTkPtr = &theTransTracks[trdx];
+        TransientTrack* trk2TransTkPtr = &theTransTracks[trdx2];
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
@@ -283,7 +283,7 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
         GlobalVector ottTrk2TotalP = GlobalVector(ottTrkCand2KP.momentum().x(),ottTrkCand2KP.momentum().y(),ottTrkCand2KP.momentum().z());
 
-        double ottOniaTotalE = sqrt( batPionTotalP.mag2() + oniaMass*oniMass piMassBSquared );
+        double ottOniaTotalE = sqrt( ottOniaTotalP.mag2() + oniaMass*oniaMass  );
         double trk1TotalE = sqrt( ottTrk1TotalP.mag2() + piMassBSquared );
         double trk2TotalE = sqrt( ottTrk2TotalP.mag2() + piMassBSquared );
         double ottTotalE = ottOniaTotalE + trk1TotalE + trk2TotalE ;
@@ -309,9 +309,9 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         double bSigmaRvtxMag = 999.0;
         double bSigmaLvtxMag = 999.0;
 
-        GlobalVector bLineOfFlight = GlobalVector (bVtx.x() - xVtx,
-                                                     bVtx.y() - yVtx,
-                                                     bVtx.z() - zVtx);
+        GlobalVector bLineOfFlight = GlobalVector (ottVtx.x() - xVtx,
+                                                     ottVtx.y() - yVtx,
+                                                     ottVtx.z() - zVtx);
 
         SMatrixSym3D bTotalCov;
         if(isVtxPV) bTotalCov = bVtxCovMatrix + vtxPrimary->covariance();
@@ -321,9 +321,9 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         SVector3 distanceVector2D(bLineOfFlight.x(), bLineOfFlight.y(), 0.0);
 
         double bAngle3D = angle(bLineOfFlight.x(), bLineOfFlight.y(), bLineOfFlight.z(),
-                          bTotalP.x(), bTotalP.y(), bTotalP.z());
+                          ottTotalP.x(), ottTotalP.y(), ottTotalP.z());
         double bAngle2D = angle(bLineOfFlight.x(), bLineOfFlight.y(), (float)0.0,
-                         bTotalP.x(), bTotalP.y(), (float)0.0);
+                         ottTotalP.x(), ottTotalP.y(), (float)0.0);
         bLVtxMag = bLineOfFlight.mag();
         bRVtxMag = bLineOfFlight.perp();
         bSigmaLvtxMag = sqrt(ROOT::Math::Similarity(bTotalCov, distanceVector3D)) / bLVtxMag;
@@ -337,8 +337,12 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
             cos(bAngle3D) < bCollinCut3D || cos(bAngle2D) < bCollinCut2D || bAngle3D > bAlphaCut || bAngle2D > bAlpha2DCut
         ) continue;
 
-        RecoChargedCandidate pion1candidate(theTrackRefs[trdx]->charge(), Particle::LorentzVector(ottTrkCand1.x(), ottTrkCand1.y(), ottTrkCand1.z(), trk1TotalE), ottVtx);
-        RecoChargedCandidate pion2candidate(theTrackRefs[trdx2]->charge(), Particle::LorentzVector(ottTrkCand2.x(), ottTrkCand2.y(), ottTrkCand2.z(), trk2TotalE), ottVtx);
+        // GlobalVector ottOniaTotalP = GlobalVector(ottOniaCandKP.momentum().x(),ottOniaCandKP.momentum().y(),ottOniaCandKP.momentum().z());
+        // GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
+        // GlobalVector ottTrk2TotalP = GlobalVector(ottTrkCand2KP.momentum().x(),ottTrkCand2KP.momentum().y(),ottTrkCand2KP.momentum().z());
+
+        RecoChargedCandidate pion1candidate(theTrackRefs[trdx]->charge(), Particle::LorentzVector(ottTrk1TotalP.x(), ottTrk1TotalP.y(), ottTrk1TotalP.z(), trk1TotalE), ottVtx);
+        RecoChargedCandidate pion2candidate(theTrackRefs[trdx2]->charge(), Particle::LorentzVector(ottTrk2TotalP.x(), ottTrk2TotalP.y(), ottTrk2TotalP.z(), trk2TotalE), ottVtx);
         pion1candidate.setTrack(theTrackRefs[trdx]);
         pion2candidate.setTrack(theTrackRefs[trdx2]);
 
