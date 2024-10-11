@@ -85,6 +85,15 @@ class OniapipiFitter {
   void resetAll();
 
  private:
+  const float piMassB = 0.13957018;
+  const float piMassBSquared = piMassB*piMassB;
+  // const float kaonMassB = 0.493677;
+  // const float kaonMassBSquared = kaonMassB*kaonMassB;
+  const float oniaMass = 3.094;
+  // const float bMassB = 3.872;
+  float piMassB_sigma = 3.5E-7f;
+  // float kaonMassB_sigma = 1.6E-5f;
+  // float d0MassB_sigma = bMassB*1.e-6;
   reco::VertexCompositeCandidateCollection theBs;
 
   // Tracker geometry for discerning hit positions
