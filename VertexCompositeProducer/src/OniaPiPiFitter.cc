@@ -51,10 +51,12 @@ OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::Con
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_onias = iC.consumes<pat::CompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("dimuons"));
+  token_pixeltracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("pixelTracks"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
 
   // Second, initialize post-fit cuts
+  usePixelTracks = theParameters.getParameter<bool>(string("usePixelTracks"));
   mPiDCutMin = theParameters.getParameter<double>(string("mPiDCutMin"));
   mPiDCutMax = theParameters.getParameter<double>(string("mPiDCutMax"));
   batTkDCACut = theParameters.getParameter<double>(string("batTkDCACut"));
@@ -86,6 +88,8 @@ OniapipiFitter::~OniapipiFitter() {
 // Method containing the algorithm for vertex reconstruction
 void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
+
+
   using std::vector;
   using std::cout;
   using std::endl;
@@ -98,26 +102,41 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   // Create std::vectors for Tracks and TrackRefs (required for
   //  passing to the KalmanVertexFitter)
-  std::vector<TrackRef> theTrackRefs;
-  std::vector<TransientTrack> theTransTracks;
+  std::vector<TrackRef> theTrackRefsP;
+  std::vector<int> theTrackRefsP2;
+  std::vector<TransientTrack> theTransTracksP;
+
+  std::vector<TrackRef> theTrackRefsM;
+  std::vector<int> theTrackRefsM2;
+  std::vector<TransientTrack> theTransTracksM;
 
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
   Handle<pat::CompositeCandidateCollection> theOniaHandle;
+  Handle<reco::TrackCollection> thePixelTrackHandle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
   iEvent.getByToken(token_vertices, theVertexHandle);
   iEvent.getByToken(token_onias, theOniaHandle);
   iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
   iEvent.getByToken(token_dedx, dEdxHandle);
+  auto outTracks = std::make_unique<reco::TrackCollection>();
+  if( !usePixelTracks){
+    iEvent.getByToken(token_tracks, theTrackHandle); 
+    if( !theTrackHandle->size() ) return;
+  }
+  if( usePixelTracks){
+    iEvent.getByToken(token_pixeltracks, theTrackHandle); 
+    if( !theTrackHandle->size() ) return;
+    //iEvent.getByToken(token_pixeltracks, thePixelTrackHandle); 
+    //if( !thePixelTrackHandle->size() ) return;
+  }
 
-  if( !theTrackHandle->size() ) return;
   bFieldHandle = iSetup.getHandle(bField_esToken_);
 
   magField = bFieldHandle.product();
@@ -155,42 +174,49 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
   math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
 
   // Fill vectors of TransientTracks and TrackRefs after applying preselection cuts.
-  for(unsigned int indx = 0; indx < theTrackHandle->size(); indx++) {
-    TrackRef tmpRef( theTrackHandle, indx );
-    bool quality_ok = true;
-    if (qualities.size()!=0) {
-      quality_ok = false;
-      for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
-	      if (tmpRef->quality(qualities[ndx_])){
-	        quality_ok = true;
-	        break;          
-	      }
+    for(unsigned int indx = 0; indx < theTrackHandle->size(); indx++) {
+      TrackRef tmpRef( theTrackHandle, indx );
+      bool quality_ok = true;
+      if (qualities.size()!=0) {
+        quality_ok = false;
+        for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
+  	      if (tmpRef->quality(qualities[ndx_])){
+  	        quality_ok = true;
+  	        break;          
+  	      }
+        }
+      }
+      if( !quality_ok ) continue;
+  
+      if( tmpRef->normalizedChi2() < batTkChi2Cut &&
+          tmpRef->numberOfValidHits() >= batTkNhitsCut &&
+          tmpRef->ptError() / tmpRef->pt() < batTkPtErrCut &&
+          tmpRef->pt() > batTkPtCut && fabs(tmpRef->eta()) < batTkEtaCut ) {
+        TransientTrack tmpTk( *tmpRef, magField );
+  
+        double dzvtx = tmpRef->dz(bestvtx);
+        double dxyvtx = tmpRef->dxy(bestvtx);      
+        double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
+        double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
+  
+        double dauLongImpactSig = dzvtx/dzerror;
+        double dauTransImpactSig = dxyvtx/dxyerror;
+  
+        if( fabs(dauTransImpactSig) > batDauTransImpactSigCut && fabs(dauLongImpactSig) > batDauLongImpactSigCut ) {
+          if(tmpRef->charge() > 0){
+            theTrackRefsP.push_back( tmpRef );
+            theTransTracksP.push_back( tmpTk );
+          }
+          if(tmpRef->charge() < 0){
+            theTrackRefsM.push_back( tmpRef );
+            theTransTracksM.push_back( tmpTk );
+          }
+        }
       }
     }
-    if( !quality_ok ) continue;
-
-    if( tmpRef->normalizedChi2() < batTkChi2Cut &&
-        tmpRef->numberOfValidHits() >= batTkNhitsCut &&
-        tmpRef->ptError() / tmpRef->pt() < batTkPtErrCut &&
-        tmpRef->pt() > batTkPtCut && fabs(tmpRef->eta()) < batTkEtaCut ) {
-      TransientTrack tmpTk( *tmpRef, magField );
-
-      double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
-      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
-      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
-
-      double dauLongImpactSig = dzvtx/dzerror;
-      double dauTransImpactSig = dxyvtx/dxyerror;
-
-      if( fabs(dauTransImpactSig) > batDauTransImpactSigCut && fabs(dauLongImpactSig) > batDauLongImpactSigCut ) {
-        theTrackRefs.push_back( tmpRef );
-        theTransTracks.push_back( tmpTk );
-      }
-    }
-  }
 
   const pat::CompositeCandidateCollection theOnias = *(theOniaHandle.product());
+std::cout << "N(onia), N(trk) +/-  : " << theOnias.size() << ", " << theTrackRefsP.size() << ", " << theTrackRefsM.size() <<  std::endl;
   for(unsigned it=0; it<theOnias.size(); ++it){
 
     const pat::CompositeCandidate & theOnia = theOnias[it];
@@ -198,43 +224,65 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
     float massWindow = 2.040;
     // TODO Rename variables
     // if(theOnia.mass() > d0MassB + massWindow || theOnia.mass() < d0MassB - massWindow) continue;
-    if(theOnia.mass() > 2.8 || theOnia.mass() < 3.7) continue;
+    if(!(
+	(theOnia.mass() > 2.9  && theOnia.mass() < 3.3) ||
+//	(theOnia.mass() > 7.2  && theOnia.mass() < 14.0) || 
+	false
+	)) continue;
 
-    for(unsigned int trdx = 0; trdx < theTrackRefs.size(); trdx++) {
-      if ( theTrackRefs[trdx].isNull() ) continue;
-      for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefs.size(); trdx2++) {
-        if ( theTrackRefs[trdx2].isNull() ) continue;
-        if( theTrackRefs[trdx]->charge() == theTrackRefs[trdx2]->charge()) continue;
-        TransientTrack* trk1TransTkPtr = &theTransTracks[trdx];
-        TransientTrack* trk2TransTkPtr = &theTransTracks[trdx2];
+    const reco::Candidate* dau0 = theOnia.daughter(0);
+    const reco::Candidate* dau1 = theOnia.daughter(1);
+    reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
+//cout << "start 1" << endl;
+    reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
+    if(!ttk0.isValid()) continue;
+    if(!ttk1.isValid()) continue;
+    for(unsigned int trdx = 0; trdx < theTrackRefsP.size(); trdx++) {
+      if ( !usePixelTracks && theTrackRefsP[trdx].isNull() ) continue;
+      for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefsM.size(); trdx2++) {
+    	vector<RefCountedKinematicParticle> oniaDaus;
+        if ( !usePixelTracks && theTrackRefsM[trdx2].isNull() ) continue;
+//cout << "start 1 0" << endl;
+        TransientTrack* trk1TransTkPtr = &theTransTracksP[trdx];
+        TransientTrack* trk2TransTkPtr = &theTransTracksM[trdx2];
+	if(!trk1TransTkPtr->isValid()) continue;
+	if(!trk2TransTkPtr->isValid()) continue;
+	if( fabs(dau0->pt() - trk1TransTkPtr->track().pt()) < 1e-6 ||
+	    fabs(dau0->pt() - trk2TransTkPtr->track().pt()) < 1e-6 ||
+	    fabs(dau1->pt() - trk1TransTkPtr->track().pt()) < 1e-6 ||
+	    fabs(dau1->pt() - trk2TransTkPtr->track().pt()) < 1e-6 
+        ) continue;
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
         float ndf = 0.;
         KinematicParticleFactoryFromTransientTrack pFactory;
-        vector<RefCountedKinematicParticle> oniaDaus;
-        const reco::Candidate* dau0 = theOnia.daughter(0);
-        const reco::Candidate* dau1 = theOnia.daughter(1);
-        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
-        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
         float dau0mass =  dau0->mass();
         float dau1mass =  dau1->mass();
         //if(debug_) 
-          cout << "mass of two muons : " << dau0mass << ", " <<dau1mass << endl;
+        //  cout << "mass of two muons : " << dau0mass << ", " <<dau1mass << endl;
         oniaDaus.push_back(pFactory.particle(ttk0,dau0mass,chi,ndf,piMassB_sigma));
         oniaDaus.push_back(pFactory.particle(ttk1,dau1mass,chi,ndf,piMassB_sigma));
 
         KinematicParticleVertexFitter kpvFitter;
         RefCountedKinematicTree oniaTree =  kpvFitter.fit(oniaDaus);
+	if(!oniaTree->isValid()) continue;
         oniaTree->movePointerToTheTop();
 
         // Onia + trk + trk fit
         float chi2 = 0.;
         float ndf2 = 0.;
         vector<RefCountedKinematicParticle> ottParticles;
+//cout << "start 1 1" << endl;
+	if(!oniaTree->currentParticle()->currentState().isValid()) continue;
         ottParticles.push_back(oniaTree->currentParticle());
+//std::cout << Form("%.9f, %.9f, %.9f, %.9f", piMassB, chi2, ndf2, piMassB_sigma) << std::endl;
         ottParticles.push_back(pFactory.particle(*trk1TransTkPtr, piMassB, chi2, ndf2, piMassB_sigma));
         ottParticles.push_back(pFactory.particle(*trk2TransTkPtr, piMassB, chi2, ndf2, piMassB_sigma));
+if(!(ottParticles[0]->currentState().isValid())) continue;
+if(!(ottParticles[1]->currentState().isValid())) continue;
+if(!(ottParticles[2]->currentState().isValid())) continue;
+
 
         KinematicParticleVertexFitter ottFitter;
         RefCountedKinematicTree ottVertex;
@@ -248,9 +296,10 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 
         RefCountedKinematicVertex ottTopVertex = ottVertex->currentDecayVertex();
 
-	      float ottC2Prob = TMath::Prob(ottTopVertex->chiSquared(),ottTopVertex->degreesOfFreedom());
-	      if (ottC2Prob < bVtxChiProbCut) continue;
+	float ottC2Prob = TMath::Prob(ottTopVertex->chiSquared(),ottTopVertex->degreesOfFreedom());
+	if (ottC2Prob < bVtxChiProbCut) continue;
 
+//cout << "start 1 2 " << endl;
         // get children from final B fit
         ottVertex->movePointerToTheFirstChild();
         RefCountedKinematicParticle ottOniaCand = ottVertex->currentParticle();
@@ -300,6 +349,7 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         double bSigmaRvtxMag = 999.0;
         double bSigmaLvtxMag = 999.0;
 
+//cout << "start 1 3" << endl;
         GlobalVector bLineOfFlight = GlobalVector (ottVtx.x() - xVtx,
                                                      ottVtx.y() - yVtx,
                                                      ottVtx.z() - zVtx);
@@ -331,12 +381,14 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         // GlobalVector ottOniaTotalP = GlobalVector(ottOniaCandKP.momentum().x(),ottOniaCandKP.momentum().y(),ottOniaCandKP.momentum().z());
         // GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
         // GlobalVector ottTrk2TotalP = GlobalVector(ottTrkCand2KP.momentum().x(),ottTrkCand2KP.momentum().y(),ottTrkCand2KP.momentum().z());
+        //
 
-        RecoChargedCandidate pion1candidate(theTrackRefs[trdx]->charge(), Particle::LorentzVector(ottTrk1TotalP.x(), ottTrk1TotalP.y(), ottTrk1TotalP.z(), trk1TotalE), ottVtx);
-        RecoChargedCandidate pion2candidate(theTrackRefs[trdx2]->charge(), Particle::LorentzVector(ottTrk2TotalP.x(), ottTrk2TotalP.y(), ottTrk2TotalP.z(), trk2TotalE), ottVtx);
-        pion1candidate.setTrack(theTrackRefs[trdx]);
-        pion2candidate.setTrack(theTrackRefs[trdx2]);
+        RecoChargedCandidate pion1candidate(theTrackRefsP[trdx]->charge(), Particle::LorentzVector(ottTrk1TotalP.x(), ottTrk1TotalP.y(), ottTrk1TotalP.z(), trk1TotalE), ottVtx);
+        RecoChargedCandidate pion2candidate(theTrackRefsM[trdx2]->charge(), Particle::LorentzVector(ottTrk2TotalP.x(), ottTrk2TotalP.y(), ottTrk2TotalP.z(), trk2TotalE), ottVtx);
+        pion1candidate.setTrack( theTrackRefsP[trdx]);
+        pion2candidate.setTrack( theTrackRefsM[trdx2]);
 
+//cout << "start 1 4" << endl;
         AddFourMomenta addp4;
 
         VertexCompositeCandidate* theB = 0;
@@ -352,6 +404,9 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 
         // if( theB->mass() < bMassB + bMassCut &&
         //     theB->mass() > bMassB - bMassCut ) theBs.push_back( *theB );
+        if( theB->mass() > bMassCut) continue;
+        theBs.push_back(*theB);
+//cout << "start 1 5" << endl;
         if(theB) delete theB;
            theB = 0;
       }

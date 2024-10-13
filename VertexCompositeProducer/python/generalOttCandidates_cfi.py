@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-generalOttCandidates = cms.EDProducer("OniaPiPiPducer",
+generalOttCandidates = cms.EDProducer("OniaPiPiProducer",
                                      
     # InputTag that tells which TrackCollection to use for vertexing
     trackRecoAlgorithm = cms.InputTag('generalTracks'),

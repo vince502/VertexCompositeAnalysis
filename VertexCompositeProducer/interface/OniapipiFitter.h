@@ -15,8 +15,8 @@
 //
 //
 
-#ifndef VertexCompositeAnalysis__B_FITTER_H
-#define VertexCompositeAnalysis__B_FITTER_H
+#ifndef VertexCompositeAnalysis__OTT_FITTER_H
+#define VertexCompositeAnalysis__OTT_FITTER_H
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -47,6 +47,7 @@
 
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -107,11 +108,14 @@ class OniapipiFitter {
   edm::InputTag vtxAlg;
   edm::InputTag d0Alg;
   edm::EDGetTokenT<pat::CompositeCandidateCollection> token_onias;
+  edm::EDGetTokenT<reco::TrackCollection> token_pixeltracks;
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
 
+ // Track option
+  bool   usePixelTracks;
   // Cuts
   double mPiDCutMin;
   double mPiDCutMax;

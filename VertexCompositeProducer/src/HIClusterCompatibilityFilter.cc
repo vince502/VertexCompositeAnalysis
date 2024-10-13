@@ -132,4 +132,4 @@ HIClusterCompatibilityFilter::fillDescriptions(edm::ConfigurationDescriptions& d
   descriptions.addDefault(desc);
 }
 
-DEFINE_FWK_MODULE(HIClusterCompatibilityFilter);
+//DEFINE_FWK_MODULE(HIClusterCompatibilityFilter);

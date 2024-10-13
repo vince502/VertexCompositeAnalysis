@@ -73,4 +73,4 @@ bool HiHFFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(HiHFFilter);
+//DEFINE_FWK_MODULE(HiHFFilter);
