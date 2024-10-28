@@ -63,7 +63,7 @@ options.inputFiles = [
 options.outputFile = 'Oniatree_2023PbPbPromptRecoData_141X_miniAOD.root'
 options.secondaryOutputFile = "Jpsi_Dataset.root"
 
-options.maxEvents = -1 # -1 means all events
+options.maxEvents = 60000 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -193,7 +193,7 @@ if atLeastOneCand:
       process.oniaTreeAna.replace(process.patMuonSequence, process.pseudoDimuonFilterSequence * process.patMuonSequence)
 
 
-process.onia2MuMuPatGlbGlb.dimuonSelection = cms.string('mass > 2 && pt >4') 
+process.onia2MuMuPatGlbGlb.dimuonSelection = cms.string('mass > 2 && pt >6.5') 
 process.onia2MuMuPatGlbGlb.lowerPuritySelection = cms.string('pt > 1') 
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalOttCandidates_cff")
@@ -201,22 +201,25 @@ process.generalOttCandidatesNew = process.generalOttCandidates.clone()
 process.generalOttCandidatesNew.dimuons = cms.InputTag('onia2MuMuPatGlbGlb')
 process.generalOttCandidatesNew.vertexRecoAlgorithm = cms.InputTag('unpackedTracksAndVertices')
 process.generalOttCandidatesNew.trackRecoAlgorithm = cms.InputTag('unpackedTracksAndVertices')
+process.generalOttCandidatesNew.usePixelTracks = cms.bool(False)
+process.generalOttCandidatesNew.pixelTracks = cms.InputTag('unpackedTracksAndVertices')
 
 #process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.0)
 #process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(4.8)
-process.generalOttCandidatesNew.batTkChi2Cut = cms.double(2)
-process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(10)
+process.generalOttCandidatesNew.batTkChi2Cut = cms.double(7)
+process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(12)
 process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.01)
-process.generalOttCandidatesNew.batTkPtCut = cms.double(4.3)
-process.generalOttCandidatesNew.batTkEtaCut = cms.double(1.0)
+process.generalOttCandidatesNew.batTkPtCut = cms.double(1.5)
+process.generalOttCandidatesNew.batTkEtaCut = cms.double(3.0)
 process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
 process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalOttCandidatesNew.bPtCut = cms.double(0.0)
-process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.050)
+process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.100)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(3.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(14.0)
 process.generalOttCandidatesNew.bMassCut = cms.double(4.2)
 
+#process.oniaTreeAna.replace(process.onia2MuMuPatGlbGlb, process.onia2MuMuPatGlbGlb * process.onia2MuMuPatGlbGlbFilter )
 process.oniaTreeAna.replace(process.onia2MuMuPatGlbGlb, process.onia2MuMuPatGlbGlb * process.onia2MuMuPatGlbGlbFilter * process.generalOttCandidatesNew)
 
 
@@ -241,7 +244,7 @@ process.TFileService = cms.Service("TFileService",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.options   = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-process.options.numberOfThreads = 1
+process.options.numberOfThreads = 6
 
 
 #process.Ottreco_step = cms.Sequence( process.oniaTreeAna * process.generalOttCandidatesNew) 
@@ -254,7 +257,8 @@ process.options.numberOfThreads = 1
 process.schedule  = cms.Schedule( process.oniaTreeAna )
 
 process.output = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring(["drop *", "keep *_unpacked*_*_*", "keep *_*_*_HIOnia"]),
+    #outputCommands = cms.untracked.vstring(["drop *", "keep *_unpacked*_*_*", "keep *_*_*_HIOnia"]),
+    outputCommands = cms.untracked.vstring(["drop *", "keep *_*_*_HIOnia", "drop *_unpacked*_*_*"]),
     fileName = cms.untracked.string("output.root"),
 )
 process.output_path = cms.EndPath(process.output)

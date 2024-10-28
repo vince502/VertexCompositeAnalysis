@@ -57,8 +57,8 @@ options.secondaryOutputFile = "Jpsi_DataSet.root"
 options.inputFiles =[
   # '/store/mc/HINPbPbSpring23MiniAOD/PromptJPsiToMuMu_Pthat2_TuneCP5_HydjetDrumMB_5p36TeV_pythia8/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/130000/0c311838-da71-4010-b4f9-313c7fef7745.root',
   #"file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root",
-    #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3.root',
-    'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3_Sample1k.root',
+    'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3.root',
+#    'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3_Sample1k.root',
 #    'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3HihgpT.root',
 ]
 options.maxEvents = -1 # -1 means all events
@@ -231,7 +231,6 @@ process.onia2MuMuPatGlbGlb.lowerPuritySelection = cms.string('pt > 0')
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalOttCandidates_cff")
 process.generalOttCandidatesNew = process.generalOttCandidates.clone()
 process.generalOttCandidatesNew.dimuons = cms.InputTag('onia2MuMuPatGlbGlb')
-#process.generalOttCandidatesNew.vertexRecoAlgorithm = cms.InputTag('unpackedTracksAndVertices')
 process.generalOttCandidatesNew.vertexRecoAlgorithm = cms.InputTag('unpackedTracksAndVertices')
 process.generalOttCandidatesNew.trackRecoAlgorithm = cms.InputTag('unpackedTracksAndVertices')
 
@@ -242,17 +241,17 @@ process.generalOttCandidatesNew.pixelTracks = cms.InputTag('unpackedPixelTracks'
 
 #process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.0)
 #process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(4.8)
-process.generalOttCandidatesNew.batTkChi2Cut = cms.double(10000)
-process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(0)
-process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.25)
-process.generalOttCandidatesNew.batTkPtCut = cms.double(0.0)
+process.generalOttCandidatesNew.batTkChi2Cut = cms.double(10)
+process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(5)
+process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.05)
+process.generalOttCandidatesNew.batTkPtCut = cms.double(1.0)
 process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
 process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalOttCandidatesNew.bPtCut = cms.double(0.0)
 process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.050)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(3.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(14.0)
-process.generalOttCandidatesNew.bMassCut = cms.double(20)
+process.generalOttCandidatesNew.bMassCut = cms.double(10)
 #process.generalOttCandidatesNew.d0RecoAlgorithm = cms.InputTag('')
 
 if miniAOD:
