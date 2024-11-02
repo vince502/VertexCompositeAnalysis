@@ -14,7 +14,7 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
+    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/vavladim/RECO2024/CRAB_UserFiles/crab_miniAOD_PhysicsPPRefDoubleMuon0_387574/241030_083852/0000/recoppraw2mini_RAW2DIGI_L1Reco_RECO_PAT_994.root"),
     #fileNames = cms.untracked.vstring("file:step4.root"),
     #fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root"),
 )
@@ -22,8 +22,9 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
+#process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
 #process.GlobalTag.globaltag = cms.string('132X_mcRun3_2023_realistic_HI_v9')
+process.GlobalTag.globaltag = cms.string('141X_dataRun3_Express_v3')
 
 ## Set ZDC information
 #process.es_pool = cms.ESSource("PoolDBESSource",
@@ -37,18 +38,7 @@ process.GlobalTag.globaltag = cms.string('132X_dataRun3_Prompt_v4')
 #    input = cms.VPSet(cms.PSet(object = cms.string('ElectronicsMap'), file = cms.FileInPath("emap_2023_newZDC_v3.txt")))
 #)
 
-# Add PbPb centrality
-process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
-process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
-process.GlobalTag.toGet.extend([
-    cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810"),
-        connect = cms.string("sqlite_file:CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db"),
-        label = cms.untracked.string("HFtowers")
-        )
-    ]
-)
-process.cent_seq = cms.Sequence(process.centralityBin)
+
 
 # =============== Import Sequences =====================
 #Trigger Selection
@@ -195,6 +185,7 @@ process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNew
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
+process.eventinfoana.isCentrality=cms.bool(False)
 process.eventinfoana.triggerPathNames = cms.untracked.vstring(
     "HLT_HIMinimumBiasHF1AND_v*", #24
     "HLT_HIMinimumBiasHF1ANDZDC2nOR_v", #25
@@ -210,7 +201,6 @@ process.eventinfoana.stageL1Trigger = cms.uint32(2)
 process.pevt = cms.EndPath(process.eventinfoana)
 
 process.p = cms.Path(process.d0ana_seq2)
-process.c = cms.Path(process.cent_seq)
 # process.pws = cms.Path(process.d0ana_wrongsign_seq2)
 
 # Add the Conversion tree
@@ -218,7 +208,6 @@ process.c = cms.Path(process.cent_seq)
 # Define the process schedule
 process.schedule = cms.Schedule(
     process.eventFilter_HM_step,
-    process.c,
     process.d0rereco_step,
 #    process.d0rereco_wrongsign_step,
     process.p,
