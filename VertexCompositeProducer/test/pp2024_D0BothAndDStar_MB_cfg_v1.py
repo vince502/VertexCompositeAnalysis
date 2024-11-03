@@ -18,7 +18,7 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:step4.root"),
     #fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root"),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -49,9 +49,10 @@ process.hltFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltFilter.andOr = cms.bool(True)
 process.hltFilter.throw = cms.bool(False)
 process.hltFilter.HLTPaths = [
-    "HLT_HIMinimumBiasHF1AND_v*", #24
-    "HLT_HIMinimumBiasHF1ANDZDC2nOR_v*", #25
-    "HLT_HIMinimumBiasHF1ANDZDC1nOR_v*", #26
+"HLT_PPRefZeroBias_v*", #1
+  #  "HLT_HIMinimumBiasHF1AND_v*", #24
+  #  "HLT_HIMinimumBiasHF1ANDZDC2nOR_v*", #25
+  #  "HLT_HIMinimumBiasHF1ANDZDC1nOR_v*", #26
 ]
 
 # Add PbPb collision event selection
