@@ -31,6 +31,7 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
@@ -40,6 +41,15 @@
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
+
+bool match_OniaPiPi(const reco::Track* a, const reco::Track* b){
+        if( a->charge() != b->charge() ) return false;
+        if(
+                fabs(a->pt()- b->pt()) < 0.03 &&
+                reco::deltaR(*a, *b) < 0.03
+        ) return true;
+        return false;
+};
 
 
 // Constructor and (empty) destructor
@@ -216,7 +226,6 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
     }
 
   const pat::CompositeCandidateCollection theOnias = *(theOniaHandle.product());
-std::cout << "N(onia), N(trk) +/-  : " << theOnias.size() << ", " << theTrackRefsP.size() << ", " << theTrackRefsM.size() <<  std::endl;
   for(unsigned it=0; it<theOnias.size(); ++it){
 
     const pat::CompositeCandidate & theOnia = theOnias[it];
@@ -225,33 +234,41 @@ std::cout << "N(onia), N(trk) +/-  : " << theOnias.size() << ", " << theTrackRef
     // TODO Rename variables
     // if(theOnia.mass() > d0MassB + massWindow || theOnia.mass() < d0MassB - massWindow) continue;
     if(!(
-	(theOnia.mass() > 2.9  && theOnia.mass() < 3.3) ||
-//	(theOnia.mass() > 7.2  && theOnia.mass() < 14.0) || 
+	(theOnia.mass() > 2.8  && theOnia.mass() < 3.3) ||
+	(theOnia.mass() > 7.2  && theOnia.mass() < 14.0) || 
 	false
 	)) continue;
 
     const reco::Candidate* dau0 = theOnia.daughter(0);
     const reco::Candidate* dau1 = theOnia.daughter(1);
-    reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
-//cout << "start 1" << endl;
-    reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
+    const TransientTrack ttk0(*dau0->bestTrack(), magField);
+    const TransientTrack ttk1(*dau1->bestTrack(), magField);
     if(!ttk0.isValid()) continue;
     if(!ttk1.isValid()) continue;
     for(unsigned int trdx = 0; trdx < theTrackRefsP.size(); trdx++) {
       if ( !usePixelTracks && theTrackRefsP[trdx].isNull() ) continue;
+      TransientTrack* trk1TransTkPtr = &theTransTracksP[trdx];
+      if(!trk1TransTkPtr->isValid()) continue;
+      if(
+              match_OniaPiPi(&ttk0.track(), &trk1TransTkPtr->track()) ||
+              match_OniaPiPi(&ttk1.track(), &trk1TransTkPtr->track()) ) continue;
       for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefsM.size(); trdx2++) {
+	
+
     	vector<RefCountedKinematicParticle> oniaDaus;
         if ( !usePixelTracks && theTrackRefsM[trdx2].isNull() ) continue;
-//cout << "start 1 0" << endl;
-        TransientTrack* trk1TransTkPtr = &theTransTracksP[trdx];
         TransientTrack* trk2TransTkPtr = &theTransTracksM[trdx2];
-	if(!trk1TransTkPtr->isValid()) continue;
 	if(!trk2TransTkPtr->isValid()) continue;
-	if( fabs(dau0->pt() - trk1TransTkPtr->track().pt()) < 1e-6 ||
-	    fabs(dau0->pt() - trk2TransTkPtr->track().pt()) < 1e-6 ||
-	    fabs(dau1->pt() - trk1TransTkPtr->track().pt()) < 1e-6 ||
-	    fabs(dau1->pt() - trk2TransTkPtr->track().pt()) < 1e-6 
-        ) continue;
+
+	FreeTrajectoryState posState = trk1TransTkPtr->impactPointTSCP().theState();
+	FreeTrajectoryState negState = trk2TransTkPtr->impactPointTSCP().theState();
+        if( !trk1TransTkPtr->impactPointTSCP().isValid() || !trk2TransTkPtr->impactPointTSCP().isValid() ) continue;
+        ClosestApproachInRPhi cApp;
+        cApp.calculate(posState, negState);
+        if( !cApp.status() ) continue;
+        if(
+                match_OniaPiPi(&ttk0.track(), &trk2TransTkPtr->track()) ||
+                match_OniaPiPi(&ttk1.track(), &trk2TransTkPtr->track()) ) continue;
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
@@ -272,16 +289,17 @@ std::cout << "N(onia), N(trk) +/-  : " << theOnias.size() << ", " << theTrackRef
         // Onia + trk + trk fit
         float chi2 = 0.;
         float ndf2 = 0.;
-        vector<RefCountedKinematicParticle> ottParticles;
-//cout << "start 1 1" << endl;
 	if(!oniaTree->currentParticle()->currentState().isValid()) continue;
-        ottParticles.push_back(oniaTree->currentParticle());
-//std::cout << Form("%.9f, %.9f, %.9f, %.9f", piMassB, chi2, ndf2, piMassB_sigma) << std::endl;
+        vector<RefCountedKinematicParticle> ottParticles;
+        //ottParticles.push_back(oniaTree->currentParticle()->track());
+        ottParticles.push_back(pFactory.particle(ttk0,dau0mass,chi,ndf,piMassB_sigma));
+        ottParticles.push_back(pFactory.particle(ttk1,dau1mass,chi,ndf,piMassB_sigma));
         ottParticles.push_back(pFactory.particle(*trk1TransTkPtr, piMassB, chi2, ndf2, piMassB_sigma));
         ottParticles.push_back(pFactory.particle(*trk2TransTkPtr, piMassB, chi2, ndf2, piMassB_sigma));
-if(!(ottParticles[0]->currentState().isValid())) continue;
-if(!(ottParticles[1]->currentState().isValid())) continue;
-if(!(ottParticles[2]->currentState().isValid())) continue;
+	if(!(ottParticles[0]->currentState().isValid())) continue;
+	if(!(ottParticles[1]->currentState().isValid())) continue;
+	if(!(ottParticles[2]->currentState().isValid())) continue;
+	if(!(ottParticles[3]->currentState().isValid())) continue;
 
 
         KinematicParticleVertexFitter ottFitter;
@@ -302,7 +320,8 @@ if(!(ottParticles[2]->currentState().isValid())) continue;
 //cout << "start 1 2 " << endl;
         // get children from final B fit
         ottVertex->movePointerToTheFirstChild();
-        RefCountedKinematicParticle ottOniaCand = ottVertex->currentParticle();
+        RefCountedKinematicParticle ottOniaCand = oniaTree->currentParticle();
+        ottVertex->movePointerToTheNextChild();
         ottVertex->movePointerToTheNextChild();
         RefCountedKinematicParticle ottTrkCand1 = ottVertex->currentParticle();
         ottVertex->movePointerToTheNextChild();
@@ -370,13 +389,15 @@ if(!(ottParticles[2]->currentState().isValid())) continue;
         bSigmaLvtxMag = sqrt(ROOT::Math::Similarity(bTotalCov, distanceVector3D)) / bLVtxMag;
         bSigmaRvtxMag = sqrt(ROOT::Math::Similarity(bTotalCov, distanceVector2D)) / bRVtxMag;
 
-        if( bNormalizedChi2 > bVtxChi2Cut ||
+	int b = 0;
+        if(true || bNormalizedChi2 > bVtxChi2Cut ||
             bRVtxMag < bRVtxCut ||
             bRVtxMag / bSigmaRvtxMag < bRVtxSigCut ||
             bLVtxMag < bLVtxCut ||
             bLVtxMag / bSigmaLvtxMag < bLVtxSigCut ||
             cos(bAngle3D) < bCollinCut3D || cos(bAngle2D) < bCollinCut2D || bAngle3D > bAlphaCut || bAngle2D > bAlpha2DCut
-        ) continue;
+        //) continue;
+        ) b +=1;
 
         // GlobalVector ottOniaTotalP = GlobalVector(ottOniaCandKP.momentum().x(),ottOniaCandKP.momentum().y(),ottOniaCandKP.momentum().z());
         // GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
@@ -402,8 +423,6 @@ if(!(ottParticles[2]->currentState().isValid())) continue;
 
         addp4.set( *theB );
 
-        // if( theB->mass() < bMassB + bMassCut &&
-        //     theB->mass() > bMassB - bMassCut ) theBs.push_back( *theB );
         if( theB->mass() > bMassCut) continue;
         theBs.push_back(*theB);
 //cout << "start 1 5" << endl;
