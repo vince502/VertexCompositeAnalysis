@@ -1,10 +1,10 @@
 #include "VertexCompositeAnalysis/VertexCompositeAnalyzer/plugins/VertexCompositeTreeProducer2.hxx"
 
-#define DEBUG true
+// #define DEBUG true
 
 
 #define PI 3.1416
-#define MAXCAN 50000
+#define MAXCAN 500
 
 VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet& iConfig)
 {
@@ -110,8 +110,7 @@ iSetup)
 }
 
 void
-VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
+VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 #ifdef DEBUG
     using std::cout;
     using std::endl;
@@ -144,8 +143,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
     iEvent.getByToken(Dedx_Token2_, dEdxHandle2);
     
     centrality=-1;
-    if(isCentrality_)
-    {
+    if(isCentrality_) {
       edm::Handle<reco::Centrality> cent;
       iEvent.getByToken(tok_centSrc_, cent);
 
@@ -159,8 +157,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
       ZDCMinus = cent->zdcSumMinus();
     }
 
-    if(isEventPlane_)
-    {
+    if(isEventPlane_) {
       edm::Handle<reco::EvtPlaneCollection> eventplanes;
       iEvent.getByToken(tok_eventplaneSrc_,eventplanes);
 
@@ -200,8 +197,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
     
     //Ntrkoffline
     Ntrkoffline = 0;
-    if(multMax_!=-1 && multMin_!=-1)
-    {
+    if(multMax_!=-1 && multMin_!=-1) {
       for(unsigned it=0; it<tracks->size(); ++it){
         
         const reco::Track & trk = (*tracks)[it];
@@ -222,11 +218,16 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
         double pt  = trk.pt();
         
         if(fabs(eta)>2.4) continue;
-        if(pt<=0.4) continue;
+        if(pt<=0.2) continue;
         Ntrkoffline++;
       }
     }
 
+#ifdef DEBUG
+#endif
+#ifdef DEBUG
+cout<<"Putting GEN"<<endl;
+#endif
     std::vector<reco::GenParticleRef> genRefs;
     if(doGenMatching_){
         if(!genpars.isValid())
@@ -237,38 +238,36 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
             if(fabs(id)!=PID_) continue; //check is target
             if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
             if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
-	    if( twoLayerDecay_ && balancedTree_){
-		int id1 = trk.daughter(0)->pdgId();
-		int id2 = trk.daughter(1)->pdgId();
-	        if( !(abs(id1) == PID_dau1_ && abs(id2) == PID_dau2_ && trk.daughter(0)->numberOfDaughters()==2 && trk.daughter(1)->numberOfDaughters() ==2) ) continue;
-	        if( !(abs(id2) == PID_dau1_ && abs(id1) == PID_dau2_ && trk.daughter(0)->numberOfDaughters()==2 && trk.daughter(1)->numberOfDaughters() ==2) ) continue;
-		int id11 = trk.daughter(0)->daughter(0)->pdgId();
-		int id12 = trk.daughter(0)->daughter(1)->pdgId();
-		int id21 = trk.daughter(1)->daughter(0)->pdgId();
-		int id22 = trk.daughter(1)->daughter(1)->pdgId();
-		if( !(fabs(id1) == PID_dau1_ && (
-			((id11 == PID_gdau11_ && id12 == PID_gdau12_) ||
-			(id12 == PID_gdau11_ && id11 == PID_gdau12_) ) &&
-			((id21 == PID_gdau21_ && id22 == PID_gdau22_) ||
-			(id22 == PID_gdau21_ && id21 == PID_gdau22_) ) 
-		))) continue;
-		if( !(fabs(id1) == PID_dau2_ && (
-			((id11 == PID_gdau21_ && id12 == PID_gdau22_) ||
-			(id12 == PID_gdau21_ && id11 == PID_gdau22_) ) &&
-			((id21 == PID_gdau11_ && id22 == PID_gdau12_) ||
-			(id22 == PID_gdau11_ && id21 == PID_gdau12_) ) 
-		))) continue;
-	    }
-            genRefs.push_back(reco::GenParticleRef(genpars, it));
-        }
+	          if( twoLayerDecay_ && balancedTree_){
+	      	    int id1 = trk.daughter(0)->pdgId();
+	      	    int id2 = trk.daughter(1)->pdgId();
+	                 if( !(abs(id1) == PID_dau1_ && abs(id2) == PID_dau2_ && trk.daughter(0)->numberOfDaughters()==2 && trk.daughter(1)->numberOfDaughters() ==2) ) continue;
+	                 if( !(abs(id2) == PID_dau1_ && abs(id1) == PID_dau2_ && trk.daughter(0)->numberOfDaughters()==2 && trk.daughter(1)->numberOfDaughters() ==2) ) continue;
+	      	    int id11 = trk.daughter(0)->daughter(0)->pdgId();
+	      	    int id12 = trk.daughter(0)->daughter(1)->pdgId();
+	      	    int id21 = trk.daughter(1)->daughter(0)->pdgId();
+	      	    int id22 = trk.daughter(1)->daughter(1)->pdgId();
+	      	    if( !(fabs(id1) == PID_dau1_ && (
+	      	    	((id11 == PID_gdau11_ && id12 == PID_gdau12_) ||
+	      	    	(id12 == PID_gdau11_ && id11 == PID_gdau12_) ) &&
+	      	    	((id21 == PID_gdau21_ && id22 == PID_gdau22_) ||
+	      	    	(id22 == PID_gdau21_ && id21 == PID_gdau22_) ) 
+	      	    ))) continue;
+	      	    if( !(fabs(id1) == PID_dau2_ && (
+	      	    	((id11 == PID_gdau21_ && id12 == PID_gdau22_) ||
+	      	    	(id12 == PID_gdau21_ && id11 == PID_gdau22_) ) &&
+	      	    	((id21 == PID_gdau11_ && id22 == PID_gdau12_) ||
+	      	    	(id22 == PID_gdau11_ && id21 == PID_gdau12_) ) 
+	      	))) continue;
+	      }
+        genRefs.push_back(reco::GenParticleRef(genpars, it));
+      }
         //if (genRefs.size()>1) std::cout << "More than one target of generated particles\n";
     }
 
     //RECO Candidate info
     candSize = v0candidates_->size();
-
     for(unsigned it=0; it<v0candidates_->size(); ++it){
-        
         const reco::VertexCompositeCandidate & trk = (*v0candidates_)[it];
         
         double secvz=-999.9, secvx=-999.9, secvy=-999.9;
@@ -289,49 +288,49 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
         double pz = trk.pz();
         
         const reco::Candidate * d1 = trk.daughter(0);
-        const reco::Candidate * gd1;
-        const reco::Candidate * gd2;
-        if(twoLayerDecay_){
-          gd1 = d1->daughter(0);
-          gd2 = d1->daughter(1);
-        }
         const reco::Candidate * d2 = trk.daughter(1);
-        const reco::Candidate * d3 = 0;        
-        if(threeProngDecay_) d3 = trk.daughter(2);
+        const reco::Candidate * d3 = trk.daughter(2);        
 
+        unsigned int oniaIdx = 0;
+        // if( trk.daughter(0))
+
+        const reco::Candidate * gd11 = d1->daughter(0);
+        const reco::Candidate * gd12 = d1->daughter(1);
+        const reco::Candidate * gd21 = d2->daughter(0);
+        const reco::Candidate * gd22 = d2->daughter(1);
         //Gen match
-        if(doGenMatching_ ) {
-          if( twoLayerDecay_ ){
+        if(doGenMatching_ ){
+          if( twoLayerDecay_ && balancedTree_ ){
             matchGEN[it] = false;
             unsigned int nGen = genRefs.size();
             isSwap[it] = false;
             idmom_reco[it] = -77;
             idBAnc_reco[it] = -77;
-
             for( unsigned int igen=0; igen<nGen; igen++){
-              auto const theGenDStar = genRefs.at(igen);
-              unsigned int idxD0 = -1;
-              if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
-              auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
-              auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
+              auto const theGenV0 = genRefs.at(igen);
+              unsigned int idx0 = -1;
+              if( fabs(theGenV0->daughter(0)->pdgId()) == PID_dau1_ ) idx0 = 0;
+              auto const* theGenDau0 = genRefs.at(igen)->daughter(idx0);
+              auto const* theGenDau1 = genRefs.at(igen)->daughter(1- idx0);
               // Only works for 2 body two layer decay
-              reco::Candidate const* recoD1;
-              reco::Candidate const* recoPi;
-              unsigned int idxRecoD0 = -1;
-              if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
-              recoD1 = trk.daughter(idxRecoD0);
-              recoPi = trk.daughter(1-idxRecoD0);
-              const auto nGenDau = theGenD0->numberOfDaughters();
+              reco::Candidate const* recoOnia;
+              reco::Candidate const* recoV0;
+              unsigned int idxReco0 = -1;
+              if (trk.daughter(0)->daughter(0)->isMuon()) idxReco0 = 0;
+              recoOnia = trk.daughter(idxReco0);
+              recoV0 = trk.daughter(1-idxReco0);
+              const auto nGenDau = theGenV0->numberOfDaughters();
+
 
              //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
 
-              matchGEN[it] += (matchHadron(recoD1, *theGenD0,true) && matchHadron(recoPi, *theGenPion,false));
+              matchGEN[it] += (matchHadron(recoOnia, *theGenDau0,true) && matchHadron(recoV0, *theGenDau1,false));
               #ifdef DEBUG
               //cout << matchGEN[it] << endl;
               #endif
               if(matchGEN[it]){
-                isSwap[it] = checkSwap(recoD1, *theGenD0);
-                auto mom_ref = findMother(theGenDStar);
+                // isSwap[it] = checkSwap(recoOnia, *theGenV0);
+                auto mom_ref = findMother(theGenV0);
                 if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
                 int __count_anc__ = 0;
                 auto __ref_anc__ = mom_ref;
@@ -342,101 +341,94 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
                       idBAnc_reco[it] = __ref_anc__->pdgId();
                 } } }
 
-                matchGen_D0pT_[it] = theGenD0->pt();
-                matchGen_D0eta_[it] = theGenD0->eta();
-                matchGen_D0phi_[it] = theGenD0->phi();
-                matchGen_D0mass_[it] = theGenD0->mass();
-                matchGen_D0y_[it] = theGenD0->rapidity();
-                matchGen_D0charge_[it] = theGenD0->charge();
-                matchGen_D0pdgId_[it] = theGenD0->pdgId();
+                matchGen_V0pT_[it] = theGenV0->pt();
+                matchGen_V0eta_[it] = theGenV0->eta();
+                matchGen_V0phi_[it] = theGenV0->phi();
+                matchGen_V0mass_[it] = theGenV0->mass();
+                matchGen_V0y_[it] = theGenV0->rapidity();
+                matchGen_V0charge_[it] = theGenV0->charge();
+                matchGen_V0pdgId_[it] = theGenV0->pdgId();
 
-                genDecayLength(*theGenD0, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
-                getAncestorId(*theGenD0, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
+                // genDecayLength(*theGenV0, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+                // getAncestorId(*theGenV0, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
 
-                const auto* genDau0 = theGenD0->daughter(0);
-                const auto* genDau1 = theGenD0->daughter(1);
+                // const auto* genDau0 = theGenV0->daughter(0);
+                // const auto* genDau1 = theGenV0->daughter(1);
 
-                matchGen_D0Dau1_pT_[it] = genDau0->pt();
-                matchGen_D0Dau1_eta_[it] = genDau0->eta();
-                matchGen_D0Dau1_phi_[it] = genDau0->phi();
-                matchGen_D0Dau1_mass_[it] = genDau0->mass();
-                matchGen_D0Dau1_y_[it] = genDau0->rapidity();
-                matchGen_D0Dau1_charge_[it] = genDau0->charge();
-                matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
+                matchGen_V0Dau1_pT_[it] = theGenDau0->pt();
+                matchGen_V0Dau1_eta_[it] = theGenDau0->eta();
+                matchGen_V0Dau1_phi_[it] = theGenDau0->phi();
+                matchGen_V0Dau1_mass_[it] = theGenDau0->mass();
+                matchGen_V0Dau1_y_[it] = theGenDau0->rapidity();
+                matchGen_V0Dau1_charge_[it] = theGenDau0->charge();
+                matchGen_V0Dau1_pdgId_[it] = theGenDau0->pdgId();
 
-                matchGen_D0Dau2_pT_[it] = genDau1->pt();
-                matchGen_D0Dau2_eta_[it] = genDau1->eta();
-                matchGen_D0Dau2_phi_[it] = genDau1->phi();
-                matchGen_D0Dau2_mass_[it] = genDau1->mass();
-                matchGen_D0Dau2_y_[it] = genDau1->rapidity();
-                matchGen_D0Dau2_charge_[it] = genDau1->charge();
-                matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
+                matchGen_V0Dau2_pT_[it] = theGenDau1->pt();
+                matchGen_V0Dau2_eta_[it] = theGenDau1->eta();
+                matchGen_V0Dau2_phi_[it] = theGenDau1->phi();
+                matchGen_V0Dau2_mass_[it] = theGenDau1->mass();
+                matchGen_V0Dau2_y_[it] = theGenDau1->rapidity();
+                matchGen_V0Dau2_charge_[it] = theGenDau1->charge();
+                matchGen_V0Dau2_pdgId_[it] = theGenDau1->pdgId();
 
-                matchGen_D1pT_[it] = theGenPion->pt();
-                matchGen_D1eta_[it] = theGenPion->eta();
-                matchGen_D1phi_[it] = theGenPion->phi();
-                matchGen_D1mass_[it] = theGenPion->mass();
-                matchGen_D1y_[it] = theGenPion->rapidity();
-                matchGen_D1charge_[it] = theGenPion->charge();
-                matchGen_D1pdgId_[it] = theGenPion->pdgId();
               }
             } // END for nGen
           }
-          else {
-            matchGEN[it] = false;
-            unsigned int nGen = genRefs.size();
-            isSwap[it] = false;
-            idmom_reco[it] = -77;
-            idBAnc_reco[it] = -77;
+          // else {
+          //   matchGEN[it] = false;
+          //   unsigned int nGen = genRefs.size();
+          //   isSwap[it] = false;
+          //   idmom_reco[it] = -77;
+          //   idBAnc_reco[it] = -77;
 
-            for( unsigned int igen=0; igen<nGen; igen++){
-              auto const theGenP = genRefs.at(igen);
-              matchGEN[it] += matchHadron(&trk, *theGenP,true);
-              if(matchGEN[it]){
-                isSwap[it] = checkSwap(&trk, *theGenP);
-                auto mom_ref = findMother(theGenP);
-                if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
-                int __count_anc__ = 0;
-                auto __ref_anc__ = mom_ref;
-                while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
-                  __ref_anc__ = findMother(__ref_anc__);
-                  if( __ref_anc__.isNonnull()){
-                    if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
-                      idBAnc_reco[it] = __ref_anc__->pdgId();
-                } } }
+          //   for( unsigned int igen=0; igen<nGen; igen++){
+          //     auto const theGenP = genRefs.at(igen);
+          //     matchGEN[it] += matchHadron(&trk, *theGenP,true);
+          //     if(matchGEN[it]){
+          //       isSwap[it] = checkSwap(&trk, *theGenP);
+          //       auto mom_ref = findMother(theGenP);
+          //       if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
+          //       int __count_anc__ = 0;
+          //       auto __ref_anc__ = mom_ref;
+          //       while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
+          //         __ref_anc__ = findMother(__ref_anc__);
+          //         if( __ref_anc__.isNonnull()){
+          //           if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
+          //             idBAnc_reco[it] = __ref_anc__->pdgId();
+          //       } } }
 
-                matchGen_D0pT_[it] = theGenP->pt();
-                matchGen_D0eta_[it] = theGenP->eta();
-                matchGen_D0phi_[it] = theGenP->phi();
-                matchGen_D0mass_[it] = theGenP->mass();
-                matchGen_D0y_[it] = theGenP->rapidity();
-                matchGen_D0charge_[it] = theGenP->charge();
-                matchGen_D0pdgId_[it] = theGenP->pdgId();
+          //       matchGen_D0pT_[it] = theGenP->pt();
+          //       matchGen_D0eta_[it] = theGenP->eta();
+          //       matchGen_D0phi_[it] = theGenP->phi();
+          //       matchGen_D0mass_[it] = theGenP->mass();
+          //       matchGen_D0y_[it] = theGenP->rapidity();
+          //       matchGen_D0charge_[it] = theGenP->charge();
+          //       matchGen_D0pdgId_[it] = theGenP->pdgId();
 
-                genDecayLength(*theGenP, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
-                getAncestorId(*theGenP, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
+          //       genDecayLength(*theGenP, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+          //       getAncestorId(*theGenP, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
 
-                const auto* genDau0 = theGenP->daughter(0);
-                const auto* genDau1 = theGenP->daughter(1);
+          //       const auto* genDau0 = theGenP->daughter(0);
+          //       const auto* genDau1 = theGenP->daughter(1);
 
-                matchGen_D0Dau1_pT_[it] = genDau0->pt();
-                matchGen_D0Dau1_eta_[it] = genDau0->eta();
-                matchGen_D0Dau1_phi_[it] = genDau0->phi();
-                matchGen_D0Dau1_mass_[it] = genDau0->mass();
-                matchGen_D0Dau1_y_[it] = genDau0->rapidity();
-                matchGen_D0Dau1_charge_[it] = genDau0->charge();
-                matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
+          //       matchGen_D0Dau1_pT_[it] = genDau0->pt();
+          //       matchGen_D0Dau1_eta_[it] = genDau0->eta();
+          //       matchGen_D0Dau1_phi_[it] = genDau0->phi();
+          //       matchGen_D0Dau1_mass_[it] = genDau0->mass();
+          //       matchGen_D0Dau1_y_[it] = genDau0->rapidity();
+          //       matchGen_D0Dau1_charge_[it] = genDau0->charge();
+          //       matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
 
-                matchGen_D0Dau2_pT_[it] = genDau1->pt();
-                matchGen_D0Dau2_eta_[it] = genDau1->eta();
-                matchGen_D0Dau2_phi_[it] = genDau1->phi();
-                matchGen_D0Dau2_mass_[it] = genDau1->mass();
-                matchGen_D0Dau2_y_[it] = genDau1->rapidity();
-                matchGen_D0Dau2_charge_[it] = genDau1->charge();
-                matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
-              }
-            } // END for nGen
-          }
+          //       matchGen_D0Dau2_pT_[it] = genDau1->pt();
+          //       matchGen_D0Dau2_eta_[it] = genDau1->eta();
+          //       matchGen_D0Dau2_phi_[it] = genDau1->phi();
+          //       matchGen_D0Dau2_mass_[it] = genDau1->mass();
+          //       matchGen_D0Dau2_y_[it] = genDau1->rapidity();
+          //       matchGen_D0Dau2_charge_[it] = genDau1->charge();
+          //       matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
+          //     }
+          //   } // END for nGen
+          // }
         }
         
         double pxd1 = d1->px();
@@ -472,8 +464,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
         double pxd3 = -999.9;
         double pyd3 = -999.9;
         double pzd3 = -999.9;
-        if(threeProngDecay_ && d3)
-        {
+        if(threeProngDecay_ && d3) {
           pxd3 = d3->px();
           pyd3 = d3->py();
           pzd3 = d3->pz();
@@ -487,8 +478,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
 
         pid1[it] = -99999;
         pid2[it] = -99999;
-        if(doGenMatchingTOF_)
-        {
+        if(doGenMatchingTOF_) {
           for(unsigned it=0; it<genpars->size(); ++it){
 
               const reco::GenParticle & trk = (*genpars)[it];
@@ -597,11 +587,10 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
         
         dlos2D[it] = dl2D[it]/dl2Derror;
 
-        //trk info
-        auto dau1 = d1->get<reco::TrackRef>();
-        if(!twoLayerDecay_)
-        {
+        if(!twoLayerDecay_) {
+          //trk info
             //trk quality
+            auto dau1 = d1->get<reco::TrackRef>();
             trkquality1[it] = dau1->quality(reco::TrackBase::highPurity);
             
             //trk dEdx
@@ -643,51 +632,53 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
             dxyos1[it] = dxybest1/dxyerror1;
         }
         
-        auto dau2 = d2->get<reco::TrackRef>();
+        if(!(twoLayerDecay_ && balancedTree_) ){
+          auto dau2 = d2->get<reco::TrackRef>();
+          //trk quality
+          trkquality2[it] = dau2->quality(reco::TrackBase::highPurity);
         
-        //trk quality
-        trkquality2[it] = dau2->quality(reco::TrackBase::highPurity);
+          //trk dEdx
+          H2dedx2[it] = -999.9;
         
-        //trk dEdx
-        H2dedx2[it] = -999.9;
+          if(dEdxHandle1.isValid()){
+              const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
+              H2dedx2[it] = dEdxTrack[dau2].dEdx();
+          }
         
-        if(dEdxHandle1.isValid()){
-            const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
-            H2dedx2[it] = dEdxTrack[dau2].dEdx();
+          T4dedx2[it] = -999.9;
+        
+          if(dEdxHandle2.isValid()){
+              const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
+              T4dedx2[it] = dEdxTrack[dau2].dEdx();
+          }
+        
+          //track Chi2
+          trkChi2[it] = dau2->normalizedChi2();
+        
+          //track pT error
+          ptErr2[it] = dau2->ptError();
+        
+          //vertexCovariance 00-xError 11-y 22-z
+          secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
+        
+          //trkNHits
+          nhit2[it] = dau2->numberOfValidHits();
+          math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
+        
+          double dzbest2 = dau2->dz(bestvtx);
+          double dxybest2 = dau2->dxy(bestvtx);
+          double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
+          double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
+        
+          dzos2[it] = dzbest2/dzerror2;
+          dxyos2[it] = dxybest2/dxyerror2;
+
         }
-        
-        T4dedx2[it] = -999.9;
-        
-        if(dEdxHandle2.isValid()){
-            const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
-            T4dedx2[it] = dEdxTrack[dau2].dEdx();
-        }
-        
-        //track Chi2
-        trkChi2[it] = dau2->normalizedChi2();
-        
-        //track pT error
-        ptErr2[it] = dau2->ptError();
-        
-        //vertexCovariance 00-xError 11-y 22-z
-        secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
-        
-        //trkNHits
-        nhit2[it] = dau2->numberOfValidHits();
         
         //DCA
-        math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-        
-        double dzbest2 = dau2->dz(bestvtx);
-        double dxybest2 = dau2->dxy(bestvtx);
-        double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
-        double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
-        
-        dzos2[it] = dzbest2/dzerror2;
-        dxyos2[it] = dxybest2/dxyerror2;
-        
-        if(doMuon_)
-        {
+        if(doMuon_) {
+          auto dau1 = d1->get<reco::TrackRef>();
+          auto dau2 = d2->get<reco::TrackRef>();
           edm::Handle<reco::MuonCollection> theMuonHandle;
           iEvent.getByToken(tok_muon_, theMuonHandle);
             
@@ -745,8 +736,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
           const int muId1 = muAssocToTrack( dau1, theMuonHandle );
           const int muId2 = muAssocToTrack( dau2, theMuonHandle );
 
-          if( muId1 != -1 )
-          {
+          if( muId1 != -1 ) {
             const reco::Muon& cand = (*theMuonHandle)[muId1];
 
             onestmuon1[it] = muon::isGoodMuon(cand, muon::selectionTypeFromString("TMOneStationTight"));
@@ -785,11 +775,9 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
               ) softmuon2[it] = true;
           }
 
-          if(doMuonFull_)
-          {
+          if(doMuonFull_) {
 
-          if( muId1 != -1 )
-          {
+          if( muId1 != -1 ) {
             const reco::Muon& cand = (*theMuonHandle)[muId1];
 
             nmatchedch1[it] = cand.numberOfMatches();
@@ -800,8 +788,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
                     
             const std::vector<reco::MuonChamberMatch>& muchmatches = cand.matches();
                    
-            for(unsigned int ich=0;ich<muchmatches.size();ich++)
-            {
+            for(unsigned int ich=0;ich<muchmatches.size();ich++) {
               x_exp = muchmatches[ich].x;
               y_exp = muchmatches[ich].y;
               xerr_exp = muchmatches[ich].xErr;
@@ -814,8 +801,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
               std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
                         
               if(!musegmatches.size()) continue;
-              for(unsigned int jseg=0;jseg<musegmatches.size();jseg++)
-              {
+              for(unsigned int jseg=0;jseg<musegmatches.size();jseg++) {
                 x_seg = musegmatches[jseg].x;
                 y_seg = musegmatches[jseg].y;
                 xerr_seg = musegmatches[jseg].xErr;
@@ -920,12 +906,12 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
           } // doMuonFull
         }
         
-        if(twoLayerDecay_)
-        {
+
+        if(twoLayerDecay_ && ! balancedTree_) {
             grand_mass[it] = d1->mass();
             
-            // const reco::Candidate * gd1 = d1->daughter(0);
-            // const reco::Candidate * gd2 = d1->daughter(1);
+            const reco::Candidate * gd1 = d1->daughter(0);
+            const reco::Candidate * gd2 = d1->daughter(1);
             
             double gpxd1 = gd1->px();
             double gpyd1 = gd1->py();
@@ -1060,17 +1046,297 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
             
             grand_dlos2D[it] = gdl2D/gdl2Derror;
         }
+
+
+        if(twoLayerDecay_ &&  balancedTree_) {
+            grand_mass[it] = d1->mass();
+            double gpxd1 = gd11->px();
+            double gpyd1 = gd11->py();
+            double gpzd1 = gd11->pz();
+            double gpxd2 = gd12->px();
+            double gpyd2 = gd12->py();
+            double gpzd2 = gd12->pz();
+            
+            TVector3 gdauvec1(gpxd1,gpyd1,gpzd1);
+            TVector3 gdauvec2(gpxd2,gpyd2,gpzd2);
+            
+            auto gdau1 = gd11->get<reco::TrackRef>();
+            auto gdau2 = gd12->get<reco::TrackRef>();
 #ifdef DEBUG
-cout << "Done reco single iter" << endl;
+cout<<"Reco loop 6"<<endl;
+#endif
+            
+            //trk quality
+            
+            grand_trkquality1[it] = gdau1->quality(reco::TrackBase::highPurity);
+            grand_trkquality2[it] = gdau2->quality(reco::TrackBase::highPurity);
+            
+            //trk dEdx
+            grand_H2dedx1[it] = -999.9;
+            grand_H2dedx2[it] = -999.9;
+            
+            if(dEdxHandle1.isValid()){
+                const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
+                grand_H2dedx1[it] = dEdxTrack[gdau1].dEdx();
+                grand_H2dedx2[it] = dEdxTrack[gdau2].dEdx();
+            }
+            
+            grand_T4dedx1[it] = -999.9;
+            grand_T4dedx2[it] = -999.9;
+            
+            if(dEdxHandle2.isValid()){
+                const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
+                grand_T4dedx1[it] = dEdxTrack[gdau1].dEdx();
+                grand_T4dedx2[it] = dEdxTrack[gdau2].dEdx();
+            }
+#ifdef DEBUG
+cout<<"Reco loop 7"<<endl;
+#endif
+            
+            //track pt
+            grand_pt1[it] = gd11->pt();
+            grand_pt2[it] = gd12->pt();
+            
+            //track momentum
+            grand_p1[it] = gd11->p();
+            grand_p2[it] = gd12->p();
+            
+            //track eta
+            grand_eta1[it] = gd11->eta();
+            grand_eta2[it] = gd12->eta();
+            
+            //track charge
+            grand_charge1[it] = gd11->charge();
+            grand_charge2[it] = gd12->charge();
+            
+            //track Chi2
+            grand_trkChi1[it] = gdau1->normalizedChi2();
+            grand_trkChi2[it] = gdau2->normalizedChi2();
+            
+            //track pT error
+            grand_ptErr1[it] = gdau1->ptError();
+            grand_ptErr2[it] = gdau2->ptError();
+            
+            //vertexCovariance 00-xError 11-y 22-z
+            secvz = d1->vz(); secvx = d1->vx(); secvy = d1->vy();
+            
+            //trkNHits
+            grand_nhit1[it] = gdau1->numberOfValidHits();
+            grand_nhit2[it] = gdau2->numberOfValidHits();
+            
+            //DCA
+            math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
+            
+            double gdzbest1 = gdau1->dz(bestvtx);
+            double gdxybest1 = gdau1->dxy(bestvtx);
+            double gdzerror1 = sqrt(gdau1->dzError()*gdau1->dzError()+bestvzError*bestvzError);
+            double gdxyerror1 = sqrt(gdau1->d0Error()*gdau1->d0Error()+bestvxError*bestvyError);
+            
+            grand_dzos1[it] = gdzbest1/gdzerror1;
+            grand_dxyos1[it] = gdxybest1/gdxyerror1;
+            
+            double gdzbest2 = gdau2->dz(bestvtx);
+            double gdxybest2 = gdau2->dxy(bestvtx);
+            double gdzerror2 = sqrt(gdau2->dzError()*gdau2->dzError()+bestvzError*bestvzError);
+            double gdxyerror2 = sqrt(gdau2->d0Error()*gdau2->d0Error()+bestvxError*bestvyError);
+            
+            grand_dzos2[it] = gdzbest2/gdzerror2;
+            grand_dxyos2[it] = gdxybest2/gdxyerror2;
+            
+            //vtxChi2
+            // grand_vtxChi2[it] = d1->vertexChi2();
+            // grand_ndf[it] = d1->vertexNdof();
+            // grand_VtxProb[it] = TMath::Prob(grand_vtxChi2[it],grand_ndf[it]);
+            
+            // //PAngle
+            // TVector3 ptosvec(secvx-bestvx,secvy-bestvy,secvz-bestvz);
+            // TVector3 secvec(d1->px(),d1->py(),d1->pz());
+            
+            // TVector3 ptosvec2D(secvx-bestvx,secvy-bestvy,0);
+            // TVector3 secvec2D(d1->px(),d1->py(),0);
+            
+            // grand_agl[it] = cos(secvec.Angle(ptosvec));
+            // grand_agl_abs[it] = secvec.Angle(ptosvec);
+            
+            // grand_agl2D[it] = cos(secvec2D.Angle(ptosvec2D));
+            // grand_agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
+            
+            // //Decay length 3D
+            // typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
+            // typedef ROOT::Math::SVector<double, 3> SVector3;
+            // typedef ROOT::Math::SVector<double, 6> SVector6;
+            
+            // SMatrixSym3D totalCov = vtx.covariance() + d1->vertexCovariance();
+            // SVector3 distanceVector(secvx-bestvx,secvy-bestvy,secvz-bestvz);
+            
+            // grand_dl[it] = ROOT::Math::Mag(distanceVector);
+            // grand_dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector))/grand_dl[it];
+            
+            // grand_dlos[it] = grand_dl[it]/grand_dlerror[it];
+            
+            // //Decay length 2D
+            // SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1),vtx.covariance(1,1),0,0,0);
+            // SVector6 v2(d1->vertexCovariance(0,0), d1->vertexCovariance(0,1),d1->vertexCovariance(1,1),0,0,0);
+            
+            // SMatrixSym3D sv1(v1);
+            // SMatrixSym3D sv2(v2);
+            
+            // SMatrixSym3D totalCov2D = sv1 + sv2;
+            // SVector3 distanceVector2D(secvx-bestvx,secvy-bestvy,0);
+            
+            // double gdl2D = ROOT::Math::Mag(distanceVector2D);
+            // double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/gdl2D;
+            
+            // grand_dlos2D[it] = gdl2D/gdl2Derror;
+
+
+#ifdef DEBUG
+cout<<"Reco loop 8"<<endl;
 #endif
 
-        if(saveHistogram_)
-        {
+            grand2_mass[it] = d2->mass();
+
+            double gpxd21 = gd21->px();
+            double gpyd21 = gd21->py();
+            double gpzd21 = gd21->pz();
+            double gpxd22 = gd22->px();
+            double gpyd22 = gd22->py();
+            double gpzd22 = gd22->pz();
+            
+            TVector3 gdauvec21(gpxd21,gpyd21,gpzd21);
+            TVector3 gdauvec22(gpxd22,gpyd22,gpzd22);
+            
+            auto gdau21 = gd21->get<reco::TrackRef>();
+            auto gdau22 = gd22->get<reco::TrackRef>();
+            
+#ifdef DEBUG
+cout<<"Reco loop 9"<<endl;
+#endif
+            //trk quality
+            
+            grand2_trkquality1[it] = gdau21->quality(reco::TrackBase::highPurity);
+            grand2_trkquality2[it] = gdau22->quality(reco::TrackBase::highPurity);
+            
+            //trk dEdx
+            grand2_H2dedx1[it] = -999.9;
+            grand2_H2dedx2[it] = -999.9;
+            
+            if(dEdxHandle1.isValid()){
+                const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
+                grand2_H2dedx1[it] = dEdxTrack[gdau21].dEdx();
+                grand2_H2dedx2[it] = dEdxTrack[gdau22].dEdx();
+            }
+            
+            grand2_T4dedx1[it] = -999.9;
+            grand2_T4dedx2[it] = -999.9;
+            
+            if(dEdxHandle2.isValid()){
+                const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
+                grand2_T4dedx1[it] = dEdxTrack[gdau21].dEdx();
+                grand2_T4dedx2[it] = dEdxTrack[gdau22].dEdx();
+            }
+            
+            //track pt
+            grand2_pt1[it] = gd21->pt();
+            grand2_pt2[it] = gd22->pt();
+            
+            //track momentum
+            grand2_p1[it] = gd21->p();
+            grand2_p2[it] = gd22->p();
+            
+            //track eta
+            grand2_eta1[it] = gd21->eta();
+            grand2_eta2[it] = gd22->eta();
+            
+            //track charge
+            grand2_charge1[it] = gd21->charge();
+            grand2_charge2[it] = gd22->charge();
+            
+            //track Chi2
+            grand2_trkChi1[it] = gdau21->normalizedChi2();
+            grand2_trkChi2[it] = gdau22->normalizedChi2();
+            
+            //track pT error
+            grand2_ptErr1[it] = gdau21->ptError();
+            grand2_ptErr2[it] = gdau22->ptError();
+            
+            //vertexCovariance 00-xError 11-y 22-z
+            secvz = d2->vz(); secvx = d2->vx(); secvy = d2->vy();
+            
+            //trkNHits
+            grand2_nhit1[it] = gdau21->numberOfValidHits();
+            grand2_nhit2[it] = gdau22->numberOfValidHits();
+            
+            //DCA
+            // math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
+            
+            double gdzbest21 = gdau21->dz(bestvtx);
+            double gdxybest21 = gdau21->dxy(bestvtx);
+            double gdzerror21 = sqrt(gdau21->dzError()*gdau21->dzError()+bestvzError*bestvzError);
+            double gdxyerror21 = sqrt(gdau21->d0Error()*gdau21->d0Error()+bestvxError*bestvyError);
+            
+            grand2_dzos1[it] = gdzbest21/gdzerror21;
+            grand2_dxyos1[it] = gdxybest21/gdxyerror21;
+            
+            double gdzbest22 = gdau22->dz(bestvtx);
+            double gdxybest22 = gdau22->dxy(bestvtx);
+            double gdzerror22 = sqrt(gdau22->dzError()*gdau22->dzError()+bestvzError*bestvzError);
+            double gdxyerror22 = sqrt(gdau22->d0Error()*gdau22->d0Error()+bestvxError*bestvyError);
+            
+            grand2_dzos2[it] = gdzbest22/gdzerror22;
+            grand2_dxyos2[it] = gdxybest22/gdxyerror22;
+            
+            //vtxChi2
+            grand2_vtxChi2[it] = d2->vertexChi2();
+            grand2_ndf[it] = d2->vertexNdof();
+            grand2_VtxProb[it] = TMath::Prob(grand2_vtxChi2[it],grand2_ndf[it]);
+            
+            //PAngle
+            TVector3 ptosvec2(secvx-bestvx,secvy-bestvy,secvz-bestvz);
+            TVector3 secvec2(d2->px(),d2->py(),d2->pz());
+            
+            TVector3 ptosvec2D2(secvx-bestvx,secvy-bestvy,0);
+            TVector3 secvec2D2(d2->px(),d2->py(),0);
+            
+            grand2_agl[it] = cos(secvec2.Angle(ptosvec2));
+            grand2_agl_abs[it] = secvec2.Angle(ptosvec2);
+            
+            grand2_agl2D[it] = cos(secvec2D2.Angle(ptosvec2D2));
+            grand2_agl2D_abs[it] = secvec2D2.Angle(ptosvec2D2);
+            
+            //Decay length 3D
+            typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
+            typedef ROOT::Math::SVector<double, 3> SVector3;
+            typedef ROOT::Math::SVector<double, 6> SVector6;
+            
+            SMatrixSym3D totalCov2 = vtx.covariance() + d2->vertexCovariance();
+            SVector3 distanceVector2(secvx-bestvx,secvy-bestvy,secvz-bestvz);
+            
+            grand2_dl[it] = ROOT::Math::Mag(distanceVector2);
+            grand2_dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov2, distanceVector2))/grand2_dl[it];
+            
+            grand2_dlos[it] = grand2_dl[it]/grand2_dlerror[it];
+            
+            //Decay length 2D
+            SVector6 v21(vtx.covariance(0,0), vtx.covariance(0,1),vtx.covariance(1,1),0,0,0);
+            SVector6 v22(d2->vertexCovariance(0,0), d2->vertexCovariance(0,1),d2->vertexCovariance(1,1),0,0,0);
+            
+            SMatrixSym3D sv21(v21);
+            SMatrixSym3D sv22(v22);
+            
+            SMatrixSym3D totalCov2D2 = sv21 + sv22;
+            SVector3 distanceVector2D2(secvx-bestvx,secvy-bestvy,0);
+            
+            double gdl2D2 = ROOT::Math::Mag(distanceVector2D2);
+            double gdl2Derror2 = sqrt(ROOT::Math::Similarity(totalCov2D2, distanceVector2D2))/gdl2D2;
+            
+            grand2_dlos2D[it] = gdl2D2/gdl2Derror2;
+        }
+
+        if(saveHistogram_) {
           for(unsigned int ipt=0;ipt<pTBins_.size()-1;ipt++)
-            for(unsigned int iy=0;iy<yBins_.size()-1;iy++)
-            {
-              if(pt[it]<pTBins_[ipt+1] && pt[it]>pTBins_[ipt] && y[it]<yBins_[iy+1] && y[it]>yBins_[iy])
-              {
+            for(unsigned int iy=0;iy<yBins_.size()-1;iy++) {
+              if(pt[it]<pTBins_[ipt+1] && pt[it]>pTBins_[ipt] && y[it]<yBins_[iy+1] && y[it]>yBins_[iy]) {
                 hMassVsMVA[iy][ipt]->Fill(mva[it],mass[it]);
 //                h3DDCAVsMVA[iy][ipt]->Fill(mva[it],dl[it]*sin(agl_abs[it]));
 //                h2DDCAVsMVA[iy][ipt]->Fill(mva[it],dl2D[it]*sin(agl2D_abs[it]));
@@ -1121,115 +1387,97 @@ cout << "Done reco single iter" << endl;
               }
             }
         }
-
     }
 #ifdef DEBUG
-cout << "Fill reco done" << endl;
+cout<<"Done reco loop"<<endl;
 #endif
 }
 
-void
-VertexCompositeTreeProducer2::fillGEN(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void VertexCompositeTreeProducer2::fillGEN(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     edm::Handle<reco::GenParticleCollection> genpars;
     iEvent.getByToken(tok_genParticle_,genpars);
-
     candSize_gen = 0;
     for(unsigned it=0; it<genpars->size(); ++it){
+      const reco::GenParticle & trk = (*genpars)[it];
+      int id = trk.pdgId();
+      if(fabs(id)!=PID_) continue; //check is target
+      if(decayInGen_ && !(trk.numberOfDaughters()==2 || trk.numberOfDaughters()==3) ) continue; //check 2-pron decay if target decays in Gen
 
-        const reco::GenParticle & trk = (*genpars)[it];
+      candSize_gen+=1;
+      mass_gen[candSize_gen-1] = trk.mass();
+      pt_gen[candSize_gen-1] = trk.pt();
+      eta_gen[candSize_gen-1] = trk.eta();
+      phi_gen[candSize_gen-1] = trk.phi();
+      status_gen[candSize_gen-1] = trk.status();
+      idmom[candSize_gen-1] = -77;
+      y_gen[candSize_gen-1] = trk.rapidity();
 
-        int id = trk.pdgId();
-	//std::cout << PID_ << ": " << trk.numberOfDaughters() << std::endl;
-	//for( unsigned int idx = 0; idx < trk.numberOfDaughters(); ++idx){
-	//	std::cout << trk.daughter(idx)->pdgId() << std::endl;
-	//	for( unsigned int idx2 = 0; idx2 < trk.daughter(idx)->numberOfDaughters(); ++idx2){
-	//		std::cout << "    >" << trk.daughter(idx)->daughter(idx2)->pdgId() << std::endl;
-	//	}
-	//}
-        if(fabs(id)!=PID_) continue; //check is target
-        if(decayInGen_ && !(trk.numberOfDaughters()==2 || trk.numberOfDaughters()==3) ) continue; //check 2-pron decay if target decays in Gen
+      if(trk.numberOfMothers()!=0) {
+          const reco::Candidate * mom = trk.mother();
+          idmom[candSize_gen-1] = mom->pdgId();
+      }
 
-        candSize_gen+=1;
+      if(!decayInGen_) continue;
+      int idx0=0, idx1=1, idx2=2;
+      if(twoLayerDecay_){
+        if(trk.daughter(0)->numberOfDaughters() >1){ idx0 = 0; idx1 = 1; idx2 = 2;}
+        if(trk.daughter(1)->numberOfDaughters() >1){ idx0 = 1; idx1 = 0; idx2 = 2;}
+        if(balancedTree_ && !(trk.daughter(0)->numberOfDaughters() ==2 && trk.daughter(1)->numberOfDaughters() == 2) ) continue;
+        if(trk.daughter(2) != nullptr) if(trk.daughter(2)->numberOfDaughters() >1){ idx0 = 2; idx1 = 0; idx2 = 1;}
+	      }
+      const reco::Candidate * Dd1 = trk.daughter(idx0);
+      const reco::Candidate * Dd2 = trk.daughter(idx1);
+      const reco::Candidate * Dd3 = trk.daughter(idx2);
 
-        mass_gen[candSize_gen-1] = trk.mass();
-        pt_gen[candSize_gen-1] = trk.pt();
-        eta_gen[candSize_gen-1] = trk.eta();
-        phi_gen[candSize_gen-1] = trk.phi();
-        status_gen[candSize_gen-1] = trk.status();
-        idmom[candSize_gen-1] = -77;
-        y_gen[candSize_gen-1] = trk.rapidity();
+      mass1_gen[candSize_gen-1] = fabs(Dd1->mass());
+      pt1_gen[candSize_gen-1] = fabs(Dd1->pt());
+      eta1_gen[candSize_gen-1] = Dd1->eta();
+      phi1_gen[candSize_gen-1] = Dd1->phi();
+      y1_gen[candSize_gen-1] = Dd1->y();
 
-        if(trk.numberOfMothers()!=0) {
-            const reco::Candidate * mom = trk.mother();
-            idmom[candSize_gen-1] = mom->pdgId();
+      mass2_gen[candSize_gen-1] = fabs(Dd2->mass());
+      pt2_gen[candSize_gen-1] = fabs(Dd2->pt());
+      eta2_gen[candSize_gen-1] = Dd2->eta();
+      phi2_gen[candSize_gen-1] = Dd2->phi();
+      y2_gen[candSize_gen-1] = Dd2->y();
+      if(twoLayerDecay_){
+        const reco::Candidate * Dd11 = Dd1->daughter(0);
+        const reco::Candidate * Dd12 = Dd1->daughter(1);
+
+        mass11_gen[candSize_gen-1] = fabs(Dd11->mass());
+        pt11_gen[candSize_gen-1] = fabs(Dd11->pt());
+        eta11_gen[candSize_gen-1] = Dd11->eta();
+        phi11_gen[candSize_gen-1] = Dd11->phi();
+
+        mass12_gen[candSize_gen-1] = fabs(Dd12->mass());
+        pt12_gen[candSize_gen-1] = fabs(Dd12->pt());
+        eta12_gen[candSize_gen-1] = Dd12->eta();
+        phi12_gen[candSize_gen-1] = Dd12->phi();
+        if(balancedTree_){
+          const reco::Candidate * Dd21 = Dd2->daughter(0);
+          const reco::Candidate * Dd22 = Dd2->daughter(1);
+
+          mass21_gen[candSize_gen-1] = fabs(Dd21->mass());
+          pt21_gen[candSize_gen-1] = fabs(Dd21->pt());
+          eta21_gen[candSize_gen-1] = Dd21->eta();
+          phi21_gen[candSize_gen-1] = Dd21->phi();
+
+          mass22_gen[candSize_gen-1] = fabs(Dd22->mass());
+          pt22_gen[candSize_gen-1] = fabs(Dd22->pt());
+          eta22_gen[candSize_gen-1] = Dd22->eta();
+          phi22_gen[candSize_gen-1] = Dd22->phi();
+          }
         }
-
-        if(!decayInGen_) continue;
-	int idx0=0, idx1=1, idx2=2;
-
-
-	// Put the two layer decay daughter to first
-	//std::cout << trk.daughter(0)->pdgId() << ": " << trk.daughter(0)->numberOfDaughters() << ", " << trk.daughter(1)->pdgId() << ": " << trk.daughter(1)->numberOfDaughters() << std::endl; 
-	if(twoLayerDecay_){
-		if(trk.daughter(0)->numberOfDaughters() >1){ idx0 = 0; idx1 = 1; idx2 = 2;}
-		if(trk.daughter(1)->numberOfDaughters() >1){ idx0 = 1; idx1 = 0; idx2 = 2;}
-		if(balancedTree_ && !(trk.daughter(0)->numberOfDaughters() ==2 && trk.daughter(1)->numberOfDaughters() == 2) ) continue;
-		if(trk.daughter(2) != nullptr) if(trk.daughter(2)->numberOfDaughters() >1){ idx0 = 2; idx1 = 0; idx2 = 1;}
-	}
-        const reco::Candidate * Dd1 = trk.daughter(idx0);
-        const reco::Candidate * Dd2 = trk.daughter(idx1);
-        const reco::Candidate * Dd3 = trk.daughter(idx2);
-
-        mass1_gen[candSize_gen-1] = fabs(Dd1->mass());
-        pt1_gen[candSize_gen-1] = fabs(Dd1->pt());
-        eta1_gen[candSize_gen-1] = Dd1->eta();
-        phi1_gen[candSize_gen-1] = Dd1->phi();
-        y1_gen[candSize_gen-1] = Dd1->y();
-
-        mass2_gen[candSize_gen-1] = fabs(Dd2->mass());
-        pt2_gen[candSize_gen-1] = fabs(Dd2->pt());
-        eta2_gen[candSize_gen-1] = Dd2->eta();
-        phi2_gen[candSize_gen-1] = Dd2->phi();
-        y2_gen[candSize_gen-1] = Dd2->y();
-	if(twoLayerDecay_){
-        	const reco::Candidate * Dd11 = Dd1->daughter(0);
-        	const reco::Candidate * Dd12 = Dd1->daughter(1);
-
-        	mass11_gen[candSize_gen-1] = fabs(Dd11->mass());
-        	pt11_gen[candSize_gen-1] = fabs(Dd11->pt());
-        	eta11_gen[candSize_gen-1] = Dd11->eta();
-        	phi11_gen[candSize_gen-1] = Dd11->phi();
-
-        	mass12_gen[candSize_gen-1] = fabs(Dd12->mass());
-        	pt12_gen[candSize_gen-1] = fabs(Dd12->pt());
-        	eta12_gen[candSize_gen-1] = Dd12->eta();
-        	phi12_gen[candSize_gen-1] = Dd12->phi();
-		if(balancedTree_){
-        		const reco::Candidate * Dd21 = Dd2->daughter(0);
-        		const reco::Candidate * Dd22 = Dd2->daughter(1);
-
-        		mass21_gen[candSize_gen-1] = fabs(Dd21->mass());
-        		pt21_gen[candSize_gen-1] = fabs(Dd21->pt());
-        		eta21_gen[candSize_gen-1] = Dd21->eta();
-        		phi21_gen[candSize_gen-1] = Dd21->phi();
-
-        		mass22_gen[candSize_gen-1] = fabs(Dd22->mass());
-        		pt22_gen[candSize_gen-1] = fabs(Dd22->pt());
-        		eta22_gen[candSize_gen-1] = Dd22->eta();
-        		phi22_gen[candSize_gen-1] = Dd22->phi();
-		}
-	}
-	if(threeProngDecay_){
-        	mass3_gen[candSize_gen-1] = fabs(Dd3->mass());
-        	pt3_gen[candSize_gen-1] = fabs(Dd3->pt());
-        	eta3_gen[candSize_gen-1] = Dd3->eta();
-        	phi3_gen[candSize_gen-1] = Dd3->phi();
-        	y3_gen[candSize_gen-1] = Dd3->phi();
-        	iddau3[candSize_gen-1] = Dd3->pdgId();
-	}
-
-        iddau1[candSize_gen-1] = fabs(Dd1->pdgId());
-        iddau2[candSize_gen-1] = fabs(Dd2->pdgId());
+      if(threeProngDecay_){
+        mass3_gen[candSize_gen-1] = fabs(Dd3->mass());
+        pt3_gen[candSize_gen-1] = fabs(Dd3->pt());
+        eta3_gen[candSize_gen-1] = Dd3->eta();
+        phi3_gen[candSize_gen-1] = Dd3->phi();
+        y3_gen[candSize_gen-1] = Dd3->phi();
+        iddau3[candSize_gen-1] = Dd3->pdgId();
+      	}
+      iddau1[candSize_gen-1] = fabs(Dd1->pdgId());
+      iddau2[candSize_gen-1] = fabs(Dd2->pdgId());
     }
 }
 
@@ -1362,8 +1610,7 @@ VertexCompositeTreeProducer2::initTree()
         VertexCompositeNtuple->Branch("2DDecayLengthSignificance",&dlos2D,"2DDecayLengthSignificance[candSize]/F");
         VertexCompositeNtuple->Branch("2DDecayLength",&dl2D,"2DDecayLength[candSize]/F");
     
-        if(doGenMatching_)
-        {
+        if(doGenMatching_) {
             VertexCompositeNtuple->Branch("isSwap",&isSwap,"isSwap[candSize]/O");
             VertexCompositeNtuple->Branch("idmom_reco",&idmom_reco,"idmom_reco[candSize]/I");
             VertexCompositeNtuple->Branch("idBAnc_reco",&idBAnc_reco,"idBAnc_reco[candSize]/I");
@@ -1380,48 +1627,47 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("matchgen_D0charge",&gen_D0charge_, "gen_D0charge[candSize]F");
             VertexCompositeNtuple->Branch("matchgen_D0pdgId",&gen_D0pdgId_, "gen_D0pdgId[candSize]I");
             if(twoLayerDecay_){
-    					VertexCompositeNtuple->Branch("matchGen_D0pT",&matchGen_D0pT_, "matchGen_D0pT[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0eta",&matchGen_D0eta_, "matchGen_D0eta[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0phi",&matchGen_D0phi_, "matchGen_D0phi[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0mass",&matchGen_D0mass_, "matchGen_D0mass[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0y",&matchGen_D0y_, "matchGen_D0y[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0charge",&matchGen_D0charge_, "matchGen_D0charge[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0pdgId",&matchGen_D0pdgId_, "matchGen_D0pdgId[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_V0pT",&matchGen_V0pT_, "matchGen_V0pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0eta",&matchGen_V0eta_, "matchGen_V0eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0phi",&matchGen_V0phi_, "matchGen_V0phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0mass",&matchGen_V0mass_, "matchGen_V0mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0y",&matchGen_V0y_, "matchGen_V0y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0charge",&matchGen_V0charge_, "matchGen_V0charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0pdgId",&matchGen_V0pdgId_, "matchGen_V0pdgId[candSize]I");
 
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_pT",&matchGen_D0Dau1_pT_, "matchGen_D0Dau1_pT[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_eta",&matchGen_D0Dau1_eta_, "matchGen_D0Dau1_eta[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_phi",&matchGen_D0Dau1_phi_, "matchGen_D0Dau1_phi[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_mass",&matchGen_D0Dau1_mass_, "matchGen_D0Dau1_mass[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_y",&matchGen_D0Dau1_y_, "matchGen_D0Dau1_y[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_charge",&matchGen_D0Dau1_charge_, "matchGen_D0Dau1_charge[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau1_pdgId",&matchGen_D0Dau1_pdgId_, "matchGen_D0Dau1_pdgId[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_pT",&matchGen_V0Dau1_pT_, "matchGen_V0Dau1_pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_eta",&matchGen_V0Dau1_eta_, "matchGen_V0Dau1_eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_phi",&matchGen_V0Dau1_phi_, "matchGen_V0Dau1_phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_mass",&matchGen_V0Dau1_mass_, "matchGen_V0Dau1_mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_y",&matchGen_V0Dau1_y_, "matchGen_V0Dau1_y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_charge",&matchGen_V0Dau1_charge_, "matchGen_V0Dau1_charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau1_pdgId",&matchGen_V0Dau1_pdgId_, "matchGen_V0Dau1_pdgId[candSize]I");
 
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_pT",&matchGen_D0Dau2_pT_, "matchGen_D0Dau2_pT[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_eta",&matchGen_D0Dau2_eta_, "matchGen_D0Dau2_eta[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_phi",&matchGen_D0Dau2_phi_, "matchGen_D0Dau2_phi[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_mass",&matchGen_D0Dau2_mass_, "matchGen_D0Dau2_mass[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_y",&matchGen_D0Dau2_y_, "matchGen_D0Dau2_y[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_charge",&matchGen_D0Dau2_charge_, "matchGen_D0Dau2_charge[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D0Dau2_pdgId",&matchGen_D0Dau2_pdgId_, "matchGen_D0Dau2_pdgId[candSize]I");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_pT",&matchGen_V0Dau2_pT_, "matchGen_V0Dau2_pT[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_eta",&matchGen_V0Dau2_eta_, "matchGen_V0Dau2_eta[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_phi",&matchGen_V0Dau2_phi_, "matchGen_V0Dau2_phi[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_mass",&matchGen_V0Dau2_mass_, "matchGen_V0Dau2_mass[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_y",&matchGen_V0Dau2_y_, "matchGen_V0Dau2_y[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_charge",&matchGen_V0Dau2_charge_, "matchGen_V0Dau2_charge[candSize]F");
+    					VertexCompositeNtuple->Branch("matchGen_V0Dau2_pdgId",&matchGen_V0Dau2_pdgId_, "matchGen_V0Dau2_pdgId[candSize]I");
 
-    					VertexCompositeNtuple->Branch("matchGen_D1pT",&matchGen_D1pT_, "matchGen_D1pT[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D1eta",&matchGen_D1eta_, "matchGen_D1eta[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D1phi",&matchGen_D1phi_, "matchGen_D1phi[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D1mass",&matchGen_D1mass_, "matchGen_D1mass[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D1y",&matchGen_D1y_, "matchGen_D1y[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D1charge",&matchGen_D1charge_, "matchGen_D1charge[candSize]F");
-    					VertexCompositeNtuple->Branch("matchGen_D1pdgId",&matchGen_D1pdgId_, "matchGen_D1pdgId[candSize]I");
-    					VertexCompositeNtuple->Branch("matchGen_D1decayLength2D_",&matchGen_D1decayLength2D_, "matchGen_D1decayLength2D_[candSize]I");
-    					VertexCompositeNtuple->Branch("matchGen_D1decayLength3D_",&matchGen_D1decayLength3D_, "matchGen_D1decayLength3D_[candSize]I");
-    					VertexCompositeNtuple->Branch("matchGen_D1angle2D_",&matchGen_D1angle2D_, "matchGen_D1angle2D_[candSize]I");
-    					VertexCompositeNtuple->Branch("matchGen_D1angle3D_",&matchGen_D1angle3D_, "matchGen_D1angle3D_[candSize]I");
-    					VertexCompositeNtuple->Branch("matchGen_D1ancestorId_",&matchGen_D1ancestorId_, "matchGen_D1ancestorId_[candSize]I");
-    					VertexCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1pT",&matchGen_D1pT_, "matchGen_D1pT[candSize]F");
+    					// VertexCompositeNtuple->Branch("matchGen_D1eta",&matchGen_D1eta_, "matchGen_D1eta[candSize]F");
+    					// VertexCompositeNtuple->Branch("matchGen_D1phi",&matchGen_D1phi_, "matchGen_D1phi[candSize]F");
+    					// VertexCompositeNtuple->Branch("matchGen_D1mass",&matchGen_D1mass_, "matchGen_D1mass[candSize]F");
+    					// VertexCompositeNtuple->Branch("matchGen_D1y",&matchGen_D1y_, "matchGen_D1y[candSize]F");
+    					// VertexCompositeNtuple->Branch("matchGen_D1charge",&matchGen_D1charge_, "matchGen_D1charge[candSize]F");
+    					// VertexCompositeNtuple->Branch("matchGen_D1pdgId",&matchGen_D1pdgId_, "matchGen_D1pdgId[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1decayLength2D_",&matchGen_D1decayLength2D_, "matchGen_D1decayLength2D_[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1decayLength3D_",&matchGen_D1decayLength3D_, "matchGen_D1decayLength3D_[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1angle2D_",&matchGen_D1angle2D_, "matchGen_D1angle2D_[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1angle3D_",&matchGen_D1angle3D_, "matchGen_D1angle3D_[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1ancestorId_",&matchGen_D1ancestorId_, "matchGen_D1ancestorId_[candSize]I");
+    					// VertexCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]I");
             }
         }
         
-        if(doGenMatchingTOF_)
-        {
+        if(doGenMatchingTOF_) {
           VertexCompositeNtuple->Branch("PIDD1",&pid1,"PIDD1[candSize]/I");
           VertexCompositeNtuple->Branch("PIDD2",&pid1,"PIDD2[candSize]/I");
           VertexCompositeNtuple->Branch("TOFD1",&tof1,"TOFD1[candSize]/F");
@@ -1429,8 +1675,7 @@ VertexCompositeTreeProducer2::initTree()
         }
 
         //daugther & grand daugther info
-        if(twoLayerDecay_)
-        {
+        if(twoLayerDecay_) {
             VertexCompositeNtuple->Branch("massDaugther1",&grand_mass,"massDaugther1[candSize]/F");
             VertexCompositeNtuple->Branch("pTD1",&pt1,"pTD1[candSize]/F");
             VertexCompositeNtuple->Branch("EtaD1",&eta1,"EtaD1[candSize]/F");
@@ -1473,6 +1718,25 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("EtaGrandD2",&grand_eta2,"EtaGrandD2[candSize]/F");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD1",&grand_H2dedx1,"dedxHarmonic2GrandD1[candSize]/F");
             VertexCompositeNtuple->Branch("dedxHarmonic2GrandD2",&grand_H2dedx2,"dedxHarmonic2GrandD2[candSize]/F");
+            if(balancedTree_){
+              VertexCompositeNtuple->Branch("massDaugther2",&grand2_mass,"massDaugther2[candSize]/F");
+              VertexCompositeNtuple->Branch("zDCASignificanceGrand2Daugther1",&grand2_dzos1,"zDCASignificanceGrand2Daugther1[candSize]/F");
+              VertexCompositeNtuple->Branch("zDCASignificanceGrand2Daugther2",&grand2_dzos2,"zDCASignificanceGrand2Daugther2[candSize]/F");
+              VertexCompositeNtuple->Branch("xyDCASignificanceGrand2Daugther1",&grand2_dxyos1,"xyDCASignificanceGrand2Daugther1[candSize]/F");
+              VertexCompositeNtuple->Branch("xyDCASignificanceGrand2Daugther2",&grand2_dxyos2,"xyDCASignificanceGrand2Daugther2[candSize]/F");
+              VertexCompositeNtuple->Branch("NHitGrand2D1",&grand2_nhit1,"NHitGrand2D1[candSize]/F");
+              VertexCompositeNtuple->Branch("NHitGrand2D2",&grand2_nhit2,"NHitGrand2D2[candSize]/F");
+              VertexCompositeNtuple->Branch("HighPurityGrand2Daugther1",&grand2_trkquality1,"HighPurityGrand2Daugther1[candSize]/O");
+              VertexCompositeNtuple->Branch("HighPurityGrand2Daugther2",&grand2_trkquality2,"HighPurityGrand2Daugther2[candSize]/O");
+              VertexCompositeNtuple->Branch("pTGrand2D1",&grand2_pt1,"pTGrand2D1[candSize]/F");
+              VertexCompositeNtuple->Branch("pTGrand2D2",&grand2_pt2,"pTGrand2D2[candSize]/F");
+              VertexCompositeNtuple->Branch("pTerrGrand2D1",&grand2_ptErr1,"pTerrGrand2D1[candSize]/F");
+              VertexCompositeNtuple->Branch("pTerrGrand2D2",&grand2_ptErr2,"pTerrGrand2D2[candSize]/F");
+              VertexCompositeNtuple->Branch("EtaGrand2D1",&grand2_eta1,"EtaGrand2D1[candSize]/F");
+              VertexCompositeNtuple->Branch("EtaGrand2D2",&grand2_eta2,"EtaGrand2D2[candSize]/F");
+              VertexCompositeNtuple->Branch("dedxHarmonic2Grand2D1",&grand2_H2dedx1,"dedxHarmonic2Grand2D1[candSize]/F");
+              VertexCompositeNtuple->Branch("dedxHarmonic2Grand2D2",&grand2_H2dedx2,"dedxHarmonic2Grand2D2[candSize]/F");
+            }
         }
         else
         {

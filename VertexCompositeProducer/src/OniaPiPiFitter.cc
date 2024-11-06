@@ -286,6 +286,19 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 	if(!oniaTree->isValid()) continue;
         oniaTree->movePointerToTheTop();
 
+    	  vector<RefCountedKinematicParticle> rhoDaus;
+        float chi1 = 0.;
+        float ndf1 = 0.;
+        rhoDaus.push_back(pFactory.particle(*trk1TransTkPtr, piMassB, chi1, ndf1, piMassB_sigma));
+        rhoDaus.push_back(pFactory.particle(*trk2TransTkPtr, piMassB, chi1, ndf1, piMassB_sigma));
+        KinematicParticleVertexFitter kpvFitter2;
+        RefCountedKinematicTree rhoTree =  kpvFitter2.fit(rhoDaus);
+	if(!rhoTree->isValid()) continue;
+        rhoTree->movePointerToTheTop();
+        RefCountedKinematicParticle rho = rhoTree->currentParticle();
+        if(!rho->currentState().isValid()) continue;
+        RefCountedKinematicVertex rhoTopVertex = rhoTree->currentDecayVertex();
+
         // Onia + trk + trk fit
         float chi2 = 0.;
         float ndf2 = 0.;
@@ -334,9 +347,14 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         KinematicParameters ottTrkCand1KP = ottTrkCand1->currentState().kinematicParameters();
         KinematicParameters ottTrkCand2KP = ottTrkCand2->currentState().kinematicParameters();
 
+
         GlobalVector ottTotalP = GlobalVector (ottCand->currentState().globalMomentum().x(),
                                              ottCand->currentState().globalMomentum().y(),
                                              ottCand->currentState().globalMomentum().z());
+
+        GlobalVector rhoTotalP = GlobalVector (rho->currentState().globalMomentum().x(),
+                                             rho->currentState().globalMomentum().y(),
+                                             rho->currentState().globalMomentum().z());
 
         GlobalVector ottOniaTotalP = GlobalVector(ottOniaCandKP.momentum().x(),ottOniaCandKP.momentum().y(),ottOniaCandKP.momentum().z());
         GlobalVector ottTrk1TotalP = GlobalVector(ottTrkCand1KP.momentum().x(),ottTrkCand1KP.momentum().y(),ottTrkCand1KP.momentum().z());
@@ -345,9 +363,11 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         double ottOniaTotalE = sqrt( ottOniaTotalP.mag2() + oniaMass*oniaMass  );
         double trk1TotalE = sqrt( ottTrk1TotalP.mag2() + piMassBSquared );
         double trk2TotalE = sqrt( ottTrk2TotalP.mag2() + piMassBSquared );
+        double rhoTotalE = trk1TotalE + trk2TotalE ;
         double ottTotalE = ottOniaTotalE + trk1TotalE + trk2TotalE ;
 
         const Particle::LorentzVector ottP4(ottTotalP.x(), ottTotalP.y(), ottTotalP.z(), ottTotalE);
+        const Particle::LorentzVector rhoP4(rhoTotalP.x(), rhoTotalP.y(), rhoTotalP.z(), rhoTotalE);
 
         Particle::Point ottVtx((*ottTopVertex).position().x(), (*ottTopVertex).position().y(), (*ottTopVertex).position().z());
         std::vector<double> bVtxEVec;
@@ -359,9 +379,25 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         bVtxEVec.push_back( ottTopVertex->error().czz() );
         SMatrixSym3D bVtxCovMatrix(bVtxEVec.begin(), bVtxEVec.end());
         const Vertex::CovarianceMatrix bVtxCov(bVtxCovMatrix);
+
+        Particle::Point rhoVtx((*rhoTopVertex).position().x(), (*rhoTopVertex).position().y(), (*rhoTopVertex).position().z());
+        std::vector<double> rhoVtxEVec;
+        rhoVtxEVec.push_back( rhoTopVertex->error().cxx() );
+        rhoVtxEVec.push_back( rhoTopVertex->error().cyx() );
+        rhoVtxEVec.push_back( rhoTopVertex->error().cyy() );
+        rhoVtxEVec.push_back( rhoTopVertex->error().czx() );
+        rhoVtxEVec.push_back( rhoTopVertex->error().czy() );
+        rhoVtxEVec.push_back( rhoTopVertex->error().czz() );
+        SMatrixSym3D rhoVtxCovMatrix(rhoVtxEVec.begin(), rhoVtxEVec.end());
+        const Vertex::CovarianceMatrix rhoVtxCov(rhoVtxCovMatrix);
+
         double bVtxChi2(ottTopVertex->chiSquared());
         double bVtxNdof(ottTopVertex->degreesOfFreedom());
         double bNormalizedChi2 = bVtxChi2/bVtxNdof;
+
+        double rhoVtxChi2(rhoTopVertex->chiSquared());
+        double rhoVtxNdof(rhoTopVertex->degreesOfFreedom());
+        double rhoNormalizedChi2 = rhoVtxChi2/rhoVtxNdof;
 
         double bRVtxMag = 99999.0;
         double bLVtxMag = 99999.0;
@@ -413,10 +449,16 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         AddFourMomenta addp4;
 
         VertexCompositeCandidate* theB = 0;
+        CompositeCandidate* theRho = 0;
         theB = new VertexCompositeCandidate(0, ottP4, ottVtx, bVtxCov, bVtxChi2, bVtxNdof);
+        theRho = new VertexCompositeCandidate(0, rhoP4, rhoVtx, rhoVtxCov, rhoVtxChi2, rhoVtxNdof );
+        theRho->addDaughter(pion1candidate);
+        theRho->addDaughter(pion2candidate);
         theB->addDaughter(theOnia);
-        theB->addDaughter(pion1candidate);
-        theB->addDaughter(pion2candidate);
+        theB->addDaughter(*(reco::Candidate*)theRho);
+
+        // theB->addDaughter(pion1candidate);
+        // theB->addDaughter(pion2candidate);
 
         // if(theOnia.pdgId()<0) {theB->setPdgId(521); theB->setCharge(theTrackRefs[trdx]->charge());}
         // else if(theOnia.pdgId()>0) {theB->setPdgId(-521); theB->setCharge(theTrackRefs[trdx]->charge());}

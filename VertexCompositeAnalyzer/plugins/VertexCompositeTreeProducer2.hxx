@@ -84,6 +84,7 @@
 
 using namespace std;
 
+
 class VertexCompositeTreeProducer2 : public edm::one::EDAnalyzer<> {
 public:
   explicit VertexCompositeTreeProducer2(const edm::ParameterSet&);
@@ -258,6 +259,19 @@ private:
     float grand_agl2D_abs[MAXCAN];
     float grand_dlos2D[MAXCAN];
 
+    float grand2_mass[MAXCAN];
+    float grand2_VtxProb[MAXCAN];
+    float grand2_dlos[MAXCAN];
+    float grand2_dl[MAXCAN];
+    float grand2_dlerror[MAXCAN];
+    float grand2_agl[MAXCAN];
+    float grand2_vtxChi2[MAXCAN];
+    float grand2_ndf[MAXCAN];
+    float grand2_agl_abs[MAXCAN];
+    float grand2_agl2D[MAXCAN];
+    float grand2_agl2D_abs[MAXCAN];
+    float grand2_dlos2D[MAXCAN];
+
     //dau info
     float dzos1[MAXCAN];
     float dzos2[MAXCAN];
@@ -330,6 +344,31 @@ private:
     float grand_T4dedx2[MAXCAN];
     float grand_trkChi1[MAXCAN];
     float grand_trkChi2[MAXCAN];
+
+    float grand2_dzos1[MAXCAN];
+    float grand2_dzos2[MAXCAN];
+    float grand2_dxyos1[MAXCAN];
+    float grand2_dxyos2[MAXCAN];
+    float grand2_nhit1[MAXCAN];
+    float grand2_nhit2[MAXCAN];
+    bool grand2_trkquality1[MAXCAN];
+    bool grand2_trkquality2[MAXCAN];
+    float grand2_pt1[MAXCAN];
+    float grand2_pt2[MAXCAN];
+    float grand2_ptErr1[MAXCAN];
+    float grand2_ptErr2[MAXCAN];
+    float grand2_p1[MAXCAN];
+    float grand2_p2[MAXCAN];
+    float grand2_eta1[MAXCAN];
+    float grand2_eta2[MAXCAN];
+    int grand2_charge1[MAXCAN];
+    int grand2_charge2[MAXCAN];
+    float grand2_H2dedx1[MAXCAN];
+    float grand2_H2dedx2[MAXCAN];
+    float grand2_T4dedx1[MAXCAN];
+    float grand2_T4dedx2[MAXCAN];
+    float grand2_trkChi1[MAXCAN];
+    float grand2_trkChi2[MAXCAN];
     
     //dau muon info
     bool  onestmuon1[MAXCAN];
@@ -430,43 +469,43 @@ private:
     int iddau2[MAXCAN];
     int iddau3[MAXCAN];
 
-		float matchGen_D0pT_[MAXCAN];
-		float matchGen_D0eta_[MAXCAN];
-		float matchGen_D0phi_[MAXCAN];
-		float matchGen_D0mass_[MAXCAN];
-		float matchGen_D0y_[MAXCAN];
-		int matchGen_D0charge_[MAXCAN];
-		int matchGen_D0pdgId_[MAXCAN];
+		float matchGen_V0pT_[MAXCAN];
+		float matchGen_V0eta_[MAXCAN];
+		float matchGen_V0phi_[MAXCAN];
+		float matchGen_V0mass_[MAXCAN];
+		float matchGen_V0y_[MAXCAN];
+		int matchGen_V0charge_[MAXCAN];
+		int matchGen_V0pdgId_[MAXCAN];
 
-		float matchGen_D0Dau1_pT_[MAXCAN];
-		float matchGen_D0Dau1_eta_[MAXCAN];
-		float matchGen_D0Dau1_phi_[MAXCAN];
-		float matchGen_D0Dau1_mass_[MAXCAN];
-		float matchGen_D0Dau1_y_[MAXCAN];
-		int matchGen_D0Dau1_charge_[MAXCAN];
-		int matchGen_D0Dau1_pdgId_[MAXCAN];
+		float matchGen_V0Dau1_pT_[MAXCAN];
+		float matchGen_V0Dau1_eta_[MAXCAN];
+		float matchGen_V0Dau1_phi_[MAXCAN];
+		float matchGen_V0Dau1_mass_[MAXCAN];
+		float matchGen_V0Dau1_y_[MAXCAN];
+		int matchGen_V0Dau1_charge_[MAXCAN];
+		int matchGen_V0Dau1_pdgId_[MAXCAN];
 
-		float matchGen_D0Dau2_pT_[MAXCAN];
-		float matchGen_D0Dau2_eta_[MAXCAN];
-		float matchGen_D0Dau2_phi_[MAXCAN];
-		float matchGen_D0Dau2_mass_[MAXCAN];
-		float matchGen_D0Dau2_y_[MAXCAN];
-		int matchGen_D0Dau2_charge_[MAXCAN];
-		int matchGen_D0Dau2_pdgId_[MAXCAN];
+		float matchGen_V0Dau2_pT_[MAXCAN];
+		float matchGen_V0Dau2_eta_[MAXCAN];
+		float matchGen_V0Dau2_phi_[MAXCAN];
+		float matchGen_V0Dau2_mass_[MAXCAN];
+		float matchGen_V0Dau2_y_[MAXCAN];
+		int matchGen_V0Dau2_charge_[MAXCAN];
+		int matchGen_V0Dau2_pdgId_[MAXCAN];
 
-		float matchGen_D1pT_[MAXCAN];
-		float matchGen_D1eta_[MAXCAN];
-		float matchGen_D1phi_[MAXCAN];
-		float matchGen_D1mass_[MAXCAN];
-		float matchGen_D1y_[MAXCAN];
-		float matchGen_D1decayLength2D_[MAXCAN];
-		float matchGen_D1decayLength3D_[MAXCAN];
-		float matchGen_D1angle2D_[MAXCAN];
-		float matchGen_D1angle3D_[MAXCAN];
-		int matchGen_D1ancestorId_[MAXCAN];
-		int matchGen_D1ancestorFlavor_[MAXCAN];
-		int matchGen_D1charge_[MAXCAN];
-		int matchGen_D1pdgId_[MAXCAN];
+		// float matchGen_D1pT_[MAXCAN];
+		// float matchGen_D1eta_[MAXCAN];
+		// float matchGen_D1phi_[MAXCAN];
+		// float matchGen_D1mass_[MAXCAN];
+		// float matchGen_D1y_[MAXCAN];
+		// float matchGen_D1decayLength2D_[MAXCAN];
+		// float matchGen_D1decayLength3D_[MAXCAN];
+		// float matchGen_D1angle2D_[MAXCAN];
+		// float matchGen_D1angle3D_[MAXCAN];
+		// int matchGen_D1ancestorId_[MAXCAN];
+		// int matchGen_D1ancestorFlavor_[MAXCAN];
+		// int matchGen_D1charge_[MAXCAN];
+		// int matchGen_D1pdgId_[MAXCAN];
 
 		float gen_D0pT_[MAXCAN];
 		float gen_D0eta_[MAXCAN];
@@ -476,29 +515,29 @@ private:
 		int gen_D0charge_[MAXCAN];
 		int gen_D0pdgId_[MAXCAN];
 
-		float gen_D0Dau1_pT_[MAXCAN];
-		float gen_D0Dau1_eta_[MAXCAN];
-		float gen_D0Dau1_phi_[MAXCAN];
-		float gen_D0Dau1_mass_[MAXCAN];
-		float gen_D0Dau1_y_[MAXCAN];
-		int gen_D0Dau1_charge_[MAXCAN];
-		int gen_D0Dau1_pdgId_[MAXCAN];
+		// float gen_D0Dau1_pT_[MAXCAN];
+		// float gen_D0Dau1_eta_[MAXCAN];
+		// float gen_D0Dau1_phi_[MAXCAN];
+		// float gen_D0Dau1_mass_[MAXCAN];
+		// float gen_D0Dau1_y_[MAXCAN];
+		// int gen_D0Dau1_charge_[MAXCAN];
+		// int gen_D0Dau1_pdgId_[MAXCAN];
 
-		float gen_D0Dau2_pT_[MAXCAN];
-		float gen_D0Dau2_eta_[MAXCAN];
-		float gen_D0Dau2_phi_[MAXCAN];
-		float gen_D0Dau2_mass_[MAXCAN];
-		float gen_D0Dau2_y_[MAXCAN];
-		int gen_D0Dau2_charge_[MAXCAN];
-		int gen_D0Dau2_pdgId_[MAXCAN];
+		// float gen_D0Dau2_pT_[MAXCAN];
+		// float gen_D0Dau2_eta_[MAXCAN];
+		// float gen_D0Dau2_phi_[MAXCAN];
+		// float gen_D0Dau2_mass_[MAXCAN];
+		// float gen_D0Dau2_y_[MAXCAN];
+		// int gen_D0Dau2_charge_[MAXCAN];
+		// int gen_D0Dau2_pdgId_[MAXCAN];
 
-		float gen_D1pT_[MAXCAN];
-		float gen_D1eta_[MAXCAN];
-		float gen_D1phi_[MAXCAN];
-		float gen_D1mass_[MAXCAN];
-		float gen_D1y_[MAXCAN];
-		int gen_D1charge_[MAXCAN];
-		int gen_D1pdgId_[MAXCAN];
+		// float gen_D1pT_[MAXCAN];
+		// float gen_D1eta_[MAXCAN];
+		// float gen_D1phi_[MAXCAN];
+		// float gen_D1mass_[MAXCAN];
+		// float gen_D1y_[MAXCAN];
+		// int gen_D1charge_[MAXCAN];
+		// int gen_D1pdgId_[MAXCAN];
 
     //vector for gen match
     vector< vector<double> > *pVect;
