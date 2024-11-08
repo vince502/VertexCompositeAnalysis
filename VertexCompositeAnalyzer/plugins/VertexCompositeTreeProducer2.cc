@@ -1,6 +1,6 @@
 #include "VertexCompositeAnalysis/VertexCompositeAnalyzer/plugins/VertexCompositeTreeProducer2.h"
 
-#define DEBUG true
+//#define DEBUG false
 
 
 #define PI 3.1416

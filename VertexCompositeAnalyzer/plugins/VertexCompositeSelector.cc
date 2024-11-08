@@ -1556,7 +1556,6 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
           }
           if(forestLabel_ == "DStarInPbPb")
           {
-            cout << "asd " << endl;
             gbrVals_[0] = VtxProb;
             gbrVals_[1] = agl;
             // gbrVals_[2] = agl_abs;
@@ -1599,7 +1598,6 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
 
           if(gbrVal < mvaMin_ || gbrVal > mvaMax_) continue;
           if(gbrVal < GetMVACut(y,pt)) continue;
-          cout << "1" << endl;
 
           theMVANew.push_back( gbrVal );
         } 
