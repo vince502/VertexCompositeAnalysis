@@ -15,13 +15,13 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 # Define the input source
 process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
-    fileNames = cms.untracked.vstring("file:step4.root"),
+    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/241026_084606/0000/step4_1.root"),
    # fileNames = cms.untracked.vstring(
         # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
         #),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(200))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -87,26 +87,26 @@ from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeT
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-#process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(5)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(0)
 #process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.5)
+process.generalD0CandidatesNew.tkPtCut = cms.double(1)
 #process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
 #process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
 process.generalD0CandidatesNew.collinearityCut3D = cms.double(0.99)
 #process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
-process.generalD0CandidatesNew.tkChi2Cut = cms.double(2.5)
+process.generalD0CandidatesNew.tkChi2Cut = cms.double(4)
 process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
 process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(5)
 process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
-process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
+#process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
 process.generalDStarCandidatesNew = process.generalDStarCandidates.clone()
 #process.generalDStarCandidatesNew.trkPtSumCut = cms.double(0.0)
 #process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(0.0)
-process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(3)
+process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(0)
 #process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
 process.generalDStarCandidatesNew.tkChi2Cut = cms.double(3)
@@ -115,6 +115,36 @@ process.generalDStarCandidatesNew.tkChi2Cut = cms.double(3)
 #process.generalDStarCandidatesNew.alpha2DCut = cms.double(1)
 process.generalDStarCandidatesNew.dauLongImpactSigCut = cms.double(0.0)
 process.generalDStarCandidatesNew.dauTransImpactSigCut = cms.double(0.0)# it will be cut of by 3 in selector 
+#process.generalD0CandidatesNew = process.generalD0Candidates.clone()
+##process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
+##process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+#process.generalD0CandidatesNew.tkNhitsCut = cms.int32(5)
+##process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
+#process.generalD0CandidatesNew.tkPtCut = cms.double(0.5)
+##process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
+##process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
+#process.generalD0CandidatesNew.collinearityCut3D = cms.double(0.99)
+##process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
+#process.generalD0CandidatesNew.tkChi2Cut = cms.double(2.5)
+#process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
+#process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(5)
+#process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
+#process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
+#process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
+#
+#process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
+#process.generalDStarCandidatesNew = process.generalDStarCandidates.clone()
+##process.generalDStarCandidatesNew.trkPtSumCut = cms.double(0.0)
+##process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(0.0)
+#process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(3)
+##process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
+#process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
+#process.generalDStarCandidatesNew.tkChi2Cut = cms.double(3)
+##process.generalDStarCandidatesNew.vtxSignificance3DCut = cms.double(3)
+##process.generalDStarCandidatesNew.alphaCut = cms.double(1)
+##process.generalDStarCandidatesNew.alpha2DCut = cms.double(1)
+#process.generalDStarCandidatesNew.dauLongImpactSigCut = cms.double(0.0)
+#process.generalDStarCandidatesNew.dauTransImpactSigCut = cms.double(0.0)# it will be cut of by 3 in selector 
 
 
 process.d0rereco_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew)
