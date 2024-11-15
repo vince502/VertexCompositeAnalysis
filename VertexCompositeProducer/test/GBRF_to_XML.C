@@ -40,7 +40,7 @@ void GBRForestToXML(const GBRForest* gbrForest, const std::string& outputFileNam
 
 int main(int argc, char** argv) {
     // Load the GBRForest from a file (assuming it is stored in a ROOT file)
-    TFile* file = TFile::Open("../../../VertexCompositeAnalysis/VertexCompositeAnalyzer/data/GBRForestfile_BDT_PromptD0InpPb_default_HLT185_WS_Pt46MassPeak_NoPtYPtErrNHitDLAngle2D_v3.root", "READ");
+    TFile* file = TFile::Open("/afs/cern.ch/work/s/soohwan/private/Analysis/DmesonAna/HIN-24-012/VtxCompositeTree/CMSSW_8_0_36_patch2/src/VertexCompositeAnalysis/VertexCompositeAnalyzer/data/GBRForestfile_XGBDT_PromptD0InpPb_default_MB_DataAndMC_noDauKin_v3-2.root", "READ");
     if (!file || file->IsZombie()) {
         std::cerr << "Error: Could not open GBRForest file." << std::endl;
         return 1;

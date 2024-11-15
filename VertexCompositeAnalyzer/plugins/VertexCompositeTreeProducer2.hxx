@@ -150,6 +150,7 @@ private:
 
   // options
   bool doRecoNtuple_;
+  bool onlyWantMatch ;
   bool doGenNtuple_;
   bool doGenMatching_;
   bool doGenMatchingTOF_;
@@ -569,6 +570,7 @@ private:
 VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet &iConfig) {
   // options
   doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
+  onlyWantMatch = iConfig.getUntrackedParameter<bool>("onlyWantMatch");
   doGenNtuple_ = iConfig.getUntrackedParameter<bool>("doGenNtuple");
   twoLayerDecay_ = iConfig.getUntrackedParameter<bool>("twoLayerDecay");
   threeProngDecay_ = iConfig.getUntrackedParameter<bool>("threeProngDecay");
@@ -969,8 +971,8 @@ void VertexCompositeTreeProducer2::initTree() {
         VertexCompositeNtuple->Branch("dedxHarmonic2GrandD12", &grand_H2dedx2, "dedxHarmonic2GrandD12[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter1",&grand_T4dedx1,"dedxTruncated40Granddaughter1[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter2",&grand_T4dedx2,"dedxTruncated40Granddaughter2[candSize]/F");
-        //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter1",&grand_trkChi1,"normalizedChi2Granddaughter1[candSize]/F");
-        //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter2",&grand_trkChi2,"normalizedChi2Granddaughter2[candSize]/F");
+                    VertexCompositeNtuple->Branch("normalizedChi2Granddaughter11",&grand_trkChi1,"normalizedChi2Granddaughter11[candSize]/F");
+                    VertexCompositeNtuple->Branch("normalizedChi2Granddaughter12",&grand_trkChi2,"normalizedChi2Granddaughter12[candSize]/F");
         if (doubleCand_) {
           VertexCompositeNtuple->Branch("flavordaughter2", &flavor2, "flavordaughter2[candSize]/F");
           VertexCompositeNtuple->Branch("massdaughter2", &grand_mass2, "massdaughter2[candSize]/F");
@@ -1027,8 +1029,8 @@ void VertexCompositeTreeProducer2::initTree() {
           VertexCompositeNtuple->Branch("dedxHarmonic2GrandD22", &grand_H2dedx22, "dedxHarmonic2GrandD22[candSize]/F");
           //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter1",&grand_T4dedx21,"dedxTruncated40Granddaughter1[candSize]/F");
           //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter2",&grand_T4dedx22,"dedxTruncated40Granddaughter2[candSize]/F");
-          //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter1",&grand_trkChi21,"normalizedChi2Granddaughter1[candSize]/F");
-          //            VertexCompositeNtuple->Branch("normalizedChi2Granddaughter2",&grand_trkChi22,"normalizedChi2Granddaughter2[candSize]/F");
+                      VertexCompositeNtuple->Branch("normalizedChi2Granddaughter21",&grand_trkChi21,"normalizedChi2Granddaughter21[candSize]/F");
+                      VertexCompositeNtuple->Branch("normalizedChi2Granddaughter22",&grand_trkChi22,"normalizedChi2Granddaughter22[candSize]/F");
         }
       } else {
         VertexCompositeNtuple->Branch("zDCASignificancedaughter1", &dzos1, "zDCASignificancedaughter1[candSize]/F");
@@ -1044,7 +1046,7 @@ void VertexCompositeTreeProducer2::initTree() {
         //            VertexCompositeNtuple->Branch("chargeD1",&charge1,"chargeD1[candSize]/I");
         VertexCompositeNtuple->Branch("dedxHarmonic2D1", &H2dedx1, "dedxHarmonic2D1[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40daughter1",&T4dedx1,"dedxTruncated40daughter1[candSize]/F");
-        //            VertexCompositeNtuple->Branch("normalizedChi2daughter1",&trkChi1,"normalizedChi2daughter1[candSize]/F");
+                    VertexCompositeNtuple->Branch("normalizedChi2daughter1",&trkChi1,"normalizedChi2daughter1[candSize]/F");
         VertexCompositeNtuple->Branch("zDCASignificancedaughter2", &dzos2, "zDCASignificancedaughter2[candSize]/F");
         VertexCompositeNtuple->Branch("xyDCASignificancedaughter2", &dxyos2, "xyDCASignificancedaughter2[candSize]/F");
         VertexCompositeNtuple->Branch("NHitD2", &nhit2, "NHitD2[candSize]/F");
@@ -1058,7 +1060,7 @@ void VertexCompositeTreeProducer2::initTree() {
         //            VertexCompositeNtuple->Branch("chargeD2",&charge2,"chargeD2[candSize]/I");
         VertexCompositeNtuple->Branch("dedxHarmonic2D2", &H2dedx2, "dedxHarmonic2D2[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40daughter2",&T4dedx2,"dedxTruncated40daughter2[candSize]/F");
-        //            VertexCompositeNtuple->Branch("normalizedChi2daughter2",&trkChi2,"normalizedChi2daughter2[candSize]/F");
+                    VertexCompositeNtuple->Branch("normalizedChi2daughter2",&trkChi2,"normalizedChi2daughter2[candSize]/F");
         if (threeProngDecay_) {
           VertexCompositeNtuple->Branch("zDCASignificancedaughter3", &dzos3, "zDCASignificancedaughter3[candSize]/F");
           VertexCompositeNtuple->Branch("xyDCASignificancedaughter3", &dxyos3,
@@ -1134,7 +1136,6 @@ void VertexCompositeTreeProducer2::initTree() {
     VertexCompositeNtuple->Branch("dl3D_gen", &dl3D_gen, "dl3D_gen[candSize_gen]/F");
     VertexCompositeNtuple->Branch("angle2D_gen", &angle2D_gen, "angle2D_gen[candSize_gen]/F");
     VertexCompositeNtuple->Branch("angle3D_gen", &angle3D_gen, "angle3D_gen[candSize_gen]/F");
-    if (doGenDoubleDecay_) {
       VertexCompositeNtuple->Branch("id_gen1", &idself1, "id_gen1[candSize_gen]/I");
       VertexCompositeNtuple->Branch("mass_gen1", &mass_gen1, "mass_gen1[candSize_gen]/F");
       VertexCompositeNtuple->Branch("pt_gen1", &pt_gen1, "pt_gen1[candSize_gen]/F");
@@ -1148,7 +1149,6 @@ void VertexCompositeTreeProducer2::initTree() {
       VertexCompositeNtuple->Branch("eta_gen2", &eta_gen2, "eta_gen2[candSize_gen]/F");
       VertexCompositeNtuple->Branch("phi_gen2", &phi_gen2, "phi_gen2[candSize_gen]/F");
       VertexCompositeNtuple->Branch("status_gen2", &status_gen2, "status_gen2[candSize_gen]/I");
-    }
 
     if (decayInGen_) {
       VertexCompositeNtuple->Branch("DauID1_gen", &iddau1, "DauID1_gen[candSize_gen]/I");

@@ -13,17 +13,21 @@ process.load('Configuration/StandardSequences/Services_cff')
 process.gbrForestWriter = cms.EDAnalyzer("GBRForestWriter",
     jobs = cms.VPSet(
         cms.PSet(
-            inputFileName = cms.FileInPath('VertexCompositeAnalysis/VertexCompositeProducer/data/xgboost_v2.xml'),
+            #inputFileName = cms.FileInPath('VertexCompositeAnalysis/VertexCompositeProducer/data/xgboost_v2.xml'),
+            #inputFileName = cms.FileInPath('VertexCompositeAnalysis/VertexCompositeAnalyzer/test/xgboost.xml'),
+            #inputFileName = cms.FileInPath('VertexCompositeAnalysis/VertexCompositeAnalyzer/test/xgb_model_NOdauProd2.xml'),
+            inputFileName = cms.FileInPath('VertexCompositeAnalysis/VertexCompositeAnalyzer/test/xgb_model_DauKine.xml'),
             inputFileType = cms.string("XML"),
             #inputVariables = cms.vstring( 'VtxProb', 'dca3D', 'v3DCosPointingAngle', 'v3DPointingAngle', 'v2DCosPointingAngle', 'v2DPointingAngle', 'v3DDecayLengthSignificance', 'v3DDecayLength', 'v2DDecayLengthSignificance', 'v2DDecayLength', 'pTD1', 'EtaD1', 'pTD2', 'EtaD2' ),
             inputVariables = cms.vstring( 
 		'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13',
+		#'f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15',
 	     ),
             spectatorVariables = cms.vstring(),
             methodName = cms.string("BDT"),
             gbrForestName = cms.string("D0InpPbXGB"),
             outputFileType = cms.string("GBRForest"),
-            outputFileName = cms.string("GBRForestfile_XGBDT_PromptD0InpPb_default_MB_OnlyMC_v2.root")
+            outputFileName = cms.string("GBRForestfile_XGBDT_PromptD0InpPb_default_MB_HardSoftQCD_wDauKine_v1.root")
         )
     )
 )

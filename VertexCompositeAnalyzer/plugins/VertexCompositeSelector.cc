@@ -770,202 +770,6 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
     const reco::Candidate *d3 = 0;
     if (threeProngDecay_)
       d3 = trk.daughter(2);
-
-    // Gen match
-    if (doGenMatching_) {
-      matchGEN = false;
-      int nGenDau = (int)pVect->size();
-      isSwap = false;
-      idmom_reco = -77;
-
-      for (int i = 0; i < nGenDau; i++) {
-        vector<double> Dvector1 = (*pVect)[i]; // get GEN daugther vector
-        if (d1->charge() != Dvector1.at(3))
-          continue; // check match charge
-        double deltaR = sqrt(pow(d1->eta() - Dvector1.at(1), 2) + pow(d1->phi() - Dvector1.at(2), 2));
-
-        if (deltaR > deltaR_)
-          continue; // check deltaR matching
-        if (fabs((d1->pt() - Dvector1.at(0)) / d1->pt()) > 0.5)
-          continue; // check deltaPt matching
-        double d1massGEN = Dvector1.at(4);
-        double d1mass = d1->mass();
-        double d2massGEN = 0, d2mass = 0;
-        double d3massGEN = 0, d3mass = 0;
-
-        if (nGenDau == 2) {
-          if (i % 2 == 0) {
-            vector<double> Dvector2 = (*pVect)[i + 1]; // get GEN daugther vector for track2
-            if (d2->charge() != Dvector2.at(3))
-              continue; // check match charge
-            double deltaR = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
-
-            if (deltaR > deltaR_)
-              continue; // check deltaR matching
-            if (fabs((d2->pt() - Dvector2.at(0)) / d2->pt()) > 0.5)
-              continue; // check deltaPt matching
-            d2massGEN = Dvector2.at(4);
-            d2mass = d2->mass();
-
-            matchGEN = true; // matched gen
-          }
-
-          if (i % 2 == 1) {
-            vector<double> Dvector2 = (*pVect)[i - 1]; // get GEN daugther vector for track2
-            if (d2->charge() != Dvector2.at(3))
-              continue; // check match charge
-            double deltaR = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
-
-            if (deltaR > deltaR_)
-              continue; // check deltaR matching
-            if (fabs((d2->pt() - Dvector2.at(0)) / d2->pt()) > 0.5)
-              continue; // check deltaPt matching
-            d2massGEN = Dvector2.at(4);
-            d2mass = d2->mass();
-
-            matchGEN = true; // matched gen
-          }
-
-          if (abs(d1massGEN - d1mass) > 0.01 || abs(d2massGEN - d2mass) > 0.01)
-            isSwap = true;
-
-          idmom_reco = pVectIDmom->at(i / 2);
-        }
-
-        if (nGenDau == 3) {
-          if (i % 3 == 0) {
-            vector<double> Dvector2 = (*pVect)[i + 1]; // get GEN daugther vector for track2
-            vector<double> Dvector3 = (*pVect)[i + 2]; // get GEN daugther vector for track3
-
-            if (!(d2->charge() == Dvector2.at(3) && d3->charge() == Dvector3.at(3)) &&
-                !(d3->charge() == Dvector2.at(3) && d2->charge() == Dvector3.at(3)))
-              continue; // check match charge
-
-            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
-            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) + pow(d3->phi() - Dvector3.at(2), 2));
-            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) + pow(d2->phi() - Dvector3.at(2), 2));
-            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) + pow(d3->phi() - Dvector2.at(2), 2));
-
-            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
-              continue;
-
-            double deltaPt22 = fabs((d2->pt() - Dvector2.at(0)) / d2->pt());
-            double deltaPt33 = fabs((d3->pt() - Dvector3.at(0)) / d3->pt());
-            double deltaPt23 = fabs((d2->pt() - Dvector3.at(0)) / d2->pt());
-            double deltaPt32 = fabs((d3->pt() - Dvector2.at(0)) / d3->pt());
-
-            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
-              continue; // check deltaPt matching
-
-            d2massGEN = Dvector2.at(4);
-            d2mass = d2->mass();
-            d3massGEN = Dvector3.at(4);
-            d3mass = d3->mass();
-
-            matchGEN = true; // matched gen
-          }
-
-          if (i % 3 == 1) {
-            vector<double> Dvector2 = (*pVect)[i - 1]; // get GEN daugther vector for track2
-            vector<double> Dvector3 = (*pVect)[i + 1]; // get GEN daugther vector for track3
-
-            if (!(d2->charge() == Dvector2.at(3) && d3->charge() == Dvector3.at(3)) &&
-                !(d3->charge() == Dvector2.at(3) && d2->charge() == Dvector3.at(3)))
-              continue; // check match charge
-
-            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
-            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) + pow(d3->phi() - Dvector3.at(2), 2));
-            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) + pow(d2->phi() - Dvector3.at(2), 2));
-            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) + pow(d3->phi() - Dvector2.at(2), 2));
-
-            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
-              continue;
-
-            double deltaPt22 = fabs((d2->pt() - Dvector2.at(0)) / d2->pt());
-            double deltaPt33 = fabs((d3->pt() - Dvector3.at(0)) / d3->pt());
-            double deltaPt23 = fabs((d2->pt() - Dvector3.at(0)) / d2->pt());
-            double deltaPt32 = fabs((d3->pt() - Dvector2.at(0)) / d3->pt());
-
-            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
-              continue; // check deltaPt matching
-
-            d2massGEN = Dvector2.at(4);
-            d2mass = d2->mass();
-            d3massGEN = Dvector3.at(4);
-            d3mass = d3->mass();
-
-            matchGEN = true; // matched gen
-          }
-
-          if (i % 3 == 2) {
-            vector<double> Dvector2 = (*pVect)[i - 2]; // get GEN daugther vector for track2
-            vector<double> Dvector3 = (*pVect)[i - 1]; // get GEN daugther vector for track3
-
-            if (!(d2->charge() == Dvector2.at(3) && d3->charge() == Dvector3.at(3)) &&
-                !(d3->charge() == Dvector2.at(3) && d2->charge() == Dvector3.at(3)))
-              continue; // check match charge
-
-            double deltaR22 = sqrt(pow(d2->eta() - Dvector2.at(1), 2) + pow(d2->phi() - Dvector2.at(2), 2));
-            double deltaR33 = sqrt(pow(d3->eta() - Dvector3.at(1), 2) + pow(d3->phi() - Dvector3.at(2), 2));
-            double deltaR23 = sqrt(pow(d2->eta() - Dvector3.at(1), 2) + pow(d2->phi() - Dvector3.at(2), 2));
-            double deltaR32 = sqrt(pow(d3->eta() - Dvector2.at(1), 2) + pow(d3->phi() - Dvector2.at(2), 2));
-
-            if (!(deltaR22 < deltaR_ && deltaR33 < deltaR_) && !(deltaR23 < deltaR_ && deltaR32 < deltaR_))
-              continue;
-
-            double deltaPt22 = fabs((d2->pt() - Dvector2.at(0)) / d2->pt());
-            double deltaPt33 = fabs((d3->pt() - Dvector3.at(0)) / d3->pt());
-            double deltaPt23 = fabs((d2->pt() - Dvector3.at(0)) / d2->pt());
-            double deltaPt32 = fabs((d3->pt() - Dvector2.at(0)) / d3->pt());
-
-            if (!(deltaPt22 < 0.5 && deltaPt33 < 0.5) && !(deltaPt23 < 0.5 && deltaPt32 < 0.5))
-              continue; // check deltaPt matching
-
-            d2massGEN = Dvector2.at(4);
-            d2mass = d2->mass();
-            d3massGEN = Dvector3.at(4);
-            d3mass = d3->mass();
-
-            matchGEN = true; // matched gen
-          }
-
-          if (abs(d1massGEN - d1mass) > 0.01 || abs(d2massGEN - d2mass) > 0.01 || abs(d3massGEN - d3mass) > 0.01)
-            isSwap = true;
-
-          idmom_reco = pVectIDmom->at(i / 3);
-        }
-      }
-
-      if (selectGenMatch_ && !matchGEN)
-        continue;
-      if (selectGenUnMatch_ && matchGEN)
-        continue;
-      if (selectGenMatchSwap_) {
-        if (!matchGEN)
-          continue;
-        else if (!isSwap)
-          continue;
-      }
-      if (selectGenMatchUnSwap_) {
-        if (!matchGEN)
-          continue;
-        else if (isSwap)
-          continue;
-      }
-    }
-
-    /*
-            double pxd1 = d1->px();
-            double pyd1 = d1->py();
-            double pzd1 = d1->pz();
-            double pxd2 = d2->px();
-            double pyd2 = d2->py();
-            double pzd2 = d2->pz();
-
-            TVector3 dauvec1(pxd1,pyd1,pzd1);
-            TVector3 dauvec2(pxd2,pyd2,pzd2);
-    */
-    // pt
     pt1 = d1->pt();
     pt2 = d2->pt();
 
@@ -1555,7 +1359,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
 
       theMVANew.push_back(mva);
     } else if (useAnyMVA_ && !useExistingMVA_) {
-      float gbrVals_[50] = {0};
+      float gbrVals_[20] = {0};
       if (forestLabel_ == "D0InpPbXGB") {
         gbrVals_[0] = VtxProb;
         gbrVals_[1] = dca3D;
@@ -1571,6 +1375,30 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
         gbrVals_[11] = eta1;
         gbrVals_[12] = pt2;
         gbrVals_[13] = eta2;
+        //gbrVals_[10] = pt1;
+        //gbrVals_[11] = eta1;
+        //gbrVals_[12] = pt2;
+        //gbrVals_[13] = eta2;
+        gbrVals_[14] = nhit1;
+        gbrVals_[15] = nhit2;
+        //
+        // 13 Oct
+        //gbrVals_[0] = VtxProb;
+        //gbrVals_[1] = dca3D;
+        //gbrVals_[2] = agl;
+        //gbrVals_[3] = agl_abs;
+        //gbrVals_[4] = agl2D;
+        //gbrVals_[5] = agl2D_abs;
+        //gbrVals_[6] = dlos;
+        //gbrVals_[7] = dl;
+        //gbrVals_[8] = dlos2D;
+        //gbrVals_[9] = dl2D;
+        //gbrVals_[10] = grand_dzos1;
+        //gbrVals_[11] = grand_dzos2;
+        //gbrVals_[12] = grand_dxyos1;
+        //gbrVals_[13] = grand_dxyos2;
+        //gbrVals_[14] = trkChi1;
+        //gbrVals_[15] = trkChi2;
       }
       if (forestLabel_ == "D0InpPb" || forestLabel_ == "D0Inpp" || forestLabel_ == "D0InPbPb") {
         /*
@@ -1640,58 +1468,58 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
       }
 
       if (forestLabel_ == "DsInpPb" || forestLabel_ == "DsInpp" || forestLabel_ == "DsInPbPb") {
-        gbrVals_[0] = pt;
-        gbrVals_[1] = y;
-        gbrVals_[2] = VtxProb;
-        gbrVals_[3] = dlos;
-        gbrVals_[4] = dlos2D;
-        gbrVals_[5] = dl;
-        gbrVals_[6] = agl_abs;
-        gbrVals_[7] = agl2D_abs;
-        gbrVals_[8] = dzos2;
-        gbrVals_[9] = dxyos2;
-        gbrVals_[10] = pt1;
-        gbrVals_[11] = pt2;
-        gbrVals_[12] = eta1;
-        gbrVals_[13] = eta2;
-        gbrVals_[14] = nhit2;
-        gbrVals_[15] = ptErr2;
-        gbrVals_[16] = H2dedx2;
+        //gbrVals_[0] = pt;
+        //gbrVals_[1] = y;
+        //gbrVals_[2] = VtxProb;
+        //gbrVals_[3] = dlos;
+        //gbrVals_[4] = dlos2D;
+        //gbrVals_[5] = dl;
+        //gbrVals_[6] = agl_abs;
+        //gbrVals_[7] = agl2D_abs;
+        //gbrVals_[8] = dzos2;
+        //gbrVals_[9] = dxyos2;
+        //gbrVals_[10] = pt1;
+        //gbrVals_[11] = pt2;
+        //gbrVals_[12] = eta1;
+        //gbrVals_[13] = eta2;
+        //gbrVals_[14] = nhit2;
+        //gbrVals_[15] = ptErr2;
+        //gbrVals_[16] = H2dedx2;
       }
 
       if (forestLabel_ == "DiMuInpPb" || forestLabel_ == "DiMuInpp" || forestLabel_ == "DiMuInPbPb") {
-        gbrVals_[0] = pt;
-        gbrVals_[1] = y;
-        gbrVals_[2] = VtxProb;
-        gbrVals_[3] = dlos;
-        gbrVals_[4] = dlos2D;
-        gbrVals_[5] = dl;
-        gbrVals_[6] = agl_abs;
-        gbrVals_[7] = agl2D_abs;
-        gbrVals_[8] = dzos1;
-        gbrVals_[9] = dzos2;
-        gbrVals_[10] = dxyos1;
-        gbrVals_[11] = dxyos2;
-        gbrVals_[12] = nhit1;
-        gbrVals_[13] = nhit2;
-        gbrVals_[14] = nmatchedch1;
-        gbrVals_[15] = nmatchedst1;
-        gbrVals_[16] = matchedenergy1;
-        gbrVals_[17] = nmatchedch2;
-        gbrVals_[18] = nmatchedst2;
-        gbrVals_[19] = matchedenergy2;
-        gbrVals_[20] = dxSig1_seg_;
-        gbrVals_[21] = dySig1_seg_;
-        gbrVals_[22] = ddxdzSig1_seg_;
-        gbrVals_[23] = ddydzSig1_seg_;
-        gbrVals_[24] = dxSig2_seg_;
-        gbrVals_[25] = dySig2_seg_;
-        gbrVals_[26] = ddxdzSig2_seg_;
-        gbrVals_[27] = ddydzSig2_seg_;
-        gbrVals_[28] = pt1;
-        gbrVals_[29] = pt2;
-        gbrVals_[30] = eta1;
-        gbrVals_[31] = eta2;
+        //gbrVals_[0] = pt;
+        //gbrVals_[1] = y;
+        //gbrVals_[2] = VtxProb;
+        //gbrVals_[3] = dlos;
+        //gbrVals_[4] = dlos2D;
+        //gbrVals_[5] = dl;
+        //gbrVals_[6] = agl_abs;
+        //gbrVals_[7] = agl2D_abs;
+        //gbrVals_[8] = dzos1;
+        //gbrVals_[9] = dzos2;
+        //gbrVals_[10] = dxyos1;
+        //gbrVals_[11] = dxyos2;
+        //gbrVals_[12] = nhit1;
+        //gbrVals_[13] = nhit2;
+        //gbrVals_[14] = nmatchedch1;
+        //gbrVals_[15] = nmatchedst1;
+        //gbrVals_[16] = matchedenergy1;
+        //gbrVals_[17] = nmatchedch2;
+        //gbrVals_[18] = nmatchedst2;
+        //gbrVals_[19] = matchedenergy2;
+        //gbrVals_[20] = dxSig1_seg_;
+        //gbrVals_[21] = dySig1_seg_;
+        //gbrVals_[22] = ddxdzSig1_seg_;
+        //gbrVals_[23] = ddydzSig1_seg_;
+        //gbrVals_[24] = dxSig2_seg_;
+        //gbrVals_[25] = dySig2_seg_;
+        //gbrVals_[26] = ddxdzSig2_seg_;
+        //gbrVals_[27] = ddydzSig2_seg_;
+        //gbrVals_[28] = pt1;
+        //gbrVals_[29] = pt2;
+        //gbrVals_[30] = eta1;
+        //gbrVals_[31] = eta2;
       }
 
       GBRForest const *forest = forest_;
@@ -1702,6 +1530,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
       }
 
       auto gbrVal = forest->GetClassifier(gbrVals_);
+      //auto gbrVal = forest->GetGradBoostClassifier(gbrVals_);
 
       if (gbrVal < mvaMin_ || gbrVal > mvaMax_)
         continue;

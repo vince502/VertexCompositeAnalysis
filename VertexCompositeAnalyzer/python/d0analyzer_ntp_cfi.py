@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 d0ana = cms.EDAnalyzer('VertexCompositeNtupleProducer',
   doRecoNtuple = cms.untracked.bool(True),
+  onlyWantMatch = cms.untracked.bool(False),
   doGenNtuple = cms.untracked.bool(False),
   doGenMatching = cms.untracked.bool(False),
   doGenMatchingTOF = cms.untracked.bool(False),

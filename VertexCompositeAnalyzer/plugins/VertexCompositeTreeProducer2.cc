@@ -370,6 +370,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
           gen_D1phiD2_[it] = -99;
           gen_D1massD2_[it] = -99;
           gen_D1yD2_[it] = -99;
+	  if(onlyWantMatch) continue;
         }
       }
       if (doGenDoubleDecay_) {
@@ -541,6 +542,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
         }
       } // END if doGenDoubleDecay_
       matchGEN[it] = (matchGEN1[it] && matchGEN2[it]);
+      if( onlyWantMatch && !(matchGEN1[it] || matchGEN2[it] ) ) continue;
 #ifdef DEBUG
       // if(matchGEN1[it]){
       //   const auto* d1trk1 = d1->daughter(0);
