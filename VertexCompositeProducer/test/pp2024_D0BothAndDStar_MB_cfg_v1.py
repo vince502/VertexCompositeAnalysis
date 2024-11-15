@@ -14,11 +14,11 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 # Define the input source
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/vavladim/RECO2024/CRAB_UserFiles/crab_miniAOD_PhysicsPPRefDoubleMuon0_387574/241030_083852/0000/recoppraw2mini_RAW2DIGI_L1Reco_RECO_PAT_994.root"),
+    fileNames = cms.untracked.vstring("/store/data/Run2024J/PPRefZeroBiasPlusForward0/MINIAOD/PromptReco-v1/000/387/696/00000/0037fb37-713f-4df8-9668-a2ce4665a93c.root"),
     #fileNames = cms.untracked.vstring("file:step4.root"),
     #fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root"),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -74,29 +74,35 @@ from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeT
 ########## D0 candidate rereco ###############################################################
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
-process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(7)
-process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
-process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
-process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
-process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
+process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
+#process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
+#process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(3)
+#process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.5)
+#process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
+#process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
+process.generalD0CandidatesNew.collinearityCut3D = cms.double(0.90)
+#process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
+process.generalD0CandidatesNew.tkChi2Cut = cms.double(3)
 process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
+process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(5)
 process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
-process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
 process.generalDStarCandidatesNew = process.generalDStarCandidates.clone()
-process.generalDStarCandidatesNew.trkPtSumCut = cms.double(0.0)
-process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(0.0)
-process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(5)
-process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
+#process.generalDStarCandidatesNew.trkPtSumCut = cms.double(0.0)
+#process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(0.0)
+process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(3)
+#process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
-process.generalDStarCandidatesNew.alphaCut = cms.double(0.4)
-process.generalDStarCandidatesNew.alpha2DCut = cms.double(0.4)
-process.generalDStarCandidatesNew.dPtCut = cms.double(0.0)
+process.generalDStarCandidatesNew.tkChi2Cut = cms.double(3)
+#process.generalDStarCandidatesNew.vtxSignificance3DCut = cms.double(0)
+#process.generalDStarCandidatesNew.alphaCut = cms.double(1)
+#process.generalDStarCandidatesNew.alpha2DCut = cms.double(1)
+process.generalDStarCandidatesNew.dauLongImpactSigCut = cms.double(0.0)
+process.generalDStarCandidatesNew.dauTransImpactSigCut = cms.double(0.0)
 # process.generalDStarCandidatesNew.useAnyMVA=cms.bool(True)
 # process.generalDStarCandidatesNew.GBRForestFileName=cms.string('GBRForestfile_XGBDT_PromptDstarInPbPb_default_MB_OnlyMC.root')
 
