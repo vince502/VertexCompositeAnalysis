@@ -75,6 +75,7 @@ OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::Con
   batTkPtCut = theParameters.getParameter<double>(string("batTkPtCut"));
   batTkPtErrCut = theParameters.getParameter<double>(string("batTkPtErrCut"));
   batTkEtaCut = theParameters.getParameter<double>(string("batTkEtaCut"));
+  batTrkEtaDiffCut = theParameters.getParameter<double>(string("batTrkEtaDiffCut"));
   bVtxChi2Cut = theParameters.getParameter<double>(string("bVtxChi2Cut"));
   bRVtxCut = theParameters.getParameter<double>(string("bVtx2DCut"));
   bRVtxSigCut = theParameters.getParameter<double>(string("bVtxSignificance2DCut"));
@@ -83,10 +84,13 @@ OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::Con
   bCollinCut2D = theParameters.getParameter<double>(string("bCollinCut2D"));
   bCollinCut3D = theParameters.getParameter<double>(string("bCollinCut3D"));
   bMassCut = theParameters.getParameter<double>(string("bMassCut"));
+  bOniaMass = theParameters.getParameter<std::vector<double>>(string("bOniaMass"));
+  bOniaWindow = theParameters.getParameter<std::vector<double>>(string("bOniaWindow"));
   batDauTransImpactSigCut = theParameters.getParameter<double>(string("batDauTransImpactSigCut"));
   batDauLongImpactSigCut = theParameters.getParameter<double>(string("batDauLongImpactSigCut"));
   bVtxChiProbCut = theParameters.getParameter<double>(string("bVtxChiProbCut"));
   bPtCut = theParameters.getParameter<double>(string("bPtCut"));
+  bQMassCut = theParameters.getParameter<double>(string("bQMassCut"));
   bAlphaCut = theParameters.getParameter<double>(string("bAlphaCut"));
   bAlpha2DCut = theParameters.getParameter<double>(string("bAlpha2DCut"));
   isWrongSignB = theParameters.getParameter<bool>(string("isWrongSignB"));
@@ -234,8 +238,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
     // TODO Rename variables
     // if(theOnia.mass() > d0MassB + massWindow || theOnia.mass() < d0MassB - massWindow) continue;
     if(!(
-	(theOnia.mass() > 2.8  && theOnia.mass() < 3.3) ||
-	(theOnia.mass() > 7.2  && theOnia.mass() < 14.0) || 
+	(theOnia.mass() > 2.90  && theOnia.mass() < 3.20) ||
+	(theOnia.mass() > 9.0  && theOnia.mass() < 10.5) || 
 	false
 	)) continue;
 
@@ -259,6 +263,7 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         if ( !usePixelTracks && theTrackRefsM[trdx2].isNull() ) continue;
         TransientTrack* trk2TransTkPtr = &theTransTracksM[trdx2];
 	if(!trk2TransTkPtr->isValid()) continue;
+        if( fabs(trk2TransTkPtr->track().eta() - trk1TransTkPtr->track().eta()) > batTrkEtaDiffCut ) continue;
 
 	FreeTrajectoryState posState = trk1TransTkPtr->impactPointTSCP().theState();
 	FreeTrajectoryState negState = trk2TransTkPtr->impactPointTSCP().theState();
@@ -464,12 +469,28 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         // else if(theOnia.pdgId()>0) {theB->setPdgId(-521); theB->setCharge(theTrackRefs[trdx]->charge());}
 
         addp4.set( *theB );
+        bool passMassRange = false;
+        for( unsigned int io =0; io < bOniaMass.size(); io++ ){
+          if( 
+            fabs(theB->mass()- bOniaMass[io]) < bOniaWindow[io] && 
+            theB->mass() -theRho->mass() - bOniaMass[io] < bQMassCut 
+          ){
+            passMassRange = true; 
+            break;
+          }
+        }
 
-        if( theB->mass() > bMassCut) continue;
+        if( !passMassRange ){
+	        if(theRho) delete theRho;
+	        if(theB) delete theB;
+	        theRho = 0;
+	        continue;
+	      }
         theBs.push_back(*theB);
-//cout << "start 1 5" << endl;
         if(theB) delete theB;
-           theB = 0;
+	      if(theRho) delete theRho;
+        theB = 0;
+	      theRho = 0;
       }
     }
   }

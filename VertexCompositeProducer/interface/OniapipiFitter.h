@@ -123,6 +123,7 @@ class OniapipiFitter {
   double batTkPtErrCut;
   double batTkPtCut;
   double batTkEtaCut;
+  double batTrkEtaDiffCut;
   double batTkPtSumCut;
   double batTkEtaDiffCut;
   double bVtxChi2Cut;
@@ -133,6 +134,9 @@ class OniapipiFitter {
   double bCollinCut2D;
   double bCollinCut3D;
   double bMassCut;
+  double bQMassCut;
+  std::vector<double> bOniaMass;
+  std::vector<double> bOniaWindow;
   double batDauTransImpactSigCut;
   double batDauLongImpactSigCut;
   double bVtxChiProbCut;

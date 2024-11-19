@@ -38,6 +38,11 @@ generalOttCandidates = cms.EDProducer("OniaPiPiProducer",
     bVtx3DCut = cms.double(0.0),
     bMassCut = cms.double(0.3),
     bPtCut = cms.double(0.0),
+    bQMassCut = cms.double(0.3),
+    bOniaMass = cms.vdouble([3.096, 3.686, 9.46, 10.023]),
+    # bOniaMass = cms.vdouble([3.686, 10.023, 10.355]),
+    bOniaWindow = cms.vdouble([0.2, 0.2, 0.4, 0.4]),
+    # bOniaWindow = cms.vdouble([0.2, 0.4, 0.4]),
 
     isWrongSignB = cms.bool(False)
 

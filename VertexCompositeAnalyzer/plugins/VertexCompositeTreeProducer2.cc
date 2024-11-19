@@ -211,14 +211,14 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
         
         if(!trk.quality(reco::TrackBase::highPurity)) continue;
         if(fabs(trk.ptError())/trk.pt()>0.10) continue;
-        if(fabs(dzvtx/dzerror) > 3) continue;
-        if(fabs(dxyvtx/dxyerror) > 3) continue;
+        // if(fabs(dzvtx/dzerror) > 3) continue;
+        // if(fabs(dxyvtx/dxyerror) > 3) continue;
         
         double eta = trk.eta();
         double pt  = trk.pt();
         
         if(fabs(eta)>2.4) continue;
-        if(pt<=0.2) continue;
+        // if(pt<=0.2) continue;
         Ntrkoffline++;
       }
     }

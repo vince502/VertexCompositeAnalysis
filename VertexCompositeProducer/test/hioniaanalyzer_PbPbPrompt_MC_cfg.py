@@ -222,27 +222,6 @@ if atLeastOneCand:
       #BEWARE, pseudoDimuonFilterSequence asks for opposite-sign dimuon in given mass range. But saves a lot of time by filtering before running PAT muons
       process.oniaTreeAna.replace(process.patMuonSequence, process.pseudoDimuonFilterSequence * process.patMuonSequence)
 
-process.oniaTreeAna = cms.Path(process.oniaTreeAna)
-if miniAOD:
-  from HiSkim.HiOnia2MuMu.onia2MuMuPAT_cff import changeToMiniAOD
-  changeToMiniAOD(process)
-  process.unpackedMuons.addPropToMuonSt = cms.bool(UsePropToMuonSt)
-
-#----------------------------------------------------------------------------
-#Options:
-process.source = cms.Source("PoolSource",
-#process.source = cms.Source("NewEventStreamFileReader", # for streamer data
-		fileNames = cms.untracked.vstring( options.inputFiles ),
-		)
-process.TFileService = cms.Service("TFileService",
-		fileName = cms.string( options.outputFile )
-		)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
-process.options   = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
-
-process.options.numberOfThreads = 4
-
-
 ########## OTT candidate rereco ###############################################################
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalOttCandidates_cff")
@@ -263,10 +242,75 @@ process.generalOttCandidatesNew.VtxChiProbCut = cms.double(0.010)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(3.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(14.0)
 
+process.forest = cms.Sequence(
+    process.primaryVertexFilter
+#    process.HiForestInfo 
+#    process.hltanalysis *
+#    process.hiEvtAnalyzer *
+#    process.hltobject +
+#    process.l1object +
+#    process.HiGenParticleAna 
+)
+
+
+addR3Jets = False
+addR4Jets = True
+
+if addR3Jets or addR4Jets :
+    process.load("HeavyIonsAnalysis.JetAnalysis.extraJets_cff")
+    from HeavyIonsAnalysis.JetAnalysis.clusterJetsFromMiniAOD_cff import setupPprefJets
+
+    if addR3Jets :
+        process.jetsR3 = cms.Sequence()
+        setupPprefJets('ak3PF', process.jetsR3, process, isMC = 1, radius = 0.30, JECTag = 'AK3PF')
+        process.ak3PFpatJetCorrFactors.levels = ['L2Relative', 'L3Absolute']
+        process.load("HeavyIonsAnalysis.JetAnalysis.candidateBtaggingMiniAOD_cff")
+        process.ak3PFJetAnalyzer = process.ak4PFJetAnalyzer.clone(jetTag = "ak3PFpatJets", jetName = 'ak3PF', genjetTag = "ak3GenJetsNoNu")
+        process.forest += process.extraPpJetsMC * process.jetsR3 * process.ak3PFJetAnalyzer
+
+    if addR4Jets :
+        # Recluster using an alias "0" in order not to get mixed up with the default AK4 collections
+        process.jetsR4 = cms.Sequence()
+        setupPprefJets('ak04PF', process.jetsR4, process, isMC = 1, radius = 0.40, JECTag = 'AK4PF')
+        process.ak04PFpatJetCorrFactors.levels = ['L2Relative', 'L3Absolute']
+        process.ak04PFpatJetCorrFactors.primaryVertices = "offlineSlimmedPrimaryVertices"
+        process.load("HeavyIonsAnalysis.JetAnalysis.candidateBtaggingMiniAOD_cff")
+        process.ak4PFJetAnalyzer.jetTag = 'ak04PFpatJets'
+        process.ak4PFJetAnalyzer.jetName = 'ak04PF'
+        process.ak4PFJetAnalyzer.doSubEvent = False # Need to disable this, since there is some issue with the gen jet constituents. More debugging needed is want to use constituents.
+        process.forest += process.extraPpJetsMC * process.jetsR4 * process.ak4PFJetAnalyzer
+
+
+#process.schedule.append( process.forest )
+
+process.oniaTreeAna.replace(process.onia2MuMuPatGlbGlb, process.onia2MuMuPatGlbGlb * process.onia2MuMuPatGlbGlbFilter  * process.generalOttCandidatesNew * process.forest * process.ottana_mc_new)
+
 
 process.Ottreco_step = cms.Path(  process.generalOttCandidatesNew)
 
 process.schedule  = cms.Schedule( process.oniaTreeAna )
+
+
+process.oniaTreeAna = cms.Path(process.oniaTreeAna)
+if miniAOD:
+  from HiSkim.HiOnia2MuMu.onia2MuMuPAT_cff import changeToMiniAOD
+  changeToMiniAOD(process)
+  process.unpackedMuons.addPropToMuonSt = cms.bool(UsePropToMuonSt)
+
+#----------------------------------------------------------------------------
+#Options:
+process.source = cms.Source("PoolSource",
+#process.source = cms.Source("NewEventStreamFileReader", # for streamer data
+		fileNames = cms.untracked.vstring( options.inputFiles ),
+		)
+process.TFileService = cms.Service("TFileService",
+		fileName = cms.string( options.outputFile )
+		)
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
+process.options   = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+
+process.options.numberOfThreads = 4
+
 
 process.output = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring(["drop *", "keep *_*_*_HIOnia"]),

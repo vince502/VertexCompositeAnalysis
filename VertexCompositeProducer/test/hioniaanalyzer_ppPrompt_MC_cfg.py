@@ -22,7 +22,7 @@ OneMatchedHLTMu = -1   # Keep only di(tri)muons of which the one(two) muon(s) ar
 keepExtraColl  = False # General Tracks + Stand Alone Muons + Converted Photon collections
 miniAOD        = True # whether the input file is in miniAOD format (default is AOD)
 UsePropToMuonSt = True # whether to use L1 propagated muons (works only for miniAOD now)
-pdgId = 443 # J/Psi : 443, Y(1S) : 553
+pdgId = 100443 # J/Psi : 443, Y(1S) : 553
 useMomFormat = "vector" # default "array" for TClonesArray of TLorentzVector. Use "vector" for std::vector<float> of pt, eta, phi, M
 
 #----------------------------------------------------------------------------
@@ -53,14 +53,18 @@ process = cms.Process("HIOnia", eras.Run3_2024_ppRef)
 options = VarParsing.VarParsing ('analysis')
 
 # Input and Output File Name
-options.outputFile = "Oniatree_ppMC2024_miniAOD.root"
+options.outputFile = "Oniatree_ppMC2024_miniAOD2.root"
 options.secondaryOutputFile = "Jpsi_DataSet.root"
 options.inputFiles =[
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3.root',
-'file:step3_1.root',
-'file:step3_2.root',
-'file:step3_3.root',
-'file:step3_4.root',
+#'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3_JpsiShower.root',
+#'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/Psi2S_OniaShower_PythiaOnly_07Nov_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241108_123917/0000/step3_JpsiShower_61.root',
+'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/XtoJpsiToRhoToPiPi_PythiaOnly_12Oct_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241104_071417/0000/step3_10.root',
+'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/XtoJpsiToRhoToPiPi_PythiaOnly_12Oct_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241104_071417/0000/step3_100.root',
+#'file:step3_1.root',
+#'file:step3_2.root',
+#'file:step3_3.root',
+#'file:step3_4.root',
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3HihgpT.root',
 ]
 options.maxEvents = -1 # -1 means all events
@@ -253,8 +257,73 @@ process.ottana_mc_new.threeProngDecay = False
 process.ottana_mc_new.PID_dau1 = 443
 process.ottana_mc_new.PID_dau2 = 113
 
+#process.load("HeavyIonsAnalysis.EventAnalysis.HiForestInfo_cfi")
+#process.HiForestInfo.info = cms.vstring("HiForest, miniAOD, 140X, mc")
+process.load("HeavyIonsAnalysis.JetAnalysis.ak4PFJetSequence_ppref_mc_cff")
+# use data version to avoid PbPb MC
+#process.load('HeavyIonsAnalysis.EventAnalysis.hievtanalyzer_data_cfi')
+#process.hiEvtAnalyzer.Vertex = cms.InputTag("offlineSlimmedPrimaryVertices")
+#process.hiEvtAnalyzer.doCentrality = cms.bool(False)
+#process.hiEvtAnalyzer.doEvtPlane = cms.bool(False)
+#process.hiEvtAnalyzer.doEvtPlaneFlat = cms.bool(False)
+#process.hiEvtAnalyzer.doMC = cms.bool(True) # general MC info
+#process.hiEvtAnalyzer.doHiMC = cms.bool(False) # HI specific MC info
+#process.hiEvtAnalyzer.doHFfilters = cms.bool(False) # Disable HF filters for ppRef
 
-#process.oniaTreeAna.replace(process.onia2MuMuPatGlbGlb, process.onia2MuMuPatGlbGlb * process.onia2MuMuPatGlbGlbFilter  * process.generalOttCandidatesNew * process.ottana_mc_new)
+
+#process.load('HeavyIonsAnalysis.EventAnalysis.hltanalysis_cfi')
+#process.load('HeavyIonsAnalysis.EventAnalysis.hltobject_cfi')
+#process.load('HeavyIonsAnalysis.EventAnalysis.l1object_cfi')
+
+## TODO: Many of these triggers are not available in the test file
+#from HeavyIonsAnalysis.EventAnalysis.hltobject_cfi import trigger_list_mc
+#process.hltobject.triggerNames = trigger_list_mc
+
+# Gen particles
+#process.load('HeavyIonsAnalysis.EventAnalysis.HiGenAnalyzer_cfi')
+
+process.forest = cms.Sequence(
+    process.primaryVertexFilter
+#    process.HiForestInfo 
+#    process.hltanalysis *
+#    process.hiEvtAnalyzer *
+#    process.hltobject +
+#    process.l1object +
+#    process.HiGenParticleAna 
+)
+
+
+addR3Jets = False
+addR4Jets = True
+
+if addR3Jets or addR4Jets :
+    process.load("HeavyIonsAnalysis.JetAnalysis.extraJets_cff")
+    from HeavyIonsAnalysis.JetAnalysis.clusterJetsFromMiniAOD_cff import setupPprefJets
+
+    if addR3Jets :
+        process.jetsR3 = cms.Sequence()
+        setupPprefJets('ak3PF', process.jetsR3, process, isMC = 1, radius = 0.30, JECTag = 'AK3PF')
+        process.ak3PFpatJetCorrFactors.levels = ['L2Relative', 'L3Absolute']
+        process.load("HeavyIonsAnalysis.JetAnalysis.candidateBtaggingMiniAOD_cff")
+        process.ak3PFJetAnalyzer = process.ak4PFJetAnalyzer.clone(jetTag = "ak3PFpatJets", jetName = 'ak3PF', genjetTag = "ak3GenJetsNoNu")
+        process.forest += process.extraPpJetsMC * process.jetsR3 * process.ak3PFJetAnalyzer
+
+    if addR4Jets :
+        # Recluster using an alias "0" in order not to get mixed up with the default AK4 collections
+        process.jetsR4 = cms.Sequence()
+        setupPprefJets('ak04PF', process.jetsR4, process, isMC = 1, radius = 0.40, JECTag = 'AK4PF')
+        process.ak04PFpatJetCorrFactors.levels = ['L2Relative', 'L3Absolute']
+        process.ak04PFpatJetCorrFactors.primaryVertices = "offlineSlimmedPrimaryVertices"
+        process.load("HeavyIonsAnalysis.JetAnalysis.candidateBtaggingMiniAOD_cff")
+        process.ak4PFJetAnalyzer.jetTag = 'ak04PFpatJets'
+        process.ak4PFJetAnalyzer.jetName = 'ak04PF'
+        process.ak4PFJetAnalyzer.doSubEvent = False # Need to disable this, since there is some issue with the gen jet constituents. More debugging needed is want to use constituents.
+        process.forest += process.extraPpJetsMC * process.jetsR4 * process.ak4PFJetAnalyzer
+
+
+#process.schedule.append( process.forest )
+
+process.oniaTreeAna.replace(process.onia2MuMuPatGlbGlb, process.onia2MuMuPatGlbGlb * process.onia2MuMuPatGlbGlbFilter  * process.generalOttCandidatesNew * process.forest * process.ottana_mc_new)
 #process.generalOttCandidatesNew.d0RecoAlgorithm = cms.InputTag('')
 
 if miniAOD:
