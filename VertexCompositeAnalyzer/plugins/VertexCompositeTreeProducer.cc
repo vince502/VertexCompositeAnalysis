@@ -1608,7 +1608,7 @@ VertexCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventS
 
         int id = trk.pdgId();
         if(fabs(id)!=PID_) continue; //check is target
-        if(decayInGen_ && (trk.numberOfDaughters()!=2 || trk.numberOfDaughters()!=3)) continue; //check 2-pron decay if target decays in Gen
+        if(decayInGen_ && !(trk.numberOfDaughters() ==2 || trk.numberOfDaughters()==3)) continue; //check 2-pron decay if target decays in Gen
 
         candSize_gen+=1;
 
