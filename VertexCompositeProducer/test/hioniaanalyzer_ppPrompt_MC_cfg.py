@@ -8,7 +8,7 @@ from Configuration.StandardSequences.Eras import eras
 
 HLTProcess     = "HLT" # Name of HLT process
 isMC           = True # if input is MONTECARLO: True or if it's DATA: False
-muonSelection  = "GlbTrk" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
+muonSelection  = "Trk" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
 applyEventSel  = True # Only apply Event Selection if the required collections are present
 OnlySoftMuons  = False # Keep only isSoftMuon's (without highPurity, and without isGlobal which should be put in 'muonSelection' parameter) from the beginning of HiSkim. If you want the full SoftMuon selection, set this flag false and add 'isSoftMuon' in lowerPuritySelection. In any case, if applyCuts=True, isSoftMuon is required at HiAnalysis level for muons of selected dimuons.
 applyCuts      = False # At HiAnalysis level, apply kinematic acceptance cuts + identification cuts (isSoftMuon (without highPurity) or isTightMuon, depending on TightGlobalMuon flag) for muons from selected di(tri)muons + hard-coded cuts on the di(tri)muon that you would want to add (but recommended to add everything in LateDimuonSelection, applied at the end of HiSkim)
@@ -56,11 +56,12 @@ options = VarParsing.VarParsing ('analysis')
 options.outputFile = "Oniatree_ppMC2024_miniAOD2.root"
 options.secondaryOutputFile = "Jpsi_DataSet.root"
 options.inputFiles =[
+'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_6/src/Jpsi_RECO.root',
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3.root',
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/MC/CMSSW_14_1_0/src/step3_JpsiShower.root',
 #'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/Psi2S_OniaShower_PythiaOnly_07Nov_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241108_123917/0000/step3_JpsiShower_61.root',
-'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/XtoJpsiToRhoToPiPi_PythiaOnly_12Oct_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241104_071417/0000/step3_10.root',
-'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/XtoJpsiToRhoToPiPi_PythiaOnly_12Oct_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241104_071417/0000/step3_100.root',
+#'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/XtoJpsiToRhoToPiPi_PythiaOnly_12Oct_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241104_071417/0000/step3_10.root',
+#'/store/user/soohwan/Run3_2024/MC/RECO_PAT_141X_PyhitaX_04Nov2024_v2/XtoJpsiToRhoToPiPi_PythiaOnly_12Oct_v1/RECO_PAT_141X_PyhitaX_04Nov2024_v2/241104_071417/0000/step3_100.root',
 #'file:step3_1.root',
 #'file:step3_2.root',
 #'file:step3_3.root',
@@ -232,16 +233,16 @@ process.generalOttCandidatesNew.usePixelTracks = cms.bool(False)
 process.generalOttCandidatesNew.pixelTracks = cms.InputTag('unpackedPixelTracks')
 
 
-process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(1.0)
-process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(1.4)
+process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.0)
+process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(100.0)
 process.generalOttCandidatesNew.batTkChi2Cut = cms.double(10000)
-process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(7)
-process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.10)
+process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(0)
+process.generalOttCandidatesNew.batTkPtErrCut = cms.double(1.10)
 process.generalOttCandidatesNew.batTkPtCut = cms.double(0.03)
 process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
 process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalOttCandidatesNew.bPtCut = cms.double(0.0)
-process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.010)
+process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.000)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(0.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 process.generalOttCandidatesNew.bMassCut = cms.double(12)
@@ -251,11 +252,14 @@ process.ottana_mc_new = process.ottana_mc.clone()
 process.ottana_mc_new.VertexCollection = cms.untracked.InputTag('unpackedTracksAndVertices')
 process.ottana_mc_new.TrackCollection = cms.untracked.InputTag('unpackedTracksAndVertices')
 process.ottana_mc_new.doRecoNtuple = True
-process.ottana_mc_new.PID = 20443
+#process.ottana_mc_new.PID = 20443
+process.ottana_mc_new.PID = 100443
 
-process.ottana_mc_new.threeProngDecay = False 
+process.ottana_mc_new.threeProngDecay = True 
+process.ottana_mc_new.balancedTree = False 
 process.ottana_mc_new.PID_dau1 = 443
-process.ottana_mc_new.PID_dau2 = 113
+process.ottana_mc_new.PID_dau2 = 211
+process.ottana_mc_new.PID_dau3 = -211
 
 #process.load("HeavyIonsAnalysis.EventAnalysis.HiForestInfo_cfi")
 #process.HiForestInfo.info = cms.vstring("HiForest, miniAOD, 140X, mc")

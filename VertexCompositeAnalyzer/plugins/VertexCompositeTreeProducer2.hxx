@@ -493,6 +493,14 @@ private:
 		int matchGen_V0Dau2_charge_[MAXCAN];
 		int matchGen_V0Dau2_pdgId_[MAXCAN];
 
+		float matchGen_V0Dau3_pT_[MAXCAN];
+		float matchGen_V0Dau3_eta_[MAXCAN];
+		float matchGen_V0Dau3_phi_[MAXCAN];
+		float matchGen_V0Dau3_mass_[MAXCAN];
+		float matchGen_V0Dau3_y_[MAXCAN];
+		int matchGen_V0Dau3_charge_[MAXCAN];
+		int matchGen_V0Dau3_pdgId_[MAXCAN];
+
 		// float matchGen_D1pT_[MAXCAN];
 		// float matchGen_D1eta_[MAXCAN];
 		// float matchGen_D1phi_[MAXCAN];

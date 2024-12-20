@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      OniapipiFitter
+// Class:      OniaV0Fitter
 // 
-/**\class OniapipiFitter OniapipiFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/OniapipiFitter.cc
+/**\class OniaV0Fitter OniaV0Fitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/OniaV0Fitter.cc
 
  Description: <one line class summary>
 
@@ -14,7 +14,7 @@
 //
 //
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/OniaV0Fitter.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -42,7 +42,7 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
-bool match_OniaPiPi(const reco::Track* a, const reco::Track* b){
+bool match_OniaV0(const reco::Track* a, const reco::Track* b){
         if( a->charge() != b->charge() ) return false;
         if(
                 fabs(a->pt()- b->pt()) < 0.03 &&
@@ -53,7 +53,7 @@ bool match_OniaPiPi(const reco::Track* a, const reco::Track* b){
 
 
 // Constructor and (empty) destructor
-OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+OniaV0Fitter::OniaV0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
     bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
 {
   using std::string;
@@ -96,11 +96,11 @@ OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::Con
   isWrongSignB = theParameters.getParameter<bool>(string("isWrongSignB"));
 }
 
-OniapipiFitter::~OniapipiFitter() {
+OniaV0Fitter::~OniaV0Fitter() {
 }
 
 // Method containing the algorithm for vertex reconstruction
-void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void OniaV0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 
 
@@ -254,8 +254,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
       TransientTrack* trk1TransTkPtr = &theTransTracksP[trdx];
       if(!trk1TransTkPtr->isValid()) continue;
       if(
-              match_OniaPiPi(&ttk0.track(), &trk1TransTkPtr->track()) ||
-              match_OniaPiPi(&ttk1.track(), &trk1TransTkPtr->track()) ) continue;
+              match_OniaV0(&ttk0.track(), &trk1TransTkPtr->track()) ||
+              match_OniaV0(&ttk1.track(), &trk1TransTkPtr->track()) ) continue;
       for(unsigned int trdx2 = trdx+1; trdx2 < theTrackRefsM.size(); trdx2++) {
 	
 
@@ -272,8 +272,8 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         cApp.calculate(posState, negState);
         if( !cApp.status() ) continue;
         if(
-                match_OniaPiPi(&ttk0.track(), &trk2TransTkPtr->track()) ||
-                match_OniaPiPi(&ttk1.track(), &trk2TransTkPtr->track()) ) continue;
+                match_OniaV0(&ttk0.track(), &trk2TransTkPtr->track()) ||
+                match_OniaV0(&ttk1.track(), &trk2TransTkPtr->track()) ) continue;
 
         //Creating a KinematicParticleFactory
         float chi = 0.;
@@ -460,9 +460,7 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
         theRho->addDaughter(pion1candidate);
         theRho->addDaughter(pion2candidate);
         theB->addDaughter(theOnia);
-        theB->addDaughter(pion1candidate);
-        theB->addDaughter(pion2candidate);
-        // theB->addDaughter(*(reco::Candidate*)theRho);
+        theB->addDaughter(*(reco::Candidate*)theRho);
 
         // theB->addDaughter(pion1candidate);
         // theB->addDaughter(pion2candidate);
@@ -499,22 +497,22 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& OniapipiFitter::getB() const {
+const reco::VertexCompositeCandidateCollection& OniaV0Fitter::getB() const {
   return theBs;
 }
 
 /*
-const std::vector<float>& OniapipiFitter::getMVAVals() const {
+const std::vector<float>& OniaV0Fitter::getMVAVals() const {
   return mvaVals_;
 }
 */
 /*
-auto_ptr<edm::ValueMap<float> > OniapipiFitter::getMVAMap() const {
+auto_ptr<edm::ValueMap<float> > OniaV0Fitter::getMVAMap() const {
   return mvaValValueMap;
 }
 */
 
-void OniapipiFitter::resetAll() {
+void OniaV0Fitter::resetAll() {
     theBs.clear();
 //    mvaVals_.clear();
 }
