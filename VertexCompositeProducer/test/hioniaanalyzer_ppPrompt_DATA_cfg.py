@@ -69,7 +69,7 @@ options.inputFiles =[
 #'/store/hidata/HIRun2023A/HIForward1/MINIAOD/16Jan2024-v1/40000/574b9ae2-e2d7-45db-96af-ab91bfac097e.root',
 
 ]
-options.maxEvents = -1 # -1 means all events
+options.maxEvents = 10000 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -247,16 +247,16 @@ process.generalOttCandidatesNew.pixelTracks = cms.InputTag('unpackedPixelTracks'
 #process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 #process.generalOttCandidatesNew.bMassCut = cms.double(12)
 
-process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.0)
+process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(1.0)
 process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(100.0)
 process.generalOttCandidatesNew.batTkChi2Cut = cms.double(10000)
 process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(0)
-process.generalOttCandidatesNew.batTkPtErrCut = cms.double(1.10)
-process.generalOttCandidatesNew.batTkPtCut = cms.double(0.03)
+process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.10)
+process.generalOttCandidatesNew.batTkPtCut = cms.double(0.20)
 process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
 process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
-process.generalOttCandidatesNew.bPtCut = cms.double(6.0)
-process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.000)
+process.generalOttCandidatesNew.bPtCut = cms.double(4.0)
+process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.005)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(0.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 process.generalOttCandidatesNew.bMassCut = cms.double(12)
