@@ -80,7 +80,7 @@
 //
 
 #define PI 3.1416
-#define MAXCAN 50000
+#define MAXCAN 10000
 
 using namespace std;
 

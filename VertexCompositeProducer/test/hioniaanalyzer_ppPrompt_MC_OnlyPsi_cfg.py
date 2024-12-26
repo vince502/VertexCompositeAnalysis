@@ -253,7 +253,7 @@ options.inputFiles =[
 '/store/user/soohwan/Run3_2024/MC/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/Psi2SJpsipipi_PythiaCP5_Noemb_ppRef5p36_20Dec_v1/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/241222_061609/0000/Jpsi_RECO_72.root',
 '/store/user/soohwan/Run3_2024/MC/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/Psi2SJpsipipi_PythiaCP5_Noemb_ppRef5p36_20Dec_v1/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/241222_061609/0000/Jpsi_RECO_87.root',
 ]
-options.maxEvents = 50000 # -1 means all events
+options.maxEvents = -1 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -431,6 +431,8 @@ process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.000)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(0.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 process.generalOttCandidatesNew.bMassCut = cms.double(12)
+process.generalOttCandidatesNew.bQMassCut = cms.double(333)
+process.generalOttCandidatesNew.bOniaWindow = cms.vdouble(5.2, 0.2, 0.4, 0.4)
 
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.ottanalyzer_tree_cff")
 process.ottana_mc_new = process.ottana_mc.clone()
@@ -536,8 +538,8 @@ process.TFileService = cms.Service("TFileService",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.options   = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-process.options.numberOfThreads = 1
-process.options.numberOfStreams = 1
+process.options.numberOfThreads = 10
+process.options.numberOfStreams = 0
 process.schedule  = cms.Schedule( process.oniaTreeAna )
 
 process.output = cms.OutputModule("PoolOutputModule",

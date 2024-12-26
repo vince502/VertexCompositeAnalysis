@@ -65,7 +65,7 @@ options.inputFiles =[
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/General2024Analysis/CMSSW_14_1_4_patch1/src/cfg_txt/recoppraw2mini_RAW2DIGI_L1Reco_RECO_PAT.root',
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/General2024Analysis/CMSSW_14_1_4_patch1/src/cfg_txt/recoppraw2mini_RAW2DIGI_L1Reco_RECO_PAT.root',
 #'/store/data/Run2024J/PPRefDoubleMuon0/MINIAOD/PromptReco-v1/000/387/695/00000/3be8f20e-6df1-4678-baed-b3c65b5ac756.root',
-'file:3be8f20e-6df1-4678-baed-b3c65b5ac756.root',
+'file:/eos/home-s/soohwan/store/DataRun3/2024/ppRef/DoubleMuon0/run387607/00cedc48-95c8-415d-a40d-935fe70d4ace.root',
 #'/store/hidata/HIRun2023A/HIForward1/MINIAOD/16Jan2024-v1/40000/574b9ae2-e2d7-45db-96af-ab91bfac097e.root',
 
 ]
@@ -233,19 +233,35 @@ process.generalOttCandidatesNew.usePixelTracks = cms.bool(False)
 process.generalOttCandidatesNew.pixelTracks = cms.InputTag('unpackedPixelTracks')
 
 
-process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.1)
-process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(1.6)
-process.generalOttCandidatesNew.batTkChi2Cut = cms.double(3)
+#process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.1)
+#process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(1.6)
+#process.generalOttCandidatesNew.batTkChi2Cut = cms.double(3)
+#process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(0)
+#process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.1)
+#process.generalOttCandidatesNew.batTkPtCut = cms.double(0.10)
+#process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
+#process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
+#process.generalOttCandidatesNew.bPtCut = cms.double(0.0)
+#process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.010)
+#process.generalOttCandidatesNew.mPiKCutMin = cms.double(0.0)
+#process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
+#process.generalOttCandidatesNew.bMassCut = cms.double(12)
+
+process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.0)
+process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(100.0)
+process.generalOttCandidatesNew.batTkChi2Cut = cms.double(10000)
 process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(0)
-process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.1)
-process.generalOttCandidatesNew.batTkPtCut = cms.double(0.10)
+process.generalOttCandidatesNew.batTkPtErrCut = cms.double(1.10)
+process.generalOttCandidatesNew.batTkPtCut = cms.double(0.03)
 process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
 process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
-process.generalOttCandidatesNew.bPtCut = cms.double(0.0)
-process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.010)
+process.generalOttCandidatesNew.bPtCut = cms.double(6.0)
+process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.000)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(0.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 process.generalOttCandidatesNew.bMassCut = cms.double(12)
+process.generalOttCandidatesNew.bQMassCut = cms.double(333)
+process.generalOttCandidatesNew.bOniaWindow = cms.vdouble(5.2, 0.2, 0.4, 0.4)
 
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.ottanalyzer_tree_cff")
 process.ottana_new = process.ottana.clone()
@@ -254,9 +270,12 @@ process.ottana_new.TrackCollection = cms.untracked.InputTag('unpackedTracksAndVe
 process.ottana_new.doRecoNtuple = True
 process.ottana_new.PID = 20443
 
-process.ottana_new.threeProngDecay = False 
+process.ottana_new.threeProngDecay = True 
+process.ottana_new.balancedTree = False 
 process.ottana_new.PID_dau1 = 443
-process.ottana_new.PID_dau2 = 113
+#process.ottana_new.PID_dau2 = 113
+process.ottana_new.PID_dau2 = -211
+process.ottana_new.PID_dau3 = 211
 
 #process.load("HeavyIonsAnalysis.EventAnalysis.HiForestInfo_cfi")
 #process.HiForestInfo.info = cms.vstring("HiForest, miniAOD, 140X, mc")
@@ -357,7 +376,7 @@ process.TFileService = cms.Service("TFileService",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.options   = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-process.options.numberOfThreads = 1
+process.options.numberOfThreads = 10
 process.options.numberOfStreams = 0
 process.schedule  = cms.Schedule( process.oniaTreeAna )
 

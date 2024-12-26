@@ -4,7 +4,6 @@
 
 
 #define PI 3.1416
-#define MAXCAN 500
 
 VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet& iConfig)
 {
@@ -430,8 +429,8 @@ cout<<"Putting GEN"<<endl;
               bool decision = (
 			          matchHadron(recoOnia, *theGenDau0,true) &&
 			          (
-			          	matchHadron(recopi1, *theGenDau1,false) && matchHadron(recopi2, *theGenDau2,false) ||
-			          	matchHadron(recopi1, *theGenDau2,false) && matchHadron(recopi2, *theGenDau1,false)
+			          	(matchHadron(recopi1, *theGenDau1,false) && matchHadron(recopi2, *theGenDau2,false)) ||
+			          	(matchHadron(recopi1, *theGenDau2,false) && matchHadron(recopi2, *theGenDau1,false))
 			          )
 		          );
               matchGEN[it] += decision;
@@ -1854,6 +1853,19 @@ VertexCompositeTreeProducer2::initTree()
               VertexCompositeNtuple->Branch("dedxHarmonic2Grand2D1",&grand2_H2dedx1,"dedxHarmonic2Grand2D1[candSize]/F");
               VertexCompositeNtuple->Branch("dedxHarmonic2Grand2D2",&grand2_H2dedx2,"dedxHarmonic2Grand2D2[candSize]/F");
             }
+            if(threeProngDecay_)
+            {
+              VertexCompositeNtuple->Branch("zDCASignificanceDaugther3",&dzos3,"zDCASignificanceDaugther3[candSize]/F");
+              VertexCompositeNtuple->Branch("xyDCASignificanceDaugther3",&dxyos3,"xyDCASignificanceDaugther3[candSize]/F");
+              VertexCompositeNtuple->Branch("NHitD3",&nhit3,"NHitD3[candSize]/F");
+              VertexCompositeNtuple->Branch("HighPurityDaugther3",&trkquality3,"HighPurityDaugther3[candSize]/O");
+              VertexCompositeNtuple->Branch("pTD3",&pt3,"pTD3[candSize]/F");
+              VertexCompositeNtuple->Branch("pTerrD3",&ptErr3,"pTerrD3[candSize]/F");
+              VertexCompositeNtuple->Branch("EtaD3",&eta3,"EtaD3[candSize]/F");
+              VertexCompositeNtuple->Branch("chargeD3",&charge3,"chargeD3[candSize]/I");
+              VertexCompositeNtuple->Branch("PhiD3",&phi3,"PhiD3[candSize]/F");
+              VertexCompositeNtuple->Branch("dedxHarmonic2D3",&H2dedx3,"dedxHarmonic2D3[candSize]/F");
+            }
         }
         else
         {
@@ -1883,19 +1895,6 @@ VertexCompositeTreeProducer2::initTree()
             VertexCompositeNtuple->Branch("dedxHarmonic2D2",&H2dedx2,"dedxHarmonic2D2[candSize]/F");
 //            VertexCompositeNtuple->Branch("dedxTruncated40Daugther2",&T4dedx2,"dedxTruncated40Daugther2[candSize]/F");
 //            VertexCompositeNtuple->Branch("normalizedChi2Daugther2",&trkChi2,"normalizedChi2Daugther2[candSize]/F");
-            if(threeProngDecay_)
-            {
-              VertexCompositeNtuple->Branch("zDCASignificanceDaugther3",&dzos3,"zDCASignificanceDaugther3[candSize]/F");
-              VertexCompositeNtuple->Branch("xyDCASignificanceDaugther3",&dxyos3,"xyDCASignificanceDaugther3[candSize]/F");
-              VertexCompositeNtuple->Branch("NHitD3",&nhit3,"NHitD3[candSize]/F");
-              VertexCompositeNtuple->Branch("HighPurityDaugther3",&trkquality3,"HighPurityDaugther3[candSize]/O");
-              VertexCompositeNtuple->Branch("pTD3",&pt3,"pTD3[candSize]/F");
-              VertexCompositeNtuple->Branch("pTerrD3",&ptErr3,"pTerrD3[candSize]/F");
-              VertexCompositeNtuple->Branch("EtaD3",&eta3,"EtaD3[candSize]/F");
-              VertexCompositeNtuple->Branch("chargeD3",&charge3,"chargeD3[candSize]/I");
-              VertexCompositeNtuple->Branch("PhiD3",&phi3,"PhiD3[candSize]/F");
-              VertexCompositeNtuple->Branch("dedxHarmonic2D3",&H2dedx3,"dedxHarmonic2D3[candSize]/F");
-            }
         }
         
         if(doMuon_)
