@@ -495,6 +495,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());
          dcaErrs_.push_back(cur3DIP.error());
+//if(theDStar->pt()<4){cout <<"Dstar pt : " <<theDStar->pt()<<endl;}
 
 // per//form MVA evaluation
          if(useAnyMVA_)

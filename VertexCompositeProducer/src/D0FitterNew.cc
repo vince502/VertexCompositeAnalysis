@@ -516,6 +516,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   // theD0->pt() > dPtCut ) {
         {
           theD0s.push_back( *theD0 );
+          if(theD0->pt()< 4){cout <<theD0->pt()<<endl;}
 
 // perform MVA evaluation
           if(useAnyMVA_)

@@ -423,7 +423,7 @@ VertexCompositeSelector::VertexCompositeSelector(const edm::ParameterSet& iConfi
     useAnyMVA_ = false;
     useExistingMVA_ = false;
 
-    forestLabel_ = "D0InpPb";
+    forestLabel_ = "DStarInPbPb";
     std::string type = "BDT";
     useForestFromDB_ = true;
     dbFileName_ = "";
@@ -1553,6 +1553,39 @@ VertexCompositeSelector::fillRECO(edm::Event& iEvent, const edm::EventSetup& iSe
             gbrVals_[27] = pt2;
             gbrVals_[28] = eta1;
             gbrVals_[29] = eta2;
+          }
+          if(forestLabel_ == "DStarInPbPb")
+          {
+            gbrVals_[0] = VtxProb;
+            gbrVals_[1] = agl;
+            // gbrVals_[2] = agl_abs;
+            // gbrVals_[3] = agl2D;
+            // gbrVals_[4] = agl2D_abs;
+            gbrVals_[2] = dl;
+            gbrVals_[3] = dlos;
+            gbrVals_[4] = dl2D;
+            gbrVals_[5] = dlos2D;
+            gbrVals_[6] = pt1;
+            gbrVals_[7] = eta1;
+            gbrVals_[8] = pt2;
+            gbrVals_[9] = eta2;
+            gbrVals_[10] = ptErr1;
+            gbrVals_[11] = ptErr2;
+            // gbrVals_[15] = nmatchedch2;
+            // gbrVals_[16] = nmatchedst2;
+            // gbrVals_[17] = matchedenergy2;
+            // gbrVals_[18] = dxSig1_seg_;
+            // gbrVals_[19] = dySig1_seg_;
+            // gbrVals_[20] = ddxdzSig1_seg_;
+            // gbrVals_[21] = ddydzSig1_seg_;
+            // gbrVals_[22] = dxSig2_seg_;
+            // gbrVals_[23] = dySig2_seg_;
+            // gbrVals_[24] = ddxdzSig2_seg_;
+            // gbrVals_[25] = ddydzSig2_seg_;
+            // gbrVals_[26] = pt1;
+            // gbrVals_[27] = pt2;
+            // gbrVals_[28] = eta1;
+            // gbrVals_[29] = eta2;
           }
 
           GBRForest const * forest = forest_;
