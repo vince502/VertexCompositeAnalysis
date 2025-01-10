@@ -80,7 +80,7 @@
 //
 
 #define PI 3.1416
-#define MAXCAN 50000
+#define MAXCAN 2000
 
 using namespace std;
 
@@ -368,8 +368,10 @@ private:
 
     // gen info    
     int candSize_gen;
+    float mass_gen[MAXCAN];
     float pt_gen[MAXCAN];
     float eta_gen[MAXCAN];
+    float phi_gen[MAXCAN];
     int status_gen[MAXCAN];
     int idmom[MAXCAN];
     float y_gen[MAXCAN];
@@ -551,9 +553,13 @@ bool VertexCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, 
 };
 
 bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
+    cout <<"_dmeson_ pdg ID : "<<_dmeson_->pdgId() << endl;
+    cout <<"_gen_ pdgId : " << _gen_.pdgId() << endl;
     return _dmeson_->pdgId() != _gen_.pdgId();
 };
 bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_) const {
+    cout <<"_dmeson_ pdg ID : "<<_dmeson_->pdgId() << endl;
+    cout <<"_gen_ pdgId : " << _gen_.pdgId() << endl;
     return _dmeson_->pdgId() != _gen_.pdgId();
 };
 
@@ -562,7 +568,6 @@ bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_
     // _deltaR_
     if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) return false;
     const double dR = reco::deltaR(*_recoTrk_, *_genTrk_);
-    cout << dR << endl;
     if(dR < deltaR_) pass = true;
     return pass;
 };
