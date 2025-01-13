@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      OniapipiFitter
+// Class:      OniapipiFitterPAT
 // 
-/**\class OniapipiFitter OniapipiFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/OniapipiFitter.cc
+/**\class OniapipiFitterPAT OniapipiFitterPAT.cc VertexCompositeAnalysis/VertexCompositeProducer/src/OniapipiFitterPAT.cc
 
  Description: <one line class summary>
 
@@ -14,7 +14,7 @@
 //
 //
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitterPAT.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -44,7 +44,7 @@
 
 
 // Constructor and (empty) destructor
-OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+OniapipiFitterPAT::OniapipiFitterPAT(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
     bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
 {
   using std::string;
@@ -96,11 +96,11 @@ OniapipiFitter::OniapipiFitter(const edm::ParameterSet& theParameters,  edm::Con
   trk2pTCut = theParameters.getParameter<double>(string("trk2pTCut"));
 }
 
-OniapipiFitter::~OniapipiFitter() {
+OniapipiFitterPAT::~OniapipiFitterPAT() {
 }
 
 // Method containing the algorithm for vertex reconstruction
-void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void OniapipiFitterPAT::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
 
 
@@ -466,15 +466,30 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 //cout << "start 1 4" << endl;
         AddFourMomenta addp4;
 
-        VertexCompositeCandidate* theB = 0;
+        // VertexCompositeCandidate* theB = 0;
+        // theB = new VertexCompositeCandidate(0, ottP4, ottVtx, bVtxCov, bVtxChi2, bVtxNdof);
         CompositeCandidate* theRho = 0;
-        theB = new VertexCompositeCandidate(0, ottP4, ottVtx, bVtxCov, bVtxChi2, bVtxNdof);
         theRho = new VertexCompositeCandidate(0, rhoP4, rhoVtx, rhoVtxCov, rhoVtxChi2, rhoVtxNdof );
         theRho->addDaughter(pion1candidate);
         theRho->addDaughter(pion2candidate);
-        theB->addDaughter(theOnia);
-        theB->addDaughter(pion1candidate);
-        theB->addDaughter(pion2candidate);
+        // theB->addDaughter(theOnia);
+        // theB->addDaughter(pion1candidate);
+        // theB->addDaughter(pion2candidate);
+
+        // Create a pat::CompositeCandidate for the B meson
+        pat::CompositeCandidate* theB = new pat::CompositeCandidate();
+        // theB = new pat::CompositeCandidate(0, ottCand->currentState().globalMomentum(),
+        //                               ottCand->currentState().mass(), ottVtx);
+
+        // Add user floats for vertex and fit information
+        // const auto& ottKineState = ottCand->currentState();
+        // math::PtEtaPhiELorentzVectorD ottP4(math::XYZTLorentzVector(ottKineState.px(), ottKineState.py(), ottKineState.pz(), ottKineState.mass()))
+        theB->setP4(ottP4);
+        theB->addUserFloat("vtxChi2", bVtxChi2);
+        theB->addUserFloat("vtxNdof", bVtxNdof);
+        theB->addUserFloat("vtxProb", ottC2Prob);
+        theB->addUserData("vtxCovariance", bVtxCovMatrix);
+
         // theB->addDaughter(*(reco::Candidate*)theRho);
 
         // theB->addDaughter(pion1candidate);
@@ -513,25 +528,25 @@ void OniapipiFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSe
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& OniapipiFitter::getB() const {
+const pat::CompositeCandidateCollection& OniapipiFitterPAT::getB() const {
   return theBs;
 }
-const std::vector<int>& OniapipiFitter::getOniaIdx() const {
+const std::vector<int>& OniapipiFitterPAT::getOniaIdx() const {
   return oniaIdx;
 }
 
 /*
-const std::vector<float>& OniapipiFitter::getMVAVals() const {
+const std::vector<float>& OniapipiFitterPAT::getMVAVals() const {
   return mvaVals_;
 }
 */
 /*
-auto_ptr<edm::ValueMap<float> > OniapipiFitter::getMVAMap() const {
+auto_ptr<edm::ValueMap<float> > OniapipiFitterPAT::getMVAMap() const {
   return mvaValValueMap;
 }
 */
 
-void OniapipiFitter::resetAll() {
+void OniapipiFitterPAT::resetAll() {
     theBs.clear();
     oniaIdx.clear();
 //    mvaVals_.clear();

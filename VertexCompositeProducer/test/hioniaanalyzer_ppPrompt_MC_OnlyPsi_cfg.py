@@ -253,7 +253,7 @@ options.inputFiles =[
 '/store/user/soohwan/Run3_2024/MC/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/Psi2SJpsipipi_PythiaCP5_Noemb_ppRef5p36_20Dec_v1/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/241222_061609/0000/Jpsi_RECO_72.root',
 '/store/user/soohwan/Run3_2024/MC/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/Psi2SJpsipipi_PythiaCP5_Noemb_ppRef5p36_20Dec_v1/PAT_MC_PythiaPsi2SToJPsiPiPi_CMSW_14_1_6_21Dec2024_v2/241222_061609/0000/Jpsi_RECO_87.root',
 ]
-options.maxEvents = -1 # -1 means all events
+options.maxEvents = 200000 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -433,6 +433,15 @@ process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 process.generalOttCandidatesNew.bMassCut = cms.double(12)
 process.generalOttCandidatesNew.bQMassCut = cms.double(333)
 process.generalOttCandidatesNew.bOniaWindow = cms.vdouble(5.2, 0.2, 0.4, 0.4)
+process.generalOttCandidatesNew.trk1cosPhiCut = cms.double(-1)
+process.generalOttCandidatesNew.trk2cosPhiCut = cms.double(-1)
+process.generalOttCandidatesNew.trk12cosPhiCut = cms.double(-1)
+process.generalOttCandidatesNew.trk1dRCut = cms.double(999.0)
+process.generalOttCandidatesNew.trk2dRCut = cms.double(999.0)
+process.generalOttCandidatesNew.trk12dRCut = cms.double(99.0)
+process.generalOttCandidatesNew.oniapTCut = cms.double(0.0)
+process.generalOttCandidatesNew.trk1pTCut = cms.double(0.0)
+process.generalOttCandidatesNew.trk2pTCut = cms.double(0.0)
 
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.ottanalyzer_tree_cff")
 process.ottana_mc_new = process.ottana_mc.clone()

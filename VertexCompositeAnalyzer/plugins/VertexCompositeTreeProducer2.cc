@@ -5,8 +5,7 @@
 
 #define PI 3.1416
 
-VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet& iConfig)
-{
+VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet& iConfig){
     //options
     doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
     doGenNtuple_ = iConfig.getUntrackedParameter<bool>("doGenNtuple");
@@ -33,11 +32,24 @@ VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterS
     if(threeProngDecay_) PID_dau3_ = iConfig.getUntrackedParameter<int>("PID_dau3");
     
     saveTree_ = iConfig.getUntrackedParameter<bool>("saveTree");
+    isFromOnia_ = iConfig.getUntrackedParameter<bool>("isFromOnia");
     saveHistogram_ = iConfig.getUntrackedParameter<bool>("saveHistogram");
     saveAllHistogram_ = iConfig.getUntrackedParameter<bool>("saveAllHistogram");
     massHistPeak_ = iConfig.getUntrackedParameter<double>("massHistPeak");
     massHistWidth_ = iConfig.getUntrackedParameter<double>("massHistWidth");
     massHistBins_ = iConfig.getUntrackedParameter<int>("massHistBins");
+    doJetConstituentCompare_ = iConfig.exists("doJetConstituentCompare") ? 
+      iConfig.getUntrackedParameter<bool>("doJetConstituentCompare") : false;
+    jetCompareOnlyNonMuons_ = iConfig.exists("jetCompareOnlyNonMuons") ? 
+      iConfig.getUntrackedParameter<bool>("jetCompareOnlyNonMuons") : false;
+    jetInclDimuon_ = iConfig.exists("jetInclDimuon") ? 
+      iConfig.getUntrackedParameter<bool>("jetInclDimuon") : false;
+    if(doJetConstituentCompare_){
+      jetNames =  iConfig.getParameter<std::vector<string> >("jetNames");
+      for( string jetName : jetNames){
+        jetsByName_token[jetName] = consumes<std::vector<pat::Jet> >(edm::InputTag(jetName, string("")));
+      }
+    }
 
     useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
     isSkimMVA_ = iConfig.getUntrackedParameter<bool>("isSkimMVA"); 
@@ -59,6 +71,7 @@ VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterS
     Dedx_Token1_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
     Dedx_Token2_ = consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxTruncated40"));
     tok_genParticle_ = consumes<reco::GenParticleCollection>(edm::InputTag(iConfig.getUntrackedParameter<edm::InputTag>("GenParticleCollection")));
+    if(isFromOnia_) oniaCandidateIdx_Token_ = consumes<std::vector<int> >(iConfig.getUntrackedParameter<edm::InputTag>("OniaIdxCollection"));
 
     isCentrality_ = false;
     if(iConfig.exists("isCentrality")) isCentrality_ = iConfig.getParameter<bool>("isCentrality");
@@ -103,17 +116,42 @@ iSetup)
     using namespace reco;
 
     if(doGenNtuple_) fillGEN(iEvent,iSetup);
-    if(doRecoNtuple_) fillRECO(iEvent,iSetup);
+    if(doRecoNtuple_) {
+      for( auto jetName : jetNames){
+        jetNewPt[jetName].reserve(MAXCAN);
+        jetNewEta[jetName].reserve(MAXCAN);
+        jetNewPhi[jetName].reserve(MAXCAN);
+        jetNewM[jetName].reserve(MAXCAN);
+        jetPt[jetName].reserve(MAXCAN);
+        jetEta[jetName].reserve(MAXCAN);
+        jetPhi[jetName].reserve(MAXCAN);
+        jetM[jetName].reserve(MAXCAN);
+      }
+      fillRECO(iEvent,iSetup);
+    }
 
     if(saveTree_) VertexCompositeNtuple->Fill();
+
+    for( auto jetName : jetNames){
+      jetNewPt[jetName].clear();
+      jetNewEta[jetName].clear();
+      jetNewPhi[jetName].clear();
+      jetNewM[jetName].clear();
+      jetPt[jetName].clear();
+      jetEta[jetName].clear();
+      jetPhi[jetName].clear();
+      jetM[jetName].clear();
+    }
 }
 
 void
 VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  using LV=math::XYZTLorentzVector;
 #ifdef DEBUG
     using std::cout;
     using std::endl;
 #endif
+    // std::fill(std::begin(oniaCandIdx), std::end(oniaCandIdx), (int) -1);
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
     iEvent.getByToken(tok_offlinePV_,vertices);
@@ -123,11 +161,12 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
 
     edm::Handle<reco::VertexCompositeCandidateCollection> v0candidates;
     iEvent.getByToken(recoVertexCompositeCandidateCollection_Token_,v0candidates);
+    edm::Handle<std::vector<int> > oniaIdx;
+    if(isFromOnia_) iEvent.getByToken(oniaCandidateIdx_Token_, oniaIdx);
     const reco::VertexCompositeCandidateCollection * v0candidates_ = v0candidates.product();
     
     edm::Handle<MVACollection> mvavalues;
-    if(useAnyMVA_)
-    {
+    if(useAnyMVA_){
       iEvent.getByToken(MVAValues_Token_,mvavalues);
       assert( (*mvavalues).size() == v0candidates->size() );
     }
@@ -140,6 +179,19 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
     
     edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle2;
     iEvent.getByToken(Dedx_Token2_, dEdxHandle2);
+
+    std::map<string, edm::Handle<vector<pat::Jet> > > jetsByNameHandle;
+    if(doJetConstituentCompare_){
+      jetComp = new ConstituentComparer(jetCompareOnlyNonMuons_, jetInclDimuon_);
+    // edm::Handle<
+      int count = 0;
+      for( string jetName : jetNames){
+        jetKind[jetName] = count;
+        count ++;
+        iEvent.getByToken(jetsByName_token[jetName], jetsByNameHandle[jetName]);
+      }
+    }
+
     
     centrality=-1;
     if(isCentrality_) {
@@ -237,7 +289,7 @@ cout<<"Putting GEN"<<endl;
           if(fabs(id)!=PID_) continue; //check is target
           if(decayInGen_ && trk.numberOfDaughters()!=2 && !threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
           if(decayInGen_ && trk.numberOfDaughters()!=3 && threeProngDecay_) continue; //check 2-pron decay if target decays in Gen
-          std::cout << "chkpt 1" << std::endl;
+          // std::cout << "chkpt 1" << std::endl;
           if( twoLayerDecay_ && balancedTree_){
             int id1 = trk.daughter(0)->pdgId();
             int id2 = trk.daughter(1)->pdgId();
@@ -260,26 +312,26 @@ cout<<"Putting GEN"<<endl;
               (id22 == PID_gdau11_ && id21 == PID_gdau12_) ) 
             ))) continue;
 	        }
-          std::cout << "chkpt 2" << std::endl;
+          // std::cout << "chkpt 2" << std::endl;
           if( twoLayerDecay_ && threeProngDecay_){
             int id1 = trk.daughter(0)->pdgId();
             int id2 = trk.daughter(1)->pdgId();
             int id3 = trk.daughter(2)->pdgId();
-            std::cout << id1 << ", " << id2 << ", " << id3 << std::endl;
+            // std::cout << id1 << ", " << id2 << ", " << id3 << std::endl;
             int hasDau = (abs(id1) == PID_dau1_ ) ? 0 :  (abs(id2) == PID_dau1_ ) ? 1 : (abs(id3) == PID_dau1_ ) ? 2 : -1;
             if( hasDau < 0) continue;
-          std::cout << "chkpt 3" << std::endl;
+          // std::cout << "chkpt 3" << std::endl;
             int idx1 = 2- hasDau;
             int idx2 = abs(1- (int) hasDau);
             id2 = trk.daughter(idx1)->pdgId();
             id3 = trk.daughter(idx2)->pdgId();
-            std::cout << id1 << ", " << id2 << ", " << id3 << std::endl;
+            // std::cout << id1 << ", " << id2 << ", " << id3 << std::endl;
             if( !((id2 == PID_dau2_ && id3 == PID_dau3_) || (id3 == PID_dau2_ && id2 == PID_dau3_) )) continue; 
-          std::cout << "chkpt 4" << std::endl;
+          // std::cout << "chkpt 4" << std::endl;
             int id11 = trk.daughter(0)->daughter(0)->pdgId();
             int id12 = trk.daughter(0)->daughter(1)->pdgId();
             if( !((id11 == PID_gdau11_ && id12 == PID_gdau12_) || (id12 == PID_gdau11_ && id11 == PID_gdau12_) )) continue; 
-          std::cout << "chkpt 5" << std::endl;
+          // std::cout << "chkpt 5" << std::endl;
           }
           genRefs.push_back(reco::GenParticleRef(genpars, it));
        }
@@ -288,8 +340,52 @@ cout<<"Putting GEN"<<endl;
 
     //RECO Candidate info
     candSize = v0candidates_->size();
+
+    std::memset(oniaCandIdx, -1, sizeof(oniaCandIdx));
+
+    std::map<string, const std::vector<pat::Jet>* > jets;
+    if(doJetConstituentCompare_){
+      for( auto jetName : jetNames){
+        jets[jetName] = jetsByNameHandle[jetName].product();
+      }
+    }
     for(unsigned it=0; it<v0candidates_->size(); ++it){
         const reco::VertexCompositeCandidate & trk = (*v0candidates_)[it];
+        if(isFromOnia_){
+          oniaCandIdx[it] = (*oniaIdx)[it];
+        }
+        if(doJetConstituentCompare_){
+          for( auto jetName : jetNames){
+            auto newP4s = jetComp->checkOttForEveryJet(*jets[jetName], trk);
+            // std::vector<float> jetIdxs = jetComp->checkJetForEveryOtt(jets[it], *v0candidates_);
+  
+#ifdef DEBUG_OTTSUB
+            if(newP4s.size() > 0)std::cout << newP4s[0].first.pt() << ", " << std::endl;
+#endif            
+            std::vector<float> npt, neta, nphi, nm;
+            std::vector<float> opt, oeta, ophi, om;
+
+            for( std::pair<LV, LV> jidx : newP4s){ 
+              opt.push_back(jidx.first.pt());
+              oeta.push_back(jidx.first.eta());
+              ophi.push_back(jidx.first.phi());
+              om.push_back(jidx.first.mass());
+              npt.push_back(jidx.second.pt());
+              neta.push_back(jidx.second.eta());
+              nphi.push_back(jidx.second.phi());
+              nm.push_back(jidx.second.mass());
+            }
+            jetPt[jetName].push_back(opt);
+            jetEta[jetName].push_back(oeta);
+            jetPhi[jetName].push_back(ophi);
+            jetM[jetName].push_back(om);
+
+            jetNewPt[jetName].push_back(npt);
+            jetNewEta[jetName].push_back(neta);
+            jetNewPhi[jetName].push_back(nphi);
+            jetNewM[jetName].push_back(nm);
+          }
+        }
         
         double secvz=-999.9, secvx=-999.9, secvy=-999.9;
         secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
@@ -402,7 +498,7 @@ cout<<"Putting GEN"<<endl;
             idmom_reco[it] = -77;
             idBAnc_reco[it] = -77;
             for( unsigned int igen=0; igen<nGen; igen++){
-              std::cout << "Running 3 prong decay system" << std::endl;
+              // std::cout << "Running 3 prong decay system" << std::endl;
               auto const theGenV0 = genRefs.at(igen);
               unsigned int idx0 = -1;
               if( fabs(theGenV0->daughter(0)->pdgId()) == PID_dau1_ ) idx0 = 0;
@@ -411,7 +507,7 @@ cout<<"Putting GEN"<<endl;
               auto const* theGenDau0 = genRefs.at(igen)->daughter(idx0);
               auto const* theGenDau1 = genRefs.at(igen)->daughter(2- idx0);
               auto const* theGenDau2 = genRefs.at(igen)->daughter(abs(1- (int) idx0));
-              std::cout << "idx : " << idx0 << "("<< theGenDau0->pdgId() <<"), " << 2-idx0 << "("<< theGenDau2->pdgId() <<"), " << abs(1-(int) idx0) << "("<< theGenDau1->pdgId()<<")"<<  std::endl;
+              // std::cout << "idx : " << idx0 << "("<< theGenDau0->pdgId() <<"), " << 2-idx0 << "("<< theGenDau2->pdgId() <<"), " << abs(1-(int) idx0) << "("<< theGenDau1->pdgId()<<")"<<  std::endl;
               // Only works for 2 body two layer decay
               reco::Candidate const* recoOnia;
               reco::Candidate const* recopi1;
@@ -423,7 +519,7 @@ cout<<"Putting GEN"<<endl;
               recoOnia = trk.daughter(idxReco0);
               recopi1 = trk.daughter(2-idxReco0);
               recopi2 = trk.daughter(abs(1- (int)idxReco0));
-              std::cout << "idx : " << idxReco0 << "("<< recoOnia->pdgId() <<"), " << 2-idxReco0 << "("<< recopi1->pdgId() <<"), " << abs(1-(int) idxReco0) << "("<< recopi2->pdgId()<<")"<<  std::endl;
+              // std::cout << "idx : " << idxReco0 << "("<< recoOnia->pdgId() <<"), " << 2-idxReco0 << "("<< recopi1->pdgId() <<"), " << abs(1-(int) idxReco0) << "("<< recopi2->pdgId()<<")"<<  std::endl;
               const auto nGenDau = theGenV0->numberOfDaughters();
              //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
               bool decision = (
@@ -491,61 +587,6 @@ cout<<"Putting GEN"<<endl;
               }
             } // END for nGen
           }
-          // else {
-          //   matchGEN[it] = false;
-          //   unsigned int nGen = genRefs.size();
-          //   isSwap[it] = false;
-          //   idmom_reco[it] = -77;
-          //   idBAnc_reco[it] = -77;
-
-          //   for( unsigned int igen=0; igen<nGen; igen++){
-          //     auto const theGenP = genRefs.at(igen);
-          //     matchGEN[it] += matchHadron(&trk, *theGenP,true);
-          //     if(matchGEN[it]){
-          //       isSwap[it] = checkSwap(&trk, *theGenP);
-          //       auto mom_ref = findMother(theGenP);
-          //       if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
-          //       int __count_anc__ = 0;
-          //       auto __ref_anc__ = mom_ref;
-          //       while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
-          //         __ref_anc__ = findMother(__ref_anc__);
-          //         if( __ref_anc__.isNonnull()){
-          //           if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
-          //             idBAnc_reco[it] = __ref_anc__->pdgId();
-          //       } } }
-
-          //       matchGen_D0pT_[it] = theGenP->pt();
-          //       matchGen_D0eta_[it] = theGenP->eta();
-          //       matchGen_D0phi_[it] = theGenP->phi();
-          //       matchGen_D0mass_[it] = theGenP->mass();
-          //       matchGen_D0y_[it] = theGenP->rapidity();
-          //       matchGen_D0charge_[it] = theGenP->charge();
-          //       matchGen_D0pdgId_[it] = theGenP->pdgId();
-
-          //       genDecayLength(*theGenP, matchGen_D1decayLength2D_[it], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
-          //       getAncestorId(*theGenP, matchGen_D1ancestorId_[it], matchGen_D1ancestorFlavor_[it] );
-
-          //       const auto* genDau0 = theGenP->daughter(0);
-          //       const auto* genDau1 = theGenP->daughter(1);
-
-          //       matchGen_D0Dau1_pT_[it] = genDau0->pt();
-          //       matchGen_D0Dau1_eta_[it] = genDau0->eta();
-          //       matchGen_D0Dau1_phi_[it] = genDau0->phi();
-          //       matchGen_D0Dau1_mass_[it] = genDau0->mass();
-          //       matchGen_D0Dau1_y_[it] = genDau0->rapidity();
-          //       matchGen_D0Dau1_charge_[it] = genDau0->charge();
-          //       matchGen_D0Dau1_pdgId_[it] = genDau0->pdgId();
-
-          //       matchGen_D0Dau2_pT_[it] = genDau1->pt();
-          //       matchGen_D0Dau2_eta_[it] = genDau1->eta();
-          //       matchGen_D0Dau2_phi_[it] = genDau1->phi();
-          //       matchGen_D0Dau2_mass_[it] = genDau1->mass();
-          //       matchGen_D0Dau2_y_[it] = genDau1->rapidity();
-          //       matchGen_D0Dau2_charge_[it] = genDau1->charge();
-          //       matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
-          //     }
-          //   } // END for nGen
-          // }
         }
         
         double pxd1 = d1->px();
@@ -590,6 +631,12 @@ cout<<"Putting GEN"<<endl;
           eta3[it] = d3->eta();
           phi3[it] = d3->phi();
           charge3[it] = d3->charge();
+          ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > ad2(d2->p4());
+          ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double> > ad3(d3->p4());
+          ad2.SetM(0.000511);
+          ad3.SetM(0.000511);
+          
+          massIfConv[it] = (d1->p4() + ad2 + ad3).mass();
         }
         TVector3 dauvec3(pxd3,pyd3,pzd3);
 
@@ -1667,10 +1714,9 @@ void
 VertexCompositeTreeProducer2::initTree()
 { 
     VertexCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
+    fs->file().SetCompressionLevel(9);
     
-    if(doRecoNtuple_) 
-    { 
-  
+    if(doRecoNtuple_){ 
     // Event info
     VertexCompositeNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
     VertexCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
@@ -1683,14 +1729,29 @@ VertexCompositeTreeProducer2::initTree()
     VertexCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
     VertexCompositeNtuple->Branch("candSize",&candSize,"candSize/I");
     if(isCentrality_) VertexCompositeNtuple->Branch("centrality",&centrality,"centrality/I");
-    if(isEventPlane_) 
-    {
+    if(isFromOnia_){
+      VertexCompositeNtuple->Branch("oniaCandIdx",&oniaCandIdx,"oniaCandIdx[candSize]/I");
+    }
+    if(isEventPlane_){
       VertexCompositeNtuple->Branch("ephfpAngle",&ephfpAngle,"ephfpAngle[3]/F");
       VertexCompositeNtuple->Branch("ephfmAngle",&ephfmAngle,"ephfmAngle[3]/F");
       VertexCompositeNtuple->Branch("ephfpQ",&ephfpQ,"ephfpQ[3]/F");
       VertexCompositeNtuple->Branch("ephfmQ",&ephfmQ,"ephfmQ[3]/F");
       VertexCompositeNtuple->Branch("ephfpSumW",&ephfpSumW,"ephfpSumW/F");
       VertexCompositeNtuple->Branch("ephfmSumW",&ephfmSumW,"ephfmSumW/F");
+    }
+    if(doJetConstituentCompare_){
+      for(string jetName : jetNames){
+        VertexCompositeNtuple->Branch(string("jetNewPt"+jetName).c_str(),&(jetNewPt[jetName]), 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetNewEta"+jetName).c_str(),&jetNewEta[jetName], 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetNewPhi"+jetName).c_str(),&jetNewPhi[jetName], 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetNewM"+jetName).c_str(),&jetNewM[jetName], 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetPt"+jetName).c_str(),&jetPt[jetName], 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetEta"+jetName).c_str(),&jetEta[jetName], 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetPhi"+jetName).c_str(),&jetPhi[jetName], 32000, 99);
+        VertexCompositeNtuple->Branch(string("jetM"+jetName).c_str(),&jetM[jetName], 32000, 99);
+      }
+
     }
 
     // particle info
@@ -1865,6 +1926,7 @@ VertexCompositeTreeProducer2::initTree()
               VertexCompositeNtuple->Branch("chargeD3",&charge3,"chargeD3[candSize]/I");
               VertexCompositeNtuple->Branch("PhiD3",&phi3,"PhiD3[candSize]/F");
               VertexCompositeNtuple->Branch("dedxHarmonic2D3",&H2dedx3,"dedxHarmonic2D3[candSize]/F");
+              VertexCompositeNtuple->Branch("massIfConv",&massIfConv,"massIfConv[candSize]/F");
             }
         }
         else

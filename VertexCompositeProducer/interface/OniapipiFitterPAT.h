@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      OniapipiFitter
+// Class:      OniapipiFitterPAT
 // 
-/**\class OniapipiFitter OniapipiFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitter.h
+/**\class OniapipiFitterPAT OniapipiFitterPAT.h VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitterPAT.h
 
  Description: <one line class summary>
 
@@ -45,9 +45,10 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
 
-#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include <DataFormats/PatCandidates/interface/Muon.h>
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -74,14 +75,14 @@
 #include <algorithm>
 #include <map>
 
-class OniapipiFitter {
+class OniapipiFitterPAT {
  public:
-  OniapipiFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
-  ~OniapipiFitter();
+  OniapipiFitterPAT(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
+  ~OniapipiFitterPAT();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-  const reco::VertexCompositeCandidateCollection& getB() const;
+  const pat::CompositeCandidateCollection& getB() const;
   const std::vector<int>& getOniaIdx() const;
 //  const std::vector<float>& getMVAVals() const; 
 
@@ -95,7 +96,7 @@ class OniapipiFitter {
   const float oniaMass = 3.094;
   float piMassB_sigma = 3.5E-4f;
   float kaonMassB_sigma = 1.6E-4f;
-  reco::VertexCompositeCandidateCollection theBs;
+  pat::CompositeCandidateCollection theBs;
   std::vector<int> oniaIdx;
 
   // Tracker geometry for discerning hit positions
@@ -190,6 +191,6 @@ class OniapipiFitter {
       return std::atan2(std::sin(dphi), std::cos(dphi)); // Ensures result is in [-π, π]
   };
 
-};
+  };
 
 #endif

@@ -1,10 +1,11 @@
-
 // system include files
 #include <memory>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include <algorithm>
+#include <iterator>
 
 #include <TH1.h>
 #include <TH2.h>
@@ -63,6 +64,8 @@
 #include "DataFormats/HeavyIonEvent/interface/CentralityBins.h"
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 #include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 //#include "RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneFlatten.h"
 //#include "RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h"
@@ -72,6 +75,8 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 
+#include "ConstituentComparer.cc"
+
 //#define DEBUG true
 
 
@@ -80,7 +85,8 @@
 //
 
 #define PI 3.1416
-#define MAXCAN 10000
+#define MAXCAN 1000
+#define MAXJETSIZE 20
 
 using namespace std;
 
@@ -160,11 +166,18 @@ private:
     TH2F*  hdedxHarmonic2D3VsP[6][10];
     
     bool   saveTree_;
+    bool   isFromOnia_;
     bool   saveHistogram_;
     bool   saveAllHistogram_;
+    bool   compareJet_;
+    bool   doJetConstituentCompare_;
+    bool   jetCompareOnlyNonMuons_;
+    bool   jetInclDimuon_;
     double massHistPeak_;
     double massHistWidth_;
     int    massHistBins_;
+
+    ConstituentComparer* jetComp;
 
     //options
     bool doRecoNtuple_;
@@ -208,12 +221,22 @@ private:
     float bestvy;
     float bestvz;
     int candSize;
+    std::map<string, int[MAXCAN]> jetSize;
+    std::map<string, std::vector<std::vector<float> > >jetNewPt;
+    std::map<string, std::vector<std::vector<float> > >jetNewEta;
+    std::map<string, std::vector<std::vector<float> > >jetNewPhi;
+    std::map<string, std::vector<std::vector<float> > >jetNewM;
+    std::map<string, std::vector<std::vector<float> > >jetPt;
+    std::map<string, std::vector<std::vector<float> > >jetEta;
+    std::map<string, std::vector<std::vector<float> > >jetPhi;
+    std::map<string, std::vector<std::vector<float> > >jetM;
     float ephfpAngle[3];
     float ephfmAngle[3];
     float ephfpQ[3];
     float ephfmQ[3];
     float ephfpSumW;
     float ephfmSumW;
+    std::map<string, int> jetKind;
     
     //Composite candidate info
     float mva[MAXCAN];
@@ -223,6 +246,7 @@ private:
     float flavor[MAXCAN];
     float y[MAXCAN];
     float mass[MAXCAN];
+    float massIfConv[MAXCAN];
     float VtxProb[MAXCAN];
     float dlos[MAXCAN];
     float dl[MAXCAN];
@@ -235,6 +259,7 @@ private:
     float agl2D_abs[MAXCAN];
     float dlos2D[MAXCAN];
     float dl2D[MAXCAN];
+    int oniaCandIdx[MAXCAN];
     bool isSwap[MAXCAN];
     bool matchGEN[MAXCAN];
     int idBAnc_reco[MAXCAN];
@@ -556,6 +581,7 @@ private:
     vector<double> *GDvector2;
     vector<double> *Dvector3;
     vector<int> *pVectIDmom;
+
     
     bool useAnyMVA_;
     bool isSkimMVA_;
@@ -568,6 +594,7 @@ private:
     edm::EDGetTokenT<reco::VertexCollection> tok_offlinePV_;
     edm::EDGetTokenT<reco::TrackCollection> tok_generalTrk_;
     edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> recoVertexCompositeCandidateCollection_Token_;
+    edm::EDGetTokenT<std::vector<int> > oniaCandidateIdx_Token_;
     edm::EDGetTokenT<MVACollection> MVAValues_Token_;
 
     edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > Dedx_Token1_;
@@ -579,6 +606,9 @@ private:
     edm::EDGetTokenT<reco::Centrality> tok_centSrc_;
 
     edm::EDGetTokenT<reco::EvtPlaneCollection> tok_eventplaneSrc_;
+
+    std::vector<string> jetNames;
+    std::map<string, edm::EDGetTokenT<vector<pat::Jet> > > jetsByName_token;
 };
 
 //

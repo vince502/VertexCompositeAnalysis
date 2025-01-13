@@ -34,7 +34,11 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include <DataFormats/PatCandidates/interface/Muon.h>
 
+// #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitterPAT.h"
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/OniapipiFitter.h"
 
 class OniaPiPiProducer : public edm::one::EDProducer<> {
@@ -52,6 +56,7 @@ private:
 
 //  bool useAnyMVA_;
 
+  // OniapipiFitter theVees; 
   OniapipiFitter theVees; 
 //  edm::ParameterSet theParams;
 };

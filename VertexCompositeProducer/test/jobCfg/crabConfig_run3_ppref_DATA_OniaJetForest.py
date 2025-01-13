@@ -3,16 +3,17 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_('General')
-config.General.requestName = 'JspiPiPi_VertexCompsoite_DoubleMu0to4_ppref_27Dec_Full_NewFixLoopv1'
+config.General.requestName = 'OniaAndJet_VertexCompsoite_DoubleMu0to4_ppref_13Jan_Full_R3R4_v1'
 config.General.workArea = 'crab_project'
 config.General.transferOutputs = True
 config.General.transferLogs = False
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '../hioniaanalyzer_ppPrompt_DATA_cfg.py'
+config.JobType.psetName = '../forest_miniAOD_run3_ppref_DATA_OniaJet.py'
 config.JobType.maxMemoryMB = 2500
 config.JobType.numCores = 1
+config.JobType.priority = 1
 
 config.section_('Data')
 config.Data.outputPrimaryDataset = 'PPRefDoubleMuonAll'
@@ -20,7 +21,7 @@ config.Data.outputPrimaryDataset = 'PPRefDoubleMuonAll'
 config.Data.userInputFiles = open('dbmu2024J').readlines()
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 20
+config.Data.unitsPerJob = 10
 config.Data.totalUnits =  -1
 
 config.Data.publication = False

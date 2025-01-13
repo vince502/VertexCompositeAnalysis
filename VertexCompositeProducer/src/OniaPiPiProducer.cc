@@ -10,6 +10,8 @@ OniaPiPiProducer::OniaPiPiProducer(const edm::ParameterSet& iConfig) :
 //  if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
   produces< reco::VertexCompositeCandidateCollection >("B");
+//   produces< pat::CompositeCandidateCollection >("B");
+  produces< std::vector<int> >("OniaIdx");
 //  if(useAnyMVA_) produces<MVACollection>("MVAValuesB");
 }
 
@@ -36,6 +38,8 @@ void OniaPiPiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 //     bCandidates( new reco::VertexCompositeCandidateCollection );
 //
    auto bCandidates = std::make_unique<reco::VertexCompositeCandidateCollection>();
+   // auto bCandidates = std::make_unique<pat::CompositeCandidateCollection>();
+   auto oniaIndices = std::make_unique<std::vector<int> >(theVees.getOniaIdx().begin(), theVees.getOniaIdx().end());
    bCandidates->reserve( theVees.getB().size() );
 
    std::copy( theVees.getB().begin(),
@@ -44,6 +48,7 @@ void OniaPiPiProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 
    // Write the collections to the Event
    iEvent.put( std::move(bCandidates), std::string("B") );
+   iEvent.put( std::move(oniaIndices), std::string("OniaIdx") );
 /*    
    if(useAnyMVA_) 
    {

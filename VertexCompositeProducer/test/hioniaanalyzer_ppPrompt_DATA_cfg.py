@@ -8,7 +8,7 @@ from Configuration.StandardSequences.Eras import eras
 
 HLTProcess     = "HLT" # Name of HLT process
 isMC           = False # if input is MONTECARLO: True or if it's DATA: False
-muonSelection  = "GlbTrk" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
+muonSelection  = "Trk" # Single muon selection: All, Glb(isGlobal), GlbTrk(isGlobal&&isTracker), Trk(isTracker), GlbOrTrk, TwoGlbAmongThree (which requires two isGlobal for a trimuon, and one isGlobal for a dimuon) are available
 applyEventSel  = True # Only apply Event Selection if the required collections are present
 OnlySoftMuons  = False # Keep only isSoftMuon's (without highPurity, and without isGlobal which should be put in 'muonSelection' parameter) from the beginning of HiSkim. If you want the full SoftMuon selection, set this flag false and add 'isSoftMuon' in lowerPuritySelection. In any case, if applyCuts=True, isSoftMuon is required at HiAnalysis level for muons of selected dimuons.
 applyCuts      = False # At HiAnalysis level, apply kinematic acceptance cuts + identification cuts (isSoftMuon (without highPurity) or isTightMuon, depending on TightGlobalMuon flag) for muons from selected di(tri)muons + hard-coded cuts on the di(tri)muon that you would want to add (but recommended to add everything in LateDimuonSelection, applied at the end of HiSkim)
@@ -65,11 +65,11 @@ options.inputFiles =[
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/General2024Analysis/CMSSW_14_1_4_patch1/src/cfg_txt/recoppraw2mini_RAW2DIGI_L1Reco_RECO_PAT.root',
 #'file:/afs/cern.ch/work/s/soohwan/private/Analysis/General2024Analysis/CMSSW_14_1_4_patch1/src/cfg_txt/recoppraw2mini_RAW2DIGI_L1Reco_RECO_PAT.root',
 #'/store/data/Run2024J/PPRefDoubleMuon0/MINIAOD/PromptReco-v1/000/387/695/00000/3be8f20e-6df1-4678-baed-b3c65b5ac756.root',
-'file:/eos/home-s/soohwan/store/DataRun3/2024/ppRef/DoubleMuon0/run387607/00cedc48-95c8-415d-a40d-935fe70d4ace.root',
+'file:/eos/home-s/soohwan/store/DataRun3/2024/ppRef/DoubleMuon0/run387696/1028d78e-6237-4bc3-ab45-c77494763e00.root',
 #'/store/hidata/HIRun2023A/HIForward1/MINIAOD/16Jan2024-v1/40000/574b9ae2-e2d7-45db-96af-ab91bfac097e.root',
 
 ]
-options.maxEvents = 10000 # -1 means all events
+options.maxEvents = 100000 # -1 means all events
 
 # Get and parse the command line arguments
 options.parseArguments()
@@ -77,7 +77,7 @@ options.parseArguments()
 triggerList    = {
 		# Double Muon Trigger List
 		'DoubleMuonTrigger' : cms.vstring(
-			      "HLT_PPRefL1DoubleMu0_Open_v",
+		     "HLT_PPRefL1DoubleMu0_Open_v",
             "HLT_PPRefL1DoubleMu0_v",
             "HLT_PPRefL1DoubleMu0_SQ_v",
             "HLT_PPRefL1DoubleMu2_v",
@@ -133,7 +133,7 @@ oniaTreeAnalyzer(process,
                  muonSelection=muonSelection, L1Stage=2, isMC=isMC, pdgID=pdgId, outputFileName=options.outputFile, doTrimu=doTrimuons#, OnlySingleMuons=True
 )
 
-process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string("mass > 2 && charge==0 && abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25")
+process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string(" pt > 3.0 && mass > 2 && mass < 5 && charge==0 && abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25")
 #process.onia2MuMuPatGlbGlb.lowerPuritySelection  = cms.string("pt > 5 || isPFMuon || (pt>1.2 && (isGlobalMuon || isStandAloneMuon)) || (isTrackerMuon && track.quality('highPurity'))")
 #process.onia2MuMuPatGlbGlb.higherPuritySelection = cms.string("") ## No need to repeat lowerPuritySelection in there, already included
 if applyCuts:
@@ -247,7 +247,7 @@ process.generalOttCandidatesNew.pixelTracks = cms.InputTag('unpackedPixelTracks'
 #process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
 #process.generalOttCandidatesNew.bMassCut = cms.double(12)
 
-process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(1.0)
+process.generalOttCandidatesNew.batTrkPtSumCut = cms.double(0.0)
 process.generalOttCandidatesNew.batTrkEtaDiffCut = cms.double(100.0)
 process.generalOttCandidatesNew.batTkChi2Cut = cms.double(10000)
 process.generalOttCandidatesNew.batTkNhitsCut = cms.int32(0)
@@ -255,13 +255,22 @@ process.generalOttCandidatesNew.batTkPtErrCut = cms.double(0.10)
 process.generalOttCandidatesNew.batTkPtCut = cms.double(0.20)
 process.generalOttCandidatesNew.alphaCut = cms.double(999.0)
 process.generalOttCandidatesNew.alpha2DCut = cms.double(999.0)
-process.generalOttCandidatesNew.bPtCut = cms.double(4.0)
+process.generalOttCandidatesNew.bPtCut = cms.double(6.5)
 process.generalOttCandidatesNew.bVtxChiProbCut = cms.double(0.005)
 process.generalOttCandidatesNew.mPiKCutMin = cms.double(0.0)
 process.generalOttCandidatesNew.mPiKCutMax = cms.double(40.0)
-process.generalOttCandidatesNew.bMassCut = cms.double(12)
+process.generalOttCandidatesNew.bMassCut = cms.double(7)
 process.generalOttCandidatesNew.bQMassCut = cms.double(333)
 process.generalOttCandidatesNew.bOniaWindow = cms.vdouble(5.2, 0.2, 0.4, 0.4)
+process.generalOttCandidatesNew.trk1cosPhiCut = cms.double(0.7)
+process.generalOttCandidatesNew.trk2cosPhiCut = cms.double(0.7)
+process.generalOttCandidatesNew.trk12cosPhiCut = cms.double(0.5)
+process.generalOttCandidatesNew.trk1dRCut = cms.double(1.2)
+process.generalOttCandidatesNew.trk2dRCut = cms.double(1.2)
+process.generalOttCandidatesNew.trk12dRCut = cms.double(1.5)
+process.generalOttCandidatesNew.oniapTCut = cms.double(0.0)
+process.generalOttCandidatesNew.trk1pTCut = cms.double(0.1)
+process.generalOttCandidatesNew.trk2pTCut = cms.double(0.1)
 
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.ottanalyzer_tree_cff")
 process.ottana_new = process.ottana.clone()
@@ -376,7 +385,7 @@ process.TFileService = cms.Service("TFileService",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvents) )
 process.options   = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-process.options.numberOfThreads = 10
+process.options.numberOfThreads = 1
 process.options.numberOfStreams = 0
 process.schedule  = cms.Schedule( process.oniaTreeAna )
 
