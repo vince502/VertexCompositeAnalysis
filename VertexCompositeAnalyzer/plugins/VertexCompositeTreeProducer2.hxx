@@ -692,7 +692,7 @@ bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_
     // _deltaR_
     if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) return false;
     const double dR = reco::deltaR(*_recoTrk_, *_genTrk_);
-    cout << dR << endl;
+    // cout << dR << endl;
     if(dR < deltaR_) pass = true;
     return pass;
 };
