@@ -170,7 +170,7 @@ from HiAnalysis.HiOnia.oniaTreeAnalyzer_cff import oniaTreeAnalyzer
 oniaTreeAnalyzer(process,
                  muonTriggerList= triggerList,
                  HLTProName="HLT",
-                 muonSelection="Trk", 
+                 muonSelection="GlbOrTrk", 
                  L1Stage=2, 
                  isMC=False, 
                  pdgID=443, 
@@ -179,7 +179,17 @@ oniaTreeAnalyzer(process,
                  OnlySingleMuons=False
 )
 
-process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string("(2.5 < mass && mass < 5.0) && charge == 0 && pt > 4.0 && abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25 && daughter('muon1').isPFMuon() && daughter('muon2').isPFMuon()")
+# Tracker or GLB is chosen
+process.onia2MuMuPatGlbGlb.dimuonSelection       = cms.string(
+    "(2.5 < mass && mass < 5.0) && \
+    charge == 0 && pt > 4.0 && \
+    abs(daughter('muon1').innerTrack.dz - daughter('muon2').innerTrack.dz) < 25 && \
+    daughter('muon1').isSoftMuon() && \
+    daughter('muon2').isSoftMuon() && \
+    daughter('muon1').isPFMuon() && \
+    daughter('muon2').isPFMuon() \
+    "
+    )
 process.onia2MuMuPatGlbGlb.LateDimuonSel         = cms.string("userFloat(\"vProb\")>0.01")
 process.hionia.primaryVertexTag = "unpackedTracksAndVertices"
 process.hionia.CentralitySrc    = cms.InputTag("hiCentrality")
