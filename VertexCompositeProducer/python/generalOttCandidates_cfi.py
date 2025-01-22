@@ -44,6 +44,16 @@ generalOttCandidates = cms.EDProducer("OniaPiPiProducer",
     bOniaWindow = cms.vdouble([0.2, 0.2, 0.4, 0.4]),
     # bOniaWindow = cms.vdouble([0.2, 0.4, 0.4]),
 
+    trk1cosPhiCut = cms.double(0.0),
+    trk2cosPhiCut = cms.double(0.0),
+    trk12cosPhiCut = cms.double(0.0),
+    trk1dRCut = cms.double(99.0),
+    trk2dRCut = cms.double(99.0),
+    trk12dRCut = cms.double(99.0),
+    oniapTCut = cms.double(0.0),
+    trk1pTCut = cms.double(0.1),
+    trk2pTCut = cms.double(0.1),
+
     isWrongSignB = cms.bool(False)
 
 # MVA 
