@@ -57,6 +57,9 @@
         "unordered_set": "cpp",
         "variant": "cpp",
         "algorithm": "cpp",
-        "deque": "cpp"
+        "deque": "cpp",
+        "chrono": "cpp",
+        "format": "cpp",
+        "system_error": "cpp"
     }
 }

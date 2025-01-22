@@ -33,6 +33,8 @@ D0Producer::D0Producer(const edm::ParameterSet& iConfig) :
   if(useAnyMVA_) produces<MVACollection>("MVAValuesD0");
   produces<std::vector<float > >("DCAValuesD0");
   produces<std::vector<float > >("DCAErrorsD0");
+  produces<std::vector<float > >("Angle3D");
+  produces<std::vector<float > >("Angle2D");
 }
 
 // (Empty) Destructor
@@ -76,6 +78,11 @@ void D0Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    iEvent.put(std::move(dcaVals), std::string("DCAValuesD0"));
    auto dcaErrs = std::make_unique<std::vector<float > >(theVees.getDCAErrs().begin(), theVees.getDCAErrs().end());
    iEvent.put(std::move(dcaErrs), std::string("DCAErrorsD0"));
+
+   auto agl2Ds = std::make_unique<std::vector<float > >(theVees.getAngle2Ds().begin(), theVees.getAngle2Ds().end());
+   iEvent.put(std::move(agl2Ds), std::string("Angle2D"));
+   auto agl3Ds = std::make_unique<std::vector<float > >(theVees.getAngle3Ds().begin(), theVees.getAngle3Ds().end());
+   iEvent.put(std::move(agl3Ds), std::string("Angle3D"));
 
    theVees.resetAll();
 }

@@ -91,9 +91,12 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   dauLongImpactSigCut = theParameters.getParameter<double>(string("dauLongImpactSigCut"));
   VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
   dPtCut = theParameters.getParameter<double>(string("dPtCut"));
+  dAbsYCut = theParameters.getParameter<double>(string("dAbsYCut"));
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
+  mvaCut = theParameters.getParameter<double>(string("mvaCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
+  useBS = theParameters.getParameter<bool>(string("useBS"));
 
 
   useAnyMVA_ = false;
@@ -115,7 +118,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
     }
 
     if(!useForestFromDB_){
-      edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeProducer/data/%s",dbFileName_.c_str()));
+      edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeAnalyzer/data/%s",dbFileName_.c_str()));
       TFile gbrfile(fip.fullPath().c_str(),"READ");
       forest_ = (GBRForest*)gbrfile.Get(forestLabel_.c_str());
       gbrfile.Close();
@@ -189,7 +192,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   double zVtxError=-999.0;
   const reco::VertexCollection vtxCollection = *(theVertexHandle.product());
   reco::VertexCollection::const_iterator vtxPrimary = vtxCollection.begin();
-  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=2)
+  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=2 && !useBS)
   {
     isVtxPV = 1;
     xVtx = vtxPrimary->x();
@@ -374,17 +377,18 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
                       sqrt( negTSCP.momentum().mag2() + kaonMassD0Squared );
       double totalE2Sq = totalE2*totalE2;
 
-      double totalPSq =
-        ( posTSCP.momentum() + negTSCP.momentum() ).mag2();
+      auto sumMom = ( posTSCP.momentum() + negTSCP.momentum() );
+      double totalPt = sumMom.perp();
+      if( totalPt < dPtCut ) continue;
 
-      double totalPt =
-        ( posTSCP.momentum() + negTSCP.momentum() ).perp();
-
+      double totalPSq = sumMom.mag2();
       double mass1 = sqrt( totalE1Sq - totalPSq);
       double mass2 = sqrt( totalE2Sq - totalPSq);
 
       if( (mass1 > mPiKCutMax || mass1 < mPiKCutMin) && (mass2 > mPiKCutMax || mass2 < mPiKCutMin)) continue;
-      if( totalPt < dPtCut ) continue;
+      double totalY1 = 0.5 * log((totalE1 + totalPt* TMath::SinH(sumMom.eta()) )/(totalE1 - totalPt*TMath::SinH(sumMom.eta())));
+      double totalY2 = 0.5 * log((totalE2 + totalPt* TMath::SinH(sumMom.eta()) )/(totalE2 - totalPt*TMath::SinH(sumMom.eta())));
+      if( fabs(totalY1) > dAbsYCut && fabs(totalY2) > dAbsYCut ) continue;
 
       // Create the vertex fitter object and vertex the tracks
     
@@ -392,8 +396,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       float negCandTotalE[2]={0.0};
       float d0TotalE[2]={0.0};
 
-      for(int i=0;i<2;i++)
-      {
+      for(int i=0;i<2;i++) {
         //Creating a KinematicParticleFactory
         KinematicParticleFactoryFromTransientTrack pFactory;
         
@@ -547,34 +550,60 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             theD0->mass() > d0MassD0 - d0MassCut ) //&&
 	   // theD0->pt() > dPtCut ) {
         {
-          theD0s.push_back( *theD0 );
-          dcaVals_.push_back(cur3DIP.value());
-          dcaErrs_.push_back(cur3DIP.error());
 
 // perform MVA evaluation
-          if(useAnyMVA_)
-          {
-            float gbrVals_[20];
-            gbrVals_[0] = d0P4.Pt();
-            gbrVals_[1] = d0P4.Eta();
-            gbrVals_[2] = d0C2Prob;
-            gbrVals_[3] = lVtxMag / sigmaLvtxMag;
-            gbrVals_[4] = rVtxMag / sigmaRvtxMag;
-            gbrVals_[5] = lVtxMag;
-            gbrVals_[6] = d0Angle3D;
-            gbrVals_[7] = d0Angle2D;
-            gbrVals_[8] = dauLongImpactSig_pos;
-            gbrVals_[9] = dauLongImpactSig_neg;
-            gbrVals_[10] = dauTransImpactSig_pos;
-            gbrVals_[11] = dauTransImpactSig_neg;
-            gbrVals_[12] = nhits_pos;
-            gbrVals_[13] = nhits_neg;
-            gbrVals_[14] = ptErr_pos;
-            gbrVals_[15] = ptErr_neg;
-            gbrVals_[16] = posCandTotalP.perp();
-            gbrVals_[17] = negCandTotalP.perp();
-            gbrVals_[18] = posCandTotalP.eta();
-            gbrVals_[19] = negCandTotalP.eta();
+          if(useAnyMVA_) {
+            float gbrVals_[23];
+            if( forestLabel_ == "D0InpPbXGB"){
+              // gbrVals_[0] = d0P4.Pt();
+              // gbrVals_[1] = d0P4.Eta();
+              gbrVals_[0] = d0C2Prob; //VtxPorb
+              gbrVals_[1] = cur3DIP.value(); // DCA 3D
+              gbrVals_[2] = cos(d0Angle3D); // PA 3D
+              gbrVals_[3] = d0Angle3D; // PA 3D
+              gbrVals_[4] = cos(d0Angle2D); // PA 2D
+              gbrVals_[5] = d0Angle2D; // PA 2D
+              gbrVals_[6] = lVtxMag / sigmaLvtxMag; // DLS 3D
+              gbrVals_[7] = lVtxMag; // DL3D
+              gbrVals_[8] = rVtxMag / sigmaRvtxMag; // DLS 2D
+              gbrVals_[9] = rVtxMag; // DL2D
+              gbrVals_[10] = posCandTotalP.perp(); // pT D1
+              gbrVals_[11] = posCandTotalP.eta(); // Eta D1
+              gbrVals_[12] = negCandTotalP.perp(); // pT D2
+              gbrVals_[13] = negCandTotalP.eta(); // Eta D2
+              gbrVals_[14] = nhits_pos; // nhit D1
+              gbrVals_[15] = nhits_neg; // nhit D2
+              gbrVals_[16] = dauLongImpactSig_pos; // zDCA D1
+              gbrVals_[17] = dauLongImpactSig_neg; // zDCA D2
+              gbrVals_[18] = dauTransImpactSig_pos; // xyDCA D1
+              gbrVals_[19] = dauTransImpactSig_neg; // xyDCA D2
+              gbrVals_[20] = thePosCand.track()->normalizedChi2(); // chi2/ndf D2
+              gbrVals_[21] = theNegCand.track()->normalizedChi2(); // chi2/ndf D2
+              gbrVals_[22] = cur3DIP.error(); // DCA 3D err
+            }
+            if( forestLabel_ == "D0InpPb"){
+
+              gbrVals_[0] = d0P4.Pt();
+              gbrVals_[1] = d0P4.Eta();
+              gbrVals_[2] = d0C2Prob;
+              gbrVals_[3] = lVtxMag / sigmaLvtxMag;
+              gbrVals_[4] = lVtxMag;
+              gbrVals_[5] = d0Angle3D;
+              gbrVals_[6] = dauLongImpactSig_pos;
+              gbrVals_[7] = dauLongImpactSig_neg;
+              gbrVals_[8] = dauTransImpactSig_pos;
+              gbrVals_[9] = dauTransImpactSig_neg;
+              gbrVals_[10] = posCandTotalP.perp();
+              gbrVals_[11] = negCandTotalP.perp();
+              gbrVals_[12] = posCandTotalP.eta();
+              gbrVals_[13] = negCandTotalP.eta();
+              gbrVals_[14] = nhits_pos;
+              gbrVals_[15] = nhits_neg;
+              gbrVals_[16] = ptErr_pos;
+              gbrVals_[17] = ptErr_neg;
+              gbrVals_[18] = rVtxMag / sigmaRvtxMag;
+              gbrVals_[19] = d0Angle2D;
+            }
 
             GBRForest const * forest = forest_;
             if(useForestFromDB_){
@@ -584,7 +613,21 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             }
 
             auto gbrVal = forest->GetClassifier(gbrVals_);
-            mvaVals_.push_back(gbrVal);
+            if( gbrVal > mvaCut){
+              mvaVals_.push_back(gbrVal);
+              theD0s.push_back( *theD0 );
+              dcaVals_.push_back(cur3DIP.value());
+              dcaErrs_.push_back(cur3DIP.error());
+              agl2Ds_.push_back(d0Angle2D);
+              agl3Ds_.push_back(d0Angle3D);
+            }
+          }
+          else{
+            theD0s.push_back( *theD0 );
+            dcaVals_.push_back(cur3DIP.value());
+            dcaErrs_.push_back(cur3DIP.error());
+            agl2Ds_.push_back(d0Angle2D);
+            agl3Ds_.push_back(d0Angle3D);
           }
         }
 
@@ -615,6 +658,12 @@ const std::vector<float>& D0Fitter::getDCAErrs() const{
 const std::vector<float>& D0Fitter::getMVAVals() const {
   return mvaVals_;
 }
+const std::vector<float>& D0Fitter::getAngle2Ds() const {
+  return agl2Ds_;
+}
+const std::vector<float>& D0Fitter::getAngle3Ds() const {
+  return agl3Ds_;
+}
 
 /*
 auto_ptr<edm::ValueMap<float> > D0Fitter::getMVAMap() const {
@@ -627,4 +676,6 @@ void D0Fitter::resetAll() {
     mvaVals_.clear();
     dcaVals_.clear();
     dcaErrs_.clear();
+    agl2Ds_.clear();
+    agl3Ds_.clear();
 }

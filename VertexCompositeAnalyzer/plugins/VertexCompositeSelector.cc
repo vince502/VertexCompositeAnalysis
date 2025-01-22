@@ -1401,7 +1401,6 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
         //gbrVals_[15] = trkChi2;
       }
       if (forestLabel_ == "D0InpPb" || forestLabel_ == "D0Inpp" || forestLabel_ == "D0InPbPb") {
-        /*
                     gbrVals_[0] = pt;
                     gbrVals_[1] = y;
                     gbrVals_[2] = VtxProb;
@@ -1422,8 +1421,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
                     gbrVals_[17] = nhit2;
                     gbrVals_[18] = ptErr1;
                     gbrVals_[19] = ptErr2;
-        */
 
+        /*
         gbrVals_[0] = pt;
         gbrVals_[1] = y;
         gbrVals_[2] = VtxProb;
@@ -1444,6 +1443,7 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
         gbrVals_[17] = ptErr2;
         gbrVals_[18] = dlos2D;
         gbrVals_[19] = agl2D_abs;
+        */
 
         /*
                     gbrVals_[0] = VtxProb;

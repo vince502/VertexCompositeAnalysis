@@ -7,6 +7,10 @@ generalDDCandidates = cms.EDProducer("DDProducer",
     trackRecoAlgorithm = cms.InputTag('generalTracks'),
     vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices'),
     MVACollection = cms.InputTag(''),
+    DCACollection = cms.InputTag(''),
+    DCAErrCollection = cms.InputTag(''),
+    Angle2DCollection = cms.InputTag(''),
+    Angle3DCollection = cms.InputTag(''),
 
     trackQualities = cms.vstring('highPurity'),
 
@@ -17,6 +21,7 @@ generalDDCandidates = cms.EDProducer("DDProducer",
     tkEtaCut = cms.double(999.0), #trk abs(eta) <
     tkPtSumCut = cms.double(0.0),
     tkEtaDiffCut = cms.double(999.0),
+    BDTCut = cms.double(-1.1),
 
     mPiKCutMin = cms.double(1.72),
     mPiKCutMax = cms.double(2.01),

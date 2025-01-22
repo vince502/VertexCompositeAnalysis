@@ -250,6 +250,8 @@ private:
   float grand_agl2D[MAXCAN];
   float grand_agl2D_abs[MAXCAN];
   float grand_dlos2D[MAXCAN];
+  float grand_dca3D[MAXCAN];
+  float grand_dcaErr3D[MAXCAN];
   float mva1[MAXCAN];
 
   float grand_mass2[MAXCAN];
@@ -264,6 +266,8 @@ private:
   float grand_agl2D2[MAXCAN];
   float grand_agl2D_abs2[MAXCAN];
   float grand_dlos2D2[MAXCAN];
+  float grand_dca3D2[MAXCAN];
+  float grand_dcaErr3D2[MAXCAN];
   float mva2[MAXCAN];
 
   // dau info
@@ -565,6 +569,18 @@ private:
   // for DCA
   edm::EDGetTokenT<std::vector<float>> tok_DCAVal_;
   edm::EDGetTokenT<std::vector<float>> tok_DCAErr_;
+  edm::EDGetTokenT<std::vector<float>> tok_Angle2D_;
+  edm::EDGetTokenT<std::vector<float>> tok_Angle3D_;
+
+  edm::EDGetTokenT<std::vector<float>> tok_DCAVal1_;
+  edm::EDGetTokenT<std::vector<float>> tok_DCAErr1_;
+  edm::EDGetTokenT<std::vector<float>> tok_Angle2D1_;
+  edm::EDGetTokenT<std::vector<float>> tok_Angle3D1_;
+
+  edm::EDGetTokenT<std::vector<float>> tok_DCAVal2_;
+  edm::EDGetTokenT<std::vector<float>> tok_DCAErr2_;
+  edm::EDGetTokenT<std::vector<float>> tok_Angle2D2_;
+  edm::EDGetTokenT<std::vector<float>> tok_Angle3D2_;
 };
 
 VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet &iConfig) {
@@ -645,10 +661,26 @@ VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterS
     MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
   if (doubleCand_ && useAnyMVA_ && iConfig.exists("MVACollection2"))
     MVAValues_Token2_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection2"));
-  if (iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")) {
+  if (iConfig.exists("DCAValCollection") && iConfig.exists("DCAErrCollection")&& iConfig.exists("Angle3D")&& iConfig.exists("Angle2D")) {
     useDCA_ = true;
     tok_DCAVal_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAValCollection"));
     tok_DCAErr_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAErrCollection"));
+    tok_Angle2D_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("Angle2D"));
+    tok_Angle3D_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("Angle3D"));
+  }
+  if (doubleCand_ && iConfig.exists("DCAValCollection1")&& iConfig.exists("DCAErrCollection1")){
+    // useDCA_ = true;
+
+    tok_DCAVal1_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAValCollection1"));
+    tok_DCAErr1_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAErrCollection1"));
+    tok_Angle2D1_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("Angle2D1"));
+    tok_Angle3D1_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("Angle3D1"));
+
+    tok_DCAVal2_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAValCollection2"));
+    tok_DCAErr2_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("DCAErrCollection2"));
+    tok_Angle2D2_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("Angle2D2"));
+    tok_Angle3D2_ = consumes<std::vector<float>>(iConfig.getParameter<edm::InputTag>("Angle3D2"));
+
   }
 };
 
@@ -940,6 +972,10 @@ void VertexCompositeTreeProducer2::initTree() {
                                       "3DDecayLengthErrordaughter1[candSize]/F");
         VertexCompositeNtuple->Branch("2DDecayLengthSignificancedaughter1", &grand_dlos2D,
                                       "2DDecayLengthSignificancedaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("dca3Ddaughter1", &grand_dca3D,
+                                      "dca3Ddaughter1[candSize]/F");
+        VertexCompositeNtuple->Branch("dca3DErrdaughter1", &grand_dcaErr3D,
+                                      "dca3DErrdaughter1[candSize]/F");
 
         VertexCompositeNtuple->Branch("zDCASignificanceGranddaughter11", &grand_dzos1,
                                       "zDCASignificanceGranddaughter11[candSize]/F");
@@ -965,8 +1001,8 @@ void VertexCompositeTreeProducer2::initTree() {
         VertexCompositeNtuple->Branch("EtaGrandD12", &grand_eta2, "EtaGrandD12[candSize]/F");
         VertexCompositeNtuple->Branch("PhiGrandD11", &grand_phi1, "PhiGrandD11[candSize]/F");
         VertexCompositeNtuple->Branch("PhiGrandD12", &grand_phi2, "PhiGrandD12[candSize]/F");
-        //            VertexCompositeNtuple->Branch("chargeGrandD11",&grand_charge1,"chargeGrandD11[candSize]/I");
-        //            VertexCompositeNtuple->Branch("chargeGrandD12",&grand_charge2,"chargeGrandD12[candSize]/I");
+        VertexCompositeNtuple->Branch("chargeGrandD11",&grand_charge1,"chargeGrandD11[candSize]/I");
+        VertexCompositeNtuple->Branch("chargeGrandD12",&grand_charge2,"chargeGrandD12[candSize]/I");
         VertexCompositeNtuple->Branch("dedxHarmonic2GrandD11", &grand_H2dedx1, "dedxHarmonic2GrandD11[candSize]/F");
         VertexCompositeNtuple->Branch("dedxHarmonic2GrandD12", &grand_H2dedx2, "dedxHarmonic2GrandD12[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter1",&grand_T4dedx1,"dedxTruncated40Granddaughter1[candSize]/F");
@@ -998,6 +1034,10 @@ void VertexCompositeTreeProducer2::initTree() {
                                         "3DDecayLengthErrordaughter2[candSize]/F");
           VertexCompositeNtuple->Branch("2DDecayLengthSignificancedaughter2", &grand_dlos2D2,
                                         "2DDecayLengthSignificancedaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("dca3Ddaughter2", &grand_dca3D2,
+                                        "dca3Ddaughter2[candSize]/F");
+          VertexCompositeNtuple->Branch("dca3DErrdaughter2", &grand_dcaErr3D2,
+                                        "dca3DErrdaughter2[candSize]/F");
 
           VertexCompositeNtuple->Branch("zDCASignificanceGranddaughter21", &grand_dzos21,
                                         "zDCASignificanceGranddaughter21[candSize]/F");
@@ -1023,8 +1063,8 @@ void VertexCompositeTreeProducer2::initTree() {
           VertexCompositeNtuple->Branch("EtaGrandD22", &grand_eta22, "EtaGrandD22[candSize]/F");
           VertexCompositeNtuple->Branch("PhiGrandD21", &grand_phi21, "PhiGrandD21[candSize]/F");
           VertexCompositeNtuple->Branch("PhiGrandD22", &grand_phi22, "PhiGrandD22[candSize]/F");
-          //            VertexCompositeNtuple->Branch("chargeGrandD21",&grand_charge21,"chargeGrandD1[candSize]/I");
-          //            VertexCompositeNtuple->Branch("chargeGrandD22",&grand_charge22,"chargeGrandD2[candSize]/I");
+           VertexCompositeNtuple->Branch("chargeGrandD21",&grand_charge21,"chargeGrandD21[candSize]/I");
+           VertexCompositeNtuple->Branch("chargeGrandD22",&grand_charge22,"chargeGrandD22[candSize]/I");
           VertexCompositeNtuple->Branch("dedxHarmonic2GrandD21", &grand_H2dedx21, "dedxHarmonic2GrandD21[candSize]/F");
           VertexCompositeNtuple->Branch("dedxHarmonic2GrandD22", &grand_H2dedx22, "dedxHarmonic2GrandD22[candSize]/F");
           //            VertexCompositeNtuple->Branch("dedxTruncated40Granddaughter1",&grand_T4dedx21,"dedxTruncated40Granddaughter1[candSize]/F");
@@ -1043,7 +1083,7 @@ void VertexCompositeTreeProducer2::initTree() {
         VertexCompositeNtuple->Branch("EtaD1", &eta1, "EtaD1[candSize]/F");
         VertexCompositeNtuple->Branch("YD1", &y1, "Y D1[candSize]/F");
         VertexCompositeNtuple->Branch("PhiD1", &phi1, "PhiD1[candSize]/F");
-        //            VertexCompositeNtuple->Branch("chargeD1",&charge1,"chargeD1[candSize]/I");
+        VertexCompositeNtuple->Branch("chargeD1",&charge1,"chargeD1[candSize]/I");
         VertexCompositeNtuple->Branch("dedxHarmonic2D1", &H2dedx1, "dedxHarmonic2D1[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40daughter1",&T4dedx1,"dedxTruncated40daughter1[candSize]/F");
                     VertexCompositeNtuple->Branch("normalizedChi2daughter1",&trkChi1,"normalizedChi2daughter1[candSize]/F");
@@ -1057,7 +1097,7 @@ void VertexCompositeTreeProducer2::initTree() {
         VertexCompositeNtuple->Branch("EtaD2", &eta2, "EtaD2[candSize]/F");
         VertexCompositeNtuple->Branch("YD2", &y2, "Y D2[candSize]/F");
         VertexCompositeNtuple->Branch("PhiD2", &phi2, "PhiD2[candSize]/F");
-        //            VertexCompositeNtuple->Branch("chargeD2",&charge2,"chargeD2[candSize]/I");
+        VertexCompositeNtuple->Branch("chargeD2",&charge2,"chargeD2[candSize]/I");
         VertexCompositeNtuple->Branch("dedxHarmonic2D2", &H2dedx2, "dedxHarmonic2D2[candSize]/F");
         //            VertexCompositeNtuple->Branch("dedxTruncated40daughter2",&T4dedx2,"dedxTruncated40daughter2[candSize]/F");
                     VertexCompositeNtuple->Branch("normalizedChi2daughter2",&trkChi2,"normalizedChi2daughter2[candSize]/F");
@@ -1206,12 +1246,11 @@ bool VertexCompositeTreeProducer2::checkSwap(const reco::Candidate *_dmeson_, co
   return _dmeson_->pdgId() != _gen_.pdgId();
 };
 
-bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate *_recoTrk_, const reco::Candidate *_genTrk_,
-                                                bool chkchrg) const {
+bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate *_recoTrk_, const reco::Candidate *_genTrk_, bool chkchrg) const {
   bool pass = false;
   // deltaR_
 #ifdef DEBUG
-  // cout << "Charge : " << _recoTrk_->charge() << ", " <<  _genTrk_->charge() ;
+  cout << "Charge : " << _recoTrk_->charge() << ", " <<  _genTrk_->charge() ;
 #endif
   if (chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) {
 #ifdef DEBUG
@@ -1221,15 +1260,12 @@ bool VertexCompositeTreeProducer2::matchTrackdR(const reco::Candidate *_recoTrk_
   }
   const double dR = reco::deltaR(*_recoTrk_, *_genTrk_);
 #ifdef DEBUG
-  // cout << ", mathTrk : (" << _recoTrk_->eta() << ", " << _genTrk_->eta() <<
-  // "), (" << _recoTrk_->phi() << ", " << _genTrk_->phi() << ") -> dR = "<< dR
-  // ;
+  cout << ", mathTrk : (" << _recoTrk_->eta() << ", " << _genTrk_->eta() << "), (" << _recoTrk_->phi() << ", " << _genTrk_->phi() << ") -> dR = "<< dR;
 #endif
   if (dR < deltaR_)
     pass = true;
 #ifdef DEBUG
-    // cout << Form(", dR, deltaR_ pass : %.3f %.3f %d", dR, deltaR_, pass) <<
-    // endl;
+    cout << Form(", dR, deltaR_ pass : %.3f %.3f %d", dR, deltaR_, pass) << endl;
 #endif
   return pass;
 };

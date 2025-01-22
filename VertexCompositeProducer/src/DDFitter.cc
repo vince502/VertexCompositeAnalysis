@@ -10,9 +10,6 @@
  Implementation:
      <Notes on implementation>
 */
-//
-//
-//
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DDFitter.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
@@ -70,6 +67,11 @@ DDFitter::DDFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
   token_d0cand = iC.consumes<reco::VertexCompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+
+  token_d0dcaVals = iC.consumes<std::vector<float>>(theParameters.getParameter<edm::InputTag>("DCACollection"));
+  token_d0dcaErrs = iC.consumes<std::vector<float>>(theParameters.getParameter<edm::InputTag>("DCAErrCollection"));
+  token_d0angle2Ds = iC.consumes<std::vector<float>>(theParameters.getParameter<edm::InputTag>("Angle2DCollection"));
+  token_d0angle3Ds = iC.consumes<std::vector<float>>(theParameters.getParameter<edm::InputTag>("Angle3DCollection"));
   token_d0mva = iC.consumes<MVACollection>(theParameters.getParameter<edm::InputTag>("MVACollection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
@@ -100,6 +102,7 @@ DDFitter::DDFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   dPtCut = theParameters.getParameter<double>(string("dPtCut"));
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
+  BDTCut = theParameters.getParameter<double>(string("BDTCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
 
 
@@ -169,11 +172,20 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
 
+  Handle<std::vector<float> > dcaHandle;
+  Handle<std::vector<float> > dcaErrHandle;
+  Handle<std::vector<float> > angle2DHandle;
+  Handle<std::vector<float> > angle3DHandle;
+
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
   iEvent.getByToken(token_tracks, theTrackHandle); 
   iEvent.getByToken(token_vertices, theVertexHandle);
   iEvent.getByToken(token_d0cand, theD0Handle);
+  iEvent.getByToken(token_d0dcaVals,      dcaHandle);
+  iEvent.getByToken(token_d0dcaErrs,   dcaErrHandle);
+  iEvent.getByToken(token_d0angle2Ds, angle2DHandle);
+  iEvent.getByToken(token_d0angle3Ds, angle3DHandle);
   iEvent.getByToken(token_d0mva, theD0mvaHandle);
   iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
   iEvent.getByToken(token_dedx, dEdxHandle);
@@ -271,8 +283,10 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   // Loop over tracks and vertex good charged track pairs
   for(unsigned int didx1 = 0; didx1 < theD0Handle->size(); didx1++) {
+    if((*theD0mvaHandle)[didx1] < BDTCut) continue;
 
     for(unsigned int didx2 = didx1 + 1; didx2 < theD0Handle->size(); didx2++) {
+      if((*theD0mvaHandle)[didx2] < BDTCut) continue;
 
       // Not using this on Dstar fit (1)
       // if( (theTrackRefs[didx1]->pt() + theTrackRefs[trdx2]->pt()) < tkPtSumCut) continue;
@@ -518,13 +532,23 @@ void DDFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
        //if( theDD->mass() < ddMassDD + ddMassCut &&
        //    theDD->mass() > ddMassDD - ddMassCut ) 
        //{
-         if(useAnyMVA_){ 
-          mvaVals1_.push_back((*theD0mvaHandle)[didx1]);
-          mvaVals2_.push_back((*theD0mvaHandle)[didx2]);
-         }
-         theDDs.push_back( *theDD );
-         dcaVals_.push_back(cur3DIP.value());
-         dcaErrs_.push_back(cur3DIP.error());
+        if(useAnyMVA_){ 
+         mvaVals1_.push_back((*theD0mvaHandle)[didx1]);
+         mvaVals2_.push_back((*theD0mvaHandle)[didx2]);
+        }
+        theDDs.push_back( *theDD );
+        dcaVals_.push_back(cur3DIP.value());
+        dcaErrs_.push_back(cur3DIP.error());
+  
+        dcaValsDau1_.push_back((*dcaHandle)[didx1] );
+        dcaErrsDau1_.push_back((*dcaErrHandle)[didx1] );
+        angle2DDau1_.push_back((*angle2DHandle)[didx1] );
+        angle3DDau1_.push_back((*angle2DHandle)[didx1] );
+
+        dcaValsDau2_.push_back((*dcaHandle)[didx2] );
+        dcaErrsDau2_.push_back((*dcaErrHandle)[didx2] );
+        angle2DDau2_.push_back((*angle2DHandle)[didx2] );
+        angle3DDau2_.push_back((*angle3DHandle)[didx2] );
 
 // per//form MVA evaluation
          if(useAnyMVA_)
@@ -594,6 +618,14 @@ const std::vector<float>& DDFitter::getMVAVals1() const {
 const std::vector<float>& DDFitter::getMVAVals2() const {
   return mvaVals2_;
 }
+const std::vector<float>& DDFitter::getDcaVal1() const { return dcaValsDau1_ ; }
+const std::vector<float>& DDFitter::getDcaErr1() const { return dcaErrsDau1_ ; }
+const std::vector<float>& DDFitter::getAngle2D1() const { return angle2DDau1_ ; }
+const std::vector<float>& DDFitter::getAngle3D1() const { return angle3DDau1_ ; }
+const std::vector<float>& DDFitter::getDcaVal2() const { return dcaValsDau2_ ; }
+const std::vector<float>& DDFitter::getDcaErr2() const { return dcaErrsDau2_ ; }
+const std::vector<float>& DDFitter::getAngle2D2() const { return angle2DDau2_ ; }
+const std::vector<float>& DDFitter::getAngle3D2() const { return angle3DDau2_ ; }
 
 /*
 auto_ptr<edm::ValueMap<float> > DDFitter::getMVAMap() const {
@@ -607,4 +639,13 @@ void DDFitter::resetAll() {
     mvaVals2_.clear();
     dcaVals_.clear();
     dcaErrs_.clear();
+    dcaValsDau1_.clear();
+    dcaErrsDau1_.clear();
+    angle2DDau1_.clear();
+    angle3DDau1_.clear();
+
+    dcaValsDau2_.clear();
+    dcaErrsDau2_.clear();
+    angle2DDau2_.clear();    
+    angle3DDau2_.clear();
 }

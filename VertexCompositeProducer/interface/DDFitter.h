@@ -93,6 +93,15 @@ class DDFitter {
   const std::vector<float>& getMVAVals1() const; 
   const std::vector<float>& getMVAVals2() const; 
 
+  const std::vector<float>& getDcaVal1() const; 
+  const std::vector<float>& getDcaErr1() const; 
+  const std::vector<float>& getAngle2D1() const; 
+  const std::vector<float>& getAngle3D1() const; 
+  const std::vector<float>& getDcaVal2() const; 
+  const std::vector<float>& getDcaErr2() const; 
+  const std::vector<float>& getAngle2D2() const; 
+  const std::vector<float>& getAngle3D2() const; 
+
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
 
@@ -113,6 +122,11 @@ class DDFitter {
   edm::EDGetTokenT<MVACollection> token_d0mva;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
+
+  edm::EDGetTokenT<std::vector<float> > token_d0dcaVals;
+  edm::EDGetTokenT<std::vector<float> > token_d0dcaErrs;
+  edm::EDGetTokenT<std::vector<float> > token_d0angle2Ds;
+  edm::EDGetTokenT<std::vector<float> > token_d0angle3Ds;
 
   // Cuts
   double mPiKCutMin;
@@ -138,6 +152,7 @@ class DDFitter {
   double dauLongImpactSigCut;
   double VtxChiProbCut;
   double dPtCut;
+  double BDTCut;
   double alphaCut;
   double alpha2DCut;
   bool   isWrongSign;
@@ -161,6 +176,16 @@ class DDFitter {
   // DCA
   std::vector<float> dcaVals_;
   std::vector<float> dcaErrs_;
+
+  std::vector<float> dcaValsDau1_;
+  std::vector<float> dcaErrsDau1_;
+  std::vector<float> angle2DDau1_;
+  std::vector<float> angle3DDau1_;
+
+  std::vector<float> dcaValsDau2_;
+  std::vector<float> dcaErrsDau2_;
+  std::vector<float> angle2DDau2_;
+  std::vector<float> angle3DDau2_;
 
   std::string dbFileName_;
 

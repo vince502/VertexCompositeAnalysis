@@ -62,8 +62,8 @@ void D0ProducerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
               theVees.getD0().end(),
               std::back_inserter(*d0Candidates) );
 
+
    // Write the collections to the Event
-   iEvent.put( std::move(d0Candidates), std::string("D0") );
     
    if(useAnyMVA_) 
    {

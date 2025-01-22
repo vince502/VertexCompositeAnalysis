@@ -54,11 +54,46 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
   }
   edm::Handle<std::vector<float>> dcaValues;
   edm::Handle<std::vector<float>> dcaErrors;
+  edm::Handle<std::vector<float>> angle2Ds;
+  edm::Handle<std::vector<float>> angle3Ds;
+
+  edm::Handle<std::vector<float>> dcaValues1;
+  edm::Handle<std::vector<float>> dcaErrors1;
+  edm::Handle<std::vector<float>> angle2Ds1;
+  edm::Handle<std::vector<float>> angle3Ds1;
+
+  edm::Handle<std::vector<float>> dcaValues2;
+  edm::Handle<std::vector<float>> dcaErrors2;
+  edm::Handle<std::vector<float>> angle2Ds2;
+  edm::Handle<std::vector<float>> angle3Ds2;
   if (useDCA_) {
     iEvent.getByToken(tok_DCAVal_, dcaValues);
     iEvent.getByToken(tok_DCAErr_, dcaErrors);
+    iEvent.getByToken(tok_Angle2D_, angle2Ds);
+    iEvent.getByToken(tok_Angle3D_, angle3Ds);
     assert((*dcaValues).size() == v0candidates->size());
     assert((*dcaErrors).size() == v0candidates->size());
+    assert((*angle2Ds).size() == v0candidates->size());
+    assert((*angle3Ds).size() == v0candidates->size());
+  }
+  if( useDCA_ && doubleCand_ ){
+    iEvent.getByToken(tok_DCAVal1_, dcaValues1);
+    iEvent.getByToken(tok_DCAErr1_, dcaErrors1);
+    iEvent.getByToken(tok_Angle2D1_, angle2Ds1);
+    iEvent.getByToken(tok_Angle3D1_, angle3Ds1);
+    iEvent.getByToken(tok_DCAVal2_, dcaValues2);
+    iEvent.getByToken(tok_DCAErr2_, dcaErrors2);
+    iEvent.getByToken(tok_Angle2D2_, angle2Ds2);
+    iEvent.getByToken(tok_Angle3D2_, angle3Ds2);
+    assert((*dcaValues1).size() == v0candidates->size());
+    assert((*dcaErrors1).size() == v0candidates->size());
+    assert((*angle2Ds1).size() == v0candidates->size());
+    assert((*angle3Ds1).size() == v0candidates->size());
+    assert((*dcaValues2).size() == v0candidates->size());
+    assert((*dcaErrors2).size() == v0candidates->size());
+    assert((*angle2Ds2).size() == v0candidates->size());
+    assert((*angle3Ds2).size() == v0candidates->size());
+
   }
 
   edm::Handle<reco::GenParticleCollection> genpars;
@@ -135,6 +170,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
 
       const reco::Track &trk = (*tracks)[it];
 
+    cout << "Filling ";
       math::XYZPoint bestvtx(bestvx, bestvy, bestvz);
 
       double dzvtx = trk.dz(bestvtx);
@@ -144,20 +180,26 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
 
       if (!trk.quality(reco::TrackBase::highPurity))
         continue;
+    cout << "purity ";
       if (fabs(trk.ptError()) / trk.pt() > 0.10)
         continue;
+    cout << "trk-err ";
       if (fabs(dzvtx / dzerror) > 3)
         continue;
+    cout << "dz-err ";
       if (fabs(dxyvtx / dxyerror) > 3)
         continue;
+    cout << "dxy-err ";
 
       double eta = trk.eta();
       double pt = trk.pt();
 
       if (fabs(eta) > 2.4)
         continue;
+    cout << "eta ";
       if (pt <= 0.4)
         continue;
+    cout << "pt ";
       Ntrkoffline++;
     }
   }
@@ -238,37 +280,9 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
 
     const reco::VertexCompositeCandidate &trk = (*v0candidates_)[it];
 
-    double secvz = -999.9, secvx = -999.9, secvy = -999.9;
-    secvz = trk.vz();
-    secvx = trk.vx();
-    secvy = trk.vy();
-    // cout << "size pt eta phi mass " << candSize << ", "<< trk.pt() << ", " <<
-    // trk.eta() << ", " << trk.phi() << ", MM" << trk.mass() << endl;
-
-    eta[it] = trk.eta();
-    y[it] = trk.rapidity();
-    pt[it] = trk.pt();
-    phi[it] = trk.phi();
-    flavor[it] = trk.pdgId() / abs(trk.pdgId());
-
-    mva[it] = 0.0;
-    if (useAnyMVA_)
-      mva[it] = (*mvavalues)[it];
-
-    dca3D[it] = -1.0;
-    dcaErr3D[it] = -1.0;
-    if (useDCA_) {
-      dca3D[it] = dcaValues->at(it);
-      dcaErr3D[it] = dcaErrors->at(it);
-    }
-
-    double px = trk.px();
-    double py = trk.py();
-    double pz = trk.pz();
-    mass[it] = trk.mass();
-
     const reco::Candidate *d1 = trk.daughter(0);
     const reco::Candidate *d2 = trk.daughter(1);
+    bool skip = false;
     if (doubleCand_) {
       flavor1[it] = d1->pdgId() / abs(d1->pdgId());
       flavor2[it] = d2->pdgId() / abs(d2->pdgId());
@@ -370,7 +384,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
           gen_D1phiD2_[it] = -99;
           gen_D1massD2_[it] = -99;
           gen_D1yD2_[it] = -99;
-	  if(onlyWantMatch) continue;
+	        if(onlyWantMatch) skip = true;
         }
       }
       if (doGenDoubleDecay_) {
@@ -542,7 +556,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
         }
       } // END if doGenDoubleDecay_
       matchGEN[it] = (matchGEN1[it] && matchGEN2[it]);
-      if( onlyWantMatch && !(matchGEN1[it] || matchGEN2[it] ) ) continue;
+      if( onlyWantMatch && !(matchGEN1[it] || matchGEN2[it] ) ) skip = true;
 #ifdef DEBUG
       // if(matchGEN1[it]){
       //   const auto* d1trk1 = d1->daughter(0);
@@ -591,6 +605,39 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
       // matchToGen1[it], matchGEN2[it], isSwap2[it], matchToGen2[it]) << endl;
 #endif
     }
+    if( skip ) continue;
+
+    double secvz = -999.9, secvx = -999.9, secvy = -999.9;
+    secvz = trk.vz();
+    secvx = trk.vx();
+    secvy = trk.vy();
+    // cout << "size pt eta phi mass " << candSize << ", "<< trk.pt() << ", " <<
+    // trk.eta() << ", " << trk.phi() << ", MM" << trk.mass() << endl;
+
+    eta[it] = trk.eta();
+    y[it] = trk.rapidity();
+    pt[it] = trk.pt();
+    phi[it] = trk.phi();
+    flavor[it] = trk.pdgId() / abs(trk.pdgId());
+
+    mva[it] = 0.0;
+    if (useAnyMVA_)
+      mva[it] = (*mvavalues)[it];
+
+    dca3D[it] = -1.0;
+    dcaErr3D[it] = -1.0;
+    if (useDCA_) {
+      dca3D[it] = dcaValues->at(it);
+      dcaErr3D[it] = dcaErrors->at(it);
+      agl2D_abs[it] = angle2Ds->at(it);
+      agl_abs[it] = angle3Ds->at(it);
+      agl2D[it] = cos(angle2Ds->at(it));
+      agl[it] = cos(angle3Ds->at(it));
+    }
+    double px = trk.px();
+    double py = trk.py();
+    double pz = trk.pz();
+    mass[it] = trk.mass();
 
     double pxd1 = d1->px();
     double pyd1 = d1->py();
@@ -716,12 +763,13 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
 
     TVector3 ptosvec2D(secvx - bestvx, secvy - bestvy, 0);
     TVector3 secvec2D(px, py, 0);
+    if(!useDCA_){
+      agl[it] = cos(secvec.Angle(ptosvec));
+      agl_abs[it] = secvec.Angle(ptosvec);
 
-    agl[it] = cos(secvec.Angle(ptosvec));
-    agl_abs[it] = secvec.Angle(ptosvec);
-
-    agl2D[it] = cos(secvec2D.Angle(ptosvec2D));
-    agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
+      agl2D[it] = cos(secvec2D.Angle(ptosvec2D));
+      agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
+    }
 
     // Decay length 3D
     typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
@@ -1175,10 +1223,10 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
       grand_VtxProb[it] = TMath::Prob(grand_vtxChi2[it], grand_ndf[it]);
 
       // PAngle
-      TVector3 ptosvec(secvx - bestvx, secvy - bestvy, secvz - bestvz);
+      TVector3 ptosvec(d1->vx() - bestvx, d1->vy() - bestvy, d1->vz() - bestvz);
       TVector3 secvec(d1->px(), d1->py(), d1->pz());
 
-      TVector3 ptosvec2D(secvx - bestvx, secvy - bestvy, 0);
+      TVector3 ptosvec2D(d1->vx() - bestvx, d1->vy() - bestvy, 0);
       TVector3 secvec2D(d1->px(), d1->py(), 0);
 
       grand_agl[it] = cos(secvec.Angle(ptosvec));
@@ -1193,7 +1241,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
       typedef ROOT::Math::SVector<double, 6> SVector6;
 
       SMatrixSym3D totalCov = vtx.covariance() + d1->vertexCovariance();
-      SVector3 distanceVector(secvx - bestvx, secvy - bestvy, secvz - bestvz);
+      SVector3 distanceVector(d1->vx() - bestvx, d1->vy() - bestvy, d1->vz() - bestvz);
 
       grand_dl[it] = ROOT::Math::Mag(distanceVector);
       grand_dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector)) / grand_dl[it];
@@ -1208,7 +1256,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
       SMatrixSym3D sv2(v2);
 
       SMatrixSym3D totalCov2D = sv1 + sv2;
-      SVector3 distanceVector2D(secvx - bestvx, secvy - bestvy, 0);
+      SVector3 distanceVector2D(d1->vx() - bestvx, d1->vy() - bestvy, 0);
 
       double gdl2D = ROOT::Math::Mag(distanceVector2D);
       double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D)) / gdl2D;
@@ -1320,10 +1368,10 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
         grand_VtxProb2[it] = TMath::Prob(grand_vtxChi22[it], grand_ndf2[it]);
 
         // PAngle
-        TVector3 ptosvec2(secvx - bestvx, secvy - bestvy, secvz - bestvz);
+        TVector3 ptosvec2(d2->vx() - bestvx, d2->vy() - bestvy, d2->vz() - bestvz);
         TVector3 secvec2(d2->px(), d2->py(), d2->pz());
 
-        TVector3 ptosvec2D2(secvx - bestvx, secvy - bestvy, 0);
+        TVector3 ptosvec2D2(d2->vx() - bestvx, d2->vy() - bestvy, 0);
         TVector3 secvec2D2(d2->px(), d2->py(), 0);
 
         grand_agl2[it] = cos(secvec2.Angle(ptosvec2));
@@ -1338,7 +1386,7 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
         typedef ROOT::Math::SVector<double, 6> SVector6;
 
         SMatrixSym3D totalCov2 = vtx.covariance() + d2->vertexCovariance();
-        SVector3 distanceVector2(secvx - bestvx, secvy - bestvy, secvz - bestvz);
+        SVector3 distanceVector2(d2->vx() - bestvx, d2->vy() - bestvy, d2->vz() - bestvz);
 
         grand_dl2[it] = ROOT::Math::Mag(distanceVector2);
         grand_dlerror2[it] = sqrt(ROOT::Math::Similarity(totalCov2, distanceVector2)) / grand_dl2[it];
@@ -1353,12 +1401,30 @@ void VertexCompositeTreeProducer2::fillRECO(const edm::Event &iEvent, const edm:
         SMatrixSym3D sv22(v2);
 
         SMatrixSym3D totalCov2D2 = sv21 + sv22;
-        SVector3 distanceVector2D2(secvx - bestvx, secvy - bestvy, 0);
+        SVector3 distanceVector2D2(d1->vx() - bestvx, d1->vy() - bestvy, 0);
 
         double gdl2D2 = ROOT::Math::Mag(distanceVector2D2);
         double gdl2Derror2 = sqrt(ROOT::Math::Similarity(totalCov2D2, distanceVector2D2)) / gdl2D2;
 
         grand_dlos2D2[it] = gdl2D2 / gdl2Derror2;
+        if(useDCA_){
+          grand_agl[it] = cos((*angle3Ds1)[it]);
+          grand_agl_abs[it] = (*angle3Ds1)[it];
+
+          grand_agl2D[it] = cos((*angle2Ds1)[it]);
+          grand_agl2D_abs[it] = (*angle2Ds1)[it];
+
+          grand_agl2[it] = cos((*angle3Ds2)[it]);
+          grand_agl_abs2[it] = (*angle3Ds2)[it];
+
+          grand_agl2D2[it] = cos((*angle2Ds2)[it]);
+          grand_agl2D_abs2[it] = (*angle2Ds2)[it];
+
+          grand_dca3D[it] = (*dcaValues1)[it];
+          grand_dcaErr3D[it] = (*dcaErrors1)[it];
+          grand_dca3D2[it] = (*dcaValues2)[it];
+          grand_dcaErr3D2[it] = (*dcaErrors2)[it];
+        }
       }
     }
 

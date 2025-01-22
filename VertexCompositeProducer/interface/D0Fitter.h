@@ -88,6 +88,8 @@ class D0Fitter {
   const std::vector<float>& getDCAVals() const;
   const std::vector<float>& getDCAErrs() const;
   const std::vector<float>& getMVAVals() const; 
+  const std::vector<float>& getAngle2Ds() const; 
+  const std::vector<float>& getAngle3Ds() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
@@ -131,9 +133,12 @@ class D0Fitter {
   double dauLongImpactSigCut;
   double VtxChiProbCut;
   double dPtCut;
+  double dAbsYCut;
   double alphaCut;
   double alpha2DCut;
+  double mvaCut;
   bool   isWrongSign;
+  bool   useBS;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
 
@@ -153,6 +158,8 @@ class D0Fitter {
   // DCA
   std::vector<float> dcaVals_;
   std::vector<float> dcaErrs_;
+  std::vector<float> agl2Ds_;
+  std::vector<float> agl3Ds_;
 
   std::string dbFileName_;
 
