@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      DStarFitter
+// Class:      DStar5PFitter
 // 
-/**\class DStarFitter DStarFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DStarFitter.cc
+/**\class DStar5PFitter DStar5PFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DStar5PFitter.cc
 
  Description: <one line class summary>
 
@@ -14,7 +14,7 @@
 //
 //
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DStarFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DStar5PFitter.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -61,7 +61,7 @@ static float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
 
 
 // Constructor and (empty) destructor
-DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
+DStar5PFitter::DStar5PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
     bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
 {
   using std::string;
@@ -135,12 +135,12 @@ DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesC
   }
 }
 
-DStarFitter::~DStarFitter() {
+DStar5PFitter::~DStar5PFitter() {
   delete forest_;
 }
 
 // Method containing the algorithm for vertex reconstruction
-void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   using std::vector;
   using std::cout;
@@ -197,7 +197,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   double zVtxError=-999.0;
   const reco::VertexCollection vtxCollection = *(theVertexHandle.product());
   reco::VertexCollection::const_iterator vtxPrimary = vtxCollection.begin();
-  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=2)
+  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=5)
   {
     isVtxPV = 1;
     xVtx = vtxPrimary->x();
@@ -219,6 +219,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
 
   // Fill vectors of TransientTracks and TrackRefs after applying preselection cuts.
+  if(theTrackHandle->size() < 5 ) return;
   for(unsigned int indx = 0; indx < theTrackHandle->size(); indx++) {
     TrackRef tmpRef( theTrackHandle, indx );
     bool quality_ok = true;
@@ -269,10 +270,6 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
     for(unsigned int trdx1 = 0; trdx1 < theTrackRefs.size(); trdx1++) {
 
-      // Not using this on Dstar fit (1)
-      // if( (theTrackRefs[didx1]->pt() + theTrackRefs[trdx2]->pt()) < tkPtSumCut) continue;
-      // if( abs(theTrackRefs[didx1]->eta() - theTrackRefs[trdx2]->eta()) > tkEtaDiffCut) continue;
-
       //This vector holds the 3 tracks (K + pi) +pi to be vertexed
       std::vector<TransientTrack> transTracks;
 
@@ -289,68 +286,6 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       // std::cout << "D* - D0 mass : " << theDStarcandMass << ", " << D0Vec.M() << std::endl;
       if(theDStarcandMass - D0Vec.M() >0.16) continue;
       
-
-      // Calculate DCA of two daughters
-//      double dzvtx_pos = positiveTrackRef->dz(bestvtx);
-//      double dxyvtx_pos = positiveTrackRef->dxy(bestvtx);
-//      double dzerror_pos = sqrt(positiveTrackRef->dzError()*positiveTrackRef->dzError()+zVtxError*zVtxError);
-//      double dxyerror_pos = sqrt(positiveTrackRef->d0Error()*positiveTrackRef->d0Error()+xVtxError*yVtxError);
-//      double dauLongImpactSig_pos = dzvtx_pos/dzerror_pos;
-//      double dauTransImpactSig_pos = dxyvtx_pos/dxyerror_pos;
-//
-//      double dzvtx_neg = negativeTrackRef->dz(bestvtx);
-//      double dxyvtx_neg = negativeTrackRef->dxy(bestvtx);
-//      double dzerror_neg = sqrt(negativeTrackRef->dzError()*negativeTrackRef->dzError()+zVtxError*zVtxError);
-//      double dxyerror_neg = sqrt(negativeTrackRef->d0Error()*negativeTrackRef->d0Error()+xVtxError*yVtxError);
-//      double dauLongImpactSig_neg = dzvtx_neg/dzerror_neg;
-//      double dauTransImpactSig_neg = dxyvtx_neg/dxyerror_neg;
-//
-//      double nhits_pos = positiveTrackRef->numberOfValidHits();
-//      double nhits_neg = negativeTrackRef->numberOfValidHits(); 
-//    
-//      double ptErr_pos = positiveTrackRef->ptError();
-//      double ptErr_neg = negativeTrackRef->ptError();
-//
-//      double dedx_pos=-999.;
-//      double dedx_neg=-999.;
-//      // Extract dEdx
-//      if(dEdxHandle.isValid()){
-//        const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle.product();
-//        dedx_pos = dEdxTrack[positiveTrackRef].dEdx();
-//        dedx_neg = dEdxTrack[negativeTrackRef].dEdx();
-//      } 
-//      dedx_pos = dedx_pos;
-//      dedx_neg = dedx_neg;
-
-//      // Fill the vector of TransientTracks to send to KVF
-//      transTracks.push_back(*posTransTkPtr);
-//      transTracks.push_back(*negTransTkPtr);
-
-      // Trajectory states to calculate DCA for the 2 tracks
-//      FreeTrajectoryState posState = posTransTkPtr->impactPointTSCP().theState();
-//      FreeTrajectoryState negState = pionTransTkPtr->impactPointTSCP().theState();
-//
-//      if( !posTransTkPtr->impactPointTSCP().isValid() || !negTransTkPtr->impactPointTSCP().isValid() ) continue;
-//
-//      // Measure distance between tracks at their closest approach
-//      ClosestApproachInRPhi cApp;
-//      cApp.calculate(posState, negState);
-//      if( !cApp.status() ) continue;
-//      float dca = fabs( cApp.distance() );
-//      GlobalPoint cxPt = cApp.crossingPoint();
-//
-//      if (dca < 0. || dca > tkDCACut) continue;
-//
-//      // Get trajectory states for the tracks at POCA for later cuts
-//      TrajectoryStateClosestToPoint posTSCP = posTransTkPtr->trajectoryStateClosestToPoint( cxPt );
-//      TrajectoryStateClosestToPoint negTSCP = negTransTkPtr->trajectoryStateClosestToPoint( cxPt );
-//
-//      if( !posTSCP.isValid() || !negTSCP.isValid() ) continue;
-//
-//      if( (mass1 > mPiKCutMax || mass1 < mPiKCutMin) && (mass2 > mPiKCutMax || mass2 < mPiKCutMin)) continue;
-//      if( totalPt < dPtCut ) continue;
-
-
        float chi = 0.0;
        float ndf = 0.0;
 
@@ -359,12 +294,20 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        vector<RefCountedKinematicParticle> d0Daus;
        reco::Candidate* dau0 = theD0.daughter(0);
        reco::Candidate* dau1 = theD0.daughter(1);
+       reco::Candidate* dau2 = theD0.daughter(2);
+       reco::Candidate* dau3 = theD0.daughter(3);
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
-       float dau0mass =  dau0->mass();
-       float dau1mass =  dau1->mass();
-       d0Daus.push_back(pFactory.particle(ttk0,dau0mass,chi,ndf,D0MassD0_sigma));
-       d0Daus.push_back(pFactory.particle(ttk1,dau1mass,chi,ndf,D0MassD0_sigma));
+       reco::TransientTrack ttk2(*dau2->bestTrack(), magField);
+       reco::TransientTrack ttk3(*dau3->bestTrack(), magField);
+       if(fabs(thePiTrack.eta() - dau0->bestTrack()->eta()) < 0.03) continue;
+       if(fabs(thePiTrack.eta() - dau1->bestTrack()->eta()) < 0.03) continue;
+       if(fabs(thePiTrack.eta() - dau2->bestTrack()->eta()) < 0.03) continue;
+       if(fabs(thePiTrack.eta() - dau3->bestTrack()->eta()) < 0.03) continue;
+       d0Daus.push_back(pFactory.particle(ttk0,dau0->mass(),chi,ndf,D0MassD0_sigma));
+       d0Daus.push_back(pFactory.particle(ttk1,dau1->mass(),chi,ndf,D0MassD0_sigma));
+       d0Daus.push_back(pFactory.particle(ttk2,dau2->mass(),chi,ndf,D0MassD0_sigma));
+       d0Daus.push_back(pFactory.particle(ttk3,dau3->mass(),chi,ndf,D0MassD0_sigma));
 
        KinematicParticleVertexFitter kpvFitter;
        RefCountedKinematicTree d0Tree =  kpvFitter.fit(d0Daus);
@@ -379,7 +322,6 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        KinematicParticleVertexFitter dStarFitter;
        RefCountedKinematicTree dStarVertex;
        dStarVertex = dStarFitter.fit(dStarParticles);
-
        if( !dStarVertex->isValid() ) continue;
 
        dStarVertex->movePointerToTheTop();
@@ -496,6 +438,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());
          dcaErrs_.push_back(cur3DIP.error());
+         detlaM_.push_back( (theDStar->mass() - D0Vec.M()));
 //if(theDStar->pt()<4){cout <<"Dstar pt : " <<theDStar->pt()<<endl;}
 
 // per//form MVA evaluation
@@ -546,31 +489,36 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& DStarFitter::getDStar() const {
+const reco::VertexCompositeCandidateCollection& DStar5PFitter::getDStar() const {
   return theDStars;
 }
 
-const std::vector<float>& DStarFitter::getDCAVals() const{
+const std::vector<float>& DStar5PFitter::getDCAVals() const{
   return dcaVals_;
 }
 
-const std::vector<float>& DStarFitter::getDCAErrs() const{
+const std::vector<float>& DStar5PFitter::getDCAErrs() const{
   return dcaErrs_;
 }
 
-const std::vector<float>& DStarFitter::getMVAVals() const {
+const std::vector<float>& DStar5PFitter::getMVAVals() const {
   return mvaVals_;
 }
 
+const std::vector<float>& DStar5PFitter::getDeltaM() const {
+  return detlaM_;
+}
+
 /*
-auto_ptr<edm::ValueMap<float> > DStarFitter::getMVAMap() const {
+auto_ptr<edm::ValueMap<float> > DStar5PFitter::getMVAMap() const {
   return mvaValValueMap;
 }
 */
 
-void DStarFitter::resetAll() {
+void DStar5PFitter::resetAll() {
     theDStars.clear();
     mvaVals_.clear();
     dcaVals_.clear();
     dcaErrs_.clear();
+    detlaM_.clear();
 }

@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      D0Fitter
+// Class:      D04PFitter
 // 
-/**\class D0Fitter D0Fitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Fitter.h
+/**\class D04PFitter D04PFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D04PFitter.h
 
  Description: <one line class summary>
 
@@ -11,12 +11,12 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li
+//  Author: Soohwan Lee
 //
 //
 
-#ifndef VertexCompositeAnalysis__D0_FITTER_H
-#define VertexCompositeAnalysis__D0_FITTER_H
+#ifndef VertexCompositeAnalysis__D0_4P_FITTER_H
+#define VertexCompositeAnalysis__D0_4P_FITTER_H
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -45,8 +45,7 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
 
-// #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
-#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -75,10 +74,10 @@
 #include <algorithm>
 #include <map>
 
-class D0Fitter {
+class D04PFitter {
  public:
-  D0Fitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
-  ~D0Fitter();
+  D04PFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
+  ~D04PFitter();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
@@ -152,6 +151,15 @@ class D0Fitter {
 //  MVACollection mvas; 
 
   std::string dbFileName_;
+
+  const float piMassD04P = 0.13957018;
+  const float piMassD04PSquared = piMassD04P*piMassD04P;
+  const float kaonMassD04P = 0.493677;
+  const float kaonMassD04PSquared = kaonMassD04P*kaonMassD04P;
+  const float d0MassD04P = 1.86484;
+  float piMassD04P_sigma = 3.5E-7f;
+  float kaonMassD04P_sigma = 1.6E-5f;
+  float d0MassD04P_sigma = d0MassD04P*1.e-6;
 
 };
 
