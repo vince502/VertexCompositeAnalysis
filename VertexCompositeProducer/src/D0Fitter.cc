@@ -49,6 +49,9 @@ float piMassD0_sigma = 3.5E-7f;
 float kaonMassD0_sigma = 1.6E-5f;
 float d0MassD0_sigma = d0MassD0*1.e-6;
 
+using CC = pat::CompositeCandidate;
+using CCC = pat::CompositeCandidateCollection;
+
 // Constructor and (empty) destructor
 D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
     bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
@@ -414,8 +417,8 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         //   ChiSquaredProbability((double)(d0DecayVertex->chiSquared()),(double)(d0DecayVertex->degreesOfFreedom()));
         //if (d0C2Prob < 0.0001) continue;
 
-	float d0C2Prob = TMath::Prob(d0DecayVertex->chiSquared(),d0DecayVertex->degreesOfFreedom());
-	if (d0C2Prob < VtxChiProbCut) continue;
+	      float d0C2Prob = TMath::Prob(d0DecayVertex->chiSquared(),d0DecayVertex->degreesOfFreedom());
+	      if (d0C2Prob < VtxChiProbCut) continue;
 
         //if ( d0Cand->currentState().mass() > 2.5 || d0Cand->currentState().mass() < 1.0) continue;
 
@@ -491,9 +494,25 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             lVtxMag / sigmaLvtxMag < lVtxSigCut ||
             cos(d0Angle3D) < collinCut3D || cos(d0Angle2D) < collinCut2D || d0Angle3D > alphaCut || d0Angle2D > alpha2DCut
         ) continue;
+        AnalyticalImpactPointExtrapolator extrapolator(magField);
+        TrajectoryStateOnSurface tsos = extrapolator.extrapolate(d0Cand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));;
 
-        VertexCompositeCandidate* theD0 = 0;
-        theD0 = new VertexCompositeCandidate(0, d0P4, d0Vtx, d0VtxCov, d0VtxChi2, d0VtxNdof);
+	      if( !tsos.isValid() ) continue;
+        Measurement1D cur3DIP;
+        VertexDistance3D a3d;
+        GlobalPoint refPoint          = tsos.globalPosition();
+        GlobalError refPointErr       = tsos.cartesianError().position();
+        GlobalPoint vertexPosition    = RecoVertex::convertPos(vtxPrimary->position());
+        GlobalError vertexPositionErr = RecoVertex::convertError(vtxPrimary->error());
+        cur3DIP =  (a3d.distance(VertexState(vertexPosition,vertexPositionErr), VertexState(refPoint, refPointErr)));
+        // // Debugging part : cur3DIP and sin(alpha) * decaylength value is equal but the error different
+        // std::cout << "By cur3DIP " << cur3DIP.value() << " +/- " << cur3DIP.error() <<std::endl;
+        // std::cout << "By decay length and alpha " << std::sin(d0Angle3D)*lVtxMag << " +/- " << sigmaLvtxMag * std::sin(d0Angle3D) <<std::endl;
+        // std::cout << "By decay length " << lVtxMag << " +/- " << sigmaLvtxMag * lVtxMag <<std::endl;
+        CC* theD0 = 0;
+        theD0 = new CC();
+        theD0->setP4(d0P4);
+        // theD0 = new VertexCompositeCandidate(0, d0P4, d0Vtx, d0VtxCov, d0VtxChi2, d0VtxNdof);
 
         RecoChargedCandidate
           thePosCand(1, Particle::LorentzVector(posCandTotalP.x(),
@@ -514,9 +533,21 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         }
 
         AddFourMomenta addp4;
-        theD0->addDaughter(thePosCand);
-        theD0->addDaughter(theNegCand);
+        theD0->addDaughter(thePosCand, "posdau" );
+        theD0->addDaughter(theNegCand, "negdau" );
         theD0->setPdgId(pdg_id[i]);
+        reco::Vertex d0VtxObj = *d0DecayVertex;
+        theD0->addUserData("Vtx", d0VtxObj);
+        theD0->addUserFloat("VtxChi2", d0VtxChi2 );
+        theD0->addUserFloat("VtxNdof", d0VtxNdof );
+        theD0->addUserFloat("alpha2D", d0Angle2D );
+        theD0->addUserFloat("alpha3D", d0Angle3D );
+        theD0->addUserFloat("decaylength2D", rVtxMag);
+        theD0->addUserFloat("decaylength3D", lVtxMag );
+        theD0->addUserFloat("decaylengthsignif2D", sigmaRvtxMag);
+        theD0->addUserFloat("decaylengthsignif3D", sigmaLvtxMag );
+        theD0->addUserFloat("dca3D", cur3DIP.value());
+        theD0->addUserFloat("dca3DErr", cur3DIP.error());
         addp4.set( *theD0 );
         if( theD0->mass() < d0MassD0 + d0MassCut &&
             theD0->mass() > d0MassD0 - d0MassCut ) //&&
@@ -573,7 +604,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& D0Fitter::getD0() const {
+const CCC& D0Fitter::getD0() const {
   return theD0s;
 }
 

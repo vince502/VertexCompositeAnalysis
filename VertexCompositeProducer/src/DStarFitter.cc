@@ -68,7 +68,7 @@ DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesC
 
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  token_d0cand = iC.consumes<reco::VertexCompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0cand = iC.consumes<CCC>(theParameters.getParameter<edm::InputTag>("d0Collection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -161,7 +161,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
-  Handle<reco::VertexCompositeCandidateCollection> theD0Handle;
+  Handle<CCC> theD0Handle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
@@ -279,7 +279,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TrackRef pionTrackRef = theTrackRefs[trdx1];
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
-      VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
+      CC theD0 = (*theD0Handle)[didx1];
 
       // if( !pionTransTkPtr->impactPointStateAvailable()) continue;
       const auto& D0Vec = theD0.p4();
@@ -475,8 +475,10 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
            cos(dStarAngle3D) < collinCut3D || cos(dStarAngle2D) < collinCut2D || dStarAngle3D > alphaCut || dStarAngle2D > alpha2DCut
        ) continue;
 
-       VertexCompositeCandidate* theDStar = 0;
-       theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
+       CC* theDStar = 0;
+      //  theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
+      theDStar = new CC();
+      theDStar->setP4(dStarP4);
 
        RecoChargedCandidate
          theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
@@ -484,12 +486,24 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
                                                   negCandTotalE), dStarVtx);
        theNegCand.setTrack(pionTrackRef);
 
-       AddFourMomenta addp4;
-       theDStar->addDaughter(theD0);
-       theDStar->addDaughter(theNegCand);
+      //  AddFourMomenta addp4;
+       theDStar->addDaughter(theD0, "D0");
+       theDStar->addDaughter(theNegCand, "pion");
        int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
        theDStar->setPdgId(pdgId);
-       addp4.set( *theDStar );
+        reco::Vertex dStarVtxObj = *dStarDecayVertex;
+        theDStar->addUserData("Vtx", dStarVtxObj);
+        theDStar->addUserFloat("VtxChi2", dStarVtxChi2 );
+        theDStar->addUserFloat("VtxNdof", dStarVtxNdof );
+        theDStar->addUserFloat("alpha2D", dStarAngle2D );
+        theDStar->addUserFloat("alpha3D", dStarAngle3D );
+        theDStar->addUserFloat("decaylength2D", rVtxMag);
+        theDStar->addUserFloat("decaylength3D", lVtxMag );
+        theDStar->addUserFloat("decaylengthsignif2D", sigmaRvtxMag);
+        theDStar->addUserFloat("decaylengthsignif3D", sigmaLvtxMag );
+        theDStar->addUserFloat("dca3D", cur3DIP.value());
+        theDStar->addUserFloat("dca3DErr", cur3DIP.error());
+      //  addp4.set( *theDStar );
        if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
            theDStar->mass() > dStarMassDStar - dStarMassCut ) 
        {
@@ -546,7 +560,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& DStarFitter::getDStar() const {
+const pat::CompositeCandidateCollection& DStarFitter::getDStar() const {
   return theDStars;
 }
 

@@ -33,6 +33,7 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 
+#include "RecoVertex/KinematicFitPrimitives/interface/KinematicVertex.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
 #include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
@@ -44,6 +45,13 @@
 
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
+
+// IP/DCA TOOLS
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
+#include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 
 // #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
@@ -77,13 +85,15 @@
 
 class D0Fitter {
  public:
+ using CC = pat::CompositeCandidate;
+ using CCC = pat::CompositeCandidateCollection;
   D0Fitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
   ~D0Fitter();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
-  const reco::VertexCompositeCandidateCollection& getD0() const;
+  const CCC& getD0() const;
   const std::vector<float>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
@@ -91,7 +101,7 @@ class D0Fitter {
 
  private:
   // STL vector of VertexCompositeCandidate that will be filled with VertexCompositeCandidates by fitAll()
-  reco::VertexCompositeCandidateCollection theD0s;
+  CCC theD0s;
 
   // Tracker geometry for discerning hit positions
   const TrackerGeometry* trackerGeom;

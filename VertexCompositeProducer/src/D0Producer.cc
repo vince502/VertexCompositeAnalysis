@@ -29,7 +29,7 @@ D0Producer::D0Producer(const edm::ParameterSet& iConfig) :
   useAnyMVA_ = false;
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
-  produces< reco::VertexCompositeCandidateCollection >("D0");
+  produces< CCC >("D0");
   if(useAnyMVA_) produces<MVACollection>("MVAValuesD0");
 }
 
@@ -55,7 +55,7 @@ void D0Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //   std::auto_ptr< reco::VertexCompositeCandidateCollection >
 //     d0Candidates( new reco::VertexCompositeCandidateCollection );
 //
-   auto d0Candidates = std::make_unique<reco::VertexCompositeCandidateCollection>();
+   auto d0Candidates = std::make_unique<CCC>();
    d0Candidates->reserve( theVees.getD0().size() );
 
    std::copy( theVees.getD0().begin(),
