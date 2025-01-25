@@ -84,6 +84,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   collinCut2D = theParameters.getParameter<double>(string("collinearityCut2D"));
   collinCut3D = theParameters.getParameter<double>(string("collinearityCut3D"));
   d0MassCut = theParameters.getParameter<double>(string("d0MassCut"));
+  d0AbsYCut = theParameters.getParameter<double>(string("d0AbsYCut"));
   dauTransImpactSigCut = theParameters.getParameter<double>(string("dauTransImpactSigCut"));
   dauLongImpactSigCut = theParameters.getParameter<double>(string("dauLongImpactSigCut"));
   VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
@@ -371,14 +372,19 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       double totalPSq =
         ( posTSCP.momentum() + negTSCP.momentum() ).mag2();
 
-      double totalPt =
-        ( posTSCP.momentum() + negTSCP.momentum() ).perp();
+      auto sumMom = ( posTSCP.momentum() + negTSCP.momentum() );
+      double totalPt = sumMom.perp();
 
       double mass1 = sqrt( totalE1Sq - totalPSq);
       double mass2 = sqrt( totalE2Sq - totalPSq);
 
       if( (mass1 > mPiKCutMax || mass1 < mPiKCutMin) && (mass2 > mPiKCutMax || mass2 < mPiKCutMin)) continue;
       if( totalPt < dPtCut ) continue;
+      double totalY1 = 0.5 * log((totalE1 + totalPt* TMath::SinH(sumMom.eta()) )/(totalE1 - totalPt*TMath::SinH(sumMom.eta())));
+      double totalY2 = 0.5 * log((totalE2 + totalPt* TMath::SinH(sumMom.eta()) )/(totalE2 - totalPt*TMath::SinH(sumMom.eta())));
+      if( fabs(totalY1) > d0AbsYCut && fabs(totalY2) > d0AbsYCut ) continue;
+
+
 
       // Create the vertex fitter object and vertex the tracks
     

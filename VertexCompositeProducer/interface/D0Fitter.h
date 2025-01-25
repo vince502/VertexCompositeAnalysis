@@ -136,6 +136,7 @@ class D0Fitter {
   double collinCut2D;
   double collinCut3D;
   double d0MassCut;
+  double d0AbsYCut;
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
   double VtxChiProbCut;
