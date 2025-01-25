@@ -13,7 +13,7 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     tkPtErrCut = cms.double(9999.0), #trk pT err <
     tkPtCut = cms.double(0.3), #trk pT >
     tkEtaCut = cms.double(999.0), #trk abs(eta) <
-    tkPtSumCut = cms.double(0.0), 
+    tkPtSumCut = cms.double(0.0), #
     tkEtaDiffCut = cms.double(999.0), 
 
     mPiKCutMin = cms.double(1.72),

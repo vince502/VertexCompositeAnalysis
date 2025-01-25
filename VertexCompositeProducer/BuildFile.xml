@@ -29,3 +29,4 @@
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/EgammaObjects"/>
 <use   name="CondFormats/GBRForest"/>
+<flags SKIP_FILES="FourTrkD0Fitter.cc"/>
