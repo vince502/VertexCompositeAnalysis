@@ -2,9 +2,9 @@
 
 //#define DEBUG false
 
-// #define DEBUG true
+#define DEBUG true
 #define PI 3.1416
-#define MAXCAN 2000
+// #define MAXCAN 2000
 
 VertexCompositeTreeProducer2::VertexCompositeTreeProducer2(const edm::ParameterSet& iConfig)
 {
@@ -262,7 +262,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
                         ) {
                       idxs = permutations;
                       break;
-                    } while (std::next_permutation(permutations.begin(), permutations.end()));
+                    }// while (std::next_permutation(permutations.begin(), permutations.end()));
                     if(!idxs.empty()) break;
                   }
                 }
@@ -339,14 +339,14 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
 
             for( unsigned int igen=0; igen<nGen; igen++){
               auto const theGenDStar = genRefs.at(igen);
-              unsigned int idxD0 = -1;
+              unsigned int idxD0 = 1;
               if( abs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
               auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
               auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
               // Only works for 2 body two layer decay
               reco::Candidate const* recoD1;
               reco::Candidate const* recoPi;
-              unsigned int idxRecoD0 = -1;
+              unsigned int idxRecoD0 = 1;
               if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
               recoD1 = trk.daughter(idxRecoD0);
               recoPi = trk.daughter(1-idxRecoD0);
@@ -1224,7 +1224,7 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
                       ) {
                     idxs = permutations;
                     break;
-                  } while (std::next_permutation(permutations.begin(), permutations.end()));
+                  } 
                   if(!idxs.empty()) break;
                 }
               }
@@ -1255,7 +1255,10 @@ VertexCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::Even
           #endif
           auto const theGenDStar = genRefs.at(igen);
           if(abs(theGenDStar->pdgId())!=413) cout << "id : " << theGenDStar->pdgId() << endl;
-          unsigned int idxD0 = -1;
+          unsigned int idxD0 = 1;
+          cout << idxD0 << endl;
+          cout <<  genRefs.at(igen)->daughter(idxD0)->pdgId() << endl;
+          cout <<  genRefs.at(igen)->daughter(1-idxD0)->pdgId() << endl;
           if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
           auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
           auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);

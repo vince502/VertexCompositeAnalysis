@@ -26,5 +26,7 @@
 <use name="DataFormats/HLTReco"/>
 <use name="HLTrigger/HLTcore"/>
 <use name="CondFormats/GBRForest"/>
+<flags SKIP_FILES="VertexCompositeTreeProducer2_vector.cc"/>
+<flags SKIP_FILES="VertexCompositeTreeProducer2_vector.h"/>
 
 <flags EDM_PLUGIN="1"/>

@@ -176,7 +176,7 @@ process.dStarselectorNewReduced = process.dStarselector.clone()
 process.dStarselectorNewReduced.DCAValCollection = cms.InputTag("generaldStarCandidatesNew:DCAValuesdStar")
 process.dStarselectorNewReduced.DCAErrCollection = cms.InputTag("generaldStarCandidatesNew:DCAErrorsdStar")
 process.dStarselectorNewReduced.useAnyMVA=cms.bool(True)
-process.dStarselectorNewReduced.GBRForestFileName=cms.string('GBRForestfile_XGBDT_PromptDstarInPbPb_default_MB_OnlyMC_v1.root')
+process.dStarselectorNewReduced.GBRForestFileName=cms.string('GBRForestfile_XGBDT_PromptDstarInPbPb_default_MB_OnlyMC_v3.root')
 # process.dStarselectorNewReduced.mvaMin = cms.untracked.double(0.3)
 #process.dStarselectorNewReduced.cand3DDecayLengthSigMin = cms.untracked.double(3.)
 #process.dStarselectorNewReduced.cand3DPointingAngleMax = cms.untracked.double(0.2)
@@ -193,7 +193,7 @@ process.d0ana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("d0s
 # process.d0ana_newreduced.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
 process.d0ana_newreduced.DCAValCollection = cms.InputTag("d0selectorNewReduced:DCAValuesNewD0")
 process.d0ana_newreduced.DCAErrCollection = cms.InputTag("d0selectorNewReduced:DCAErrorsNewD0")
-process.dStarana.useAnyMVA = cms.bool(False)
+process.dStarana.useAnyMVA = cms.bool(True)
 process.dStarana.MVACollection = cms.InputTag("dStarselectorNewReduced:MVAValuesNewDStar")
 
 #process.d0ana_wrongsign_newreduced = process.d0ana_wrongsign.clone()
@@ -203,8 +203,8 @@ process.dStarana.MVACollection = cms.InputTag("dStarselectorNewReduced:MVAValues
 #process.d0ana_wrongsign_newreduced.DCAErrCollection = cms.InputTag("d0selectorWSNewReduced:DCAErrorsNewD0")
 
 
-#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew *process.dStarselectorNewReduced *process.dStarana )
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew * process.dStarana )
+process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew *process.dStarselectorNewReduced *process.dStarana )
+#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew * process.dStarana )
 #process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced  * process.generalDStarCandidatesNew * process.dStarana )
 # process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorWSNewReduced * process.d0ana_wrongsign_newreduced)
 
