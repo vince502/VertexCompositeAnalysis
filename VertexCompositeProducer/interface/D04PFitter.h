@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      D0Fitter
+// Class:      D04PFitter
 // 
-/**\class D0Fitter D0Fitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Fitter.h
+/**\class D04PFitter D04PFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D04PFitter.h
 
  Description: <one line class summary>
 
@@ -11,12 +11,12 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li
+//  Author: Soohwan Lee
 //
 //
 
-#ifndef VertexCompositeAnalysis__D0_FITTER_H
-#define VertexCompositeAnalysis__D0_FITTER_H
+#ifndef VertexCompositeAnalysis__D0_4P_FITTER_H
+#define VertexCompositeAnalysis__D0_4P_FITTER_H
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -33,7 +33,6 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 
-#include "RecoVertex/KinematicFitPrimitives/interface/KinematicVertex.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
 #include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
@@ -46,15 +45,7 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
 
-// IP/DCA TOOLS
-#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
-#include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
-#include "TrackingTools/IPTools/interface/IPTools.h"
-#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
-#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
-
-// #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
-#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -83,17 +74,15 @@
 #include <algorithm>
 #include <map>
 
-class D0Fitter {
+class D04PFitter {
  public:
- using CC = pat::CompositeCandidate;
- using CCC = pat::CompositeCandidateCollection;
-  D0Fitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
-  ~D0Fitter();
+  D04PFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
+  ~D04PFitter();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
-  const CCC& getD0() const;
+  const reco::VertexCompositeCandidateCollection& getD0() const;
   const std::vector<float>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
@@ -101,7 +90,7 @@ class D0Fitter {
 
  private:
   // STL vector of VertexCompositeCandidate that will be filled with VertexCompositeCandidates by fitAll()
-  CCC theD0s;
+  reco::VertexCompositeCandidateCollection theD0s;
 
   // Tracker geometry for discerning hit positions
   const TrackerGeometry* trackerGeom;
@@ -136,7 +125,6 @@ class D0Fitter {
   double collinCut2D;
   double collinCut3D;
   double d0MassCut;
-  double d0AbsYCut;
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
   double VtxChiProbCut;
@@ -163,6 +151,15 @@ class D0Fitter {
 //  MVACollection mvas; 
 
   std::string dbFileName_;
+
+  const float piMassD04P = 0.13957018;
+  const float piMassD04PSquared = piMassD04P*piMassD04P;
+  const float kaonMassD04P = 0.493677;
+  const float kaonMassD04PSquared = kaonMassD04P*kaonMassD04P;
+  const float d0MassD04P = 1.86484;
+  float piMassD04P_sigma = 3.5E-7f;
+  float kaonMassD04P_sigma = 1.6E-5f;
+  float d0MassD04P_sigma = d0MassD04P*1.e-6;
 
 };
 

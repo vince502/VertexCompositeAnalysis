@@ -1,20 +1,21 @@
 import FWCore.ParameterSet.Config as cms
 
-generalD0Candidates = cms.EDProducer("D0Producer",
-                                     
+generalDStar5PCandidates = cms.EDProducer("DStar5PProducer",
+
     # InputTag that tells which TrackCollection to use for vertexing
+    d0Collection = cms.InputTag('d0selectorNewReduced'),
     trackRecoAlgorithm = cms.InputTag('generalTracks'),
     vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices'),
 
     trackQualities = cms.vstring('highPurity'),
-                                     
+
     tkChi2Cut = cms.double(7), #trk Chi2 <
     tkNhitsCut = cms.int32(5), #trk Nhits >=
     tkPtErrCut = cms.double(9999.0), #trk pT err <
     tkPtCut = cms.double(0.3), #trk pT >
     tkEtaCut = cms.double(999.0), #trk abs(eta) <
-    tkPtSumCut = cms.double(0.0), #
-    tkEtaDiffCut = cms.double(999.0), 
+    tkPtSumCut = cms.double(0.0),
+    tkEtaDiffCut = cms.double(999.0),
 
     mPiKCutMin = cms.double(1.72),
     mPiKCutMax = cms.double(2.01),
@@ -35,16 +36,15 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     lVtxCut = cms.double(0.0),
     vtxSignificance2DCut = cms.double(0.0),
     vtxSignificance3DCut = cms.double(0.0),
-    d0MassCut = cms.double(0.15),
-    d0AbsYCut = cms.double(2.4),
+    dStarMassCut = cms.double(0.22),
     dPtCut = cms.double(0.0),
 
     isWrongSign = cms.bool(False),
 
-# MVA 
+# MVA
 
     useAnyMVA = cms.bool(False),
-    mvaType = cms.string('BDT'), 
+    mvaType = cms.string('BDT'),
     GBRForestLabel = cms.string('D0InpPb'),
     GBRForestFileName = cms.string('GBRForestfile.root'),
 )

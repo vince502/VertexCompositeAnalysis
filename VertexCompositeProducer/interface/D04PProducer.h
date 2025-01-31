@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      D0Producer
+// Class:      D04PProducer
 // 
-/**\class D0Producer D0Producer.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Producer.h
+/**\class D04PProducer D04PProducer.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D04PProducer.h
 
  Description: <one line class summary>
 
@@ -11,12 +11,12 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li 
+//  Author: Soohwan Lee
 //
 //
 
-#ifndef VertexCompositeAnalysis__D0_PRODUCER_H
-#define VertexCompositeAnalysis__D0_PRODUCER_H
+#ifndef VertexCompositeAnalysis__D0_4P_PRODUCER_H
+#define VertexCompositeAnalysis__D0_4P_PRODUCER_H
 
 // system include files
 #include <memory>
@@ -33,19 +33,16 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
-// #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
-#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Fitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D04PFitter.h"
 
-class D0Producer : public edm::one::EDProducer<> {
+class D04PProducer : public edm::one::EDProducer<> {
 public:
-  using CC = pat::CompositeCandidate;
-  using CCC = pat::CompositeCandidateCollection;
   using MVACollection = std::vector<float>;
 
-  explicit D0Producer(const edm::ParameterSet&);
-  ~D0Producer();
+  explicit D04PProducer(const edm::ParameterSet&);
+  ~D04PProducer();
 
 private:
   //virtual void beginJob() ;
@@ -55,7 +52,7 @@ private:
 
   bool useAnyMVA_;
 
-  D0Fitter theVees; 
+  D04PFitter theVees; 
 //  edm::ParameterSet theParams;
 };
 

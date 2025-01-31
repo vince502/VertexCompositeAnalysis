@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      D0Fitter
+// Class:      DStar5PFitter
 // 
-/**\class D0Fitter D0Fitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Fitter.h
+/**\class DStar5PFitter DStar5PFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/DStar5PFitter.h
 
  Description: <one line class summary>
 
@@ -11,12 +11,12 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li
+// Class Author:  Soohwan Lee
 //
 //
 
-#ifndef VertexCompositeAnalysis__D0_FITTER_H
-#define VertexCompositeAnalysis__D0_FITTER_H
+#ifndef VertexCompositeAnalysis__DStar_5P_FITTER_H
+#define VertexCompositeAnalysis__DStar_5P_FITTER_H
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -33,7 +33,6 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 
-#include "RecoVertex/KinematicFitPrimitives/interface/KinematicVertex.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
 #include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
@@ -46,19 +45,14 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
 
-// IP/DCA TOOLS
-#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
-#include "TrackingTools/PatternTools/interface/TransverseImpactPointExtrapolator.h"
-#include "TrackingTools/IPTools/interface/IPTools.h"
-#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
-#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
-
-// #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
-#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
 #include "DataFormats/TrackReco/interface/DeDxData.h"
+
+// DCA
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
@@ -83,25 +77,26 @@
 #include <algorithm>
 #include <map>
 
-class D0Fitter {
+class DStar5PFitter {
  public:
- using CC = pat::CompositeCandidate;
- using CCC = pat::CompositeCandidateCollection;
-  D0Fitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
-  ~D0Fitter();
+  DStar5PFitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
+  ~DStar5PFitter();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
-  const CCC& getD0() const;
+  const reco::VertexCompositeCandidateCollection& getDStar() const;
+  const std::vector<float>& getDCAVals() const;
+  const std::vector<float>& getDCAErrs() const;
   const std::vector<float>& getMVAVals() const; 
+  const std::vector<float>& getDeltaM() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
 
  private:
   // STL vector of VertexCompositeCandidate that will be filled with VertexCompositeCandidates by fitAll()
-  CCC theD0s;
+  reco::VertexCompositeCandidateCollection theDStars;
 
   // Tracker geometry for discerning hit positions
   const TrackerGeometry* trackerGeom;
@@ -114,6 +109,7 @@ class D0Fitter {
   edm::InputTag vtxAlg;
   edm::EDGetTokenT<reco::TrackCollection> token_tracks;
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
+  edm::EDGetTokenT<reco::VertexCompositeCandidateCollection> token_d0cand;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
 
@@ -135,8 +131,8 @@ class D0Fitter {
   double lVtxSigCut;
   double collinCut2D;
   double collinCut3D;
+  double dStarMassCut;
   double d0MassCut;
-  double d0AbsYCut;
   double dauTransImpactSigCut;
   double dauLongImpactSigCut;
   double VtxChiProbCut;
@@ -157,10 +153,13 @@ class D0Fitter {
   bool useForestFromDB_;
 
   std::vector<float> mvaVals_;
-  edm::ESGetToken<GBRForest, GBRWrapperRcd> mvaToken_;
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 
+  // DCA
+  std::vector<float> dcaVals_;
+  std::vector<float> dcaErrs_;
+  std::vector<float> detlaM_;
 
   std::string dbFileName_;
 

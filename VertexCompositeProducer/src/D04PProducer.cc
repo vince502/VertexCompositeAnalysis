@@ -2,9 +2,9 @@
 //
 // Package:    VertexCompositeProducer
 //
-// Class:      D0Producer
+// Class:      D04PProducer
 // 
-/**\class D0Producer D0Producer.cc VertexCompositeAnalysis/VertexCompositeProducer/src/D0Producer.cc
+/**\class D04PProducer D04PProducer.cc VertexCompositeAnalysis/VertexCompositeProducer/src/D04PProducer.cc
 
  Description: <one line class summary>
 
@@ -12,7 +12,7 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li
+// Original Author:  Soohwan Lee
 //
 //
 
@@ -20,21 +20,21 @@
 // system include files
 #include <memory>
 
-#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Producer.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D04PProducer.h"
 
 // Constructor
-D0Producer::D0Producer(const edm::ParameterSet& iConfig) :
+D04PProducer::D04PProducer(const edm::ParameterSet& iConfig) :
  theVees(iConfig, consumesCollector())
 {
   useAnyMVA_ = false;
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
-  produces< CCC >("D0");
+  produces< reco::VertexCompositeCandidateCollection >("D04P");
   if(useAnyMVA_) produces<MVACollection>("MVAValuesD0");
 }
 
 // (Empty) Destructor
-D0Producer::~D0Producer() {
+D04PProducer::~D04PProducer() {
 }
 
 
@@ -43,7 +43,7 @@ D0Producer::~D0Producer() {
 //
 
 // Producer Method
-void D0Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+void D04PProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
    using namespace edm;
 
    // Create D0Fitter object which reconstructs the vertices and creates
@@ -55,7 +55,7 @@ void D0Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //   std::auto_ptr< reco::VertexCompositeCandidateCollection >
 //     d0Candidates( new reco::VertexCompositeCandidateCollection );
 //
-   auto d0Candidates = std::make_unique<CCC>();
+   auto d0Candidates = std::make_unique<reco::VertexCompositeCandidateCollection>();
    d0Candidates->reserve( theVees.getD0().size() );
 
    std::copy( theVees.getD0().begin(),
@@ -63,27 +63,27 @@ void D0Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
               std::back_inserter(*d0Candidates) );
 
    // Write the collections to the Event
-   iEvent.put( std::move(d0Candidates), std::string("D0") );
+   iEvent.put( std::move(d0Candidates), std::string("D04P") );
     
    if(useAnyMVA_) 
    {
      auto mvas = std::make_unique<MVACollection>(theVees.getMVAVals().begin(),theVees.getMVAVals().end());
-     iEvent.put(std::move(mvas), std::string("MVAValuesD0"));
+     iEvent.put(std::move(mvas), std::string("MVAValuesD04P"));
    }
 
    theVees.resetAll();
 }
 
 
-//void D0Producer::beginJob() {
-void D0Producer::beginJob() {
+//void D04PProducer::beginJob() {
+void D04PProducer::beginJob() {
 }
 
 
-void D0Producer::endJob() {
+void D04PProducer::endJob() {
 }
 
 //define this as a plug-in
 #include "FWCore/PluginManager/interface/ModuleDef.h"
 
-DEFINE_FWK_MODULE(D0Producer);
+DEFINE_FWK_MODULE(D04PProducer);
