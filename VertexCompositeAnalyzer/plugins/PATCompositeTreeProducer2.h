@@ -82,7 +82,7 @@
 //
 
 #define PI 3.1416
-#define MAXCAN 2000
+#define MAXCAN 500000
 
 using namespace std;
 using CC = pat::CompositeCandidate;
