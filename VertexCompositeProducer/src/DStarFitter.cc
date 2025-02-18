@@ -499,8 +499,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
         theDStar->addUserFloat("alpha3D", dStarAngle3D );
         theDStar->addUserFloat("decaylength2D", rVtxMag);
         theDStar->addUserFloat("decaylength3D", lVtxMag );
-        theDStar->addUserFloat("decaylengthsignif2D", sigmaRvtxMag);
-        theDStar->addUserFloat("decaylengthsignif3D", sigmaLvtxMag );
+        theDStar->addUserFloat("decaylengthsignif2D", rVtxMag/sigmaRvtxMag);
+        theDStar->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
         theDStar->addUserFloat("dca3D", cur3DIP.value());
         theDStar->addUserFloat("dca3DErr", cur3DIP.error());
       //  addp4.set( *theDStar );

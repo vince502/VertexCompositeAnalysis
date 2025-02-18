@@ -550,8 +550,8 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         theD0->addUserFloat("alpha3D", d0Angle3D );
         theD0->addUserFloat("decaylength2D", rVtxMag);
         theD0->addUserFloat("decaylength3D", lVtxMag );
-        theD0->addUserFloat("decaylengthsignif2D", sigmaRvtxMag);
-        theD0->addUserFloat("decaylengthsignif3D", sigmaLvtxMag );
+        theD0->addUserFloat("decaylengthsignif2D", rVtxMag/sigmaRvtxMag);
+        theD0->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
         theD0->addUserFloat("dca3D", cur3DIP.value());
         theD0->addUserFloat("dca3DErr", cur3DIP.error());
         addp4.set( *theD0 );

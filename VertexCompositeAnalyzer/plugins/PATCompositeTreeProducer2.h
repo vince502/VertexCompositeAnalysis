@@ -421,6 +421,7 @@ private:
 		int matchGen_D1charge_[MAXCAN];
 		int matchGen_D1pdgId_[MAXCAN];
 
+
 		float gen_D0pT_[MAXCAN];
 		float gen_D0eta_[MAXCAN];
 		float gen_D0phi_[MAXCAN];
@@ -428,6 +429,8 @@ private:
 		float gen_D0y_[MAXCAN];
 		int gen_D0charge_[MAXCAN];
 		int gen_D0pdgId_[MAXCAN];
+		int gen_D0ancestorId_[MAXCAN];
+		int gen_D0ancestorFlavor_[MAXCAN];
 
 		float gen_D0Dau1_pT_[MAXCAN];
 		float gen_D0Dau1_eta_[MAXCAN];
@@ -629,10 +632,10 @@ void PATCompositeTreeProducer2::getAncestorId(const reco::Candidate& gCand, int&
   //  if (std::abs(gen_ancestorId_) <= 40) break;
   //}
   for (auto mom = gCand.mother(); !(mom==nullptr);){
-          gen_ancestorId_=mom->pdgId();
+    gen_ancestorId_= mom->pdgId();
     const auto idstr = std::to_string(std::abs(gen_ancestorId_));
     gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
-    if (idstr[0] == '5') {
+    if (idstr.find('5') != std::string::npos) {
       break;
     }
     if (std::abs(gen_ancestorId_) <= 40) break;
