@@ -41,7 +41,7 @@ dStarana = cms.EDAnalyzer('PATCompositeTreeProducer2',
   centralitySrc = cms.InputTag("hiCentrality")
                               )
 
-dStarana_mc = cms.EDAnalyzer('VertexCompositeTreeProducer2',
+dStarana_mc = cms.EDAnalyzer('PATCompositeTreeProducer2',
   doRecoNtuple = cms.untracked.bool(True),
   doGenNtuple = cms.untracked.bool(True),
   doGenMatching = cms.untracked.bool(True),
@@ -66,7 +66,7 @@ dStarana_mc = cms.EDAnalyzer('VertexCompositeTreeProducer2',
   saveTree = cms.untracked.bool(True),
   saveHistogram = cms.untracked.bool(False),
   saveAllHistogram = cms.untracked.bool(True),
-  massHistPeak = cms.untracked.double(1.86),
+  massHistPeak = cms.untracked.double(2.01),
   massHistWidth = cms.untracked.double(0.2),
   massHistBins = cms.untracked.int32(100),
 
@@ -75,5 +75,9 @@ dStarana_mc = cms.EDAnalyzer('VertexCompositeTreeProducer2',
 
   useAnyMVA = cms.bool(False),
   isSkimMVA = cms.untracked.bool(False),
-  MVACollection = cms.InputTag("generalD0CandidatesNew:MVAValues")
+  MVACollection = cms.InputTag("generalD0CandidatesNew:MVAValues"),
+
+  isCentrality = cms.bool(False),
+  centralityBinLabel = cms.InputTag("centralityBin","HFtowers"),
+  centralitySrc = cms.InputTag("hiCentrality")
                               )
