@@ -377,11 +377,21 @@ private:
     float eta_gen[MAXCAN];
     float phi_gen[MAXCAN];
     int status_gen[MAXCAN];
+    int pdgId_gen[MAXCAN];
+    int charge_gen[MAXCAN];
     int idmom[MAXCAN];
     float y_gen[MAXCAN];
     int iddau1[MAXCAN];
     int iddau2[MAXCAN];
     int iddau3[MAXCAN];
+
+    float matchGen_DStarpT_[MAXCAN];
+		float matchGen_DStareta_[MAXCAN];
+		float matchGen_DStarphi_[MAXCAN];
+		float matchGen_DStarmass_[MAXCAN];
+		float matchGen_DStary_[MAXCAN];
+		int matchGen_DStarcharge_[MAXCAN];
+		int matchGen_DStarpdgId_[MAXCAN];
 
 		float matchGen_D0pT_[MAXCAN];
 		float matchGen_D0eta_[MAXCAN];
@@ -560,13 +570,9 @@ bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, con
 };
 
 bool PATCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
-    cout <<"_dmeson_ pdg ID : "<<_dmeson_->pdgId() << endl;
-    cout <<"_gen_ pdgId : " << _gen_.pdgId() << endl;
     return _dmeson_->pdgId() != _gen_.pdgId();
 };
 bool PATCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_) const {
-    cout <<"_dmeson_ pdg ID : "<<_dmeson_->pdgId() << endl;
-    cout <<"_gen_ pdgId : " << _gen_.pdgId() << endl;
     return _dmeson_->pdgId() != _gen_.pdgId();
 };
 

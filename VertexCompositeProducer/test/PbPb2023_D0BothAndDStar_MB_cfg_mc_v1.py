@@ -23,13 +23,13 @@ process.FastTimerService = cms.Service("FastTimerService",
 process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
 #    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/241026_084606/0000/step4_1.root"),
-    fileNames= cms.untracked.vstring("/store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
+    fileNames= cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
    # fileNames = cms.untracked.vstring(
         # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
         #),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -101,12 +101,12 @@ process.generalD0CandidatesNew.tkPtErrCut = cms.double(9999.0)
 process.generalD0CandidatesNew.tkPtCut = cms.double(0.8)
 process.generalD0CandidatesNew.tkEtaCut = cms.double(999.0)
 process.generalD0CandidatesNew.tkPtSumCut = cms.double(0.0)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(2.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(999.0)
 process.generalD0CandidatesNew.dauTransImpactSigCut = cms.double(0.)
 process.generalD0CandidatesNew.dauLongImpactSigCut = cms.double(0.)
 process.generalD0CandidatesNew.tkDCACut = cms.double(9999.)
 process.generalD0CandidatesNew.vtxChi2Cut = cms.double(9999.0)
-process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.0001)
+process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.0)
 process.generalD0CandidatesNew.collinearityCut2D = cms.double(-2.0)
 process.generalD0CandidatesNew.collinearityCut3D = cms.double(-2.0)
 process.generalD0CandidatesNew.alphaCut = cms.double(999.0)
@@ -116,7 +116,7 @@ process.generalD0CandidatesNew.lVtxCut = cms.double(0.0)
 process.generalD0CandidatesNew.vtxSignificance2DCut = cms.double(0.0)
 process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(0.0)
 process.generalD0CandidatesNew.d0MassCut = cms.double(0.15)
-process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.5)
+process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.6)
 process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 
 
@@ -211,6 +211,7 @@ process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.d0analyzer_tree_cf
 #process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dStarselector_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.dStaranalyzer_tree_cff")
 process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.eventinfotree_cff")
+process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.eventplaneanalyzer_cfi")
 
 process.TFileService = cms.Service("TFileService",
     fileName =
@@ -240,7 +241,8 @@ process.generalDStarCandidatesNew.d0Collection = cms.InputTag("generalD0Candidat
 #process.d0ana_newreduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsNewD0")
 
 
-process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew * process.d0ana_newreduced *process.dStarana_mc)
+#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew * process.d0ana_newreduced *process.dStarana_mc)
+process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.d0ana_newreduced*process.eventplane)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')

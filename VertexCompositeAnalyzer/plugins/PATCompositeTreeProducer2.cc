@@ -388,6 +388,13 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                       if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
                         idBAnc_reco[it] = __ref_anc__->pdgId();
                   } } }
+                  matchGen_DStarpT_[it] = theGenDStar->pt();
+                  matchGen_DStareta_[it] = theGenDStar->eta();
+                  matchGen_DStarphi_[it] = theGenDStar->phi();
+                  matchGen_DStarmass_[it] = theGenDStar->mass();
+                  matchGen_DStary_[it] = theGenDStar->rapidity();
+                  matchGen_DStarcharge_[it] = theGenDStar->charge();
+                  matchGen_DStarpdgId_[it] = theGenDStar->pdgId();
 
                   matchGen_D0pT_[it] = theGenD0->pt();
                   matchGen_D0eta_[it] = theGenD0->eta();
@@ -1272,9 +1279,9 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               if (decayInGen_ && idxs.empty()) continue;
               genRefs.push_back(reco::GenParticleRef(genpars, it));
       }
+      unsigned int nGen = genRefs.size();
+      candSize_gen = nGen;
       if(twoLayerDecay_){
-        unsigned int nGen = genRefs.size();
-        candSize_gen = nGen;
         for( unsigned int igen=0; igen<nGen; igen++){
           #ifdef DEBUG
           cout <<"nGen : "<< nGen << endl;
@@ -1291,6 +1298,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           phi_gen[igen] = theGenDStar->phi();
           y_gen[igen] = theGenDStar->rapidity();
           status_gen[igen] = theGenDStar->status();
+          pdgId_gen[igen] = theGenDStar->pdgId();
+          charge_gen[igen] = theGenDStar->charge();
           idmom[igen] = -77;
           if(theGenDStar->numberOfMothers()!=0){
             const reco::Candidate * mom = theGenDStar->mother();
@@ -1330,9 +1339,51 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           gen_D0Dau2_phi_[igen] = genDau1->phi();
           gen_D0Dau2_y_[igen] = genDau1->rapidity();
           gen_D0Dau2_pdgId_[igen] = genDau1->pdgId();
+      }
     }
-    
-  }
+    else{
+        for( unsigned int igen=0; igen<nGen; igen++){
+            auto const theGenP = genRefs.at(igen);
+             pt_gen[igen] = theGenP->pt();
+             eta_gen[igen] = theGenP->eta();
+             phi_gen[igen] = theGenP->phi();
+             mass_gen[igen] = theGenP->mass();
+             y_gen[igen] = theGenP->rapidity();
+             status_gen[igen] = theGenP->status();
+             pdgId_gen[igen] = theGenP->pdgId();
+             charge_gen[igen] = theGenP->charge();
+
+             idmom[igen] = -77;
+             if(theGenP->numberOfMothers()!=0){
+               const reco::Candidate * mom = theGenP->mother();
+               idmom[igen] = mom->pdgId();
+             }
+
+             // genDecayLength(*thegenP, Gen_D1decayLength2D_[igen], matchGen_D1decayLength3D_[it], matchGen_D1angle2D_[it], matchGen_D1angle3D_[it] );
+             getAncestorId(*theGenP, gen_D0ancestorId_[igen], gen_D0ancestorFlavor_[igen] );
+
+             const auto* genDau0 = theGenP->daughter(0);
+             const auto* genDau1 = theGenP->daughter(1);
+
+             gen_D0Dau1_pT_[igen] = genDau0->pt();
+             gen_D0Dau1_eta_[igen] = genDau0->eta();
+             gen_D0Dau1_phi_[igen] = genDau0->phi();
+             gen_D0Dau1_mass_[igen] = genDau0->mass();
+             gen_D0Dau1_y_[igen] = genDau0->rapidity();
+             gen_D0Dau1_charge_[igen] = genDau0->charge();
+             gen_D0Dau1_pdgId_[igen] = genDau0->pdgId();
+
+             gen_D0Dau2_pT_[igen] = genDau1->pt();
+             gen_D0Dau2_eta_[igen] = genDau1->eta();
+             gen_D0Dau2_phi_[igen] = genDau1->phi();
+             gen_D0Dau2_mass_[igen] = genDau1->mass();
+             gen_D0Dau2_y_[igen] = genDau1->rapidity();
+             gen_D0Dau2_charge_[igen] = genDau1->charge();
+             gen_D0Dau2_pdgId_[igen] = genDau1->pdgId();
+                }
+              } // END for nGen
+            }
+  
 
           //if (genRefs.size()>1) std::cout << "More than one target of generated particles\n";
       
@@ -1370,7 +1421,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       //     iddau2[candSize_gen-1] = fabs(Dd2->pdgId());
       //     if(Dd3) iddau3[candSize_gen-1] = fabs(Dd3->pdgId());
       // }
-  }
+
 
   // ------------ method called once each job just before starting event
   //loop  ------------
@@ -1524,43 +1575,78 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               // PATCompositeNtuple->Branch("matchgen_D0charge",&gen_D0charge_, "gen_D0charge[candSize]F");
               // PATCompositeNtuple->Branch("matchgen_D0pdgId",&gen_D0pdgId_, "gen_D0pdgId[candSize]I");
               if(twoLayerDecay_){
-                PATCompositeNtuple->Branch("matchGen_D0pT",&matchGen_D0pT_, "matchGen_D0pT[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0eta",&matchGen_D0eta_, "matchGen_D0eta[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0phi",&matchGen_D0phi_, "matchGen_D0phi[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0mass",&matchGen_D0mass_, "matchGen_D0mass[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0y",&matchGen_D0y_, "matchGen_D0y[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0charge",&matchGen_D0charge_, "matchGen_D0charge[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0pdgId",&matchGen_D0pdgId_, "matchGen_D0pdgId[candSize]I");
+                PATCompositeNtuple->Branch("matchGen_DStarpT",&matchGen_DStarpT_, "matchGen_DStarpT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_DStareta",&matchGen_DStareta_, "matchGen_DStareta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_DStarphi",&matchGen_DStarphi_, "matchGen_DStarphi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_DStarmass",&matchGen_DStarmass_, "matchGen_DStarmass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_DStary",&matchGen_DStary_, "matchGen_DStary[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_DStarcharge",&matchGen_DStarcharge_, "matchGen_DStarcharge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_DStarpdgId",&matchGen_DStarpdgId_, "matchGen_DStarpdgId[candSize]/I");
 
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_pT",&matchGen_D0Dau1_pT_, "matchGen_D0Dau1_pT[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_eta",&matchGen_D0Dau1_eta_, "matchGen_D0Dau1_eta[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_phi",&matchGen_D0Dau1_phi_, "matchGen_D0Dau1_phi[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_mass",&matchGen_D0Dau1_mass_, "matchGen_D0Dau1_mass[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_y",&matchGen_D0Dau1_y_, "matchGen_D0Dau1_y[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_charge",&matchGen_D0Dau1_charge_, "matchGen_D0Dau1_charge[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau1_pdgId",&matchGen_D0Dau1_pdgId_, "matchGen_D0Dau1_pdgId[candSize]I");
+                PATCompositeNtuple->Branch("matchGen_D0pT",&matchGen_D0pT_, "matchGen_D0pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0eta",&matchGen_D0eta_, "matchGen_D0eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0phi",&matchGen_D0phi_, "matchGen_D0phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0mass",&matchGen_D0mass_, "matchGen_D0mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0y",&matchGen_D0y_, "matchGen_D0y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0charge",&matchGen_D0charge_, "matchGen_D0charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0pdgId",&matchGen_D0pdgId_, "matchGen_D0pdgId[candSize]/I");
 
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_pT",&matchGen_D0Dau2_pT_, "matchGen_D0Dau2_pT[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_eta",&matchGen_D0Dau2_eta_, "matchGen_D0Dau2_eta[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_phi",&matchGen_D0Dau2_phi_, "matchGen_D0Dau2_phi[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_mass",&matchGen_D0Dau2_mass_, "matchGen_D0Dau2_mass[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_y",&matchGen_D0Dau2_y_, "matchGen_D0Dau2_y[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_charge",&matchGen_D0Dau2_charge_, "matchGen_D0Dau2_charge[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D0Dau2_pdgId",&matchGen_D0Dau2_pdgId_, "matchGen_D0Dau2_pdgId[candSize]I");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_pT",&matchGen_D0Dau1_pT_, "matchGen_D0Dau1_pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_eta",&matchGen_D0Dau1_eta_, "matchGen_D0Dau1_eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_phi",&matchGen_D0Dau1_phi_, "matchGen_D0Dau1_phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_mass",&matchGen_D0Dau1_mass_, "matchGen_D0Dau1_mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_y",&matchGen_D0Dau1_y_, "matchGen_D0Dau1_y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_charge",&matchGen_D0Dau1_charge_, "matchGen_D0Dau1_charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_pdgId",&matchGen_D0Dau1_pdgId_, "matchGen_D0Dau1_pdgId[candSize]/I");
 
-                PATCompositeNtuple->Branch("matchGen_D1pT",&matchGen_D1pT_, "matchGen_D1pT[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D1eta",&matchGen_D1eta_, "matchGen_D1eta[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D1phi",&matchGen_D1phi_, "matchGen_D1phi[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D1mass",&matchGen_D1mass_, "matchGen_D1mass[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D1y",&matchGen_D1y_, "matchGen_D1y[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D1charge",&matchGen_D1charge_, "matchGen_D1charge[candSize]F");
-                PATCompositeNtuple->Branch("matchGen_D1pdgId",&matchGen_D1pdgId_, "matchGen_D1pdgId[candSize]I");
-                PATCompositeNtuple->Branch("matchGen_D1decayLength2D_",&matchGen_D1decayLength2D_, "matchGen_D1decayLength2D_[candSize]I");
-                PATCompositeNtuple->Branch("matchGen_D1decayLength3D_",&matchGen_D1decayLength3D_, "matchGen_D1decayLength3D_[candSize]I");
-                PATCompositeNtuple->Branch("matchGen_D1angle2D_",&matchGen_D1angle2D_, "matchGen_D1angle2D_[candSize]I");
-                PATCompositeNtuple->Branch("matchGen_D1angle3D_",&matchGen_D1angle3D_, "matchGen_D1angle3D_[candSize]I");
-                PATCompositeNtuple->Branch("matchGen_D1ancestorId_",&matchGen_D1ancestorId_, "matchGen_D1ancestorId_[candSize]I");
-                PATCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]I");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_pT",&matchGen_D0Dau2_pT_, "matchGen_D0Dau2_pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_eta",&matchGen_D0Dau2_eta_, "matchGen_D0Dau2_eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_phi",&matchGen_D0Dau2_phi_, "matchGen_D0Dau2_phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_mass",&matchGen_D0Dau2_mass_, "matchGen_D0Dau2_mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_y",&matchGen_D0Dau2_y_, "matchGen_D0Dau2_y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_charge",&matchGen_D0Dau2_charge_, "matchGen_D0Dau2_charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_pdgId",&matchGen_D0Dau2_pdgId_, "matchGen_D0Dau2_pdgId[candSize]/I");
+
+                PATCompositeNtuple->Branch("matchGen_D1pT",&matchGen_D1pT_, "matchGen_D1pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D1eta",&matchGen_D1eta_, "matchGen_D1eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D1phi",&matchGen_D1phi_, "matchGen_D1phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D1mass",&matchGen_D1mass_, "matchGen_D1mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D1y",&matchGen_D1y_, "matchGen_D1y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D1charge",&matchGen_D1charge_, "matchGen_D1charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D1pdgId",&matchGen_D1pdgId_, "matchGen_D1pdgId[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1decayLength2D_",&matchGen_D1decayLength2D_, "matchGen_D1decayLength2D_[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1decayLength3D_",&matchGen_D1decayLength3D_, "matchGen_D1decayLength3D_[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1angle2D_",&matchGen_D1angle2D_, "matchGen_D1angle2D_[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1angle3D_",&matchGen_D1angle3D_, "matchGen_D1angle3D_[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1ancestorId_",&matchGen_D1ancestorId_, "matchGen_D1ancestorId_[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]/I");
+              }
+              else{
+                PATCompositeNtuple->Branch("matchGen_D0pT",&matchGen_D0pT_, "matchGen_D0pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0eta",&matchGen_D0eta_, "matchGen_D0eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0phi",&matchGen_D0phi_, "matchGen_D0phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0mass",&matchGen_D0mass_, "matchGen_D0mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0y",&matchGen_D0y_, "matchGen_D0y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0charge",&matchGen_D0charge_, "matchGen_D0charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0pdgId",&matchGen_D0pdgId_, "matchGen_D0pdgId[candSize]/I");
+
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_pT",&matchGen_D0Dau1_pT_, "matchGen_D0Dau1_pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_eta",&matchGen_D0Dau1_eta_, "matchGen_D0Dau1_eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_phi",&matchGen_D0Dau1_phi_, "matchGen_D0Dau1_phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_mass",&matchGen_D0Dau1_mass_, "matchGen_D0Dau1_mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_y",&matchGen_D0Dau1_y_, "matchGen_D0Dau1_y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_charge",&matchGen_D0Dau1_charge_, "matchGen_D0Dau1_charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau1_pdgId",&matchGen_D0Dau1_pdgId_, "matchGen_D0Dau1_pdgId[candSize]/I");
+
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_pT",&matchGen_D0Dau2_pT_, "matchGen_D0Dau2_pT[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_eta",&matchGen_D0Dau2_eta_, "matchGen_D0Dau2_eta[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_phi",&matchGen_D0Dau2_phi_, "matchGen_D0Dau2_phi[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_mass",&matchGen_D0Dau2_mass_, "matchGen_D0Dau2_mass[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_y",&matchGen_D0Dau2_y_, "matchGen_D0Dau2_y[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_charge",&matchGen_D0Dau2_charge_, "matchGen_D0Dau2_charge[candSize]/F");
+                PATCompositeNtuple->Branch("matchGen_D0Dau2_pdgId",&matchGen_D0Dau2_pdgId_, "matchGen_D0Dau2_pdgId[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1ancestorId_",&matchGen_D1ancestorId_, "matchGen_D1ancestorId_[candSize]/I");
+                PATCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]/I");
               }
           }
           
@@ -1713,6 +1799,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
         PATCompositeNtuple->Branch("gen_phi",&phi_gen,"phi_gen[candSize_gen]/F");
         PATCompositeNtuple->Branch("gen_y",&y_gen,"y_gen[candSize_gen]/F");
         PATCompositeNtuple->Branch("gen_status",&status_gen,"status_gen[candSize_gen]/I");
+        PATCompositeNtuple->Branch("gen_pdgId",&pdgId_gen,"pdgId_gen[candSize_gen]/I");
+        PATCompositeNtuple->Branch("gen_charge",&charge_gen,"charge_gen[candSize_gen]/I");
         PATCompositeNtuple->Branch("gen_MotherID",&idmom,"MotherID_gen[candSize_gen]/I");
 
         if(decayInGen_)
@@ -1738,7 +1826,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           PATCompositeNtuple->Branch("gen_D0Dau1_phi",&gen_D0Dau1_phi_, "gen_D0Dau1_phi[candSize_gen]/F");
           PATCompositeNtuple->Branch("gen_D0Dau1_mass",&gen_D0Dau1_mass_, "gen_D0Dau1_mass[candSize_gen]/F");
           PATCompositeNtuple->Branch("gen_D0Dau1_y",&gen_D0Dau1_y_, "gen_D0Dau1_y[candSize_gen]/F");
-          PATCompositeNtuple->Branch("gen_D0Dau1_charge",&gen_D0Dau1_charge_, "gen_D0Dau1_charge[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau1_charge",&gen_D0Dau1_charge_, "gen_D0Dau1_charge[candSize_gen]/I");
           PATCompositeNtuple->Branch("gen_D0Dau1_pdgId",&gen_D0Dau1_pdgId_, "gen_D0Dau1_pdgId[candSize_gen]/I");
 
           PATCompositeNtuple->Branch("gen_D0Dau2_pT",&gen_D0Dau2_pT_, "gen_D0Dau2_pT[candSize_gen]/F");
@@ -1746,7 +1834,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           PATCompositeNtuple->Branch("gen_D0Dau2_phi",&gen_D0Dau2_phi_, "gen_D0Dau2_phi[candSize_gen]/F");
           PATCompositeNtuple->Branch("gen_D0Dau2_mass",&gen_D0Dau2_mass_, "gen_D0Dau2_mass[candSize_gen]/F");
           PATCompositeNtuple->Branch("gen_D0Dau2_y",&gen_D0Dau2_y_, "gen_D0Dau2_y[candSize_gen]/F");
-          PATCompositeNtuple->Branch("gen_D0Dau2_charge",&gen_D0Dau2_charge_, "gen_D0Dau2_charge[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau2_charge",&gen_D0Dau2_charge_, "gen_D0Dau2_charge[candSize_gen]/I");
           PATCompositeNtuple->Branch("gen_D0Dau2_pdgId",&gen_D0Dau2_pdgId_, "gen_D0Dau2_pdgId[candSize_gen]/I");
 
           PATCompositeNtuple->Branch("gen_D1pT",&gen_D1pT_, "gen_D1pT[candSize_gen]/F");
@@ -1754,8 +1842,27 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           PATCompositeNtuple->Branch("gen_D1phi",&gen_D1phi_, "gen_D1phi[candSize_gen]/F");
           PATCompositeNtuple->Branch("gen_D1mass",&gen_D1mass_, "gen_D1mass[candSize_gen]/F");
           PATCompositeNtuple->Branch("gen_D1y",&gen_D1y_, "gen_D1y[candSize_gen]/F");
-          PATCompositeNtuple->Branch("gen_D1charge",&gen_D1charge_, "gen_D1charge[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D1charge",&gen_D1charge_, "gen_D1charge[candSize_gen]/I");
           PATCompositeNtuple->Branch("gen_D1pdgId",&gen_D1pdgId_, "gen_D1pdgId[candSize_gen]/I");
+        }
+        else{
+          PATCompositeNtuple->Branch("gen_D0ancestorId_",&gen_D0ancestorId_, "gen_D0ancestorId_[candSize_gen]/I");
+          PATCompositeNtuple->Branch("gen_D0ancestorFlavor_",&gen_D0ancestorFlavor_, "gen_D0ancestorFlavor_[candSize_gen]/I");
+          PATCompositeNtuple->Branch("gen_D0Dau1_pT",&gen_D0Dau1_pT_, "gen_D0Dau1_pT[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau1_eta",&gen_D0Dau1_eta_, "gen_D0Dau1_eta[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau1_phi",&gen_D0Dau1_phi_, "gen_D0Dau1_phi[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau1_mass",&gen_D0Dau1_mass_, "gen_D0Dau1_mass[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau1_y",&gen_D0Dau1_y_, "gen_D0Dau1_y[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau1_charge",&gen_D0Dau1_charge_, "gen_D0Dau1_charge[candSize_gen]/I");
+          PATCompositeNtuple->Branch("gen_D0Dau1_pdgId",&gen_D0Dau1_pdgId_, "gen_D0Dau1_pdgId[candSize_gen]/I");
+
+          PATCompositeNtuple->Branch("gen_D0Dau2_pT",&gen_D0Dau2_pT_, "gen_D0Dau2_pT[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau2_eta",&gen_D0Dau2_eta_, "gen_D0Dau2_eta[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau2_phi",&gen_D0Dau2_phi_, "gen_D0Dau2_phi[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau2_mass",&gen_D0Dau2_mass_, "gen_D0Dau2_mass[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau2_y",&gen_D0Dau2_y_, "gen_D0Dau2_y[candSize_gen]/F");
+          PATCompositeNtuple->Branch("gen_D0Dau2_charge",&gen_D0Dau2_charge_, "gen_D0Dau2_charge[candSize_gen]/I");
+          PATCompositeNtuple->Branch("gen_D0Dau2_pdgId",&gen_D0Dau2_pdgId_, "gen_D0Dau2_pdgId[candSize_gen]/I");
         }
     }
 }
