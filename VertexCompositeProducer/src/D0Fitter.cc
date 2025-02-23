@@ -31,6 +31,7 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/GlobalError.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
@@ -515,6 +516,23 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         // std::cout << "By cur3DIP " << cur3DIP.value() << " +/- " << cur3DIP.error() <<std::endl;
         // std::cout << "By decay length and alpha " << std::sin(d0Angle3D)*lVtxMag << " +/- " << sigmaLvtxMag * std::sin(d0Angle3D) <<std::endl;
         // std::cout << "By decay length " << lVtxMag << " +/- " << sigmaLvtxMag * lVtxMag <<std::endl;
+
+        FreeTrajectoryState posStateNew = posTransTkPtr->impactPointTSCP().theState();
+        FreeTrajectoryState negStateNew = negTransTkPtr->impactPointTSCP().theState();
+        ClosestApproachInRPhi cApp;
+        cApp.calculate(posStateNew, negStateNew);
+        if( !cApp.status() ) continue;
+        float dca = fabs( cApp.distance() );
+        GlobalError posErr = posStateNew.cartesianError().position();
+        GlobalError negErr = negStateNew.cartesianError().position();
+
+        // DCA error propagation
+        double sigma_x2 = posErr.cxx() + negErr.cxx();
+        double sigma_y2 = posErr.cyy() + negErr.cyy();
+    
+        // Error in transverse plane (r-phi)
+        double dcaError = sqrt(sigma_x2 * cxPt.x() * cxPt.x() + 
+                               sigma_y2 * cxPt.y() * cxPt.y()) / dca;
         CC* theD0 = 0;
         theD0 = new CC();
         theD0->setP4(d0P4);
@@ -554,6 +572,9 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         theD0->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
         theD0->addUserFloat("dca3D", cur3DIP.value());
         theD0->addUserFloat("dca3DErr", cur3DIP.error());
+        theD0->addUserFloat("track3DDCA", dca);
+        theD0->addUserFloat("track3DDCAErr", dcaError);
+
         addp4.set( *theD0 );
         if( theD0->mass() < d0MassD0 + d0MassCut &&
             theD0->mass() > d0MassD0 - d0MassCut ) //&&
