@@ -24,11 +24,14 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
+#include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
+
 
 #include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/GlobalError.h"
@@ -70,6 +73,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   mPiKCutMin = theParameters.getParameter<double>(string("mPiKCutMin"));
   mPiKCutMax = theParameters.getParameter<double>(string("mPiKCutMax"));
   tkDCACut = theParameters.getParameter<double>(string("tkDCACut"));
+  tkDCACutLow = theParameters.getParameter<double>(string("tkDCACutLow"));
   tkChi2Cut = theParameters.getParameter<double>(string("tkChi2Cut"));
   tkNhitsCut = theParameters.getParameter<int>(string("tkNhitsCut"));
   tkPtCut = theParameters.getParameter<double>(string("tkPtCut"));
@@ -347,10 +351,26 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       ClosestApproachInRPhi cApp;
       cApp.calculate(posState, negState);
       if( !cApp.status() ) continue;
-      float dca = fabs( cApp.distance() );
+      float dca =  cApp.distance();
       GlobalPoint cxPt = cApp.crossingPoint();
 
-      if (dca < 0. || dca > tkDCACut) continue;
+      // TrajectoryStateClosestToPoint posTsctp = posTransTkPtr->trajectoryStateClosestToPoint(bestvtx);
+      // TrajectoryStateClosestToPoint negTsctp = negTransTkPtr->trajectoryStateClosestToPoint(bestvtx);
+
+      // GlobalVector pospT = posTransTkPtr.impactPointTSCP().momentum();
+      // GlobalVector negpT = negTransTkPtr.impactPointTSCP().momentum();
+      // math::XYZVector deltaP(pospT.x() - negpT.x(), pospT.y() - negpT.y(), 0);
+
+      // TwoTrackMinimumDistanceHelixHelix minDistCalculator;
+      // minDistCalculator.calculate(posState.parameters(), negState.parameters());
+      TwoTrackMinimumDistance minDistCalculator;
+      minDistCalculator.calculate(posState, negState);
+      dca = minDistCalculator.distance(); 
+      // std::cout << "(pca,dca) : " << minDistCalculator.distance() << ", " << dca << std::endl;
+      
+
+      if (dca < tkDCACutLow || dca > tkDCACut) continue;
+      if( dca < 0 ) std::cout << "Negative DCA : " << dca << std::endl;
 //      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120. 
 //          || std::abs(cxPt.z()) > 300.) continue;
 
@@ -523,6 +543,9 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         cApp.calculate(posStateNew, negStateNew);
         if( !cApp.status() ) continue;
         float dca = fabs( cApp.distance() );
+        TwoTrackMinimumDistance minDistCalculator;
+        minDistCalculator.calculate(posState, negState);
+        dca = minDistCalculator.distance(); 
         GlobalError posErr = posStateNew.cartesianError().position();
         GlobalError negErr = negStateNew.cartesianError().position();
 
