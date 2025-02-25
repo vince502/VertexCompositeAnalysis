@@ -23,13 +23,14 @@ process.FastTimerService = cms.Service("FastTimerService",
 process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
 #    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/241026_084606/0000/step4_1.root"),
-    fileNames= cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
+    #fileNames= cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
+    fileNames= cms.untracked.vstring("/store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/3dd6a1d3-ab2e-4198-afeb-4c867efbcf37.root"),
    # fileNames = cms.untracked.vstring(
         # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
         #),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -96,19 +97,21 @@ process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidate
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
 process.generalD0CandidatesNew.tkChi2Cut = cms.double(10)
-process.generalD0CandidatesNew.tkNhitsCut = cms.int32(0)
+process.generalD0CandidatesNew.tkNhitsCut = cms.int32(8)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(9999.0)
 process.generalD0CandidatesNew.tkPtCut = cms.double(0.8)
 process.generalD0CandidatesNew.tkEtaCut = cms.double(999.0)
 process.generalD0CandidatesNew.tkPtSumCut = cms.double(0.0)
-process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(999.0)
+process.generalD0CandidatesNew.trkEtaDiffCut = cms.double(1.0)
 process.generalD0CandidatesNew.dauTransImpactSigCut = cms.double(0.)
 process.generalD0CandidatesNew.dauLongImpactSigCut = cms.double(0.)
 process.generalD0CandidatesNew.tkDCACut = cms.double(9999.)
 process.generalD0CandidatesNew.vtxChi2Cut = cms.double(9999.0)
 process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.0)
-process.generalD0CandidatesNew.collinearityCut2D = cms.double(-2.0)
-process.generalD0CandidatesNew.collinearityCut3D = cms.double(-2.0)
+#process.generalD0CandidatesNew.collinearityCut2D = cms.double(-2.0)
+#process.generalD0CandidatesNew.collinearityCut3D = cms.double(-2.0)
+process.generalD0CandidatesNew.collinearityCut2D = cms.double(1.0)
+process.generalD0CandidatesNew.collinearityCut3D = cms.double(1.0)
 process.generalD0CandidatesNew.alphaCut = cms.double(999.0)
 process.generalD0CandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalD0CandidatesNew.rVtxCut = cms.double(0.0)
