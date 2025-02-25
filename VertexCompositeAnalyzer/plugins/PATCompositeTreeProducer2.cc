@@ -661,6 +661,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           // double dl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/dl2D[it];
           
           dlos2D[it] = trk.userFloat("decaylengthsignif2D");
+          trk3Ddca[it] = trk.userFloat("track3DDCA");
+          trk3DdcaErr[it] = trk.userFloat("track3DDCAErr");
 
           //trk info
           auto dau1 = d1->get<reco::TrackRef>();
@@ -1556,6 +1558,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           PATCompositeNtuple->Branch("3DDecayLength",&dl,"3DDecayLength[candSize]/F");
           PATCompositeNtuple->Branch("2DDecayLengthSignificance",&dlos2D,"2DDecayLengthSignificance[candSize]/F");
           PATCompositeNtuple->Branch("2DDecayLength",&dl2D,"2DDecayLength[candSize]/F");
+          PATCompositeNtuple->Branch("Trk3DDCA",&trk3Ddca,"Trk3DDCA[candSize]/F");
+          PATCompositeNtuple->Branch("Trk3DDCAErr",&trk3DdcaErr,"Trk3DDCAErr[candSize]/F");
       
           if(doGenMatching_)
           {
@@ -1718,7 +1722,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
   //            PATCompositeNtuple->Branch("chargeD1",&charge1,"chargeD1[candSize]/I");
               PATCompositeNtuple->Branch("dedxHarmonic2D1",&H2dedx1,"dedxHarmonic2D1[candSize]/F");
   //            PATCompositeNtuple->Branch("dedxTruncated40Daugther1",&T4dedx1,"dedxTruncated40Daugther1[candSize]/F");
-  //            PATCompositeNtuple->Branch("normalizedChi2Daugther1",&trkChi1,"normalizedChi2Daugther1[candSize]/F");
+             PATCompositeNtuple->Branch("normalizedChi2Daugther1",&trkChi1,"normalizedChi2Daugther1[candSize]/F");
               PATCompositeNtuple->Branch("zDCASignificanceDaugther2",&dzos2,"zDCASignificanceDaugther2[candSize]/F");
               PATCompositeNtuple->Branch("xyDCASignificanceDaugther2",&dxyos2,"xyDCASignificanceDaugther2[candSize]/F");
               PATCompositeNtuple->Branch("NHitD2",&nhit2,"NHitD2[candSize]/F");
@@ -1731,7 +1735,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
   //            PATCompositeNtuple->Branch("chargeD2",&charge2,"chargeD2[candSize]/I");
               PATCompositeNtuple->Branch("dedxHarmonic2D2",&H2dedx2,"dedxHarmonic2D2[candSize]/F");
   //            PATCompositeNtuple->Branch("dedxTruncated40Daugther2",&T4dedx2,"dedxTruncated40Daugther2[candSize]/F");
-  //            PATCompositeNtuple->Branch("normalizedChi2Daugther2",&trkChi2,"normalizedChi2Daugther2[candSize]/F");
+             PATCompositeNtuple->Branch("normalizedChi2Daugther2",&trkChi2,"normalizedChi2Daugther2[candSize]/F");
               if(threeProngDecay_)
               {
                 PATCompositeNtuple->Branch("zDCASignificanceDaugther3",&dzos3,"zDCASignificanceDaugther3[candSize]/F");

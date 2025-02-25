@@ -121,6 +121,7 @@ class D0Fitter {
   double mPiKCutMin;
   double mPiKCutMax;
   double tkDCACut;
+  double tkDCACutLow;
   double tkChi2Cut;
   int    tkNhitsCut;
   double tkPtErrCut;
