@@ -16,8 +16,8 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     tkPtSumCut = cms.double(0.0),
     tkEtaDiffCut = cms.double(999.0),
 
-    mPiKCutMin = cms.double(1.52),
-    mPiKCutMax = cms.double(2.31),
+    mPiKCutMin = cms.double(1.3),
+    mPiKCutMax = cms.double(2.4),
 
     #   Track impact parameter significance >
     dauTransImpactSigCut = cms.double(0.),

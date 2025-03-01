@@ -584,7 +584,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             if( forestLabel_ == "D0InpPb"){
 
               gbrVals_[0] = d0P4.Pt();
-              gbrVals_[1] = d0P4.Eta();
+              gbrVals_[1] = d0P4.Rapidity();
               gbrVals_[2] = d0C2Prob;
               gbrVals_[3] = lVtxMag / sigmaLvtxMag;
               gbrVals_[4] = lVtxMag;
