@@ -862,8 +862,8 @@ void VertexCompositeTreeProducer2::initTree() {
         VertexCompositeNtuple->Branch("isSwap1", &isSwap1, "isSwap1[candSize]/O");
         VertexCompositeNtuple->Branch("matchGEN1", &matchGEN1, "matchGEN1[candSize]/O");
         VertexCompositeNtuple->Branch("gen_D1ancestorFlavor", &gen_D1ancestorFlavor_,
-                                      "gen_D1ancestorFlavor[candSize]I");
-        VertexCompositeNtuple->Branch("gen_D1ancestorId", &gen_D1ancestorId_, "gen_D1ancestorId[candSize]I");
+                                      "gen_D1ancestorFlavor[candSize]/I");
+        VertexCompositeNtuple->Branch("gen_D1ancestorId", &gen_D1ancestorId_, "gen_D1ancestorId[candSize]/I");
         VertexCompositeNtuple->Branch("gen_D1PVx", &gen_D1PVx_, "gen_D1PVx[candSize]F");
         VertexCompositeNtuple->Branch("gen_D1PVy", &gen_D1PVy_, "gen_D1PVy[candSize]F");
         VertexCompositeNtuple->Branch("gen_D1PVz", &gen_D1PVz_, "gen_D1PVz[candSize]F");
