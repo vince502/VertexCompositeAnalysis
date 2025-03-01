@@ -338,6 +338,8 @@ private:
   MVACollection theMVANew;
   std::vector<float> theDCAValNew_;
   std::vector<float> theDCAErrNew_;
+  std::vector<float> theAngle3DValNew_;
+  std::vector<float> theAngle2DValNew_;
 };
 
 //
@@ -499,6 +501,8 @@ VertexCompositeSelector::VertexCompositeSelector(const edm::ParameterSet &iConfi
   produces<MVACollection>(Form("MVAValuesNew%s", v0IDName_.c_str()));
   produces<std::vector<float>>(Form("DCAValuesNew%s", v0IDName_.c_str()));
   produces<std::vector<float>>(Form("DCAErrorsNew%s", v0IDName_.c_str()));
+  produces<std::vector<float>>(Form("Angle2DValNew%s", v0IDName_.c_str()));
+  produces<std::vector<float>>(Form("Angle3DValNew%s", v0IDName_.c_str()));
 
   isPionD1 = true;
   isPionD2 = true;
@@ -544,8 +548,14 @@ void VertexCompositeSelector::produce(edm::Event &iEvent, const edm::EventSetup 
   iEvent.put(std::move(dcaVals), Form("DCAValuesNew%s", v0IDName_.c_str()));
   auto dcaErrs = std::make_unique<std::vector<float>>(theDCAErrNew_.begin(), theDCAErrNew_.end());
   iEvent.put(std::move(dcaErrs), Form("DCAErrorsNew%s", v0IDName_.c_str()));
+  auto angle2DVals = std::make_unique<std::vector<float>>(theAngle2DValNew_.begin(), theAngle2DValNew_.end());
+  iEvent.put(std::move(angle2DVals), Form("Angle2DValNew%s", v0IDName_.c_str()));
+  auto angle3DVals = std::make_unique<std::vector<float>>(theAngle3DValNew_.begin(), theAngle3DValNew_.end());
+  iEvent.put(std::move(angle3DVals), Form("Angle3DValNew%s", v0IDName_.c_str()));
   theDCAValNew_.clear();
   theDCAErrNew_.clear();
+  theAngle2DValNew_.clear();
+  theAngle3DValNew_.clear();
 }
 
 void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup &iSetup) {
@@ -1401,26 +1411,27 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
         //gbrVals_[15] = trkChi2;
       }
       if (forestLabel_ == "D0InpPb" || forestLabel_ == "D0Inpp" || forestLabel_ == "D0InPbPb") {
-                    gbrVals_[0] = pt;
-                    gbrVals_[1] = y;
-                    gbrVals_[2] = VtxProb;
-                    gbrVals_[3] = dlos;
-                    gbrVals_[4] = dlos2D;
-                    gbrVals_[5] = dl;
-                    gbrVals_[6] = agl_abs;
-                    gbrVals_[7] = agl2D_abs;
-                    gbrVals_[8] = dzos1;
-                    gbrVals_[9] = dzos2;
-                    gbrVals_[10] = dxyos1;
-                    gbrVals_[11] = dxyos2;
-                    gbrVals_[12] = pt1;
-                    gbrVals_[13] = pt2;
-                    gbrVals_[14] = eta1;
-                    gbrVals_[15] = eta2;
-                    gbrVals_[16] = nhit1;
-                    gbrVals_[17] = nhit2;
-                    gbrVals_[18] = ptErr1;
-                    gbrVals_[19] = ptErr2;
+
+            gbrVals_[0] = pt;
+            gbrVals_[1] = y;
+            gbrVals_[2] = VtxProb;
+            gbrVals_[3] = dlos;
+            gbrVals_[4] = dl;
+            gbrVals_[5] = agl_abs;
+            gbrVals_[6] = dzos1;
+            gbrVals_[7] = dzos2;
+            gbrVals_[8] = dxyos1;
+            gbrVals_[9] = dxyos2;
+            gbrVals_[10] = pt1;
+            gbrVals_[11] = pt2;
+            gbrVals_[12] = eta1;
+            gbrVals_[13] = eta2;
+            gbrVals_[14] = nhit1;
+            gbrVals_[15] = nhit2;
+            gbrVals_[16] = ptErr1;
+            gbrVals_[17] = ptErr2;
+            gbrVals_[18] = dlos2D;
+            gbrVals_[19] = agl2D_abs;
 
         /*
         gbrVals_[0] = pt;
@@ -1543,6 +1554,8 @@ void VertexCompositeSelector::fillRECO(edm::Event &iEvent, const edm::EventSetup
     const float dcaE = (*dcaErrors)[it];
     theDCAValNew_.push_back(dca);
     theDCAErrNew_.push_back(dcaE);
+    theAngle3DValNew_.push_back(agl_abs);
+    theAngle2DValNew_.push_back(agl2D_abs);
   }
 }
 

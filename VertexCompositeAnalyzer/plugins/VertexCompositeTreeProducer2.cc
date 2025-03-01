@@ -1536,6 +1536,8 @@ void VertexCompositeTreeProducer2::fillGEN(const edm::Event &iEvent, const edm::
     ptmom[candSize_gen - 1] = -999.0;
     etamom[candSize_gen - 1] = -999.0;
     phimom[candSize_gen - 1] = -999.0;
+    idanc[candSize_gen -1] = 0;
+    flavoranc[candSize_gen -1] = 0;
     ymom[candSize_gen - 1] = -999.0;
     statusmom[candSize_gen - 1] = -999;
     genDecayLength(trk, dl2D_gen[candSize_gen - 1], dl3D_gen[candSize_gen - 1], angle2D_gen[candSize_gen - 1],
@@ -1549,6 +1551,7 @@ void VertexCompositeTreeProducer2::fillGEN(const edm::Event &iEvent, const edm::
       phimom[candSize_gen - 1] = mom->phi();
       ymom[candSize_gen - 1] = mom->rapidity();
       statusmom[candSize_gen - 1] = mom->status();
+      getAncestorId(trk, idanc[candSize_gen-1], flavoranc[candSize_gen -1]);
     }
 
     if (!decayInGen_)
