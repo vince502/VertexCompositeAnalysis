@@ -603,6 +603,28 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
               gbrVals_[17] = ptErr_neg;
               gbrVals_[18] = rVtxMag / sigmaRvtxMag;
               gbrVals_[19] = d0Angle2D;
+
+//            gbrVals_[0] = pt;
+//            gbrVals_[1] = y;
+//            gbrVals_[2] = VtxProb;
+//            gbrVals_[3] = dlos;
+//            gbrVals_[4] = dl;
+//            gbrVals_[5] = agl_abs;
+//            gbrVals_[6] = dzos1;
+//            gbrVals_[7] = dzos2;
+//            gbrVals_[8] = dxyos1;
+//            gbrVals_[9] = dxyos2;
+//            gbrVals_[10] = pt1;
+//            gbrVals_[11] = pt2;
+//            gbrVals_[12] = eta1;
+//            gbrVals_[13] = eta2;
+//            gbrVals_[14] = nhit1;
+//            gbrVals_[15] = nhit2;
+//            gbrVals_[16] = ptErr1;
+//            gbrVals_[17] = ptErr2;
+//            gbrVals_[18] = dlos2D;
+//            gbrVals_[19] = agl2D_abs;
+
             }
 
             GBRForest const * forest = forest_;

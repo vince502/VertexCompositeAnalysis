@@ -505,6 +505,8 @@ private:
   float etamom[MAXCAN];
   float phimom[MAXCAN];
   int statusmom[MAXCAN];
+  int idanc[MAXCAN];
+  int flavoranc[MAXCAN];
   float y_gen[MAXCAN];
   int iddau1[MAXCAN];
   int iddau2[MAXCAN];
@@ -1172,6 +1174,8 @@ void VertexCompositeTreeProducer2::initTree() {
     VertexCompositeNtuple->Branch("MotherPhi_gen", &phimom, "MotherPhi_gen[candSize_gen]/I");
     VertexCompositeNtuple->Branch("MotherY_gen", &ymom, "MotherY_gen[candSize_gen]/I");
     VertexCompositeNtuple->Branch("MotherStatus_gen", &statusmom, "MotherStatus_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("AncestorId_gen", &idanc, "AncestorId_gen[candSize_gen]/I");
+    VertexCompositeNtuple->Branch("AncestorFlavor_gen", &flavoranc, "AncestorFlavor_gen[candSize_gen]/I");
     VertexCompositeNtuple->Branch("dl2D_gen", &dl2D_gen, "dl2D_gen[candSize_gen]/F");
     VertexCompositeNtuple->Branch("dl3D_gen", &dl3D_gen, "dl3D_gen[candSize_gen]/F");
     VertexCompositeNtuple->Branch("angle2D_gen", &angle2D_gen, "angle2D_gen[candSize_gen]/F");
