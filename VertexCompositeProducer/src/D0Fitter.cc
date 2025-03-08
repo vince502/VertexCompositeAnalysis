@@ -97,10 +97,11 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
+  mvaCut = theParameters.getParameter<double>(string("mvaCut"));
 
 
   useAnyMVA_ = false;
-  forestLabel_ = "D0InpPb";
+  forestLabel_ = "D0InPbPb";
   std::string type = "BDT";
   useForestFromDB_ = true;
   dbFileName_ = "";
@@ -604,32 +605,39 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             theD0->mass() > d0MassD0 - d0MassCut ) //&&
 	   // theD0->pt() > dPtCut ) {
         {
-          theD0s.push_back( *theD0 );
 
 // perform MVA evaluation
           if(useAnyMVA_)
           {
-            float gbrVals_[20];
-            gbrVals_[0] = d0P4.Pt();
-            gbrVals_[1] = d0P4.Eta();
-            gbrVals_[2] = d0C2Prob;
-            gbrVals_[3] = lVtxMag / sigmaLvtxMag;
-            gbrVals_[4] = rVtxMag / sigmaRvtxMag;
+            float gbrVals_[15];
+            gbrVals_[0] = d0C2Prob;
+            gbrVals_[1] = cos(d0Angle3D);
+            gbrVals_[2] = d0Angle3D;
+            gbrVals_[3] = cos(d0Angle2D);
+            gbrVals_[4] = d0Angle2D;
             gbrVals_[5] = lVtxMag;
-            gbrVals_[6] = d0Angle3D;
-            gbrVals_[7] = d0Angle2D;
-            gbrVals_[8] = dauLongImpactSig_pos;
-            gbrVals_[9] = dauLongImpactSig_neg;
-            gbrVals_[10] = dauTransImpactSig_pos;
-            gbrVals_[11] = dauTransImpactSig_neg;
-            gbrVals_[12] = nhits_pos;
-            gbrVals_[13] = nhits_neg;
-            gbrVals_[14] = ptErr_pos;
-            gbrVals_[15] = ptErr_neg;
-            gbrVals_[16] = posCandTotalP.perp();
-            gbrVals_[17] = negCandTotalP.perp();
-            gbrVals_[18] = posCandTotalP.eta();
-            gbrVals_[19] = negCandTotalP.eta();
+            gbrVals_[6] = lVtxMag / sigmaLvtxMag;
+            gbrVals_[7] = rVtxMag;
+            gbrVals_[8] = rVtxMag / sigmaRvtxMag;
+            gbrVals_[9] = posCandTotalP.perp();
+            gbrVals_[10] = posCandTotalP.eta();
+            gbrVals_[11] = negCandTotalP.perp();
+            gbrVals_[12] = negCandTotalP.eta();
+            gbrVals_[13] = ptErr_pos;
+            gbrVals_[14] = ptErr_neg;
+
+            //gbrVals_[0] = d0P4.Pt();
+            //gbrVals_[1] = d0P4.Eta();
+            //gbrVals_[3] = lVtxMag / sigmaLvtxMag;
+            //gbrVals_[4] = rVtxMag / sigmaRvtxMag;
+            //gbrVals_[5] = lVtxMag;
+            //gbrVals_[7] = d0Angle2D;
+            //gbrVals_[8] = dauLongImpactSig_pos;
+            //gbrVals_[9] = dauLongImpactSig_neg;
+            //gbrVals_[10] = dauTransImpactSig_pos;
+            //gbrVals_[11] = dauTransImpactSig_neg;
+            //gbrVals_[12] = nhits_pos;
+            //gbrVals_[13] = nhits_neg;
 
             GBRForest const * forest = forest_;
             if(useForestFromDB_){
@@ -639,7 +647,13 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             }
 
             auto gbrVal = forest->GetClassifier(gbrVals_);
-            mvaVals_.push_back(gbrVal);
+            if(gbrVal > mvaCut ) {
+              mvaVals_.push_back(gbrVal);
+              theD0s.push_back( *theD0 );
+            }
+          }
+          else{
+            theD0s.push_back( *theD0 );
           }
         }
 

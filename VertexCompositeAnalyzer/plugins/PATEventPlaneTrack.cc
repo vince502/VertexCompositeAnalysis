@@ -299,8 +299,8 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   //RECO Candidate info
   candSize = v0candidates->size();
   if(candSize>MAXCAN) throw cms::Exception("PATEventPlaneTrack") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
-  float cohJpsiMassMin = 2.5;
-  float cohJpsiMassMax = 4.3;
+  float cohJpsiMassMin = 1.6;
+  float cohJpsiMassMax = 2.1;
 
   dauEta.clear();
   dauPhi.clear();
@@ -370,7 +370,8 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
   trkQy_v3_afterw = -1;
 
 
-
+  std::cout << "Track coll original size : " << trackColl->size() << std::endl;
+  uint subt = 0;
   for(unsigned it=0; it<trackColl->size(); ++it){
 	DauTrk = false;
 	reco::TrackRef track(trackColl, it);
@@ -412,7 +413,9 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
     	if (DauTrk == true) {
 	    //cout << "it = " << it << "; DauTrk = "<< DauTrk << endl;
             //cout << "Matched track Pt Eta Phi = " << track->pt() <<' '<< track->eta()<<' '<<track->phi()<<endl;
+            subt++;
       	    continue;
+            
     	}
     
     	trkqx += pt*cos(2*phi);
@@ -440,6 +443,7 @@ PATEventPlaneTrack::fillRECO(const edm::Event& iEvent, const edm::EventSetup& iS
 	}
 
   }
+  std::cout << "After subtraction : " << trackColl->size() - subt << std::endl;
   trkQx = trkqx/trkPt;
   trkQy = trkqy/trkPt;
   all_trkQx = all_trkqx/all_trkPt;
