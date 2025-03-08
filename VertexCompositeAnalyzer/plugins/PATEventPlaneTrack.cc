@@ -67,7 +67,7 @@
 //
 
 #define PI 3.1416
-#define MAXCAN 50000
+#define MAXCAN 500000
 #define MAXDAU 3
 #define MAXGDAU 2
 #define MAXTRG 1024
