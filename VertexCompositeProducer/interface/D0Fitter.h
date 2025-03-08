@@ -145,6 +145,7 @@ class D0Fitter {
   double alphaCut;
   double alpha2DCut;
   bool   isWrongSign;
+  double mvaCut;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
 
