@@ -23,6 +23,7 @@
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+#include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 
 #include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
@@ -359,6 +360,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        vector<RefCountedKinematicParticle> d0Daus;
        reco::Candidate* dau0 = theD0.daughter(0);
        reco::Candidate* dau1 = theD0.daughter(1);
+
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
        float dau0mass =  dau0->mass();
@@ -402,9 +404,27 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        KinematicParameters posCandKP = posCand->currentState().kinematicParameters();
        KinematicParameters negCandKP = negCand->currentState().kinematicParameters();
 
+       TwoTrackMinimumDistance minDistCalculator;
+       //minDistCalculator.calculate( posCand->currentState().trajectoryParameters(),negCand->currentState().trajectoryParameter() );
+       //float dca = minDistCalculator.distance();
+       //GlobalPoint cxPt = minDistCalculator.crossingPoint();
+       //GlobalError posErr = posCand->currentState().trajectoryParameters().cartesianError().position();
+       //GlobalError negErr = negCand->currentState().trajectoryParameters().cartesianError().position();
+
+       // DCA error propagation
+       //double sigma_x2 = posErr.cxx() + negErr.cxx();
+       //double sigma_y2 = posErr.cyy() + negErr.cyy();
+       //float dcaError = sqrt(sigma_x2 * cxPt.x() * cxPt.x() +
+       //                sigma_y2 * cxPt.y() * cxPt.y()) / dca;
+    
+       //cout << "dca : " << dca << "dcaerr : " << dcaError << endl;
+
+
+
+
        GlobalVector dStarTotalP = GlobalVector (dStarCand->currentState().globalMomentum().x(),
-                                                dStarCand->currentState().globalMomentum().y(),
-                                                dStarCand->currentState().globalMomentum().z());
+                       dStarCand->currentState().globalMomentum().y(),
+                       dStarCand->currentState().globalMomentum().z());
 
        GlobalVector posCandTotalP = GlobalVector(posCandKP.momentum().x(),posCandKP.momentum().y(),posCandKP.momentum().z());
        GlobalVector negCandTotalP = GlobalVector(negCandKP.momentum().x(),negCandKP.momentum().y(),negCandKP.momentum().z());
@@ -475,6 +495,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
            cos(dStarAngle3D) < collinCut3D || cos(dStarAngle2D) < collinCut2D || dStarAngle3D > alphaCut || dStarAngle2D > alpha2DCut
        ) continue;
 
+
+
        CC* theDStar = 0;
       //  theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
       theDStar = new CC();
@@ -485,6 +507,9 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
                                                   negCandTotalP.y(), negCandTotalP.z(),
                                                   negCandTotalE), dStarVtx);
        theNegCand.setTrack(pionTrackRef);
+
+
+
 
       //  AddFourMomenta addp4;
        theDStar->addDaughter(theD0, "D0");
@@ -503,6 +528,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
         theDStar->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
         theDStar->addUserFloat("dca3D", cur3DIP.value());
         theDStar->addUserFloat("dca3DErr", cur3DIP.error());
+//        theDStar->addUserFloat("D03DDCA", dca);
+//        theDStar->addUserFloat("D03DDCAErr", dcaError);
       //  addp4.set( *theDStar );
        if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
            theDStar->mass() > dStarMassDStar - dStarMassCut ) 

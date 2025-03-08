@@ -546,6 +546,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         TwoTrackMinimumDistance minDistCalculator;
         minDistCalculator.calculate(posState, negState);
         dca = minDistCalculator.distance(); 
+        cxPt = minDistCalculator.crossingPoint();
         GlobalError posErr = posStateNew.cartesianError().position();
         GlobalError negErr = negStateNew.cartesianError().position();
 

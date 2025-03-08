@@ -362,7 +362,6 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               cout << "matchGEN[it]: " << matchGEN[it] << endl;
                 #endif
                 #ifdef DEBUG
-                //if(abs(genRefs.at(igen)->daughter(0)->pdgId())==421 &&genRefs.at(igen)->daughter(1)->pdgId()==211){
                 if(genRefs.at(igen)->daughter(0)->pdgId()!=421){
                 cout << "genRefs.at(igen) : " << genRefs.at(igen)->pdgId() << endl;
                 cout << "nGenDau : " << nGenDau << endl;
@@ -661,8 +660,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           // double dl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/dl2D[it];
           
           dlos2D[it] = trk.userFloat("decaylengthsignif2D");
-          trk3Ddca[it] = trk.userFloat("track3DDCA");
-          trk3DdcaErr[it] = trk.userFloat("track3DDCAErr");
+          trk3Ddca[it] = twoLayerDecay_? ((CC*)d1)->userFloat("track3DDCA") : trk.userFloat("track3DDCA");
+          trk3DdcaErr[it] = twoLayerDecay_? ((CC*)d1)->userFloat("track3DDCAErr") : trk.userFloat("track3DDCAErr");
 
           //trk info
           auto dau1 = d1->get<reco::TrackRef>();
@@ -1140,6 +1139,9 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
               double gdl2D = d1CC->userFloat("decaylength2D");
               grand_dlos2D[it] = d1CC->userFloat("decaylengthsignif2D");
+              //D03Ddca[it] = trk.userFloat("D03DDCA");
+              //D03DdcaErr[it] = trk.userFloat("D03DDCAErr");
+
               double gdl2Derror = gdl2D/grand_dlos2D[it];
               
           }
@@ -1707,6 +1709,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               PATCompositeNtuple->Branch("EtaGrandD2",&grand_eta2,"EtaGrandD2[candSize]/F");
               PATCompositeNtuple->Branch("dedxHarmonic2GrandD1",&grand_H2dedx1,"dedxHarmonic2GrandD1[candSize]/F");
               PATCompositeNtuple->Branch("dedxHarmonic2GrandD2",&grand_H2dedx2,"dedxHarmonic2GrandD2[candSize]/F");
+          //    PATCompositeNtuple->Branch("D03DDCA",&D03Ddca,"D03DDCA[candSize]/F");
+          //    PATCompositeNtuple->Branch("D03DDCAErr",&D03DdcaErr,"D03DDCAErr[candSize]/F");
           }
           else
           {

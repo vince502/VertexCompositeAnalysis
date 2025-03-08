@@ -235,6 +235,8 @@ private:
     float dl2D[MAXCAN];
     float trk3Ddca[MAXCAN];
     float trk3DdcaErr[MAXCAN];
+    float D03Ddca[MAXCAN];
+    float D03DdcaErr[MAXCAN];
     bool isSwap[MAXCAN];
     bool matchGEN[MAXCAN];
     int idBAnc_reco[MAXCAN];

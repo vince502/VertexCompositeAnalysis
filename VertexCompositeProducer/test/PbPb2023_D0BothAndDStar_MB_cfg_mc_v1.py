@@ -30,7 +30,7 @@ process.source = cms.Source("PoolSource",
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
         #),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -135,7 +135,7 @@ process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
 process.generalDStarCandidatesNew = process.generalDStarCandidates.clone()
-process.generalDStarCandidatesNew.tkChi2Cut = cms.double(999)
+process.generalDStarCandidatesNew.tkChi2Cut = cms.double(5)
 process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(0)
 process.generalDStarCandidatesNew.tkPtErrCut = cms.double(9999.0)
 process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
@@ -241,8 +241,8 @@ process.generalDStarCandidatesNew.d0Collection = cms.InputTag("generalD0Candidat
 #process.d0ana_newreduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsNewD0")
 
 
-#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew * process.d0ana_newreduced *process.dStarana_mc)
-process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew)# process.d0ana_newreduced*process.eventplane)
+process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew * process.d0ana_newreduced *process.dStarana_mc)
+#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.d0ana_newreduced)#process.eventplane)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
