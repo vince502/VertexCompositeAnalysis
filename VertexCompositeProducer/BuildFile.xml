@@ -29,3 +29,4 @@
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/EgammaObjects"/>
 <use   name="CondFormats/GBRForest"/>
+<flags CXXFLAGS="-Wno-error=unused-but-set-variable"/>

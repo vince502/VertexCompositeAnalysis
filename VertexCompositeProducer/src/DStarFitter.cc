@@ -23,6 +23,7 @@
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
+#include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
 
 #include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
@@ -52,12 +53,12 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
-const float piMassDStar = 0.13957018;
-const float piMassDStarSquared = piMassDStar*piMassDStar;
-const float dStarMassDStar = 2.010000;
-float piMassDStar_sigma = 3.5E-7f;
-float D0MassD0_sigma = 1.6E-4f;
-float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
+static const float piMassDStar = 0.13957018;
+static const float piMassDStarSquared = piMassDStar*piMassDStar;
+static const float dStarMassDStar = 2.010000;
+static float piMassDStar_sigma = 3.5E-7f;
+static float D0MassD0_sigma = 1.6E-4f;
+static float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
 
 
 // Constructor and (empty) destructor
@@ -68,7 +69,7 @@ DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesC
 
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  token_d0cand = iC.consumes<reco::VertexCompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0cand = iC.consumes<CCC>(theParameters.getParameter<edm::InputTag>("d0Collection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -161,7 +162,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
-  Handle<reco::VertexCompositeCandidateCollection> theD0Handle;
+  Handle<CCC> theD0Handle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
@@ -279,7 +280,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TrackRef pionTrackRef = theTrackRefs[trdx1];
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
-      VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
+      CC theD0 = (*theD0Handle)[didx1];
 
       // if( !pionTransTkPtr->impactPointStateAvailable()) continue;
       const auto& D0Vec = theD0.p4();
@@ -359,6 +360,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        vector<RefCountedKinematicParticle> d0Daus;
        reco::Candidate* dau0 = theD0.daughter(0);
        reco::Candidate* dau1 = theD0.daughter(1);
+
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
        float dau0mass =  dau0->mass();
@@ -368,6 +370,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
        KinematicParticleVertexFitter kpvFitter;
        RefCountedKinematicTree d0Tree =  kpvFitter.fit(d0Daus);
+      if( !d0Tree->isValid() ) continue;
 
        d0Tree->movePointerToTheTop();
 
@@ -401,9 +404,27 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        KinematicParameters posCandKP = posCand->currentState().kinematicParameters();
        KinematicParameters negCandKP = negCand->currentState().kinematicParameters();
 
+       TwoTrackMinimumDistance minDistCalculator;
+       //minDistCalculator.calculate( posCand->currentState().trajectoryParameters(),negCand->currentState().trajectoryParameter() );
+       //float dca = minDistCalculator.distance();
+       //GlobalPoint cxPt = minDistCalculator.crossingPoint();
+       //GlobalError posErr = posCand->currentState().trajectoryParameters().cartesianError().position();
+       //GlobalError negErr = negCand->currentState().trajectoryParameters().cartesianError().position();
+
+       // DCA error propagation
+       //double sigma_x2 = posErr.cxx() + negErr.cxx();
+       //double sigma_y2 = posErr.cyy() + negErr.cyy();
+       //float dcaError = sqrt(sigma_x2 * cxPt.x() * cxPt.x() +
+       //                sigma_y2 * cxPt.y() * cxPt.y()) / dca;
+    
+       //cout << "dca : " << dca << "dcaerr : " << dcaError << endl;
+
+
+
+
        GlobalVector dStarTotalP = GlobalVector (dStarCand->currentState().globalMomentum().x(),
-                                                dStarCand->currentState().globalMomentum().y(),
-                                                dStarCand->currentState().globalMomentum().z());
+                       dStarCand->currentState().globalMomentum().y(),
+                       dStarCand->currentState().globalMomentum().z());
 
        GlobalVector posCandTotalP = GlobalVector(posCandKP.momentum().x(),posCandKP.momentum().y(),posCandKP.momentum().z());
        GlobalVector negCandTotalP = GlobalVector(negCandKP.momentum().x(),negCandKP.momentum().y(),negCandKP.momentum().z());
@@ -474,8 +495,12 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
            cos(dStarAngle3D) < collinCut3D || cos(dStarAngle2D) < collinCut2D || dStarAngle3D > alphaCut || dStarAngle2D > alpha2DCut
        ) continue;
 
-       VertexCompositeCandidate* theDStar = 0;
-       theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
+
+
+       CC* theDStar = 0;
+      //  theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
+      theDStar = new CC();
+      theDStar->setP4(dStarP4);
 
        RecoChargedCandidate
          theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
@@ -483,19 +508,36 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
                                                   negCandTotalE), dStarVtx);
        theNegCand.setTrack(pionTrackRef);
 
-       AddFourMomenta addp4;
-       theDStar->addDaughter(theD0);
-       theDStar->addDaughter(theNegCand);
+
+
+
+      //  AddFourMomenta addp4;
+       theDStar->addDaughter(theD0, "D0");
+       theDStar->addDaughter(theNegCand, "pion");
        int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
        theDStar->setPdgId(pdgId);
-       addp4.set( *theDStar );
+        reco::Vertex dStarVtxObj = *dStarDecayVertex;
+        theDStar->addUserData("Vtx", dStarVtxObj);
+        theDStar->addUserFloat("VtxChi2", dStarVtxChi2 );
+        theDStar->addUserFloat("VtxNdof", dStarVtxNdof );
+        theDStar->addUserFloat("alpha2D", dStarAngle2D );
+        theDStar->addUserFloat("alpha3D", dStarAngle3D );
+        theDStar->addUserFloat("decaylength2D", rVtxMag);
+        theDStar->addUserFloat("decaylength3D", lVtxMag );
+        theDStar->addUserFloat("decaylengthsignif2D", rVtxMag/sigmaRvtxMag);
+        theDStar->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
+        theDStar->addUserFloat("dca3D", cur3DIP.value());
+        theDStar->addUserFloat("dca3DErr", cur3DIP.error());
+//        theDStar->addUserFloat("D03DDCA", dca);
+//        theDStar->addUserFloat("D03DDCAErr", dcaError);
+      //  addp4.set( *theDStar );
        if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
            theDStar->mass() > dStarMassDStar - dStarMassCut ) 
        {
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());
          dcaErrs_.push_back(cur3DIP.error());
-         if(theDStar->pt()<4){cout <<"Dstar pt : " <<theDStar->pt()<<endl;}
+//if(theDStar->pt()<4){cout <<"Dstar pt : " <<theDStar->pt()<<endl;}
 
 // per//form MVA evaluation
          if(useAnyMVA_)
@@ -545,7 +587,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& DStarFitter::getDStar() const {
+const pat::CompositeCandidateCollection& DStarFitter::getDStar() const {
   return theDStars;
 }
 

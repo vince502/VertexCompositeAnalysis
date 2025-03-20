@@ -24,13 +24,17 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
+#include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
+
 
 #include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
 #include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/GlobalError.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
@@ -49,6 +53,9 @@ float piMassD0_sigma = 3.5E-7f;
 float kaonMassD0_sigma = 1.6E-5f;
 float d0MassD0_sigma = d0MassD0*1.e-6;
 
+using CC = pat::CompositeCandidate;
+using CCC = pat::CompositeCandidateCollection;
+
 // Constructor and (empty) destructor
 D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
     bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
@@ -66,6 +73,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   mPiKCutMin = theParameters.getParameter<double>(string("mPiKCutMin"));
   mPiKCutMax = theParameters.getParameter<double>(string("mPiKCutMax"));
   tkDCACut = theParameters.getParameter<double>(string("tkDCACut"));
+  tkDCACutLow = theParameters.getParameter<double>(string("tkDCACutLow"));
   tkChi2Cut = theParameters.getParameter<double>(string("tkChi2Cut"));
   tkNhitsCut = theParameters.getParameter<int>(string("tkNhitsCut"));
   tkPtCut = theParameters.getParameter<double>(string("tkPtCut"));
@@ -81,6 +89,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   collinCut2D = theParameters.getParameter<double>(string("collinearityCut2D"));
   collinCut3D = theParameters.getParameter<double>(string("collinearityCut3D"));
   d0MassCut = theParameters.getParameter<double>(string("d0MassCut"));
+  d0AbsYCut = theParameters.getParameter<double>(string("d0AbsYCut"));
   dauTransImpactSigCut = theParameters.getParameter<double>(string("dauTransImpactSigCut"));
   dauLongImpactSigCut = theParameters.getParameter<double>(string("dauLongImpactSigCut"));
   VtxChiProbCut = theParameters.getParameter<double>(string("VtxChiProbCut"));
@@ -88,10 +97,11 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
+  mvaCut = theParameters.getParameter<double>(string("mvaCut"));
 
 
   useAnyMVA_ = false;
-  forestLabel_ = "D0InpPb";
+  forestLabel_ = "D0InPbPb";
   std::string type = "BDT";
   useForestFromDB_ = true;
   dbFileName_ = "";
@@ -342,10 +352,26 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       ClosestApproachInRPhi cApp;
       cApp.calculate(posState, negState);
       if( !cApp.status() ) continue;
-      float dca = fabs( cApp.distance() );
+      float dca =  cApp.distance();
       GlobalPoint cxPt = cApp.crossingPoint();
 
-      if (dca < 0. || dca > tkDCACut) continue;
+      // TrajectoryStateClosestToPoint posTsctp = posTransTkPtr->trajectoryStateClosestToPoint(bestvtx);
+      // TrajectoryStateClosestToPoint negTsctp = negTransTkPtr->trajectoryStateClosestToPoint(bestvtx);
+
+      // GlobalVector pospT = posTransTkPtr.impactPointTSCP().momentum();
+      // GlobalVector negpT = negTransTkPtr.impactPointTSCP().momentum();
+      // math::XYZVector deltaP(pospT.x() - negpT.x(), pospT.y() - negpT.y(), 0);
+
+      // TwoTrackMinimumDistanceHelixHelix minDistCalculator;
+      // minDistCalculator.calculate(posState.parameters(), negState.parameters());
+      TwoTrackMinimumDistance minDistCalculator;
+      minDistCalculator.calculate(posState, negState);
+      dca = minDistCalculator.distance(); 
+      // std::cout << "(pca,dca) : " << minDistCalculator.distance() << ", " << dca << std::endl;
+      
+
+      if (dca < tkDCACutLow || dca > tkDCACut) continue;
+      if( dca < 0 ) std::cout << "Negative DCA : " << dca << std::endl;
 //      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120. 
 //          || std::abs(cxPt.z()) > 300.) continue;
 
@@ -368,14 +394,19 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       double totalPSq =
         ( posTSCP.momentum() + negTSCP.momentum() ).mag2();
 
-      double totalPt =
-        ( posTSCP.momentum() + negTSCP.momentum() ).perp();
+      auto sumMom = ( posTSCP.momentum() + negTSCP.momentum() );
+      double totalPt = sumMom.perp();
 
       double mass1 = sqrt( totalE1Sq - totalPSq);
       double mass2 = sqrt( totalE2Sq - totalPSq);
 
       if( (mass1 > mPiKCutMax || mass1 < mPiKCutMin) && (mass2 > mPiKCutMax || mass2 < mPiKCutMin)) continue;
       if( totalPt < dPtCut ) continue;
+      double totalY1 = 0.5 * log((totalE1 + totalPt* TMath::SinH(sumMom.eta()) )/(totalE1 - totalPt*TMath::SinH(sumMom.eta())));
+      double totalY2 = 0.5 * log((totalE2 + totalPt* TMath::SinH(sumMom.eta()) )/(totalE2 - totalPt*TMath::SinH(sumMom.eta())));
+      if( fabs(totalY1) > d0AbsYCut && fabs(totalY2) > d0AbsYCut ) continue;
+
+
 
       // Create the vertex fitter object and vertex the tracks
     
@@ -414,8 +445,8 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         //   ChiSquaredProbability((double)(d0DecayVertex->chiSquared()),(double)(d0DecayVertex->degreesOfFreedom()));
         //if (d0C2Prob < 0.0001) continue;
 
-	float d0C2Prob = TMath::Prob(d0DecayVertex->chiSquared(),d0DecayVertex->degreesOfFreedom());
-	if (d0C2Prob < VtxChiProbCut) continue;
+	      float d0C2Prob = TMath::Prob(d0DecayVertex->chiSquared(),d0DecayVertex->degreesOfFreedom());
+	      if (d0C2Prob < VtxChiProbCut) continue;
 
         //if ( d0Cand->currentState().mass() > 2.5 || d0Cand->currentState().mass() < 1.0) continue;
 
@@ -491,9 +522,46 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             lVtxMag / sigmaLvtxMag < lVtxSigCut ||
             cos(d0Angle3D) < collinCut3D || cos(d0Angle2D) < collinCut2D || d0Angle3D > alphaCut || d0Angle2D > alpha2DCut
         ) continue;
+        AnalyticalImpactPointExtrapolator extrapolator(magField);
+        TrajectoryStateOnSurface tsos = extrapolator.extrapolate(d0Cand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));;
 
-        VertexCompositeCandidate* theD0 = 0;
-        theD0 = new VertexCompositeCandidate(0, d0P4, d0Vtx, d0VtxCov, d0VtxChi2, d0VtxNdof);
+	      if( !tsos.isValid() ) continue;
+        Measurement1D cur3DIP;
+        VertexDistance3D a3d;
+        GlobalPoint refPoint          = tsos.globalPosition();
+        GlobalError refPointErr       = tsos.cartesianError().position();
+        GlobalPoint vertexPosition    = RecoVertex::convertPos(vtxPrimary->position());
+        GlobalError vertexPositionErr = RecoVertex::convertError(vtxPrimary->error());
+        cur3DIP =  (a3d.distance(VertexState(vertexPosition,vertexPositionErr), VertexState(refPoint, refPointErr)));
+        // // Debugging part : cur3DIP and sin(alpha) * decaylength value is equal but the error different
+        // std::cout << "By cur3DIP " << cur3DIP.value() << " +/- " << cur3DIP.error() <<std::endl;
+        // std::cout << "By decay length and alpha " << std::sin(d0Angle3D)*lVtxMag << " +/- " << sigmaLvtxMag * std::sin(d0Angle3D) <<std::endl;
+        // std::cout << "By decay length " << lVtxMag << " +/- " << sigmaLvtxMag * lVtxMag <<std::endl;
+
+        FreeTrajectoryState posStateNew = posTransTkPtr->impactPointTSCP().theState();
+        FreeTrajectoryState negStateNew = negTransTkPtr->impactPointTSCP().theState();
+        ClosestApproachInRPhi cApp;
+        cApp.calculate(posStateNew, negStateNew);
+        if( !cApp.status() ) continue;
+        float dca = fabs( cApp.distance() );
+        TwoTrackMinimumDistance minDistCalculator;
+        minDistCalculator.calculate(posState, negState);
+        dca = minDistCalculator.distance(); 
+        cxPt = minDistCalculator.crossingPoint();
+        GlobalError posErr = posStateNew.cartesianError().position();
+        GlobalError negErr = negStateNew.cartesianError().position();
+
+        // DCA error propagation
+        double sigma_x2 = posErr.cxx() + negErr.cxx();
+        double sigma_y2 = posErr.cyy() + negErr.cyy();
+    
+        // Error in transverse plane (r-phi)
+        double dcaError = sqrt(sigma_x2 * cxPt.x() * cxPt.x() + 
+                               sigma_y2 * cxPt.y() * cxPt.y()) / dca;
+        CC* theD0 = 0;
+        theD0 = new CC();
+        theD0->setP4(d0P4);
+        // theD0 = new VertexCompositeCandidate(0, d0P4, d0Vtx, d0VtxCov, d0VtxChi2, d0VtxNdof);
 
         RecoChargedCandidate
           thePosCand(1, Particle::LorentzVector(posCandTotalP.x(),
@@ -514,40 +582,62 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         }
 
         AddFourMomenta addp4;
-        theD0->addDaughter(thePosCand);
-        theD0->addDaughter(theNegCand);
+        theD0->addDaughter(thePosCand, "posdau" );
+        theD0->addDaughter(theNegCand, "negdau" );
         theD0->setPdgId(pdg_id[i]);
+        reco::Vertex d0VtxObj = *d0DecayVertex;
+        theD0->addUserData("Vtx", d0VtxObj);
+        theD0->addUserFloat("VtxChi2", d0VtxChi2 );
+        theD0->addUserFloat("VtxNdof", d0VtxNdof );
+        theD0->addUserFloat("alpha2D", d0Angle2D );
+        theD0->addUserFloat("alpha3D", d0Angle3D );
+        theD0->addUserFloat("decaylength2D", rVtxMag);
+        theD0->addUserFloat("decaylength3D", lVtxMag );
+        theD0->addUserFloat("decaylengthsignif2D", rVtxMag/sigmaRvtxMag);
+        theD0->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
+        theD0->addUserFloat("dca3D", cur3DIP.value());
+        theD0->addUserFloat("dca3DErr", cur3DIP.error());
+        theD0->addUserFloat("track3DDCA", dca);
+        theD0->addUserFloat("track3DDCAErr", dcaError);
+
         addp4.set( *theD0 );
         if( theD0->mass() < d0MassD0 + d0MassCut &&
             theD0->mass() > d0MassD0 - d0MassCut ) //&&
 	   // theD0->pt() > dPtCut ) {
         {
-          theD0s.push_back( *theD0 );
 
 // perform MVA evaluation
           if(useAnyMVA_)
           {
-            float gbrVals_[20];
-            gbrVals_[0] = d0P4.Pt();
-            gbrVals_[1] = d0P4.Eta();
-            gbrVals_[2] = d0C2Prob;
-            gbrVals_[3] = lVtxMag / sigmaLvtxMag;
-            gbrVals_[4] = rVtxMag / sigmaRvtxMag;
+            float gbrVals_[15];
+            gbrVals_[0] = d0C2Prob;
+            gbrVals_[1] = cos(d0Angle3D);
+            gbrVals_[2] = d0Angle3D;
+            gbrVals_[3] = cos(d0Angle2D);
+            gbrVals_[4] = d0Angle2D;
             gbrVals_[5] = lVtxMag;
-            gbrVals_[6] = d0Angle3D;
-            gbrVals_[7] = d0Angle2D;
-            gbrVals_[8] = dauLongImpactSig_pos;
-            gbrVals_[9] = dauLongImpactSig_neg;
-            gbrVals_[10] = dauTransImpactSig_pos;
-            gbrVals_[11] = dauTransImpactSig_neg;
-            gbrVals_[12] = nhits_pos;
-            gbrVals_[13] = nhits_neg;
-            gbrVals_[14] = ptErr_pos;
-            gbrVals_[15] = ptErr_neg;
-            gbrVals_[16] = posCandTotalP.perp();
-            gbrVals_[17] = negCandTotalP.perp();
-            gbrVals_[18] = posCandTotalP.eta();
-            gbrVals_[19] = negCandTotalP.eta();
+            gbrVals_[6] = lVtxMag / sigmaLvtxMag;
+            gbrVals_[7] = rVtxMag;
+            gbrVals_[8] = rVtxMag / sigmaRvtxMag;
+            gbrVals_[9] = posCandTotalP.perp();
+            gbrVals_[10] = posCandTotalP.eta();
+            gbrVals_[11] = negCandTotalP.perp();
+            gbrVals_[12] = negCandTotalP.eta();
+            gbrVals_[13] = ptErr_pos;
+            gbrVals_[14] = ptErr_neg;
+
+            //gbrVals_[0] = d0P4.Pt();
+            //gbrVals_[1] = d0P4.Eta();
+            //gbrVals_[3] = lVtxMag / sigmaLvtxMag;
+            //gbrVals_[4] = rVtxMag / sigmaRvtxMag;
+            //gbrVals_[5] = lVtxMag;
+            //gbrVals_[7] = d0Angle2D;
+            //gbrVals_[8] = dauLongImpactSig_pos;
+            //gbrVals_[9] = dauLongImpactSig_neg;
+            //gbrVals_[10] = dauTransImpactSig_pos;
+            //gbrVals_[11] = dauTransImpactSig_neg;
+            //gbrVals_[12] = nhits_pos;
+            //gbrVals_[13] = nhits_neg;
 
             GBRForest const * forest = forest_;
             if(useForestFromDB_){
@@ -557,7 +647,13 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             }
 
             auto gbrVal = forest->GetClassifier(gbrVals_);
-            mvaVals_.push_back(gbrVal);
+            if(gbrVal > mvaCut ) {
+              mvaVals_.push_back(gbrVal);
+              theD0s.push_back( *theD0 );
+            }
+          }
+          else{
+            theD0s.push_back( *theD0 );
           }
         }
 
@@ -573,7 +669,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& D0Fitter::getD0() const {
+const CCC& D0Fitter::getD0() const {
   return theD0s;
 }
 

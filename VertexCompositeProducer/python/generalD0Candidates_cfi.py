@@ -9,11 +9,11 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     trackQualities = cms.vstring('highPurity'),
                                      
     tkChi2Cut = cms.double(7), #trk Chi2 <
-    tkNhitsCut = cms.int32(5), #trk Nhits >=
+    tkNhitsCut = cms.int32(0), #trk Nhits >=
     tkPtErrCut = cms.double(9999.0), #trk pT err <
     tkPtCut = cms.double(0.3), #trk pT >
     tkEtaCut = cms.double(999.0), #trk abs(eta) <
-    tkPtSumCut = cms.double(0.0), 
+    tkPtSumCut = cms.double(0.0), #
     tkEtaDiffCut = cms.double(999.0), 
 
     mPiKCutMin = cms.double(1.72),
@@ -25,8 +25,9 @@ generalD0Candidates = cms.EDProducer("D0Producer",
 
     #   PCA distance between tracks <
     tkDCACut = cms.double(9999.),
+    tkDCACutLow = cms.double(-9999.),
     vtxChi2Cut = cms.double(9999.0), #vtxChi2 <
-    VtxChiProbCut = cms.double(0.0001), #vtx prob >
+    VtxChiProbCut = cms.double(0.0000), #vtx prob >
     collinearityCut2D = cms.double(-2.0), #cos(pointAngle) >
     collinearityCut3D = cms.double(-2.0), #cos(pointAngle) >
     alphaCut = cms.double(999.0), #pointAngle <
@@ -36,7 +37,9 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     vtxSignificance2DCut = cms.double(0.0),
     vtxSignificance3DCut = cms.double(0.0),
     d0MassCut = cms.double(0.15),
+    d0AbsYCut = cms.double(2.4),
     dPtCut = cms.double(0.0),
+    mvaCut = cms.double(-99.0),
 
     isWrongSign = cms.bool(False),
 
