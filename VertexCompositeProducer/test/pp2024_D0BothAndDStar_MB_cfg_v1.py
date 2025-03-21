@@ -187,7 +187,8 @@ process.dStarana.MVACollection = cms.InputTag("dStarselectorNewReduced:MVAValues
 #process.d0ana_wrongsign_newreduced.DCAErrCollection = cms.InputTag("d0selectorWSNewReduced:DCAErrorsNewD0")
 
 
-process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew *process.dStarselectorNewReduced *process.dStarana )
+#process.d0ana_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorNewReduced * process.d0ana_newreduced * process.generalDStarCandidatesNew *process.dStarselectorNewReduced *process.dStarana )
+process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.d0ana_newreduced)
 # process.d0ana_wrongsign_seq2 = cms.Sequence(process.eventFilter_HM * process.d0selectorWSNewReduced * process.d0ana_wrongsign_newreduced)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
@@ -213,14 +214,20 @@ process.p = cms.Path(process.d0ana_seq2)
 # Add the Conversion tree
 
 # Define the process schedule
+#process.schedule = cms.Schedule(
+#    process.eventFilter_HM_step,
+#    process.d0rereco_step,
+##    process.d0rereco_wrongsign_step,
+#    process.p,
+##    process.pws,
+#   process.pevt,
+#)
 process.schedule = cms.Schedule(
     process.eventFilter_HM_step,
-    process.d0rereco_step,
-#    process.d0rereco_wrongsign_step,
-    process.p,
-#    process.pws,
+    process.dStarAna_step,
    process.pevt,
 )
+
 
 # Add the event selection filters
 process.Flag_colEvtSel = cms.Path(process.eventFilter_HM * process.colEvtSel)
