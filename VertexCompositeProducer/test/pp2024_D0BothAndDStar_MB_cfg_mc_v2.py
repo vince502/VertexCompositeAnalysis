@@ -25,7 +25,7 @@ process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/241026_084606/0000/step4_1.root"),
    # fileNames= cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
     #fileNames= cms.untracked.vstring("file:bf4f838b-571d-4570-805c-cd3cb84839c2.root"),  #DPt>1
-    fileNames= cms.untracked.vstring("/store/user/junseok/Genproduction/GEN_DStarKpipi_CMSSW_14_1_7_250318_2M_v1/DStarKpipi/crab_GEN_DStarKpipi_CMSSW_14_1_7_250318_2M_v1/250318_034122/0007/DStarKpipi_py_GEN_SIM_7808.root"), #DPt>0
+    fileNames= cms.untracked.vstring("file:minbias_RECO_106.root"), #DPt>0
    # fileNames = cms.untracked.vstring(
         # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
@@ -244,17 +244,15 @@ process.generalDStarCandidatesNew.d0Collection = cms.InputTag("generalD0Candidat
 #process.d0ana_newreduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsNewD0")
 
 
-#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew *process.dStarana_mc)
+process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew *process.dStarana_mc)
 #process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.d0ana_newreduced)
-process.dStarAna_step = cms.Path( process.eventFilter_HM *  process.dStarana_mc)
+#process.dStarAna_step = cms.Path( process.eventFilter_HM *  process.dStarana_mc)
 #*process.eventplane)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
 process.eventinfoana.triggerPathNames = cms.untracked.vstring(
-    "HLT_HIMinimumBiasHF1AND_v*", #24
-    "HLT_HIMinimumBiasHF1ANDZDC2nOR_v", #25
-    "HLT_HIMinimumBiasHF1ANDZDC1nOR_v", #26
+        "HLT_ZeroBias_v*"
     )
 process.eventinfoana.eventFilterNames = cms.untracked.vstring(
     'Flag_colEvtSel',
