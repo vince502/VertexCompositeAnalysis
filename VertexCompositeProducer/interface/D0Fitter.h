@@ -68,6 +68,7 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 //#include "Geometry/TrackerGeometryBuilder/interface/GluedGeomDet.h"
+#include "PhysicsTools/ONNXRuntime/interface/ONNXRuntime.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -82,12 +83,13 @@
 #include <utility>
 #include <algorithm>
 #include <map>
+using namespace cms::Ort;
 
 class D0Fitter {
  public:
  using CC = pat::CompositeCandidate;
  using CCC = pat::CompositeCandidateCollection;
-  D0Fitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC);
+  D0Fitter(const edm::ParameterSet& theParams, edm::ConsumesCollector && iC, const ONNXRuntime* onnxRuntime = nullptr);
   ~D0Fitter();
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -148,6 +150,7 @@ class D0Fitter {
   double mvaCut;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
+  std::vector<float> mvaVals_;
 
   //setup mva selector
   bool useAnyMVA_;
@@ -156,15 +159,27 @@ class D0Fitter {
   std::string mvaType_;
   std::string forestLabel_;
   GBRForest * forest_;
+  const ONNXRuntime* onnxRuntime_; 
   bool useForestFromDB_;
-
-  std::vector<float> mvaVals_;
   edm::ESGetToken<GBRForest, GBRWrapperRcd> mvaToken_;
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
 //  MVACollection mvas; 
 
   std::string dbFileName_;
+// Run inference and get outputs
+// input_names: list of the names of the input nodes.
+// input_values: list of input arrays for each input node. The order of `input_values` must match `input_names`.
+// input_shapes: list of `int64_t` arrays specifying the shape of each input node. Can leave empty if the model does not have dynamic axes.
+// output_names: names of the output nodes to get outputs from. Empty list means all output nodes.
+// batch_size: number of samples in the batch. Each array in `input_values` must have a shape layout of (batch_size, ...).
+// Returns: a std::vector<std::vector<float>>, with the order matched to `output_names`.
+// When `output_names` is empty, will return all outputs ordered as in `getOutputNames()`.
+
+  std::vector<std::string> input_names_;
+  std::vector<std::string> output_names_;
+  std::vector<std::vector<int64_t>> input_shapes_;
+  FloatArrays data_;
 
 };
 

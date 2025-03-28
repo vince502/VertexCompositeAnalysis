@@ -23,8 +23,8 @@
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Producer.h"
 
 // Constructor
-D0Producer::D0Producer(const edm::ParameterSet& iConfig) :
- theVees(iConfig, consumesCollector())
+D0Producer::D0Producer(const edm::ParameterSet& iConfig, const ONNXRuntime *cache) :
+ theVees(iConfig, consumesCollector(), cache)
 {
   useAnyMVA_ = false;
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
@@ -36,6 +36,34 @@ D0Producer::D0Producer(const edm::ParameterSet& iConfig) :
 // (Empty) Destructor
 D0Producer::~D0Producer() {
 }
+std::unique_ptr<ONNXRuntime> D0Producer::initializeGlobalCache(const edm::ParameterSet &iConfig) {
+   bool useAnyMVA = iConfig.exists("useAnyMVA") ? iConfig.getParameter<bool>("useAnyMVA") : false;
+   
+   if (!useAnyMVA) return nullptr;
+   
+   if (iConfig.exists("onnxModelFileName")) {
+      // Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "ONNXRuntime");
+      // Ort::SessionOptions session_options;
+      // session_options.SetIntraOpNumThreads(1)
+     std::string onnxModelPath = iConfig.getParameter<std::string>("onnxModelFileName");
+     
+     edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeProducer/data/%s", onnxModelPath.c_str()));
+     std::string fullPath = fip.fullPath();
+     
+     std::ifstream testFile(fullPath);
+     if (!testFile.good()) {
+       throw cms::Exception("Configuration") << "cannot find ONNX Model in : " << fullPath;
+     }
+     testFile.close();
+   
+      return std::make_unique<ONNXRuntime>(fip.fullPath());
+      
+   }
+   
+   return nullptr;
+}
+ void D0Producer::globalEndJob(const ONNXRuntime *cache) {}
+
 
 
 //

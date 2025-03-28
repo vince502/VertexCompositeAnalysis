@@ -43,6 +43,8 @@
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "FWCore/Framework/interface/stream/EDAnalyzer.h"
+#include "PhysicsTools/ONNXRuntime/interface/ONNXRuntime.h"
 
 const float piMassD0 = 0.13957018;
 const float piMassD0Squared = piMassD0*piMassD0;
@@ -55,10 +57,11 @@ float d0MassD0_sigma = d0MassD0*1.e-6;
 
 using CC = pat::CompositeCandidate;
 using CCC = pat::CompositeCandidateCollection;
+// using cms;
 
 // Constructor and (empty) destructor
-D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC) :
-    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>())
+D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollector && iC, const ONNXRuntime* onnxRuntime) :
+    bField_esToken_(iC.esConsumes<MagneticField, IdealMagneticFieldRecord>()), onnxRuntime_(onnxRuntime),input_shapes_()
 {
 //		   const edm::Event& iEvent, const edm::EventSetup& iSetup, edm::ConsumesCollector && iC) {
   using std::string;
@@ -110,23 +113,48 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
 
   if(theParameters.exists("useAnyMVA")) useAnyMVA_ = theParameters.getParameter<bool>("useAnyMVA");
 
-  if(useAnyMVA_){
-    if(theParameters.exists("mvaType"))type = theParameters.getParameter<std::string>("mvaType");
-    if(theParameters.exists("GBRForestLabel"))forestLabel_ = theParameters.getParameter<std::string>("GBRForestLabel");
-    if(theParameters.exists("GBRForestFileName")){
-      dbFileName_ = theParameters.getParameter<std::string>("GBRForestFileName");
-      useForestFromDB_ = false;
-    }
+  //if(useAnyMVA_){
+  //  if(theParameters.exists("mvaType"))type = theParameters.getParameter<std::string>("mvaType");
+  //  if(theParameters.exists("GBRForestLabel"))forestLabel_ = theParameters.getParameter<std::string>("GBRForestLabel");
+  //  if(theParameters.exists("GBRForestFileName")){
+  //    dbFileName_ = theParameters.getParameter<std::string>("GBRForestFileName");
+  //    useForestFromDB_ = false;
+  //  }
 
-    if(!useForestFromDB_){
-      edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeProducer/data/%s",dbFileName_.c_str()));
-      TFile gbrfile(fip.fullPath().c_str(),"READ");
-      forest_ = (GBRForest*)gbrfile.Get(forestLabel_.c_str());
-      gbrfile.Close();
-    }
+  //  if(!useForestFromDB_){
+  //    edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeProducer/data/%s",dbFileName_.c_str()));
+  //    TFile gbrfile(fip.fullPath().c_str(),"READ");
+  //    forest_ = (GBRForest*)gbrfile.Get(forestLabel_.c_str());
+  //    gbrfile.Close();
+  //  }
 
-    mvaType_ = type;
-    mvaToken_ = iC.esConsumes<GBRForest, GBRWrapperRcd>(edm::ESInputTag("", forestLabel_));
+  //  mvaType_ = type;
+  //  mvaToken_ = iC.esConsumes<GBRForest, GBRWrapperRcd>(edm::ESInputTag("", forestLabel_));
+  //}
+  if (useAnyMVA_) {
+    if (theParameters.exists("input_names")||theParameters.exists("output_names")) {
+      input_names_ = theParameters.getParameter<std::vector<std::string>>("input_names");
+      output_names_ = theParameters.getParameter<std::vector<std::string>>("output_names");
+    } else {
+      throw cms::Exception("Configuration") << "onnxModelFileName not provided in ParameterSet";
+    }
+//  Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "D0Fitter");
+//    Ort::SessionOptions sessionOptions;
+//    sessionOptions.SetIntraOpNumThreads(1); // Single-threaded for simplicity
+    // edm::FileInPath fip(Form("VertexCompositeAnalysis/VertexCompositeProducer/data/%s",onnxModelPath_.c_str()));    // Path relative to CMSSW_BASE
+    // onnxModel_ = std::make_unique<cms::Ort::ONNXRuntime>(fip.fullPath());
+    // Retrieve input and output names
+    //Ort::AllocatorWithDefaultOptions allocator;
+    //auto numInputNodes = onnxSession_->GetInputCount();
+    //for (size_t i = 0; i < numInputNodes; i++) {
+    //  auto inputName = onnxSession_->GetInputNameAllocated(i, allocator);
+    //  inputNames_.push_back(inputName.get());
+    //}
+    //auto numOutputNodes = onnxSession_->GetOutputCount();
+    //for (size_t i = 0; i < numOutputNodes; i++) {
+    //  auto outputName = onnxSession_->GetOutputNameAllocated(i, allocator);
+    //  outputNames_.push_back(outputName.get());
+    //}
   }
 
   std::vector<std::string> qual = theParameters.getParameter<std::vector<std::string> >("trackQualities");
@@ -141,7 +169,7 @@ D0Fitter::~D0Fitter() {
 
 // Method containing the algorithm for vertex reconstruction
 void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-
+ 
   using std::vector;
   using std::cout;
   using std::endl;
@@ -607,54 +635,92 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         {
 
 // perform MVA evaluation
-          if(useAnyMVA_)
-          {
-            float gbrVals_[15];
-            gbrVals_[0] = d0C2Prob;
-            gbrVals_[1] = cos(d0Angle3D);
-            gbrVals_[2] = d0Angle3D;
-            gbrVals_[3] = cos(d0Angle2D);
-            gbrVals_[4] = d0Angle2D;
-            gbrVals_[5] = lVtxMag;
-            gbrVals_[6] = lVtxMag / sigmaLvtxMag;
-            gbrVals_[7] = rVtxMag;
-            gbrVals_[8] = rVtxMag / sigmaRvtxMag;
-            gbrVals_[9] = posCandTotalP.perp();
-            gbrVals_[10] = posCandTotalP.eta();
-            gbrVals_[11] = negCandTotalP.perp();
-            gbrVals_[12] = negCandTotalP.eta();
-            gbrVals_[13] = ptErr_pos;
-            gbrVals_[14] = ptErr_neg;
+  //        if(useAnyMVA_)
+  //        {
+  //          float gbrVals_[15];
+  //          gbrVals_[0] = d0C2Prob;
+  //          gbrVals_[1] = cos(d0Angle3D);
+  //          gbrVals_[2] = d0Angle3D;
+  //          gbrVals_[3] = cos(d0Angle2D);
+  //          gbrVals_[4] = d0Angle2D;
+  //          gbrVals_[5] = lVtxMag;
+  //          gbrVals_[6] = lVtxMag / sigmaLvtxMag;
+  //          gbrVals_[7] = rVtxMag;
+  //          gbrVals_[8] = rVtxMag / sigmaRvtxMag;
+  //          gbrVals_[9] = posCandTotalP.perp();
+  //          gbrVals_[10] = posCandTotalP.eta();
+  //          gbrVals_[11] = negCandTotalP.perp();
+  //          gbrVals_[12] = negCandTotalP.eta();
+  //          gbrVals_[13] = ptErr_pos;
+  //          gbrVals_[14] = ptErr_neg;
 
-            //gbrVals_[0] = d0P4.Pt();
-            //gbrVals_[1] = d0P4.Eta();
-            //gbrVals_[3] = lVtxMag / sigmaLvtxMag;
-            //gbrVals_[4] = rVtxMag / sigmaRvtxMag;
-            //gbrVals_[5] = lVtxMag;
-            //gbrVals_[7] = d0Angle2D;
-            //gbrVals_[8] = dauLongImpactSig_pos;
-            //gbrVals_[9] = dauLongImpactSig_neg;
-            //gbrVals_[10] = dauTransImpactSig_pos;
-            //gbrVals_[11] = dauTransImpactSig_neg;
-            //gbrVals_[12] = nhits_pos;
-            //gbrVals_[13] = nhits_neg;
+  //          //gbrVals_[0] = d0P4.Pt();
+  //          //gbrVals_[1] = d0P4.Eta();
+  //          //gbrVals_[3] = lVtxMag / sigmaLvtxMag;
+  //          //gbrVals_[4] = rVtxMag / sigmaRvtxMag;
+  //          //gbrVals_[5] = lVtxMag;
+  //          //gbrVals_[7] = d0Angle2D;
+  //          //gbrVals_[8] = dauLongImpactSig_pos;
+  //          //gbrVals_[9] = dauLongImpactSig_neg;
+  //          //gbrVals_[10] = dauTransImpactSig_pos;
+  //          //gbrVals_[11] = dauTransImpactSig_neg;
+  //          //gbrVals_[12] = nhits_pos;
+  //          //gbrVals_[13] = nhits_neg;
 
-            GBRForest const * forest = forest_;
-            if(useForestFromDB_){
-              edm::ESHandle<GBRForest> forestHandle;
-              forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
-              forest = forestHandle.product();
-            }
+  //          GBRForest const * forest = forest_;
+  //          if(useForestFromDB_){
+  //            edm::ESHandle<GBRForest> forestHandle;
+  //            forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
+  //            forest = forestHandle.product();
+  //          }
 
-            auto gbrVal = forest->GetClassifier(gbrVals_);
-            if(gbrVal > mvaCut ) {
-              mvaVals_.push_back(gbrVal);
-              theD0s.push_back( *theD0 );
-            }
-          }
-          else{
-            theD0s.push_back( *theD0 );
-          }
+  //          auto gbrVal = forest->GetClassifier(gbrVals_);
+  //          if(gbrVal > mvaCut ) {
+  //            mvaVals_.push_back(gbrVal);
+  //            theD0s.push_back( *theD0 );
+  //          }
+  //        }
+  //        else{
+  //          theD0s.push_back( *theD0 );
+  //        }
+          if (useAnyMVA_ && onnxRuntime_) {
+    // Prepare input data
+    cms::Ort::FloatArrays data_;
+
+    data_.emplace_back(15, 0);
+    std::vector<float> &onnxVals_=data_[0];
+    onnxVals_[0] = d0C2Prob;
+    onnxVals_[1] = cos(d0Angle3D);
+    onnxVals_[2] = d0Angle3D;
+    onnxVals_[3] = cos(d0Angle2D);
+    onnxVals_[4] = d0Angle2D;
+    onnxVals_[5] = lVtxMag;
+    onnxVals_[6] = lVtxMag / sigmaLvtxMag;
+    onnxVals_[7] = rVtxMag;
+    onnxVals_[8] = rVtxMag / sigmaRvtxMag;
+    onnxVals_[9] = posCandTotalP.perp();
+    onnxVals_[10] = posCandTotalP.eta();
+    onnxVals_[11] = negCandTotalP.perp();
+    onnxVals_[12] = negCandTotalP.eta();
+    onnxVals_[13] = ptErr_pos;
+    onnxVals_[14] = ptErr_neg;
+    // Create ONNX input tensor
+    std::vector<float> outputs = onnxRuntime_->run(input_names_, data_, input_shapes_,output_names_)[0];
+
+    float onnxVal = outputs[1]; // Adjust if your model has multiple outputs
+  //     std::cout << "input data -> ";
+  // for (auto &i: onnxVals_) { std::cout << i << " "; }
+  // std::cout << std::endl << "output data -> ";
+  // for (auto &i: outputs) { std::cout << i << " "; }
+  // std::cout << std::endl;
+
+    if (onnxVal > mvaCut) {
+      mvaVals_.push_back(onnxVal);
+      theD0s.push_back(*theD0);
+    }
+  } else {
+    theD0s.push_back(*theD0);
+  }
         }
 
         if(theD0) delete theD0;
