@@ -528,6 +528,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
         theDStar->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
         theDStar->addUserFloat("dca3D", cur3DIP.value());
         theDStar->addUserFloat("dca3DErr", cur3DIP.error());
+        if(theD0.hasUserFloat("mva")) theDStar->addUserFloat("D0mva", theD0.userFloat("mva"));
 //        theDStar->addUserFloat("D03DDCA", dca);
 //        theDStar->addUserFloat("D03DDCAErr", dcaError);
       //  addp4.set( *theDStar );

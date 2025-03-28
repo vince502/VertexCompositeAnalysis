@@ -310,6 +310,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
         mva[it] = 0.0;
         if(useAnyMVA_) mva[it] = (*mvavalues)[it];
+        if(trk.hasUserFloat("D0mva")) mva[it] = trk.userFloat("D0mva");
+        if(trk.hasUserFloat("mva")) mva[it] = trk.userFloat("mva");
 
         double px = trk.px();
         double py = trk.py();
@@ -662,6 +664,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           dlos2D[it] = trk.userFloat("decaylengthsignif2D");
           trk3Ddca[it] = twoLayerDecay_? ((CC*)d1)->userFloat("track3DDCA") : trk.userFloat("track3DDCA");
           trk3DdcaErr[it] = twoLayerDecay_? ((CC*)d1)->userFloat("track3DDCAErr") : trk.userFloat("track3DDCAErr");
+          dca3D[it] = twoLayerDecay_? ((CC*)d1)->userFloat("dca3D") : trk.userFloat("dca3D");
+          dca3DErr[it] = twoLayerDecay_? ((CC*)d1)->userFloat("dca3DErr") : trk.userFloat("dca3DErr");
 
           //trk info
           auto dau1 = d1->get<reco::TrackRef>();
@@ -707,6 +711,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               
               dzos1[it] = dzbest1/dzerror1;
               dxyos1[it] = dxybest1/dxyerror1;
+              dzval1[it] = dzbest1;
+              dxyval1[it] = dxybest1;
           }
           
           auto dau2 = d2->get<reco::TrackRef>();
@@ -751,6 +757,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           
           dzos2[it] = dzbest2/dzerror2;
           dxyos2[it] = dxybest2/dxyerror2;
+          dzval2[it] = dzbest2;
+          dxyval2[it] = dxybest2;
           
           if(doMuon_)
           {
@@ -1543,7 +1551,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       PATCompositeNtuple->Branch("eta",&eta,"eta[candSize]/F");
       PATCompositeNtuple->Branch("phi",&phi,"phi[candSize]/F");
       PATCompositeNtuple->Branch("mass",&mass,"mass[candSize]/F");
-      if(useAnyMVA_) PATCompositeNtuple->Branch("mva",&mva,"mva[candSize]/F");
+      PATCompositeNtuple->Branch("mva",&mva,"mva[candSize]/F");
 
       if(!isSkimMVA_)  
       {
@@ -1562,6 +1570,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           PATCompositeNtuple->Branch("2DDecayLength",&dl2D,"2DDecayLength[candSize]/F");
           PATCompositeNtuple->Branch("Trk3DDCA",&trk3Ddca,"Trk3DDCA[candSize]/F");
           PATCompositeNtuple->Branch("Trk3DDCAErr",&trk3DdcaErr,"Trk3DDCAErr[candSize]/F");
+          PATCompositeNtuple->Branch("dca3D",&dca3D,"dca3D[candSize]/F");
+          PATCompositeNtuple->Branch("dca3DErr",&dca3DErr,"dca3DErr[candSize]/F");
       
           if(doGenMatching_)
           {
@@ -1716,6 +1726,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           {
               PATCompositeNtuple->Branch("zDCASignificanceDaugther1",&dzos1,"zDCASignificanceDaugther1[candSize]/F");
               PATCompositeNtuple->Branch("xyDCASignificanceDaugther1",&dxyos1,"xyDCASignificanceDaugther1[candSize]/F");
+              PATCompositeNtuple->Branch("zDCADaugther1",&dzval1,"zDCADaugther1[candSize]/F");
+              PATCompositeNtuple->Branch("xyDCADaugther1",&dxyval1,"xyDCADaugther1[candSize]/F");
               PATCompositeNtuple->Branch("NHitD1",&nhit1,"NHitD1[candSize]/F");
               PATCompositeNtuple->Branch("HighPurityDaugther1",&trkquality1,"HighPurityDaugther1[candSize]/O");
               PATCompositeNtuple->Branch("pTD1",&pt1,"pTD1[candSize]/F");
@@ -1729,6 +1741,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
              PATCompositeNtuple->Branch("normalizedChi2Daugther1",&trkChi1,"normalizedChi2Daugther1[candSize]/F");
               PATCompositeNtuple->Branch("zDCASignificanceDaugther2",&dzos2,"zDCASignificanceDaugther2[candSize]/F");
               PATCompositeNtuple->Branch("xyDCASignificanceDaugther2",&dxyos2,"xyDCASignificanceDaugther2[candSize]/F");
+              PATCompositeNtuple->Branch("zDCADaugther2",&dzval2,"zDCADaugther2[candSize]/F");
+              PATCompositeNtuple->Branch("xyDCADaugther2",&dxyval2,"xyDCADaugther2[candSize]/F");
               PATCompositeNtuple->Branch("NHitD2",&nhit2,"NHitD2[candSize]/F");
               PATCompositeNtuple->Branch("HighPurityDaugther2",&trkquality2,"HighPurityDaugther2[candSize]/O");
               PATCompositeNtuple->Branch("pTD2",&pt2,"pTD2[candSize]/F");
@@ -1744,6 +1758,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               {
                 PATCompositeNtuple->Branch("zDCASignificanceDaugther3",&dzos3,"zDCASignificanceDaugther3[candSize]/F");
                 PATCompositeNtuple->Branch("xyDCASignificanceDaugther3",&dxyos3,"xyDCASignificanceDaugther3[candSize]/F");
+                PATCompositeNtuple->Branch("zDCADaugther3",&dzval3,"zDCADaugther3[candSize]/F");
+                PATCompositeNtuple->Branch("xyDCADaugther3",&dxyval3,"xyDCADaugther3[candSize]/F");
                 PATCompositeNtuple->Branch("NHitD3",&nhit3,"NHitD3[candSize]/F");
                 PATCompositeNtuple->Branch("HighPurityDaugther3",&trkquality3,"HighPurityDaugther3[candSize]/O");
                 PATCompositeNtuple->Branch("pTD3",&pt1,"pTD3[candSize]/F");

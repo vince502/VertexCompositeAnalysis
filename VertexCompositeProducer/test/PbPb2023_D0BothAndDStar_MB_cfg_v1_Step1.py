@@ -24,7 +24,7 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:step4.root"),
     #fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root"),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(400))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -90,10 +90,10 @@ from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeT
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.tkChi2Cut = cms.double(5)
+process.generalD0CandidatesNew.tkChi2Cut = cms.double(99)
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(0)
-process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.03)
-process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
+process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
+process.generalD0CandidatesNew.tkPtCut = cms.double(0.8)
 process.generalD0CandidatesNew.tkEtaCut = cms.double(2.4)
 process.generalD0CandidatesNew.tkPtSumCut = cms.double(0.0)
 process.generalD0CandidatesNew.tkEtaDiffCut = cms.double(1.0)
@@ -108,9 +108,9 @@ process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
 process.generalD0CandidatesNew.alpha2DCut = cms.double(999.0)
 process.generalD0CandidatesNew.rVtxCut = cms.double(0.0)
 process.generalD0CandidatesNew.lVtxCut = cms.double(0.0)
-process.generalD0CandidatesNew.vtxSignificance2DCut = cms.double(1.0)
-process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(1.0)
-process.generalD0CandidatesNew.d0MassCut = cms.double(0.15)
+process.generalD0CandidatesNew.vtxSignificance2DCut = cms.double(0.0)
+process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(0.0)
+process.generalD0CandidatesNew.d0MassCut = cms.double(0.14)
 process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.6)
 process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 
@@ -119,7 +119,7 @@ process.generalD0CandidatesNew.useAnyMVA = cms.bool(False)
 #process.generalD0CandidatesNew.GBRForestLabel = cms.string('D0InPbPbXGB')
 #process.generalD0CandidatesNew.GBRForestFileName = cms.string('GBRForestfile_XGBDT_PromptD0InPbPb_15Params_v1_08Mar.root')
 
-process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
+process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.70)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
 #process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(isWrongSign = cms.bool(True))
 
@@ -130,7 +130,7 @@ process.generalDStarCandidatesNew.trkEtaDiffCut = cms.double(99.0)
 process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(0)
 process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
 process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
-process.generalDStarCandidatesNew.tkChi2Cut = cms.double(3)
+process.generalDStarCandidatesNew.tkChi2Cut = cms.double(5)
 process.generalDStarCandidatesNew.VtxChiProbCut = cms.double(0.00)
 #process.generalDStarCandidatesNew.vtxSignificance3DCut = cms.double(3)
 #process.generalDStarCandidatesNew.alphaCut = cms.double(1)
@@ -159,7 +159,7 @@ process.TFileService = cms.Service("TFileService",
     cms.string('d0ana_tree.root')
     )
 
-process.d0ana.useAnyMVA = cms.bool(True)
+process.d0ana.useAnyMVA = cms.bool(False)
 process.d0ana.multMin = cms.untracked.double(0)
 process.d0ana.multMax = cms.untracked.double(100000)
 process.d0ana.MVACollection = cms.InputTag("generalD0CandidatesNew:MVAValuesD0")
@@ -229,10 +229,12 @@ for P in eventFilterPaths:
 changeToMiniAOD(process)
 process.options.numberOfThreads = 1
 
-#process.output = cms.OutputModule("PoolOutputModule",
-#    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM"),
-#    fileName = cms.untracked.string('output.root'),
-#)
-#
-#process.outputPath = cms.EndPath(process.output)
-#process.schedule.append(process.outputPath)
+process.output = cms.OutputModule("PoolOutputModule",
+    compressionAlgorithm = cms.untracked.string('LZMA'),
+    compressionLevel = cms.untracked.int32(4),
+    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM"),
+    fileName = cms.untracked.string('output.root'),
+)
+
+process.outputPath = cms.EndPath(process.output)
+# process.schedule.append(process.outputPath)

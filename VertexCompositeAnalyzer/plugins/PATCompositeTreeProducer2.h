@@ -82,7 +82,7 @@
 //
 
 #define PI 3.1416
-#define MAXCAN 500000
+#define MAXCAN 100
 
 using namespace std;
 using CC = pat::CompositeCandidate;
@@ -235,8 +235,8 @@ private:
     float dl2D[MAXCAN];
     float trk3Ddca[MAXCAN];
     float trk3DdcaErr[MAXCAN];
-    float D03Ddca[MAXCAN];
-    float D03DdcaErr[MAXCAN];
+    float dca3D[MAXCAN];
+    float dca3DErr[MAXCAN];
     bool isSwap[MAXCAN];
     bool matchGEN[MAXCAN];
     int idBAnc_reco[MAXCAN];
@@ -268,6 +268,12 @@ private:
     float dxyos1[MAXCAN];
     float dxyos2[MAXCAN];
     float dxyos3[MAXCAN];
+    float dzval1[MAXCAN];
+    float dzval2[MAXCAN];
+    float dzval3[MAXCAN];
+    float dxyval1[MAXCAN];
+    float dxyval2[MAXCAN];
+    float dxyval3[MAXCAN];
     float nhit1[MAXCAN];
     float nhit2[MAXCAN];
     float nhit3[MAXCAN];
