@@ -361,6 +361,28 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        reco::Candidate* dau0 = theD0.daughter(0);
        reco::Candidate* dau1 = theD0.daughter(1);
 
+       int slowPionCharge = pionTrackRef->charge();
+       
+       reco::Candidate* kaonCand = nullptr;
+       reco::Candidate* pionCand = nullptr;
+       
+       
+       if (dau0->mass() > dau1->mass()) {
+         kaonCand = dau0;
+         pionCand = dau1;
+       } else {
+         kaonCand = dau1;
+         pionCand = dau0;
+       }
+       
+       // For D*+: K- pi+ followed by slow pi+
+       // For D*-: K+ pi- followed by slow pi-
+       if (slowPionCharge > 0) { 
+         if (kaonCand->charge() >= 0) continue;
+       } else { 
+         if (kaonCand->charge() <= 0) continue;
+       }
+
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
        float dau0mass =  dau0->mass();
