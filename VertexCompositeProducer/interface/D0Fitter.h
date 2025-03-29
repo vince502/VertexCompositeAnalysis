@@ -118,6 +118,7 @@ class D0Fitter {
   edm::EDGetTokenT<reco::VertexCollection> token_vertices;
   edm::EDGetTokenT<edm::ValueMap<reco::DeDxData> > token_dedx;
   edm::EDGetTokenT<reco::BeamSpot> token_beamSpot;
+  edm::EDGetTokenT<int> tok_centBinLabel_;
 
   // Cuts
   double mPiKCutMin;
@@ -148,6 +149,7 @@ class D0Fitter {
   double alpha2DCut;
   bool   isWrongSign;
   double mvaCut;
+  int cBin;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
   std::vector<float> mvaVals_;

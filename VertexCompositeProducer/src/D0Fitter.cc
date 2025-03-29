@@ -46,6 +46,11 @@
 #include "FWCore/Framework/interface/stream/EDAnalyzer.h"
 #include "PhysicsTools/ONNXRuntime/interface/ONNXRuntime.h"
 
+#include <chrono>
+using namespace std::chrono;
+
+
+const size_t VARSIZE = 19;
 const float piMassD0 = 0.13957018;
 const float piMassD0Squared = piMassD0*piMassD0;
 const float kaonMassD0 = 0.493677;
@@ -71,6 +76,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
+  tok_centBinLabel_ = iC.consumes<int>(edm::InputTag("centralityBin","HFtowers"));
 
   // Second, initialize post-fit cuts
   mPiKCutMin = theParameters.getParameter<double>(string("mPiKCutMin"));
@@ -191,6 +197,12 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
+  Handle<int> cbin;
+  int centrality = -1;
+  if(useAnyMVA_){
+    iEvent.getByToken(tok_centBinLabel_, cbin);
+    centrality = (cbin.isValid() ? *cbin : -1);
+  }
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
@@ -282,7 +294,12 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   float negCandMass_sigma[2] = {kaonMassD0_sigma, piMassD0_sigma};
   int   pdg_id[2] = {421, -421};
 
+  double totaltime = 0.0;
+  int nloop = 0;
   // Loop over tracks and vertex good charged track pairs
+  // std::vector<CC*> tmpD0s;
+  // cms::Ort::FloatArrays data_(1);
+  // data_.reserve( 50000);
   for(unsigned int trdx1 = 0; trdx1 < theTrackRefs.size(); trdx1++) {
 
     for(unsigned int trdx2 = trdx1 + 1; trdx2 < theTrackRefs.size(); trdx2++) {
@@ -631,102 +648,170 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         addp4.set( *theD0 );
         if( theD0->mass() < d0MassD0 + d0MassCut &&
             theD0->mass() > d0MassD0 - d0MassCut ) //&&
-	   // theD0->pt() > dPtCut ) {
         {
 
 // perform MVA evaluation
-  //        if(useAnyMVA_)
-  //        {
-  //          float gbrVals_[15];
-  //          gbrVals_[0] = d0C2Prob;
-  //          gbrVals_[1] = cos(d0Angle3D);
-  //          gbrVals_[2] = d0Angle3D;
-  //          gbrVals_[3] = cos(d0Angle2D);
-  //          gbrVals_[4] = d0Angle2D;
-  //          gbrVals_[5] = lVtxMag;
-  //          gbrVals_[6] = lVtxMag / sigmaLvtxMag;
-  //          gbrVals_[7] = rVtxMag;
-  //          gbrVals_[8] = rVtxMag / sigmaRvtxMag;
-  //          gbrVals_[9] = posCandTotalP.perp();
-  //          gbrVals_[10] = posCandTotalP.eta();
-  //          gbrVals_[11] = negCandTotalP.perp();
-  //          gbrVals_[12] = negCandTotalP.eta();
-  //          gbrVals_[13] = ptErr_pos;
-  //          gbrVals_[14] = ptErr_neg;
+          // GBR METHOD START
 
-  //          //gbrVals_[0] = d0P4.Pt();
-  //          //gbrVals_[1] = d0P4.Eta();
-  //          //gbrVals_[3] = lVtxMag / sigmaLvtxMag;
-  //          //gbrVals_[4] = rVtxMag / sigmaRvtxMag;
-  //          //gbrVals_[5] = lVtxMag;
-  //          //gbrVals_[7] = d0Angle2D;
-  //          //gbrVals_[8] = dauLongImpactSig_pos;
-  //          //gbrVals_[9] = dauLongImpactSig_neg;
-  //          //gbrVals_[10] = dauTransImpactSig_pos;
-  //          //gbrVals_[11] = dauTransImpactSig_neg;
-  //          //gbrVals_[12] = nhits_pos;
-  //          //gbrVals_[13] = nhits_neg;
+  //           //gbrVals_[0] = d0C2Prob;
+  //           //gbrVals_[1] = cos(d0Angle3D);
+  //           //gbrVals_[2] = d0Angle3D;
+  //           //gbrVals_[3] = cos(d0Angle2D);
+  //           //gbrVals_[4] = d0Angle2D;
+  //           //gbrVals_[5] = lVtxMag;
+  //           //gbrVals_[6] = lVtxMag / sigmaLvtxMag;
+  //           //gbrVals_[7] = rVtxMag;
+  //           //gbrVals_[8] = rVtxMag / sigmaRvtxMag;
+  //           //gbrVals_[9] = posCandTotalP.perp();
+  //           //gbrVals_[10] = posCandTotalP.eta();
+  //           //gbrVals_[11] = negCandTotalP.perp();
+  //           //gbrVals_[12] = negCandTotalP.eta();
+  //           //gbrVals_[13] = ptErr_pos;
+  //           //gbrVals_[14] = ptErr_neg;
 
-  //          GBRForest const * forest = forest_;
-  //          if(useForestFromDB_){
-  //            edm::ESHandle<GBRForest> forestHandle;
-  //            forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
-  //            forest = forestHandle.product();
-  //          }
+  // GBR METHOD END
+                if (useAnyMVA_ && onnxRuntime_) {
+          // Prepare input data
+          cms::Ort::FloatArrays data_;
 
-  //          auto gbrVal = forest->GetClassifier(gbrVals_);
-  //          if(gbrVal > mvaCut ) {
-  //            mvaVals_.push_back(gbrVal);
-  //            theD0s.push_back( *theD0 );
-  //          }
-  //        }
-  //        else{
-  //          theD0s.push_back( *theD0 );
-  //        }
-          if (useAnyMVA_ && onnxRuntime_) {
-    // Prepare input data
-    cms::Ort::FloatArrays data_;
+          // auto start = high_resolution_clock::now();
+          data_.emplace_back(19, 0);
+          std::vector<float> &onnxVals_=data_[0];
+          onnxVals_[0] = theD0->pt();
+          onnxVals_[1] = theD0->y();;
+          onnxVals_[2] = d0C2Prob;
+          onnxVals_[3] = centrality;
+          onnxVals_[4] = cos(d0Angle3D);
+          onnxVals_[5] = d0Angle3D;
+          onnxVals_[6] = cos(d0Angle2D);
+          onnxVals_[7] = d0Angle2D;
+          onnxVals_[8] = lVtxMag;
+          onnxVals_[9] = lVtxMag / sigmaLvtxMag;
+          onnxVals_[10] = rVtxMag;
+          onnxVals_[11] = rVtxMag / sigmaRvtxMag;
+          onnxVals_[12] = posCandTotalP.perp();
+          onnxVals_[13] = posCandTotalP.eta();
+          onnxVals_[14] = negCandTotalP.perp();
+          onnxVals_[15] = negCandTotalP.eta();
+          onnxVals_[16] = ptErr_pos;
+          onnxVals_[17] = ptErr_neg;
+          onnxVals_[18] = dca;
 
-    data_.emplace_back(15, 0);
-    std::vector<float> &onnxVals_=data_[0];
-    onnxVals_[0] = d0C2Prob;
-    onnxVals_[1] = cos(d0Angle3D);
-    onnxVals_[2] = d0Angle3D;
-    onnxVals_[3] = cos(d0Angle2D);
-    onnxVals_[4] = d0Angle2D;
-    onnxVals_[5] = lVtxMag;
-    onnxVals_[6] = lVtxMag / sigmaLvtxMag;
-    onnxVals_[7] = rVtxMag;
-    onnxVals_[8] = rVtxMag / sigmaRvtxMag;
-    onnxVals_[9] = posCandTotalP.perp();
-    onnxVals_[10] = posCandTotalP.eta();
-    onnxVals_[11] = negCandTotalP.perp();
-    onnxVals_[12] = negCandTotalP.eta();
-    onnxVals_[13] = ptErr_pos;
-    onnxVals_[14] = ptErr_neg;
-    // Create ONNX input tensor
-    std::vector<float> outputs = onnxRuntime_->run(input_names_, data_, input_shapes_,output_names_)[0];
+          // onnxVals_.push_back(theD0->pt());
+          // onnxVals_.push_back(theD0->y());
+          // onnxVals_.push_back(d0C2Prob);
+          // onnxVals_.push_back(centrality);
+          // onnxVals_.push_back(cos(d0Angle3D));
+          // onnxVals_.push_back(d0Angle3D);
+          // onnxVals_.push_back(cos(d0Angle2D));
+          // onnxVals_.push_back(d0Angle2D);
+          // onnxVals_.push_back(lVtxMag);
+          // onnxVals_.push_back(lVtxMag / sigmaLvtxMag);
+          // onnxVals_.push_back(rVtxMag);
+          // onnxVals_.push_back(rVtxMag / sigmaRvtxMag);
+          // onnxVals_.push_back(posCandTotalP.perp());
+          // onnxVals_.push_back(posCandTotalP.eta());
+          // onnxVals_.push_back(negCandTotalP.perp());
+          // onnxVals_.push_back(negCandTotalP.eta());
+          // onnxVals_.push_back(ptErr_pos);
+          // onnxVals_.push_back(ptErr_neg);
+          // onnxVals_.push_back(dca);
+          // tmpD0s.push_back(theD0);
 
-    float onnxVal = outputs[1]; // Adjust if your model has multiple outputs
-  //     std::cout << "input data -> ";
-  // for (auto &i: onnxVals_) { std::cout << i << " "; }
-  // std::cout << std::endl << "output data -> ";
-  // for (auto &i: outputs) { std::cout << i << " "; }
-  // std::cout << std::endl;
+          // Create ONNX input tensor
+        // cout << unput_names_.size() << " " << data_.size() << endl;
+          std::vector<float> outputs = onnxRuntime_->run(input_names_, data_, input_shapes_,output_names_)[0];
 
-    if (onnxVal > mvaCut) {
-      mvaVals_.push_back(onnxVal);
-      theD0s.push_back(*theD0);
-    }
-  } else {
-    theD0s.push_back(*theD0);
-  }
+          float onnxVal = outputs[1]; // Adjust if your model has multiple outputs
+          //     std::cout << "input data -> ";
+          // for (auto &i: onnxVals_) { std::cout << i << " "; }
+          // std::cout << std::endl << "output data -> ";
+          // for (auto &i: outputs) { std::cout << i << " "; }
+          // std::cout << std::endl;
+          // auto stop = high_resolution_clock::now();
+          // auto duration = duration_cast<microseconds>(stop - start);
+          // totaltime += duration.count();
+          // nloop++;
+          if (onnxVal > mvaCut) {
+            theD0->addUserFloat("mva", onnxVal);
+            mvaVals_.push_back(onnxVal);
+            theD0s.push_back(std::move(*theD0));
+          }
+          if(theD0) delete theD0;
         }
+  // if (useAnyMVA_ && !onnxRuntime_) {
+  //           float gbrVals_[19];
+  //           gbrVals_[0] = theD0->pt();
+  //           gbrVals_[1] = theD0->y();;
+  //           gbrVals_[2] = d0C2Prob;
+  //           gbrVals_[3] = centrality;
+  //           gbrVals_[4] = cos(d0Angle3D);
+  //           gbrVals_[5] = d0Angle3D;
+  //           gbrVals_[6] = cos(d0Angle2D);
+  //           gbrVals_[7] = d0Angle2D;
+  //           gbrVals_[8] = lVtxMag;
+  //           gbrVals_[9] = lVtxMag / sigmaLvtxMag;
+  //           gbrVals_[10] = rVtxMag;
+  //           gbrVals_[11] = rVtxMag / sigmaRvtxMag;
+  //           gbrVals_[12] = posCandTotalP.perp();
+  //           gbrVals_[13] = posCandTotalP.eta();
+  //           gbrVals_[14] = negCandTotalP.perp();
+  //           gbrVals_[15] = negCandTotalP.eta();
+  //           gbrVals_[16] = ptErr_pos;
+  //           gbrVals_[17] = ptErr_neg;
+  //           gbrVals_[18] = dca;
+  //   theD0s.push_back(*theD0);
 
-        if(theD0) delete theD0;
+  //   GBRForest const * forest = forest_;
+  //   if(useForestFromDB_){
+  //     edm::ESHandle<GBRForest> forestHandle;
+  //     forestHandle = iSetup.getHandle<GBRForest, GBRWrapperRcd>(mvaToken_);
+  //     forest = forestHandle.product();
+  //   }
+
+  //   auto gbrVal = forest->GetClassifier(gbrVals_);
+
+  //   float gbrresponse = gbrForest_->GetResponse(gbrVals_);
+  //   if (gbrresponse > mvaCut) {
+  //     theD0->addUserFloat("mva", onnxVal);
+  //     mvaVals_.push_back(onnxVal);
+  //     theD0s.push_back(*theD0);
+  //   }
+  // }
+        else {
+          theD0s.push_back(*theD0);
+          if(theD0) delete theD0;
+          }
+        }
       }
     }
   }
+  // if (useAnyMVA_ && onnxRuntime_ && data_[0].size() > 0) {
+  //   // auto start = high_resolution_clock::now();
+  //   // cout << input_names_.size() << " " << data_.size() << " " << input_shapes_.size() << " " << output_names_.size() << endl;
+  //   int nInput = data_[0].size()/VARSIZE;
+  //   input_shapes_[0] ={nInput, VARSIZE};
+  //   auto fullOut = onnxRuntime_->run(input_names_, data_, input_shapes_,output_names_,nInput );
+  //   // std::cout << "fullOut size: " << fullOut.size() << std::endl;
+  //   // std::vector<float> fullOut_ =  fullOut[0];
+  //   for( size_t idx = 0; idx < fullOut.size(); idx++){
+  //     float& mvaVal = fullOut[idx][1];
+  //     if(mvaVal > mvaCut) {
+  //       tmpD0s[idx]->addUserFloat("mva", mvaVal);
+  //       mvaVals_.push_back(mvaVal);
+  //       theD0s.push_back(std::move(*tmpD0s[idx]));
+  //     }
+  //     if(tmpD0s[idx]) delete tmpD0s[idx];
+  //   }
+  //   // auto stop = high_resolution_clock::now();
+  //   // auto duration = duration_cast<microseconds>(stop - start);
+  //   // cout << "onnxRuntime_->run() time: " << duration.count() << " microseconds" << endl;
+  // }
+    // float onnxVal = outputs[1]; // Adjust if your model has multiple outputs
+
+  // std::cout << "Total time for MVA: " << totaltime << " microseconds" << std::endl;
+  // std::cout << "Number of loops: " << nloop << std::endl;
+  // std::cout << "Average time per loop: " << (totaltime/nloop) << " microseconds" << std::endl;
 
 //  mvaFiller.insert(theD0s,mvaVals_.begin(),mvaVals_.end());
 //  mvaFiller.fill();

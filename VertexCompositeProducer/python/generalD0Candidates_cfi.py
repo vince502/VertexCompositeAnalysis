@@ -52,4 +52,5 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     onnxModelFileName = cms.string('ONNXModel.onnx'),
     input_names = cms.vstring('input'),
     output_names = cms.vstring('probabilities')
+
 )

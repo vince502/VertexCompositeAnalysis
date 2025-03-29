@@ -5,7 +5,7 @@ config = Configuration()
 config.section_("General")
 #config.General.requestName = "Ntuplizer_test_AOD_Z_Run2018HI_Data"
 #config.General.requestName = "D0Ana_Data_Step2MVA_Run375513_HIPhysicsRawPrime0_CMSSW_13_2_13_MVA_08Mar2025_v1"
-config.General.requestName = "D0Ana_Data_Step2MVA_Run375513_HIPhysicsRawPrime1_CMSSW_13_2_13_MVA_08Mar2025_v1"
+config.General.requestName = "D0Ana_Data_Step2MVA_Run375513_HIPhysicsRawPrime1_CMSSW_13_2_13_MVA_29Mar2025_v2"
 config.General.workArea = 'crab_projects'
 config.General.transferOutputs = True
 config.General.transferLogs = True
@@ -13,7 +13,7 @@ config.General.transferLogs = True
 config.section_("JobType")
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.pluginName = "Analysis"
-config.JobType.psetName = "PbPb2023_D0BothAndDStar_MB_cfg_v1_Step2MVA.py"
+config.JobType.psetName = "PbPb2023_D0BothAndDStar_MB_cfg_v2_Step2MVA.py"
 config.JobType.numCores = 1
 config.JobType.maxMemoryMB = 4000         # request high memory machines.
 config.JobType.inputFiles=['CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db']
