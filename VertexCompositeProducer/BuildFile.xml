@@ -29,4 +29,8 @@
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/EgammaObjects"/>
 <use   name="CondFormats/GBRForest"/>
+<use name="PhysicsTools/ONNXRuntime" />
+
+
 <flags CXXFLAGS="-Wno-error=unused-but-set-variable"/>
+<flags SKIM_FILES="FourTrkD0Fitter.cc"/>
