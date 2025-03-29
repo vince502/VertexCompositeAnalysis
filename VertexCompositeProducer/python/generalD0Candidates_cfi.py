@@ -49,4 +49,6 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     mvaType = cms.string('BDT'), 
     GBRForestLabel = cms.string('D0InpPb'),
     GBRForestFileName = cms.string('GBRForestfile.root'),
+
+    output_names = cms.vstring('my_output'),
 )

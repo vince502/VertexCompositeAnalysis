@@ -4,7 +4,7 @@
 
 //#define DEBUG true
 #define PI 3.1416
-#define MAXCAN 500000
+// #define MAXCAN 500000
 
 PATCompositeTreeProducer2::PATCompositeTreeProducer2(const edm::ParameterSet& iConfig)
 {
