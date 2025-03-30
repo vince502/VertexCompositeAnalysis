@@ -52,6 +52,7 @@
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
+//#define DEBUG true
 
 static const float piMassDStar = 0.13957018;
 static const float piMassDStarSquared = piMassDStar*piMassDStar;
@@ -360,6 +361,35 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        vector<RefCountedKinematicParticle> d0Daus;
        reco::Candidate* dau0 = theD0.daughter(0);
        reco::Candidate* dau1 = theD0.daughter(1);
+       int slowPionCharge = pionTrackRef->charge();
+
+       reco::Candidate* kaonCand = nullptr;
+       reco::Candidate* pionCand = nullptr;
+
+
+       if (dau0->mass() > dau1->mass()) {
+               kaonCand = dau0;
+               pionCand = dau1;
+       } else {
+               kaonCand = dau1;
+               pionCand = dau0;
+       }
+       
+
+       
+
+       // For D*+: K- pi+ followed by slow pi+
+       // For D*-: K+ pi- followed by slow pi-
+       if (slowPionCharge > 0) { // D*+ case
+               if (kaonCand->charge() > 0) continue;
+       } else { 
+               if (kaonCand->charge() < 0) continue;
+       }
+       #ifdef DEBUG
+       cout << "kaonCand mass : " << kaonCand->mass() << " pionCand mass : " << pionCand->mass() << endl;
+       cout << "slowPionCharge : " << slowPionCharge << " kaonCand Charge : " << kaonCand->charge() << " pionCand Charge : " << pionCand->charge() << endl;
+      //  cout << "slowPion PdgId : " << pionTrackRef->pdgId() << " kaonCand PdgId : " << kaonCand->pdgId() << " pionCand PdgId : " << pionCand->pdgId() << endl;
+       #endif
 
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);

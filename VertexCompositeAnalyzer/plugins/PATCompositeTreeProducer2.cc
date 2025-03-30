@@ -356,6 +356,10 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
 
              //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
+              #ifdef DEBUG
+              cout << "matchGEN[it]: " << matchGEN[it] << endl;
+              cout << "nGen : " << nGen << endl;
+                #endif
 
               matchGEN[it] = matchGEN[it] || (matchHadron(recoD1, *theGenD0,true) && matchHadron(recoPi, *theGenPion,false));
               #ifdef DEBUG
@@ -376,7 +380,22 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 }
                 #endif
                 if(matchGEN[it]){
+
                   isSwap[it] = checkSwap(recoD1, *theGenD0);
+                #ifdef DEBUG
+                  if(isSwap[it]){
+                cout << "genRefs.at(igen) : " << genRefs.at(igen)->pdgId() << endl;
+                cout << "nGenDau : " << nGenDau << endl;
+                cout << "Gen D0_dau1 : " << theGenD0->daughter(0)->pdgId() << endl;
+                cout << "Gen D0_dau2 : " << theGenD0->daughter(1)->pdgId() << endl;
+                cout << "GenDstar_dau1 : " << theGenD0->pdgId() << endl;
+                cout << "GenDstar_dau2 : " << theGenPion->pdgId() << endl;
+                cout << "RecoDstar_dau1 : " << recoD1->pdgId() << endl;
+                cout << "RecoDstar_dau2 : " << recoPi->pdgId() << endl;
+                cout << "match D0 : " << matchHadron(recoD1, *theGenD0,true) << endl;
+                cout << "match Pion : " << matchHadron(recoPi, *theGenPion,false) << endl;
+                  }
+                #endif
                   auto mom_ref = findMother(theGenDStar);
                   if (mom_ref.isNonnull()) idmom_reco[it] = mom_ref->pdgId();
                   int __count_anc__ = 0;
@@ -432,6 +451,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   matchGen_D1y_[it] = theGenPion->rapidity();
                   matchGen_D1charge_[it] = theGenPion->charge();
                   matchGen_D1pdgId_[it] = theGenPion->pdgId();
+                  break;
                 }
               } // END for nGen
             }
