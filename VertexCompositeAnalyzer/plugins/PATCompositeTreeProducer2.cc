@@ -434,6 +434,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   matchGen_D1y_[it] = theGenPion->rapidity();
                   matchGen_D1charge_[it] = theGenPion->charge();
                   matchGen_D1pdgId_[it] = theGenPion->pdgId();
+                  break;
                 }
               } // END for nGen
             }
@@ -492,6 +493,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   matchGen_D0Dau2_y_[it] = genDau1->rapidity();
                   matchGen_D0Dau2_charge_[it] = genDau1->charge();
                   matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
+                  break;
                 }
               } // END for nGen
             }

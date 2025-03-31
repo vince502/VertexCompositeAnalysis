@@ -378,9 +378,9 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        // For D*+: K- pi+ followed by slow pi+
        // For D*-: K+ pi- followed by slow pi-
        if (slowPionCharge > 0) { 
-         if (kaonCand->charge() >= 0) continue;
+         if (kaonCand->charge() > 0) continue;
        } else { 
-         if (kaonCand->charge() <= 0) continue;
+         if (kaonCand->charge() < 0) continue;
        }
 
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
