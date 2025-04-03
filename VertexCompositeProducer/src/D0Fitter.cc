@@ -603,8 +603,9 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         // Error in transverse plane (r-phi)
         double dcaError = sqrt(sigma_x2 * cxPt.x() * cxPt.x() + 
                                sigma_y2 * cxPt.y() * cxPt.y()) / dca;
-        CC* theD0 = 0;
-        theD0 = new CC();
+
+        std::unique_ptr<CC> theD0 = std::make_unique<CC>();
+
         theD0->setP4(d0P4);
         // theD0 = new VertexCompositeCandidate(0, d0P4, d0Vtx, d0VtxCov, d0VtxChi2, d0VtxNdof);
 
@@ -737,7 +738,6 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
             mvaVals_.push_back(onnxVal);
             theD0s.push_back(std::move(*theD0));
           }
-          if(theD0) delete theD0;
         }
   // if (useAnyMVA_ && !onnxRuntime_) {
   //           float gbrVals_[19];
@@ -780,7 +780,6 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // }
         else {
           theD0s.push_back(*theD0);
-          if(theD0) delete theD0;
           }
         }
       }
