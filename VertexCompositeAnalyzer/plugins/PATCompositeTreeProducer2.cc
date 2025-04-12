@@ -510,6 +510,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   matchGen_D0Dau2_y_[it] = genDau1->rapidity();
                   matchGen_D0Dau2_charge_[it] = genDau1->charge();
                   matchGen_D0Dau2_pdgId_[it] = genDau1->pdgId();
+                  break;
                 }
               } // END for nGen
             }
@@ -1049,6 +1050,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   grand_T4dedx1[it] = dEdxTrack[gdau1].dEdx();
                   grand_T4dedx2[it] = dEdxTrack[gdau2].dEdx();
               }
+    
               
               //track pt
               grand_pt1[it] = gd1->pt();
@@ -1057,6 +1059,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               //track momentum
               grand_p1[it] = gd1->p();
               grand_p2[it] = gd2->p();
+
               
               //track eta
               grand_eta1[it] = gd1->eta();
@@ -1065,6 +1068,22 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               //track charge
               grand_charge1[it] = gd1->charge();
               grand_charge2[it] = gd2->charge();
+#ifdef DEBUG
+          math::XYZTLorentzVector dau1_p4(gd1->px(), gd1->py(), gd1->pz(), gd1->energy());
+          math::XYZTLorentzVector dau2_p4(gd2->px(), gd2->py(), gd2->pz(), gd2->energy());
+          math::XYZTLorentzVector D0_daughters_p4 = dau1_p4 + dau2_p4;
+          if(fabs(d1->pt()-D0_daughters_p4.pt()) > 0.001){
+          std::cout << "Combined D0 daughters pT: " << D0_daughters_p4.pt() << std::endl;
+          std::cout << "Combined D0 daughters eta: " << D0_daughters_p4.eta() << std::endl;
+          std::cout << "Combined D0 daughters phi: " << D0_daughters_p4.phi() << std::endl;
+          std::cout << "Combined D0 daughters mass: " << D0_daughters_p4.mass() << std::endl;
+          std::cout << "pdgID dau1: " << d1->daughter(0)->pdgId() << std::endl;
+          std::cout << "pdgID dau2: " << d1->daughter(1)->pdgId() << std::endl;
+          std::cout << "D0 pdg Id " << d1->pdgId() << std::endl;
+          std::cout << "D0 # of daughters: " << d1->numberOfDaughters() << std::endl;
+          std::cout << d1->pt()-D0_daughters_p4.pt() << std::endl;
+          }
+#endif
               
               //track Chi2
               grand_trkChi1[it] = gdau1->normalizedChi2();
@@ -1260,7 +1279,10 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
             do {
               auto Dd1 = trk.daughter( permutations.at(0) );
               auto Dd2 = trk.daughter( permutations.at(1) );
+             
+  
               if (abs(Dd1->pdgId()) == PID_dau1_ && abs(Dd2->pdgId()) == PID_dau2_) {
+                if (Dd1->numberOfDaughters() != 2) continue; 
                 if(twoLayerDecay_){
                   // Magic numbers, _permutations -> number of D0 daughters;
                   std::vector<unsigned int> _permutations(2);
@@ -1312,10 +1334,13 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           #endif
           auto const theGenDStar = genRefs.at(igen);
           if(abs(theGenDStar->pdgId())!=413) cout << "id : " << theGenDStar->pdgId() << endl;
-          unsigned int idxD0 = -1;
+          unsigned int idxD0 = 1;
+          if(fabs(theGenDStar->daughter(0)->pdgId())==211)  std::cout << theGenDStar->daughter(0)->pdgId() << std::endl;
           if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
           auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
           auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
+          if (theGenD0->numberOfDaughters() != 2)
+                  std::cout << "asdfasdf" << std::endl;
           mass_gen[igen] = theGenDStar->mass();
           pt_gen[igen] = theGenDStar->pt();
           eta_gen[igen] = theGenDStar->eta(); 
@@ -1345,6 +1370,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           gen_D1y_[igen] = theGenPion->rapidity();
           gen_D1pdgId_[igen] = theGenPion->pdgId();
 
+
           const auto* genDau0 = theGenD0->daughter(0);
           const auto* genDau1 = theGenD0->daughter(1);
           gen_D0Dau1_pT_[igen] = genDau0->pt();
@@ -1352,18 +1378,40 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           gen_D0Dau1_phi_[igen] = genDau0->phi();
           gen_D0Dau1_y_[igen] = genDau0->rapidity();
           gen_D0Dau1_pdgId_[igen] = genDau0->pdgId();
+          gen_D0Dau1_mass_[igen] = genDau0->mass();
           #ifdef DEBUG
           //cout << "D0 dau1 pdgId : " << genDau0->pdgId() << endl;
-	  cout <<"D0 Ancestor Id : " <<  gen_D0ancestorId_[igen] << endl;
+	      cout <<"D0 Ancestor Id : " <<  gen_D0ancestorId_[igen] << endl;
           #endif
+          math::XYZTLorentzVector dau1_p4(genDau0->px(), genDau0->py(), genDau0->pz(), genDau0->energy());
+          math::XYZTLorentzVector dau2_p4(genDau1->px(), genDau1->py(), genDau1->pz(), genDau1->energy());
+
+
+#ifdef DEBUG
+          math::XYZTLorentzVector D0_daughters_p4 = dau1_p4 + dau2_p4;
+          if(fabs(theGenD0->pt()-D0_daughters_p4.pt()) > 0.001){
+          std::cout << "Combined D0 daughters pT: " << D0_daughters_p4.pt() << std::endl;
+          std::cout << "Combined D0 daughters eta: " << D0_daughters_p4.eta() << std::endl;
+          std::cout << "Combined D0 daughters phi: " << D0_daughters_p4.phi() << std::endl;
+          std::cout << "Combined D0 daughters mass: " << D0_daughters_p4.mass() << std::endl;
+          std::cout << "pdgID dau1: " << theGenD0->daughter(0)->pdgId() << std::endl;
+          std::cout << "pdgID dau2: " << theGenD0->daughter(1)->pdgId() << std::endl;
+          std::cout << "D0 pdg Id " << theGenD0->pdgId() << std::endl;
+          std::cout << "D0 # of daughters: " << theGenD0->numberOfDaughters() << std::endl;
+          std::cout << theGenD0->pt()-D0_daughters_p4.pt() << std::endl;
+          }
+#endif
           // cout << "D0 dau1 pdgId : " <<  gen_D0Dau1_pdgId_[igen] << endl;
           gen_D0Dau2_pT_[igen] = genDau1->pt();
-
           gen_D0Dau2_eta_[igen] = genDau1->eta();
           gen_D0Dau2_phi_[igen] = genDau1->phi();
           gen_D0Dau2_y_[igen] = genDau1->rapidity();
           gen_D0Dau2_pdgId_[igen] = genDau1->pdgId();
-      }
+          gen_D0Dau2_mass_[igen] = genDau1->mass();
+
+
+          
+        }
     }
     else{
         for( unsigned int igen=0; igen<nGen; igen++){

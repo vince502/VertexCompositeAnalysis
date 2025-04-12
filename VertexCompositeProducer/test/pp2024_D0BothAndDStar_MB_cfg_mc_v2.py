@@ -61,17 +61,7 @@ process.GlobalTag.globaltag = cms.string('141X_mcRun3_2024_realistic_ppRef5TeV_v
 #)
 
 # Add PbPb centrality
-process.load("RecoHI.HiCentralityAlgos.CentralityBin_cfi")
-process.GlobalTag.snapshotTime = cms.string("9999-12-31 23:59:59.000")
-process.GlobalTag.toGet.extend([
-    cms.PSet(record = cms.string("HeavyIonRcd"),
-        tag = cms.string("CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810"),
-        connect = cms.string("sqlite_file:CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db"),
-        label = cms.untracked.string("HFtowers")
-        )
-    ]
-)
-process.cent_seq = cms.Sequence(process.centralityBin)
+
 
 # =============== Import Sequences =====================
 #Trigger Selection
@@ -119,6 +109,8 @@ process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
 process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(3)
 process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
+process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.5)
+process.generalD0CandidatesNew.d0MassCut = cms.double(0.15)
 
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
@@ -325,10 +317,10 @@ for P in eventFilterPaths:
 changeToMiniAOD(process)
 process.options.numberOfThreads = 1
 
-process.output = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM"),
-    fileName = cms.untracked.string('output.root'),
-)
-
-process.outputPath = cms.EndPath(process.output)
-process.schedule.append(process.outputPath)
+#process.output = cms.OutputModule("PoolOutputModule",
+#    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM"),
+#    fileName = cms.untracked.string('output.root'),
+#)
+#
+#process.outputPath = cms.EndPath(process.output)
+#process.schedule.append(process.outputPath)

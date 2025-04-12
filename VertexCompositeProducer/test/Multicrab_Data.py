@@ -7,7 +7,7 @@ from CRABClient.UserUtilities import config
 config = config()
 
 userName = "junseok"
-date = "20241109"
+date = "20250409"
 
 config.section_("General")
 config.General.workArea = 'crab_projects/'+date
@@ -16,7 +16,7 @@ config.General.transferLogs = False
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = 'pp2024_D0BothAndDStar_MB_cfg_v1.py'
+config.JobType.psetName = 'pp2024_D0BothAndDStar_MB_cfg_v2.py'
 config.section_('Data')
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'Automatic'
@@ -31,7 +31,7 @@ config.section_('Site')
 #config.Data.ignoreLocality = True
 #config.Site.whitelist = ['T2_US_Purdue', 'T2_US_MIT']
 #config.Site.blacklist = ['T2_US_Vanderbilt']
-config.Site.storageSite = 'T2_CH_CERN'
+config.Site.storageSite = 'T3_KR_KNU'
 
 def submit(config):
     try:
@@ -47,17 +47,17 @@ def submit(config):
 
 dataMap = {}
 
-for i in range(2,25):
+for i in range(0,25):
     dataMap[("PPRef"+str(i))] = { "PD": ("/PPRefZeroBiasPlusForward"+str(i)+"/Run2024J-PromptReco-v1/MINIAOD"), "Units": 20, "Memory": 4000, "RunTime": 800 }
 
 ## Submit the muon PDs
 for key, val in dataMap.items():
-    config.General.requestName = 'DStarAnalysis_PPRef2024_DstarToKpipi_CMSSW_14_1_4_'+key+'_141X_dataRun3_Express_v3_'+date
+    config.General.requestName = 'DStarAnalysis_PPRef2024_DstarToKpipi_CMSSW_14_1_7_'+key+'_141X_dataRun3_Express_v3_'+date
     config.Data.inputDataset = val["PD"]
     #config.Data.unitsPerJob = val["Units"]
     config.JobType.maxMemoryMB = val["Memory"]
     # config.JobType.maxJobRuntimeMin = val["RunTime"]
     config.Data.outputDatasetTag = config.General.requestName
-    config.Data.outLFNDirBase = '/store/group/phys_heavyions/%s/Run2024PPRef/MINIAOD/%s/%s' % (userName, date, config.General.requestName)
+    config.Data.outLFNDirBase = '/store/user/junseok/DStarMC/%s/%s/%s' % (userName, date, config.General.requestName)
     print("Submitting CRAB job for: "+val["PD"])
     submit(config)

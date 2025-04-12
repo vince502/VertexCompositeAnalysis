@@ -24,13 +24,14 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:/eos/cms/store/group/phys_heavyions/dileptons/Data2023/MINIAOD/HIPhysicsRawPrime0/Run375064/7ed5766f-6b1d-415e-8916-e62825a6347f.root"),
 #    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/241026_084606/0000/step4_1.root"),
     #fileNames= cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
-    fileNames= cms.untracked.vstring("/store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/3dd6a1d3-ab2e-4198-afeb-4c867efbcf37.root"),
+    #fileNames= cms.untracked.vstring("/store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/3dd6a1d3-ab2e-4198-afeb-4c867efbcf37.root"),
+    fileNames= cms.untracked.vstring("file:/afs/cern.ch/user/j/junseok/analysis/dstarana/CMSSW_14_1_7/src/DStarKpipi_py_GEN_SIM.root"),
    # fileNames = cms.untracked.vstring(
         # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
         #),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -229,7 +230,8 @@ process.d0ana_newreduced = process.d0ana_mc.clone()
 process.d0ana_newreduced.CompositeCollection = cms.untracked.InputTag("generalD0CandidatesNew:D0")
 process.d0ana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNew:D0")
 
-process.dStarana_mc.GenParticleCollection =  cms.untracked.InputTag("prunedGenParticles")
+process.dStarana_mc.GenParticleCollection =  cms.untracked.InputTag("genParticles")
+process.dStarana_mc.doRecoNtuple = cms.untracked.bool(False)
 process.dStarana_mc.useAnyMVA = cms.bool(False)
 process.dStarana_mc.CompositeCollection = cms.untracked.InputTag("generalDStarCandidatesNew:DStar")
 process.dStarana_mc.MVACollection = cms.InputTag("generalDStarCandidatesNew:MVAValuesNewDStar")
@@ -241,7 +243,8 @@ process.generalDStarCandidatesNew.d0Collection = cms.InputTag("generalD0Candidat
 #process.d0ana_newreduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsNewD0")
 
 
-process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew * process.d0ana_newreduced *process.dStarana_mc)
+#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew * process.d0ana_newreduced *process.dStarana_mc)
+process.dStarAna_step = cms.Path( process.dStarana_mc)
 #process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.d0ana_newreduced)#process.eventplane)
 
 # eventinfoana must be in EndPath, and process.eventinfoana.selectEvents must be the name of eventFilter_HM Path
@@ -280,7 +283,7 @@ eventFilterPaths = [ process.Flag_colEvtSel  , process.Flag_primaryVertexFilter 
 for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
-changeToMiniAOD(process)
+#changeToMiniAOD(process)
 process.options.numberOfThreads = 1
 
 #process.output = cms.OutputModule("PoolOutputModule",
