@@ -1,5 +1,6 @@
 <flags   EDM_PLUGIN="1"/>
 <use   name="roottmva"/>
+<use   name="PhysicsTools/ONNXRuntime" />
 <use   name="DataFormats/BeamSpot"/>
 <use   name="DataFormats/Candidate"/>
 <use   name="DataFormats/Common"/>
@@ -29,4 +30,8 @@
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/EgammaObjects"/>
 <use   name="CondFormats/GBRForest"/>
+<use name="PhysicsTools/ONNXRuntime" />
+
+
 <flags CXXFLAGS="-Wno-error=unused-but-set-variable"/>
+<flags SKIM_FILES="FourTrkD0Fitter.cc"/>

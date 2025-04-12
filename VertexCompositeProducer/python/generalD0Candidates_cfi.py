@@ -49,4 +49,8 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     mvaType = cms.string('BDT'), 
     GBRForestLabel = cms.string('D0InpPb'),
     GBRForestFileName = cms.string('GBRForestfile.root'),
+    onnxModelFileName = cms.string('ONNXModel.onnx'),
+    input_names = cms.vstring('input'),
+    output_names = cms.vstring('probabilities')
+
 )

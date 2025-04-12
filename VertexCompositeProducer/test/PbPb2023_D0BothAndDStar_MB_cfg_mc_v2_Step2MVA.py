@@ -25,13 +25,14 @@ process.source = cms.Source("PoolSource",
 #    fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_241026_v1/241026_084606/0000/step4_1.root"),
    # fileNames= cms.untracked.vstring("root://cmsxrootd.fnal.gov//store/mc/HINPbPbSpring23MiniAOD/promptD0ToKPi_PT-1_TuneCP5_5p36TeV_pythia8-evtgen/MINIAODSIM/132X_mcRun3_2023_realistic_HI_v9-v2/2560000/bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
     #fileNames= cms.untracked.vstring("file:bf4f838b-571d-4570-805c-cd3cb84839c2.root"),
-    fileNames= cms.untracked.vstring("file:071045a5-fddb-4ca6-9df1-82e2a7321dfd.root"),
-   # fileNames = cms.untracked.vstring(
-        # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
+    #fileNames= cms.untracked.vstring("file:071045a5-fddb-4ca6-9df1-82e2a7321dfd.root"),
+   fileNames = cms.untracked.vstring(
+        #  '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
+         'file:073a4e72-8032-4fca-9531-6ab49903449d.root',
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
-        #),
+        ),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -97,10 +98,11 @@ from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeT
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalD0Candidates_cff")
 process.generalD0CandidatesNew = process.generalD0Candidates.clone()
 #process.generalD0CandidatesNew.trkPtSumCut = cms.double(1.6)
-process.generalD0CandidatesNew.tkChi2Cut = cms.double(99)
+process.generalD0CandidatesNew.tkChi2Cut = cms.double(5)
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(0)
 process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.8)
+# process.generalD0CandidatesNew.tkPtCut = cms.double(0.8)
+process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
 process.generalD0CandidatesNew.tkEtaCut = cms.double(2.4)
 process.generalD0CandidatesNew.tkPtSumCut = cms.double(0.0)
 process.generalD0CandidatesNew.tkEtaDiffCut = cms.double(1.0)
@@ -118,8 +120,17 @@ process.generalD0CandidatesNew.lVtxCut = cms.double(0.0)
 process.generalD0CandidatesNew.vtxSignificance2DCut = cms.double(0.0)
 process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(0.0)
 process.generalD0CandidatesNew.d0MassCut = cms.double(0.14)
-process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.6)
+process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.2)
 process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
+
+process.generalD0CandidatesNew.useAnyMVA = cms.bool(True)
+process.generalD0CandidatesNew.mvaCut = cms.double(0.4)
+# process.generalD0CandidatesNew.GBRForestLabel = cms.string('D0InPbPbXGB')
+# #process.generalD0CandidatesNew.GBRForestFileName = cms.string('GBRForestfile_XGBDT_PromptD0InPbPb_15Params_v1_08Mar.root')
+# process.generalD0CandidatesNew.GBRForestFileName = cms.string('GBRForestfile_XGBDT_PromptD0InPbPb_pT_y_cBIN_19Params_v1_25Mar.root')
+process.generalD0CandidatesNew.input_names = cms.vstring('input')
+process.generalD0CandidatesNew.output_names = cms.vstring('probabilities')
+process.generalD0CandidatesNew.onnxModelFileName = cms.string("XGBoost_Model_0324_27.onnx")
 
 
 #process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
@@ -221,15 +232,16 @@ process.TFileService = cms.Service("TFileService",
     )
 
 process.d0ana_mc.GenParticleCollection =  cms.untracked.InputTag("prunedGenParticles")
-process.d0ana_mc.useAnyMVA = cms.bool(False)
+process.d0ana_mc.useAnyMVA = cms.bool(True)
 process.d0ana_mc.multMin = cms.untracked.double(0)
 process.d0ana_mc.multMax = cms.untracked.double(100000)
+process.d0ana_mc.MVACollection = cms.InputTag("generalD0CandidatesNew:MVAValuesD0")
 
 #process.d0ana_mc.VertexCompositeCollection = cms.untracked.InputTag("d0selectorNewReduced:D0")
 #process.d0ana_mc.MVACollection = cms.InputTag("d0selectorNewReduced:MVAValuesNewD0")
 process.d0ana_newreduced = process.d0ana_mc.clone()
 process.d0ana_newreduced.CompositeCollection = cms.untracked.InputTag("generalD0CandidatesNew:D0")
-process.d0ana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNew:D0")
+# process.d0ana_newreduced.VertexCompositeCollection = cms.untracked.InputTag("generalD0CandidatesNew:D0")
 
 process.dStarana_mc.GenParticleCollection =  cms.untracked.InputTag("prunedGenParticles")
 process.dStarana_mc.useAnyMVA = cms.bool(False)

@@ -24,7 +24,7 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring("file:step4.root"),
     #fileNames = cms.untracked.vstring("/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root"),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -116,8 +116,10 @@ process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 
 process.generalD0CandidatesNew.useAnyMVA = cms.bool(True)
 process.generalD0CandidatesNew.mvaCut = cms.double(-0.9)
-process.generalD0CandidatesNew.GBRForestLabel = cms.string('D0InPbPbXGB')
-process.generalD0CandidatesNew.GBRForestFileName = cms.string('GBRForestfile_XGBDT_PromptD0InPbPb_15Params_v1_08Mar.root')
+# process.generalD0CandidatesNew.GBRForestLabel = cms.string('D0InPbPbXGB')
+# process.generalD0CandidatesNew.GBRForestFileName = cms.string('GBRForestfile_XGBDT_PromptD0InPbPb_15Params_v1_08Mar.root')
+process.generalD0CandidatesNew.input_names = cms.vstring('input')
+process.generalD0CandidatesNew.onnxModelFileName = cms.string("XGBoost_Model_0324_27.onnx")
 
 process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)

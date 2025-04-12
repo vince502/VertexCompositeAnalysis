@@ -38,13 +38,19 @@
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Fitter.h"
 
-class D0Producer : public edm::one::EDProducer<> {
+#include "FWCore/Framework/interface/stream/EDProducer.h"
+#include "PhysicsTools/ONNXRuntime/interface/ONNXRuntime.h"
+
+
+class D0Producer : public edm::stream::EDProducer<edm::GlobalCache<ONNXRuntime>> {
 public:
   using CC = pat::CompositeCandidate;
   using CCC = pat::CompositeCandidateCollection;
   using MVACollection = std::vector<float>;
 
-  explicit D0Producer(const edm::ParameterSet&);
+  explicit D0Producer(const edm::ParameterSet&,const ONNXRuntime *);
+  static std::unique_ptr<ONNXRuntime> initializeGlobalCache(const edm::ParameterSet &);
+  static void globalEndJob(const ONNXRuntime *);
   ~D0Producer();
 
 private:
@@ -54,6 +60,7 @@ private:
   virtual void endJob() ;
 
   bool useAnyMVA_;
+  std::string onnxModelPath_;
 
   D0Fitter theVees; 
 //  edm::ParameterSet theParams;

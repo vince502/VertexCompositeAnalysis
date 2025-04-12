@@ -391,6 +391,28 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       //  cout << "slowPion PdgId : " << pionTrackRef->pdgId() << " kaonCand PdgId : " << kaonCand->pdgId() << " pionCand PdgId : " << pionCand->pdgId() << endl;
        #endif
 
+       int slowPionCharge = pionTrackRef->charge();
+       
+       reco::Candidate* kaonCand = nullptr;
+       reco::Candidate* pionCand = nullptr;
+       
+       
+       if (dau0->mass() > dau1->mass()) {
+         kaonCand = dau0;
+         pionCand = dau1;
+       } else {
+         kaonCand = dau1;
+         pionCand = dau0;
+       }
+       
+       // For D*+: K- pi+ followed by slow pi+
+       // For D*-: K+ pi- followed by slow pi-
+       if (slowPionCharge > 0) { 
+         if (kaonCand->charge() > 0) continue;
+       } else { 
+         if (kaonCand->charge() < 0) continue;
+       }
+
        reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
        reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
        float dau0mass =  dau0->mass();
@@ -558,6 +580,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
         theDStar->addUserFloat("decaylengthsignif3D", lVtxMag/sigmaLvtxMag );
         theDStar->addUserFloat("dca3D", cur3DIP.value());
         theDStar->addUserFloat("dca3DErr", cur3DIP.error());
+        if(theD0.hasUserFloat("mva")) theDStar->addUserFloat("D0mva", theD0.userFloat("mva"));
 //        theDStar->addUserFloat("D03DDCA", dca);
 //        theDStar->addUserFloat("D03DDCAErr", dcaError);
       //  addp4.set( *theDStar );
