@@ -2,19 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 from Configuration.StandardSequences.Eras import eras
 
-options = VarParsing('python')
-options.register('number', '0',
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.string,
-    "number"
-)
-options.register('inputfile', '',
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.string,
-    "Input files"
-)
 
-options.parseArguments()
 
 process = cms.Process('ANASKIM', eras.Run3_2023)
 
@@ -44,8 +32,8 @@ process.source = cms.Source("PoolSource",
     #fileNames= cms.untracked.vstring("file:bf4f838b-571d-4570-805c-cd3cb84839c2.root"),  #DPt>1
     # fileNames= cms.untracked.vstring("file:minbias_RECO_106.root"), #DPt>0
     #fileNames=cms.untracked.vstring('/store/data/Run2024J/PPRefZeroBiasPlusForward0/MINIAOD/PromptReco-v1/000/387/696/00000/0037fb37-713f-4df8-9668-a2ce4665a93c.root',),
-    #fileNames=cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/wangj/RECO2025/miniaod_PhysicsIonPhysics0_393952/reco_run393952_ls0075_streamPhysicsIonPhysics0_StorageManager.root',),
-    fileNames = cms.untracked.vstring(options.inputfile)
+    fileNames=cms.untracked.vstring('file:/eos/cms/store/group/phys_heavyions/wangj/RECO2025/miniaod_PhysicsIonPhysics0_393952/reco_run393952_ls0075_streamPhysicsIonPhysics0_StorageManager.root')
+    #fileNames = cms.untracked.vstring(options.inputfile)
 
    # fileNames = cms.untracked.vstring(
         # '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_081924_v1/240819_054039/0001/step4_1619.root',
@@ -259,7 +247,7 @@ process.load("VertexCompositeAnalysis.VertexCompositeAnalyzer.eventplaneanalyzer
 
 process.TFileService = cms.Service("TFileService",
     fileName =
-    cms.string("output"+options.number+".root")
+    cms.string("output.root")
     )
 
 process.d0ana.GenParticleCollection =  cms.untracked.InputTag("prunedGenParticles")
