@@ -292,13 +292,15 @@ void BDiMuMuNtuplizer::fillBMesons(const edm::Event& iEvent, const edm::EventSet
         
         // Vertex quality
         if (bPlus.hasUserData("vertex")) {
-          const reco::Vertex& vtx = bPlus.userData<reco::Vertex>("vertex");
-          bMesonVtxX[nBMeson] = vtx.x();
-          bMesonVtxY[nBMeson] = vtx.y();
-          bMesonVtxZ[nBMeson] = vtx.z();
-          bMesonVtxXError[nBMeson] = vtx.xError();
-          bMesonVtxYError[nBMeson] = vtx.yError();
-          bMesonVtxZError[nBMeson] = vtx.zError();
+          const reco::Vertex* vtx = bPlus.userData<reco::Vertex>("vertex");
+          if (vtx) {
+            bMesonVtxX[nBMeson] = vtx->x();
+            bMesonVtxY[nBMeson] = vtx->y();
+            bMesonVtxZ[nBMeson] = vtx->z();
+            bMesonVtxXError[nBMeson] = vtx->xError();
+            bMesonVtxYError[nBMeson] = vtx->yError();
+            bMesonVtxZError[nBMeson] = vtx->zError();
+          }
         }
         
         if (bPlus.hasUserFloat("vtxChi2")) {
@@ -366,13 +368,15 @@ void BDiMuMuNtuplizer::fillBMesons(const edm::Event& iEvent, const edm::EventSet
         
         // Vertex quality (similar to B+)
         if (bZero.hasUserData("vertex")) {
-          const reco::Vertex& vtx = bZero.userData<reco::Vertex>("vertex");
-          bMesonVtxX[nBMeson] = vtx.x();
-          bMesonVtxY[nBMeson] = vtx.y();
-          bMesonVtxZ[nBMeson] = vtx.z();
-          bMesonVtxXError[nBMeson] = vtx.xError();
-          bMesonVtxYError[nBMeson] = vtx.yError();
-          bMesonVtxZError[nBMeson] = vtx.zError();
+          const reco::Vertex* vtx = bZero.userData<reco::Vertex>("vertex");
+          if (vtx) {
+            bMesonVtxX[nBMeson] = vtx->x();
+            bMesonVtxY[nBMeson] = vtx->y();
+            bMesonVtxZ[nBMeson] = vtx->z();
+            bMesonVtxXError[nBMeson] = vtx->xError();
+            bMesonVtxYError[nBMeson] = vtx->yError();
+            bMesonVtxZError[nBMeson] = vtx->zError();
+          }
         }
         
         if (bZero.hasUserFloat("vtxChi2")) {
@@ -451,13 +455,15 @@ void BDiMuMuNtuplizer::fillBMesons(const edm::Event& iEvent, const edm::EventSet
         
         // Vertex quality (similar to B+)
         if (bc.hasUserData("vertex")) {
-          const reco::Vertex& vtx = bc.userData<reco::Vertex>("vertex");
-          bMesonVtxX[nBMeson] = vtx.x();
-          bMesonVtxY[nBMeson] = vtx.y();
-          bMesonVtxZ[nBMeson] = vtx.z();
-          bMesonVtxXError[nBMeson] = vtx.xError();
-          bMesonVtxYError[nBMeson] = vtx.yError();
-          bMesonVtxZError[nBMeson] = vtx.zError();
+          const reco::Vertex* vtx = bc.userData<reco::Vertex>("vertex");
+          if (vtx) {
+            bMesonVtxX[nBMeson] = vtx->x();
+            bMesonVtxY[nBMeson] = vtx->y();
+            bMesonVtxZ[nBMeson] = vtx->z();
+            bMesonVtxXError[nBMeson] = vtx->xError();
+            bMesonVtxYError[nBMeson] = vtx->yError();
+            bMesonVtxZError[nBMeson] = vtx->zError();
+          }
         }
         
         if (bc.hasUserFloat("vtxChi2")) {
@@ -501,7 +507,7 @@ void BDiMuMuNtuplizer::fillBMesons(const edm::Event& iEvent, const edm::EventSet
 void BDiMuMuNtuplizer::fillDaughterInfo(const pat::CompositeCandidate& bmeson, int bIndex) {
   // Fill dimuon information
   if (bmeson.numberOfDaughters() >= 1) {
-    const auto* dimuon = dynamic_cast<const pat::CompositeCandidate*>(bmeson.daughter("dimuon"));
+    const auto* dimuon = dynamic_cast<const pat::CompositeCandidate*>(bmeson.daughter(0));
     if (dimuon) {
       dimuonPt[bIndex] = dimuon->pt();
       dimuonEta[bIndex] = dimuon->eta();
@@ -542,54 +548,54 @@ void BDiMuMuNtuplizer::fillDaughterInfo(const pat::CompositeCandidate& bmeson, i
     }
   }
   
-  // Fill additional track information (kaon for B+, pion for Bc, or kaon/pion for B0)
+  // Fill additional track information (depends on B meson type)
   nTracks[bIndex] = 0;
   int trackIndex = 0;
   
-  for (size_t dauIdx = 0; dauIdx < bmeson.numberOfDaughters() && trackIndex < MAXTRACK; ++dauIdx) {
+  // Process remaining daughters (excluding first daughter which is dimuon)
+  for (size_t dauIdx = 1; dauIdx < bmeson.numberOfDaughters() && trackIndex < MAXTRACK; ++dauIdx) {
     const auto* daughter = bmeson.daughter(dauIdx);
     
-    // Skip the dimuon daughter - look for named daughters
     if (daughter) {
-      // Handle single track daughters (kaon for B+, pion for Bc)
-      if (bmeson.daughterName(dauIdx) == "kaon" || bmeson.daughterName(dauIdx) == "pion") {
-        const auto* track_cand = dynamic_cast<const reco::RecoChargedCandidate*>(daughter);
-        if (track_cand && track_cand->track().isNonnull()) {
-          const auto& track = track_cand->track();
-          
-          trackPt[bIndex][trackIndex] = track->pt();
-          trackEta[bIndex][trackIndex] = track->eta();
-          trackPhi[bIndex][trackIndex] = track->phi();
-          trackCharge[bIndex][trackIndex] = track->charge();
-          trackDxy[bIndex][trackIndex] = track->dxy();
-          trackDz[bIndex][trackIndex] = track->dz();
-          trackDxyError[bIndex][trackIndex] = track->dxyError();
-          trackDzError[bIndex][trackIndex] = track->dzError();
-          trackPtError[bIndex][trackIndex] = track->ptError();
-          trackNHits[bIndex][trackIndex] = track->numberOfValidHits();
-          trackNPixelHits[bIndex][trackIndex] = track->hitPattern().numberOfValidPixelHits();
-          trackChi2[bIndex][trackIndex] = track->chi2();
-          trackNdof[bIndex][trackIndex] = track->ndof();
-          trackHighPurity[bIndex][trackIndex] = track->quality(reco::TrackBase::highPurity);
-          
-          // Set PID based on daughter name
-          if (bmeson.daughterName(dauIdx) == "kaon") {
-            trackPID[bIndex][trackIndex] = 321; // kaon
-          } else if (bmeson.daughterName(dauIdx) == "pion") {
-            trackPID[bIndex][trackIndex] = 211; // pion
-          }
-          
-          trackIndex++;
+      // Check if this is a single track (B+ kaon or Bc pion)
+      const auto* track_cand = dynamic_cast<const reco::RecoChargedCandidate*>(daughter);
+      if (track_cand && track_cand->track().isNonnull()) {
+        const auto& track = track_cand->track();
+        
+        trackPt[bIndex][trackIndex] = track->pt();
+        trackEta[bIndex][trackIndex] = track->eta();
+        trackPhi[bIndex][trackIndex] = track->phi();
+        trackCharge[bIndex][trackIndex] = track->charge();
+        trackDxy[bIndex][trackIndex] = track->dxy();
+        trackDz[bIndex][trackIndex] = track->dz();
+        trackDxyError[bIndex][trackIndex] = track->dxyError();
+        trackDzError[bIndex][trackIndex] = track->dzError();
+        trackPtError[bIndex][trackIndex] = track->ptError();
+        trackNHits[bIndex][trackIndex] = track->numberOfValidHits();
+        trackNPixelHits[bIndex][trackIndex] = track->hitPattern().numberOfValidPixelHits();
+        trackChi2[bIndex][trackIndex] = track->chi2();
+        trackNdof[bIndex][trackIndex] = track->ndof();
+        trackHighPurity[bIndex][trackIndex] = track->quality(reco::TrackBase::highPurity);
+        
+        // Set PID based on B meson type
+        if (bMesonType[bIndex] == 0) { // B+
+          trackPID[bIndex][trackIndex] = 321; // kaon
+        } else if (bMesonType[bIndex] == 2) { // Bc
+          trackPID[bIndex][trackIndex] = 211; // pion
         }
+        
+        trackIndex++;
       }
-      // Handle K*0 for B0
-      else if (bmeson.daughterName(dauIdx) == "kstar") {
+      // Check if this is K*0 composite (B0 case)
+      else {
         const auto* kstar = dynamic_cast<const pat::CompositeCandidate*>(daughter);
         if (kstar) {
           for (size_t gdauIdx = 0; gdauIdx < kstar->numberOfDaughters() && trackIndex < MAXTRACK; ++gdauIdx) {
-            const auto* track_cand = dynamic_cast<const reco::RecoChargedCandidate*>(kstar->daughter(gdauIdx));
-            if (track_cand && track_cand->track().isNonnull()) {
-              const auto& track = track_cand->track();
+            const auto* grandDaughter = kstar->daughter(gdauIdx);
+            const auto* gtrack_cand = dynamic_cast<const reco::RecoChargedCandidate*>(grandDaughter);
+            
+            if (gtrack_cand && gtrack_cand->track().isNonnull()) {
+              const auto& track = gtrack_cand->track();
               
               trackPt[bIndex][trackIndex] = track->pt();
               trackEta[bIndex][trackIndex] = track->eta();
@@ -606,10 +612,10 @@ void BDiMuMuNtuplizer::fillDaughterInfo(const pat::CompositeCandidate& bmeson, i
               trackNdof[bIndex][trackIndex] = track->ndof();
               trackHighPurity[bIndex][trackIndex] = track->quality(reco::TrackBase::highPurity);
               
-              // Set PID based on K*0 daughter name
-              if (kstar->daughterName(gdauIdx) == "kaon") {
+              // Set PID for K*0 daughters: positive = kaon, negative = pion
+              if (track->charge() > 0) {
                 trackPID[bIndex][trackIndex] = 321; // kaon
-              } else if (kstar->daughterName(gdauIdx) == "pion") {
+              } else {
                 trackPID[bIndex][trackIndex] = 211; // pion
               }
               
