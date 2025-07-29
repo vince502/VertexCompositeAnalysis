@@ -147,7 +147,6 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   magField = bFieldHandle.product();
 
   // Primary vertex information
-  bool isVtxPV = false;
   double xVtx = -99999.0, yVtx = -99999.0, zVtx = -99999.0;
   double xVtxError = -999.0, yVtxError = -999.0, zVtxError = -999.0;
   
@@ -155,7 +154,6 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   auto vtxPrimary = vtxCollection.begin();
   
   if (vtxCollection.size() > 0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize() >= 2) {
-    isVtxPV = true;
     xVtx = vtxPrimary->x();
     yVtx = vtxPrimary->y();
     zVtx = vtxPrimary->z();
@@ -463,7 +461,11 @@ pat::CompositeCandidate BDiMuMuFitter::createBPlus(const pat::CompositeCandidate
   kaonP4.SetPhi(kaonTrack->phi());
   kaonP4.SetM(kaonMass);
   
-  reco::RecoChargedCandidate kaonCand(kaonTrack->charge(), kaonP4, bVertex.position());
+  // Convert to the required types
+  reco::Candidate::LorentzVector kaonP4_converted(kaonP4.Px(), kaonP4.Py(), kaonP4.Pz(), kaonP4.E());
+  reco::Candidate::Point vtxPos(bVertex.position().x(), bVertex.position().y(), bVertex.position().z());
+  
+  reco::RecoChargedCandidate kaonCand(kaonTrack->charge(), kaonP4_converted, vtxPos);
   kaonCand.setTrack(kaonTrack);
   bPlus.addDaughter(kaonCand, "kaon");
   
@@ -478,7 +480,11 @@ pat::CompositeCandidate BDiMuMuFitter::createBPlus(const pat::CompositeCandidate
   bPlus.addUserFloat("vtxProb", TMath::Prob(bVertex.totalChiSquared(), bVertex.degreesOfFreedom()));
   
   // Calculate and store topological variables
-  math::XYZVector displacement = bVertex.position() - vertex.position();
+  GlobalPoint bVtxPos = bVertex.position();
+  reco::Vertex::Point primVtxPos = vertex.position();
+  math::XYZVector displacement(bVtxPos.x() - primVtxPos.x(), 
+                              bVtxPos.y() - primVtxPos.y(), 
+                              bVtxPos.z() - primVtxPos.z());
   double pointingAngle2D = calculatePointingAngle(math::XYZVector(bPlus.px(), bPlus.py(), 0),
                                                  math::XYZVector(displacement.x(), displacement.y(), 0));
   double pointingAngle3D = calculatePointingAngle(math::XYZVector(bPlus.px(), bPlus.py(), bPlus.pz()),
@@ -512,7 +518,10 @@ pat::CompositeCandidate BDiMuMuFitter::createBZero(const pat::CompositeCandidate
   kaonP4.SetPhi(kaonTrack->phi());
   kaonP4.SetM(kaonMass);
   
-  reco::RecoChargedCandidate kaonCand(kaonTrack->charge(), kaonP4, bVertex.position());
+  reco::Candidate::LorentzVector kaonP4_converted(kaonP4.Px(), kaonP4.Py(), kaonP4.Pz(), kaonP4.E());
+  reco::Candidate::Point vtxPos(bVertex.position().x(), bVertex.position().y(), bVertex.position().z());
+  
+  reco::RecoChargedCandidate kaonCand(kaonTrack->charge(), kaonP4_converted, vtxPos);
   kaonCand.setTrack(kaonTrack);
   kstar.addDaughter(kaonCand, "kaon");
   
@@ -523,7 +532,9 @@ pat::CompositeCandidate BDiMuMuFitter::createBZero(const pat::CompositeCandidate
   pionP4.SetPhi(pionTrack->phi());
   pionP4.SetM(pionMass);
   
-  reco::RecoChargedCandidate pionCand(pionTrack->charge(), pionP4, bVertex.position());
+  reco::Candidate::LorentzVector pionP4_converted(pionP4.Px(), pionP4.Py(), pionP4.Pz(), pionP4.E());
+  
+  reco::RecoChargedCandidate pionCand(pionTrack->charge(), pionP4_converted, vtxPos);
   pionCand.setTrack(pionTrack);
   kstar.addDaughter(pionCand, "pion");
   
@@ -545,7 +556,11 @@ pat::CompositeCandidate BDiMuMuFitter::createBZero(const pat::CompositeCandidate
   bZero.addUserFloat("vtxProb", TMath::Prob(bVertex.totalChiSquared(), bVertex.degreesOfFreedom()));
   
   // Calculate and store topological variables
-  math::XYZVector displacement = bVertex.position() - vertex.position();
+  GlobalPoint bVtxPos = bVertex.position();
+  reco::Vertex::Point primVtxPos = vertex.position();
+  math::XYZVector displacement(bVtxPos.x() - primVtxPos.x(), 
+                              bVtxPos.y() - primVtxPos.y(), 
+                              bVtxPos.z() - primVtxPos.z());
   double pointingAngle2D = calculatePointingAngle(math::XYZVector(bZero.px(), bZero.py(), 0),
                                                  math::XYZVector(displacement.x(), displacement.y(), 0));
   double pointingAngle3D = calculatePointingAngle(math::XYZVector(bZero.px(), bZero.py(), bZero.pz()),
@@ -575,7 +590,11 @@ pat::CompositeCandidate BDiMuMuFitter::createBc(const pat::CompositeCandidate& d
   pionP4.SetPhi(pionTrack->phi());
   pionP4.SetM(pionMass);
   
-  reco::RecoChargedCandidate pionCand(pionTrack->charge(), pionP4, bcVertex.position());
+  // Convert to the required types
+  reco::Candidate::LorentzVector pionP4_converted(pionP4.Px(), pionP4.Py(), pionP4.Pz(), pionP4.E());
+  reco::Candidate::Point vtxPos(bcVertex.position().x(), bcVertex.position().y(), bcVertex.position().z());
+  
+  reco::RecoChargedCandidate pionCand(pionTrack->charge(), pionP4_converted, vtxPos);
   pionCand.setTrack(pionTrack);
   bc.addDaughter(pionCand, "pion");
   
@@ -590,7 +609,11 @@ pat::CompositeCandidate BDiMuMuFitter::createBc(const pat::CompositeCandidate& d
   bc.addUserFloat("vtxProb", TMath::Prob(bcVertex.totalChiSquared(), bcVertex.degreesOfFreedom()));
   
   // Calculate and store topological variables
-  math::XYZVector displacement = bcVertex.position() - vertex.position();
+  GlobalPoint bcVtxPos = bcVertex.position();
+  reco::Vertex::Point primVtxPos = vertex.position();
+  math::XYZVector displacement(bcVtxPos.x() - primVtxPos.x(), 
+                              bcVtxPos.y() - primVtxPos.y(), 
+                              bcVtxPos.z() - primVtxPos.z());
   double pointingAngle2D = calculatePointingAngle(math::XYZVector(bc.px(), bc.py(), 0),
                                                  math::XYZVector(displacement.x(), displacement.y(), 0));
   double pointingAngle3D = calculatePointingAngle(math::XYZVector(bc.px(), bc.py(), bc.pz()),
