@@ -28,6 +28,7 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/GeometryCommonDetAlgo/interface/GlobalError.h"
 
 #include <Math/Functions.h>
@@ -41,6 +42,8 @@
 using namespace std;
 using namespace reco;
 using namespace edm;
+
+#define DEBUG_BFIT false
 
 // Constructor
 BDiMuMuFitter::BDiMuMuFitter(const edm::ParameterSet& theParameters, edm::ConsumesCollector && iC) :
@@ -123,6 +126,11 @@ BDiMuMuFitter::~BDiMuMuFitter() {
 
 // Main fitting algorithm
 void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+#if DEBUG_BFIT == true
+  using std::cout;
+  using std::endl;
+#endif
   
   typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3>> SMatrixSym3D;
   typedef ROOT::Math::SVector<double, 3> SVector3;
@@ -142,7 +150,14 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   iEvent.getByToken(token_dedx, dEdxHandle);
   bFieldHandle = iSetup.getHandle(bField_esToken_);
 
-  if (!dimuonHandle.isValid() || !trackHandle.isValid() || !trackHandle->size()) return;
+  if (!dimuonHandle.isValid() || !trackHandle.isValid() || !trackHandle->size()) {
+#if DEBUG_BFIT == true
+    cout << "Some handles are missing!" << endl;
+    if(!dimuonHandle.isValid()) cout << "Dimuon!" << endl;
+    if(!trackHandle.isValid()) cout << "Track!" << endl;
+#endif
+    return;
+  }
   
   magField = bFieldHandle.product();
 
@@ -175,6 +190,9 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   std::vector<reco::TrackRef> selectedTracks;
   std::vector<reco::TransientTrack> transientTracks;
   
+#if DEBUG_BFIT == true
+  cout << "Looping over track handle" << endl;
+#endif
   for (unsigned int indx = 0; indx < trackHandle->size(); indx++) {
     reco::TrackRef trackRef(trackHandle, indx);
     
@@ -201,6 +219,12 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   // Loop over dimuon candidates
   for (const auto& dimuon : *dimuonHandle) {
     if (!passDimuonCuts(dimuon)) continue;
+    const pat::Muon* muon1 = dynamic_cast<const pat::Muon*>(dimuon.daughter("muon1"));
+    const pat::Muon* muon2 = dynamic_cast<const pat::Muon*>(dimuon.daughter("muon2"));
+    const reco::Track& muonTrk1 = *muon1->bestTrack();
+    const reco::Track& muonTrk2 = *muon2->bestTrack();
+    auto muonTTrk1 = reco::TransientTrack(muonTrk1, magField);
+    auto muonTTrk2 = reco::TransientTrack(muonTrk2, magField);
 
     // B+ reconstruction: dimuon + single track (kaon)
     if (doBPlus) {
@@ -209,36 +233,50 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
         
         // Skip tracks that are daughters of the dimuon
         bool skipTrack = false;
-        for (size_t j = 0; j < dimuon.numberOfDaughters(); j++) {
-          const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(j));
-          if (daughter && daughter->track().isNonnull() && 
-              daughter->track().key() == kaonTrack.key()) {
-            skipTrack = true;
-            break;
-          }
-        }
+        skipTrack = (
+                      &muonTrk1 == &(*kaonTrack) || 
+                      &muonTrk2 == &(*kaonTrack)
+                    );
+
+//        for (size_t j = 0; j < dimuon.numberOfDaughters(); j++) {
+//          const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(j));
+//          if (daughter && daughter->track().isNonnull() && 
+//              daughter->track().key() == kaonTrack.key()) {
+//            skipTrack = true;
+//            break;
+//          }
+//        }
+
+#if DEBUG_BFIT == true
+        cout << "Track good? " << !skipTrack << endl;
+#endif
         if (skipTrack) continue;
 
         // Get dimuon daughters as transient tracks
         std::vector<reco::TransientTrack> bTracks;
         std::vector<double> bMasses;
-        
-        for (size_t j = 0; j < dimuon.numberOfDaughters(); j++) {
-          const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(j));
-          if (daughter && daughter->track().isNonnull()) {
-            reco::TransientTrack dauTrack(*daughter->track(), magField);
-            bTracks.push_back(dauTrack);
-            bMasses.push_back(muonMass);
-          }
-        }
-        
-        // Add kaon track
+ 
+#if DEBUG_BFIT == true
+        cout << "Dimuon basic property (pt, y): "  << ", " << dimuon.pt() << ", "<< dimuon.y() << "with Ndau " << dimuon.numberOfDaughters()<< endl;
+#endif
+        bTracks.push_back(muonTTrk1);
+        bTracks.push_back(muonTTrk2);
+        bMasses.push_back(muonMass);
+        bMasses.push_back(muonMass);
+
         bTracks.push_back(transientTracks[i]);
         bMasses.push_back(kaonMass);
+
+#if DEBUG_BFIT == true
+        cout << "Checking Transient track sizes: bTracks: " << bTracks.size() << ", bMasses: " << bMasses.size() << endl;
+#endif
 
         // Fit B+ vertex
         TransientVertex bVertex = fitBVertex(bTracks, bMasses);
         if (!bVertex.isValid()) continue;
+#if DEBUG_BFIT == true
+        cout << "Track fit is success" << endl;
+#endif
 
         // Apply vertex quality cuts
         double vtxChi2 = bVertex.totalChiSquared();
@@ -246,11 +284,17 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
         double vtxProb = TMath::Prob(vtxChi2, vtxNdof);
         
         if (vtxChi2/vtxNdof > vtxChi2Cut || vtxProb < vtxProbCut) continue;
+#if DEBUG_BFIT == true
+        cout << "Vertex Qual cut is success" << endl;
+#endif
 
         // Create B+ candidate
         pat::CompositeCandidate bPlus = createBPlus(dimuon, kaonTrack, *vtxPrimary, bVertex);
         
         // Apply B+ selection cuts
+#if DEBUG_BFIT == true
+        cout << "Bmass diff : " << fabs(bPlus.mass() - bPlusMass) << " vs cut : " << bPlusMassCut << endl;
+#endif
         if (fabs(bPlus.mass() - bPlusMass) > bPlusMassCut) continue;
         if (bPlus.pt() < bPtCut) continue;
         if (fabs(bPlus.rapidity()) > bYCut) continue;
@@ -266,28 +310,21 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
         
         // Skip tracks that are daughters of the dimuon
         bool skipTrack = false;
-        for (size_t j = 0; j < dimuon.numberOfDaughters(); j++) {
-          const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(j));
-          if (daughter && daughter->track().isNonnull() && 
-              daughter->track().key() == pionTrack.key()) {
-            skipTrack = true;
-            break;
-          }
-        }
+        skipTrack = (
+                      &muonTrk1 == &(*pionTrack) || 
+                      &muonTrk2 == &(*pionTrack)
+                    );
         if (skipTrack) continue;
 
         // Get dimuon daughters as transient tracks
         std::vector<reco::TransientTrack> bcTracks;
         std::vector<double> bcMasses;
         
-        for (size_t j = 0; j < dimuon.numberOfDaughters(); j++) {
-          const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(j));
-          if (daughter && daughter->track().isNonnull()) {
-            reco::TransientTrack dauTrack(*daughter->track(), magField);
-            bcTracks.push_back(dauTrack);
-            bcMasses.push_back(muonMass);
-          }
-        }
+        bcTracks.push_back(muonTTrk1);
+        bcTracks.push_back(muonTTrk2);
+        bcMasses.push_back(muonMass);
+        bcMasses.push_back(muonMass);
+
         
         // Add pion track
         bcTracks.push_back(transientTracks[i]);
@@ -330,16 +367,12 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
           
           // Skip tracks that are daughters of the dimuon
           bool skipTracks = false;
-          for (size_t k = 0; k < dimuon.numberOfDaughters(); k++) {
-            const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(k));
-            if (daughter && daughter->track().isNonnull()) {
-              if (daughter->track().key() == track1.key() || 
-                  daughter->track().key() == track2.key()) {
-                skipTracks = true;
-                break;
-              }
-            }
-          }
+          skipTracks = (
+                        &muonTrk1 == &(*track1) || 
+                        &muonTrk2 == &(*track1) ||
+                        &muonTrk1 == &(*track2) || 
+                        &muonTrk2 == &(*track2)
+                      );
           if (skipTracks) continue;
 
           // Reconstruct K*0 candidate
@@ -375,19 +408,19 @@ void BDiMuMuFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
           std::vector<reco::TransientTrack> bTracks;
           std::vector<double> bMasses;
           
-          for (size_t k = 0; k < dimuon.numberOfDaughters(); k++) {
-            const auto* daughter = dynamic_cast<const reco::RecoChargedCandidate*>(dimuon.daughter(k));
-            if (daughter && daughter->track().isNonnull()) {
-              reco::TransientTrack dauTrack(*daughter->track(), magField);
-              bTracks.push_back(dauTrack);
-              bMasses.push_back(muonMass);
-            }
-          }
+          bTracks.push_back(muonTTrk1);
+          bTracks.push_back(muonTTrk2);
+          bMasses.push_back(muonMass);
+          bMasses.push_back(muonMass);
           
           bTracks.push_back(transientTracks[i]);
           bTracks.push_back(transientTracks[j]);
           bMasses.push_back(track1->charge() > 0 ? kaonMass : pionMass);
           bMasses.push_back(track1->charge() > 0 ? pionMass : kaonMass);
+
+#if DEBUG_BFIT == true
+        cout << "Checking Transient track sizes: bTracks: " << bTracks.size() << ", bMasses: " << bMasses.size() << endl;
+#endif
 
           // Fit B0 vertex
           TransientVertex bVertex = fitBVertex(bTracks, bMasses);

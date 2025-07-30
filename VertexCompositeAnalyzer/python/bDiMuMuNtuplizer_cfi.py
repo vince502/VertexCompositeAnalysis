@@ -12,7 +12,7 @@ bDiMuMuNtuplizer = cms.EDAnalyzer("BDiMuMuNtuplizer",
     bcMVACollection = cms.InputTag("generalBDiMuMuCandidates:MVAValuesBc"),
     
     # Event-level collections
-    vertexCollection = cms.InputTag("offlinePrimaryVertices"),
+    vertexCollection = cms.InputTag("unpackedTracksAndVertices"),
     beamSpotCollection = cms.InputTag("offlineBeamSpot"),
     triggerResults = cms.InputTag("TriggerResults::HLT"),
     
