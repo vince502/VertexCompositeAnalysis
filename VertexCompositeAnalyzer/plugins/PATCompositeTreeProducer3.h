@@ -74,24 +74,49 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 
+// Validation utility for debugging and testing
+#include "ValidationUtility.h"
+
 //#define DEBUG true
+
+// Debug macros for improved logging (should match the .cc file)
+#ifdef DEBUG
+    #define DEBUG_MSG(msg) std::cout << "DEBUG: " << msg << std::endl
+#else
+    #define DEBUG_MSG(msg) do {} while(0)
+#endif
+
+// Logging macros for event processing
+//#define LOG_DEBUG_EVENT(msg) LogDebug("PATCompositeTreeProducer") << "[Event] " << msg
+//#define LOG_DEBUG_GEN(msg) LogDebug("GenMatching") << "[GenMatch] " << msg
 
 
 //
 // class decleration
 //
 
-#define PI 3.1416
-#define MAXCAN 10000
+// Constants
+static constexpr double PI = TMath::Pi();
+static constexpr int MAXCAN = 30000;
+static constexpr double INVALID_VALUE = -999.9;
+static constexpr double PT_ERROR_THRESHOLD = 0.10;
+static constexpr double DZ_SIGNIFICANCE_CUT = 3.0;
+static constexpr double DXY_SIGNIFICANCE_CUT = 3.0;
+static constexpr double ETA_CUT = 2.4;
+static constexpr double PT_CUT = 0.4;
+// PDG ID constants for particle identification
+static constexpr int PION_PDG_ID = 211;
+static constexpr int KAON_PDG_ID = 321;
+static constexpr int D0_PDG_ID = 421;
 
-using namespace std;
+// Specific using declarations instead of namespace pollution
 using CC = pat::CompositeCandidate;
 using CCC = pat::CompositeCandidateCollection;
 
-class PATCompositeTreeProducer2 : public edm::one::EDAnalyzer<> {
+class PATCompositeTreeProducer3 : public edm::one::EDAnalyzer<> {
 public:
-  explicit PATCompositeTreeProducer2(const edm::ParameterSet&);
-  ~PATCompositeTreeProducer2();
+  explicit PATCompositeTreeProducer3(const edm::ParameterSet&);
+  ~PATCompositeTreeProducer3();
 
   using MVACollection = std::vector<float>;
 
@@ -103,11 +128,51 @@ private:
   virtual void endJob() ;
   virtual void initHistogram();
   virtual void initTree();
-  void genDecayLength(const uint&, const reco::GenParticle&);
+  
+  // Helper functions for fillRECO refactoring
+  void processEventInfo(const edm::Event& iEvent);
+  void processCentralityInfo(const edm::Event& iEvent);
+  void processEventPlaneInfo(const edm::Event& iEvent);
+  void processVertexAndTrackInfo(const edm::Handle<reco::VertexCollection>& vertices,
+                                 const edm::Handle<reco::TrackCollection>& tracks);
+  std::vector<reco::GenParticleRef> processGenMatching(const edm::Handle<reco::GenParticleCollection>& genpars);
+  void processTwoLayerDecayMatching(const CC& trk, unsigned it, 
+                                   const std::vector<reco::GenParticleRef>& genRefs);
+  void processRegularMatching(const CC& trk, unsigned it,
+                             const std::vector<reco::GenParticleRef>& genRefs);
+  
+  // Main candidate processing function
+  void processCandidates(const CCC* v0candidates_,
+                        const edm::Handle<MVACollection>& mvavalues,
+                        const std::vector<reco::GenParticleRef>& genRefs,
+                        const edm::Handle<edm::ValueMap<reco::DeDxData>>& dEdxHandle1,
+                        const edm::Handle<edm::ValueMap<reco::DeDxData>>& dEdxHandle2,
+                        const edm::Event& iEvent,
+                        const edm::Handle<reco::VertexCollection>& vertices,
+                        const edm::Handle<reco::GenParticleCollection>& genpars);
+  
+  // Error handling and safety functions
+  bool isValidCandidateIndex(unsigned int index) const;
+  void validateArrayAccess(unsigned int index, const std::string& arrayName) const;
+  
+  // Improved permutation matching functions
+  bool findDaughterPermutation(const reco::GenParticle& genParticle, std::vector<unsigned int>& matchedIndices);
+  bool checkTwoLayerDecayPermutation(const reco::Candidate* daughter, std::vector<unsigned int>& subIndices);
+  
+  // Helper function for finding correct daughter permutation (for code deduplication)
+  std::vector<unsigned int> findDaughterPermutation(const reco::GenParticle& particle, bool twoLayerDecay, bool threeProngDecay);
+  
+  // Strict D* → D0 + π → K + π + π decay chain validation
+  bool isValidDStarDecayChain(const reco::Candidate* Dd1, const reco::Candidate* Dd2) const;
+  
+  // Validation and debugging functions (delegated to ValidationUtility)
+  void performSelfDiagnostics() const;
+
+  void genDecayLength(const uint&, const reco::GenParticle&) const;
 
   bool matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_, bool isMatchD0) const;
   bool matchHadron(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_, bool isMatchD0) const;
-  bool matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg) const;
+  bool matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg = true) const;
   bool checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const;
   bool checkSwap(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_) const;
 
@@ -189,9 +254,13 @@ private:
     double multMax_;
     double multMin_;
     double deltaR_; //deltaR for Gen matching
+    
+    // Debug control variables
+    bool debugGenMatching_; // Runtime control for gen matching debug
+    bool verboseDebug_;     // Extra verbose debug output
 
-    vector<double> pTBins_;
-    vector<double> yBins_;
+    std::vector<double> pTBins_;
+    std::vector<double> yBins_;
 
     //tree branches
     //event info
@@ -478,14 +547,14 @@ private:
 		int gen_D1pdgId_[MAXCAN];
 
     //vector for gen match
-    vector< vector<double> > *pVect;
-    vector< vector<double> > *gpVect;
-    vector<double> *Dvector1;
-    vector<double> *GDvector1;
-    vector<double> *Dvector2;
-    vector<double> *GDvector2;
-    vector<double> *Dvector3;
-    vector<int> *pVectIDmom;
+    std::vector< std::vector<double> > *pVect;
+    std::vector< std::vector<double> > *gpVect;
+    std::vector<double> *Dvector1;
+    std::vector<double> *GDvector1;
+    std::vector<double> *Dvector2;
+    std::vector<double> *GDvector2;
+    std::vector<double> *Dvector3;
+    std::vector<int> *pVectIDmom;
     
     bool useAnyMVA_;
     bool isSkimMVA_;
@@ -525,7 +594,7 @@ private:
 
 
 
-bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_, bool isMatchD0) const {
+bool PATCompositeTreeProducer3::matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_, bool isMatchD0) const {
   bool match = false;
   if(isMatchD0){
     reco::Candidate const* reco_trk1 = _dmeson_->daughter(0);
@@ -552,7 +621,7 @@ bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, con
   }
   return match;
 };
-bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_, bool isMatchD0) const {
+bool PATCompositeTreeProducer3::matchHadron(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_, bool isMatchD0) const {
   bool match = false;
   if(isMatchD0){
     reco::Candidate const* reco_trk1 = _dmeson_->daughter(0);
@@ -580,14 +649,14 @@ bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, con
   return match;
 };
 
-bool PATCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
+bool PATCompositeTreeProducer3::checkSwap(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_) const {
     return _dmeson_->pdgId() != _gen_.pdgId();
 };
-bool PATCompositeTreeProducer2::checkSwap(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_) const {
+bool PATCompositeTreeProducer3::checkSwap(const reco::Candidate* _dmeson_, const reco::Candidate& _gen_) const {
     return _dmeson_->pdgId() != _gen_.pdgId();
 };
 
-bool PATCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg=true) const {
+bool PATCompositeTreeProducer3::matchTrackdR(const reco::Candidate* _recoTrk_, const reco::Candidate* _genTrk_, bool chkchrg) const {
     bool pass= false;
     // _deltaR_
     if(chkchrg && (_recoTrk_->charge() != _genTrk_->charge())) return false;
@@ -597,7 +666,7 @@ bool PATCompositeTreeProducer2::matchTrackdR(const reco::Candidate* _recoTrk_, c
 };
 
 
-reco::GenParticleRef PATCompositeTreeProducer2::findMother(const reco::GenParticleRef& genParRef)
+reco::GenParticleRef PATCompositeTreeProducer3::findMother(const reco::GenParticleRef& genParRef)
 {
   if(genParRef.isNull()) return genParRef;
   reco::GenParticleRef genMomRef = genParRef;
@@ -611,7 +680,7 @@ reco::GenParticleRef PATCompositeTreeProducer2::findMother(const reco::GenPartic
   return genMomRef;
 };
 
-void PATCompositeTreeProducer2::genDecayLength(const reco::Candidate& gCand, float& gen_decayLength2D_, float& gen_decayLength3D_, float& gen_angle2D_, float& gen_angle3D_){
+void PATCompositeTreeProducer3::genDecayLength(const reco::Candidate& gCand, float& gen_decayLength2D_, float& gen_decayLength3D_, float& gen_angle2D_, float& gen_angle3D_){
   gen_decayLength2D_ = -99.;
   gen_decayLength3D_ = -99.;
   gen_angle2D_ = -99;
@@ -630,7 +699,7 @@ void PATCompositeTreeProducer2::genDecayLength(const reco::Candidate& gCand, flo
   gen_decayLength2D_ = ptosvec2D.Mag();
 };
 
-void PATCompositeTreeProducer2::getAncestorId(const reco::Candidate& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ ){
+void PATCompositeTreeProducer3::getAncestorId(const reco::Candidate& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ ){
   gen_ancestorId_ = 0;
   gen_ancestorFlavor_ = 0;
 //  reco::GenParticle gCand1(gCand.charge(),gCand.p4(),gCand.vertex(),421,2,true);
