@@ -9,7 +9,22 @@ process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
 
 # Limit the output messages
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+#process.MessageLogger.cerr.threshold = cms.untracked.string('INFO')
+process.MessageLogger.cerr.DStarDebug = cms.untracked.PSet(
+      limit = cms.untracked.int32(0)
+  )
+process.MessageLogger.cerr.D0DaughterOrder = cms.untracked.PSet(limit=cms.untracked.int32(0))
+
+process.MessageLogger.cerr.GenMatching = cms.untracked.PSet(
+      limit = cms.untracked.int32(0)
+  )
+process.MessageLogger.cerr.DStarDecayFilter = cms.untracked.PSet(
+      limit = cms.untracked.int32(0)
+  )
+process.MessageLogger.cerr.PATCompositeTreeProducer = cms.untracked.PSet(
+      limit = cms.untracked.int32(0)
+  )
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.FastTimerService = cms.Service("FastTimerService",
                                        printEventSummary = cms.untracked.bool(True),
@@ -41,7 +56,7 @@ process.source = cms.Source("PoolSource",
 #        '/store/user/junseok/Genproduction/RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/DStarKpipiPU/crab_RECO_MINIAOD_DStarKpipiPU_CMSSW_13_2_10_082724_v1/240827_082226/0000/step4_105.root',
         #),
 )
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 # Set the global tag
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -99,18 +114,22 @@ process.generalD0CandidatesNewWrongSign = process.generalD0CandidatesNew.clone(i
 
 process.generalD0CandidatesNew.tkNhitsCut = cms.int32(3)
 #process.generalD0CandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalD0CandidatesNew.tkPtCut = cms.double(0.5)
+process.generalD0CandidatesNew.tkEtaDiffCut =cms.double(1.0)
+process.generalD0CandidatesNew.tkPtCut = cms.double(1.0)
+process.generalD0CandidatesNew.alphaCut = cms.double(0.2)
 #process.generalD0CandidatesNew.alphaCut = cms.double(1.0)
 #process.generalD0CandidatesNew.alpha2DCut = cms.double(1.0)
-process.generalD0CandidatesNew.collinearityCut3D = cms.double(0.90)
+#process.generalD0CandidatesNew.collinearityCut3D = cms.double(0.90)
+process.generalD0CandidatesNew.collinearityCut3D = cms.double(-0.91)
 #process.generalD0CandidatesNew.dPtCut = cms.double(0.0)
 process.generalD0CandidatesNew.tkChi2Cut = cms.double(3)
 process.generalD0CandidatesNew.VtxChiProbCut = cms.double(0.010)
 process.generalD0CandidatesNew.vtxSignificance3DCut = cms.double(3)
 process.generalD0CandidatesNew.mPiKCutMin = cms.double(1.74)
 process.generalD0CandidatesNew.mPiKCutMax = cms.double(2.00)
-process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.5)
+process.generalD0CandidatesNew.d0AbsYCut = cms.double(1.1)
 process.generalD0CandidatesNew.d0MassCut = cms.double(0.15)
+process.generalD0CandidatesNew.tkDCACut = cms.double(0.01)
 
 
 process.load("VertexCompositeAnalysis.VertexCompositeProducer.generalDStarCandidates_cff")
@@ -118,7 +137,7 @@ process.generalDStarCandidatesNew = process.generalDStarCandidates.clone()
 
 process.generalDStarCandidatesNew.tkNhitsCut = cms.int32(3)
 #process.generalDStarCandidatesNew.tkPtErrCut = cms.double(0.1)
-process.generalDStarCandidatesNew.tkPtCut = cms.double(0.4)
+process.generalDStarCandidatesNew.tkPtCut = cms.double(0.3)
 process.generalDStarCandidatesNew.tkChi2Cut = cms.double(3)
 #process.generalDStarCandidatesNew.vtxSignificance3DCut = cms.double(0)
 #process.generalDStarCandidatesNew.alphaCut = cms.double(1)
@@ -266,6 +285,8 @@ process.dStarana_mc.GenParticleCollection =  cms.untracked.InputTag("prunedGenPa
 process.dStarana_mc.useAnyMVA = cms.bool(False)
 process.dStarana_mc.CompositeCollection = cms.untracked.InputTag("generalDStarCandidatesNew:DStar")
 process.dStarana_mc.MVACollection = cms.InputTag("generalDStarCandidatesNew:MVAValuesNewDStar")
+process.dStarana_mc.debugGenMatching = cms.untracked.bool(True)
+process.dStarana_mc.verboseDebug = cms.untracked.bool(True)
 #process.dStarana_mc.doRecoNtuple= cms.untracked.bool(False)
 process.generalDStarCandidatesNew.d0Collection = cms.InputTag("generalD0CandidatesNew:D0")
 
@@ -275,8 +296,8 @@ process.generalDStarCandidatesNew.d0Collection = cms.InputTag("generalD0Candidat
 #process.d0ana_newreduced.DCAErrCollection = cms.InputTag("generalD0CandidatesNew:DCAErrorsNewD0")
 
 
-process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew*process.d0ana_mc* process.generalDStarCandidatesNew *process.dStarana_mc)
-#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.d0ana_newreduced)
+#process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew* process.generalDStarCandidatesNew *process.dStarana_mc)
+process.dStarAna_step = cms.Path( process.eventFilter_HM * process.generalD0CandidatesNew*process.generalDStarCandidatesNew * process.d0ana_newreduced*process.dStarana_mc)
 #process.dStarAna_step = cms.Path( process.eventFilter_HM *  process.dStarana_mc)
 #*process.eventplane)
 

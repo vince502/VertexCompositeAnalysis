@@ -5,7 +5,7 @@
 // 2. CMSSW logging system (preferred): use LogDebug
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "VertexCompositeAnalysis/VertexCompositeAnalyzer/plugins/PATCompositeTreeProducer_test_v1.h"
+#include "VertexCompositeAnalysis/VertexCompositeAnalyzer/plugins/PATCompositeTreeProducer3.h"
 
 // Debugging macros for better control
 #ifdef DEBUG_GEN_MATCHING
@@ -206,6 +206,7 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
         if(twoLayerDecay_){
           gd1 = d1->daughter(0);
           gd2 = d1->daughter(1);
+
         }
         const reco::Candidate * d2 = trk.daughter(1);
         const reco::Candidate * d3 = 0;        
@@ -232,12 +233,14 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
               auto const theGenDStar = genRefs.at(igen);
               unsigned int idxD0 = -1;
               if( abs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
+              else if( abs(theGenDStar->daughter(1)->pdgId()) == 421 ) idxD0 = 1;
               auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
               auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
               reco::Candidate const* recoD1;
               reco::Candidate const* recoPi;
               unsigned int idxRecoD0 = -1;
               if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
+              else if (abs(trk.daughter(1)->pdgId())== 421) idxRecoD0 = 1;
               recoD1 = trk.daughter(idxRecoD0);
               recoPi = trk.daughter(1-idxRecoD0);
               const auto nGenDau = theGenD0->numberOfDaughters();
@@ -1199,8 +1202,22 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
         for( unsigned int igen=0; igen<nGen; igen++){
           auto const theGenDStar = genRefs.at(igen);
           if(abs(theGenDStar->pdgId())!=413) cout << "id : " << theGenDStar->pdgId() << endl;
+          
+          // Debug: Check daughter ordering
+          edm::LogInfo("DStarDebug") << "D* candidate " << igen << ": daughter(0) pdgId = " 
+                                     << theGenDStar->daughter(0)->pdgId() 
+                                     << ", daughter(1) pdgId = " << theGenDStar->daughter(1)->pdgId();
+          
           unsigned int idxD0 = -1;
-          if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) idxD0 = 0;
+          if( fabs(theGenDStar->daughter(0)->pdgId()) == 421 ) {
+            idxD0 = 0;
+            edm::LogInfo("DStarDebug") << "D0 found at position 0";
+          } else if( fabs(theGenDStar->daughter(1)->pdgId()) == 421 ) {
+            idxD0 = 1;
+            edm::LogInfo("DStarDebug") << "D0 found at position 1";
+          } else {
+            edm::LogWarning("DStarDebug") << "D0 not found in either daughter position!";
+          }
           auto const* theGenD0 = genRefs.at(igen)->daughter(idxD0);
           auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
           mass_gen[igen] = theGenDStar->mass();
@@ -1234,6 +1251,10 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
 
           const auto* genDau0 = theGenD0->daughter(0);
           const auto* genDau1 = theGenD0->daughter(1);
+          // Debug: Check D0 daughter mass ordering
+          edm::LogInfo("D0DaughterOrder") << "D0 candidate " << igen << " daughters: "
+                                          << "daughter(0) mass=" << genDau0->mass() << " PDG=" << genDau0->pdgId() << ", "
+                                          << "daughter(1) mass=" << genDau1->mass() << " PDG=" << genDau1->pdgId();
           gen_D0Dau1_pT_[igen] = genDau0->pt();
           gen_D0Dau1_eta_[igen] = genDau0->eta();
           gen_D0Dau1_phi_[igen] = genDau0->phi();
