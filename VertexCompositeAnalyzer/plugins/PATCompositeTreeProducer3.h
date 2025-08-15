@@ -699,34 +699,92 @@ void PATCompositeTreeProducer3::genDecayLength(const reco::Candidate& gCand, flo
   gen_decayLength2D_ = ptosvec2D.Mag();
 };
 
-void PATCompositeTreeProducer3::getAncestorId(const reco::Candidate& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ ){
-  gen_ancestorId_ = 0;
-  gen_ancestorFlavor_ = 0;
-//  reco::GenParticle gCand1(gCand.charge(),gCand.p4(),gCand.vertex(),421,2,true);
-  //for (auto mothers = gCand.motherRefVector();
-  //    !mothers.empty(); ) {
-  //  auto mom = mothers.at(0);
-  //  mothers = mom->motherRefVector();
-  //  gen_ancestorId_ = mom->pdgId();
-  //  cout << "gen_ancestorId_ : " << gen_ancestorId_ << endl;
-  //  const auto idstr = std::to_string(std::abs(gen_ancestorId_));
-  //  gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
-  //  cout << "gen_ancestorFlavor_ : " << gen_ancestorFlavor_ << endl;
-  //  if (idstr[0] == '5') {
-  //    break;
-  //  }
-  //  if (std::abs(gen_ancestorId_) <= 40) break;
-  //}
-  for (auto mom = gCand.mother(); !(mom==nullptr);){
-    gen_ancestorId_= mom->pdgId();
-    const auto idstr = std::to_string(std::abs(gen_ancestorId_));
-    gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
-    if (idstr.find('5') != std::string::npos) {
-      break;
-    }
-    if (std::abs(gen_ancestorId_) <= 40) break;
-          mom = mom->mother();
-  }
+//void PATCompositeTreeProducer3::getAncestorId(const reco::Candidate& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ ){
+//  gen_ancestorId_ = 0;
+//  gen_ancestorFlavor_ = 0;
+////  reco::GenParticle gCand1(gCand.charge(),gCand.p4(),gCand.vertex(),421,2,true);
+//  //for (auto mothers = gCand.motherRefVector();
+//  //    !mothers.empty(); ) {
+//  //  auto mom = mothers.at(0);
+//  //  mothers = mom->motherRefVector();
+//  //  gen_ancestorId_ = mom->pdgId();
+//  //  cout << "gen_ancestorId_ : " << gen_ancestorId_ << endl;
+//  //  const auto idstr = std::to_string(std::abs(gen_ancestorId_));
+//  //  gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
+//  //  cout << "gen_ancestorFlavor_ : " << gen_ancestorFlavor_ << endl;
+//  //  if (idstr[0] == '5') {
+//  //    break;
+//  //  }
+//  //  if (std::abs(gen_ancestorId_) <= 40) break;
+//  //}
+//  for (auto mom = gCand.mother(); !(mom==nullptr);){
+//    gen_ancestorId_= mom->pdgId();
+//    const auto idstr = std::to_string(std::abs(gen_ancestorId_));
+//    gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin()+1});
+//    if (idstr.find('5') != std::string::npos) {
+//      break;
+//    }
+//    if (std::abs(gen_ancestorId_) <= 40) break;
+//          mom = mom->mother();
+//  }
+//
+//          
+//};
+void PATCompositeTreeProducer3::getAncestorId(const reco::Candidate& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_) {
+    // 1. 항상 기본값으로 초기화
+    gen_ancestorId_ = 0;
+    gen_ancestorFlavor_ = 0;
 
-          
+    edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Starting ancestor search for particle with PDG ID: " << gCand.pdgId();
+
+    const reco::Candidate* mom = &gCand; // 시작 입자를 현재 입자로 설정
+    int depth = 0;
+    const int MAX_DEPTH = 50; // 2. 무한 루프 방지
+
+    while (mom != nullptr && depth < MAX_DEPTH) {
+        edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Depth " << depth << ": Current particle PDG ID = " << mom->pdgId();
+        
+        if (depth > 0) { 
+             int currentId = mom->pdgId();
+             int absId = std::abs(currentId);
+             edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Processing mother: PDG ID = " << currentId << ", Abs ID = " << absId;
+
+             std::string idstr = std::to_string(absId);
+             edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] ID string: " << idstr << ", First digit: " << (idstr.empty() ? '?' : idstr[0]);
+             
+                 gen_ancestorId_ = currentId;
+                 gen_ancestorFlavor_ = std::stoi(std::string{idstr.begin(), idstr.begin() + 1}); 
+
+             if (!idstr.empty() && idstr[0] == '5') {
+
+
+                 edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Found B meson: ID = " << gen_ancestorId_ << ", Flavor = " << gen_ancestorFlavor_;
+                 break; 
+             }
+
+             if (absId <= 40) {
+                 gen_ancestorId_ = currentId;
+                 const auto final_idstr = std::to_string(absId);
+                 if(!final_idstr.empty()) {
+                    gen_ancestorFlavor_ = std::stoi(std::string{final_idstr.begin(), final_idstr.begin() + 1});
+                 }
+                 edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Found light quark/lepton: ID = " << gen_ancestorId_ << ", Flavor = " << gen_ancestorFlavor_;
+                 break;
+             }
+             edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Not target particle, continuing search...";
+        }
+
+        mom = mom->mother();
+        depth++;
+        edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Moving to next mother, depth now = " << depth;
+    }
+    
+    if (depth >= MAX_DEPTH) {
+        edm::LogWarning("PATCompositeTreeProducer") << "[getAncestorId] Maximum depth reached (" << MAX_DEPTH << "), stopping search";
+    }
+    if (mom == nullptr) {
+        edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] No more mothers found";
+    }
+    
+    edm::LogVerbatim("PATCompositeTreeProducer") << "[getAncestorId] Final result: ancestorId = " << gen_ancestorId_ << ", ancestorFlavor = " << gen_ancestorFlavor_;
 };

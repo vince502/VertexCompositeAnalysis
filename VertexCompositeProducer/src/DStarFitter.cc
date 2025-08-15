@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      DStarFitter
-// 
+//
 /**\class DStarFitter DStarFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DStarFitter.cc
 
  Description: <one line class summary>
@@ -138,7 +138,10 @@ DStarFitter::DStarFitter(const edm::ParameterSet& theParameters,  edm::ConsumesC
 }
 
 DStarFitter::~DStarFitter() {
-  delete forest_;
+  if (forest_ != nullptr) {
+    delete forest_;
+    forest_ = nullptr;
+  }
 }
 
 // Method containing the algorithm for vertex reconstruction
@@ -149,7 +152,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   using std::endl;
   using namespace reco;
   using namespace edm;
-  using namespace std; 
+  using namespace std;
 
   typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
   typedef ROOT::Math::SVector<double, 3> SVector3;
@@ -170,10 +173,10 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
   iEvent.getByToken(token_d0cand, theD0Handle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
   iEvent.getByToken(token_dedx, dEdxHandle);
 
 
@@ -229,7 +232,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	      if (tmpRef->quality(qualities[ndx_])){
 	        quality_ok = true;
-	        break;          
+	        break;
 	      }
       }
     }
@@ -242,7 +245,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack tmpTk( *tmpRef, magField );
 
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -290,7 +293,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       double theDStarcandMass = (D0Vec + pPi).M();
       // std::cout << "D* - D0 mass : " << theDStarcandMass << ", " << D0Vec.M() << std::endl;
       if(theDStarcandMass - D0Vec.M() >0.16) continue;
-      
+
 
       // Calculate DCA of two daughters
 //      double dzvtx_pos = positiveTrackRef->dz(bestvtx);
@@ -308,8 +311,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 //      double dauTransImpactSig_neg = dxyvtx_neg/dxyerror_neg;
 //
 //      double nhits_pos = positiveTrackRef->numberOfValidHits();
-//      double nhits_neg = negativeTrackRef->numberOfValidHits(); 
-//    
+//      double nhits_neg = negativeTrackRef->numberOfValidHits();
+//
 //      double ptErr_pos = positiveTrackRef->ptError();
 //      double ptErr_neg = negativeTrackRef->ptError();
 //
@@ -320,7 +323,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 //        const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle.product();
 //        dedx_pos = dEdxTrack[positiveTrackRef].dEdx();
 //        dedx_neg = dEdxTrack[negativeTrackRef].dEdx();
-//      } 
+//      }
 //      dedx_pos = dedx_pos;
 //      dedx_neg = dedx_neg;
 
@@ -374,15 +377,15 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
                kaonCand = dau1;
                pionCand = dau0;
        }
-       
 
-       
+
+
 
        // For D*+: K- pi+ followed by slow pi+
        // For D*-: K+ pi- followed by slow pi-
        if (slowPionCharge > 0) { // D*+ case
                if (kaonCand->charge() > 0) continue;
-       } else { 
+       } else {
                if (kaonCand->charge() < 0) continue;
        }
        #ifdef DEBUG
@@ -448,7 +451,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        //double sigma_y2 = posErr.cyy() + negErr.cyy();
        //float dcaError = sqrt(sigma_x2 * cxPt.x() * cxPt.x() +
        //                sigma_y2 * cxPt.y() * cxPt.y()) / dca;
-    
+
        //cout << "dca : " << dca << "dcaerr : " << dcaError << endl;
 
 
@@ -481,7 +484,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
        double dStarVtxNdof(dStarDecayVertex->degreesOfFreedom());
        double dStarNormalizedChi2 = dStarVtxChi2/dStarVtxNdof;
 
-       double rVtxMag = 99999.0; 
+       double rVtxMag = 99999.0;
        double lVtxMag = 99999.0;
        double sigmaRvtxMag = 999.0;
        double sigmaLvtxMag = 999.0;
@@ -529,9 +532,8 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
 
-       CC* theDStar = 0;
+       std::unique_ptr<CC> theDStar = std::make_unique<CC>();
       //  theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
-      theDStar = new CC();
       theDStar->setP4(dStarP4);
 
        RecoChargedCandidate
@@ -565,7 +567,7 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 //        theDStar->addUserFloat("D03DDCAErr", dcaError);
       //  addp4.set( *theDStar );
        if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
-           theDStar->mass() > dStarMassDStar - dStarMassCut ) 
+           theDStar->mass() > dStarMassDStar - dStarMassCut )
        {
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());
@@ -608,8 +610,6 @@ void DStarFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       //    //   mvaVals_.push_back(gbrVal);
          }
        }
-
-       if(theDStar) delete theDStar;
       }
   }
 
