@@ -20,10 +20,12 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/PatternTools/interface/ClosestApproachInRPhi.h"
+#include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/PatternTools/interface/TSCBLBuilderNoMaterial.h"
+#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
 
 #include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
 #include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
@@ -31,14 +33,24 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/GlobalError.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
+#include "RecoVertex/VertexPrimitives/interface/VertexState.h"
+#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 
 #include <Math/Functions.h>
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
+#include <array>
 #include <TMath.h>
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+
+
+using CC = D04PFitter::CC;
+using CCC = D04PFitter::CCC;
 
 
 // Constructor and (empty) destructor
@@ -124,8 +136,6 @@ D04PFitter::~D04PFitter() {
 void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   using std::vector;
-  using std::cout;
-  using std::endl;
   using namespace reco;
   using namespace edm;
   using namespace std; 
@@ -238,18 +248,16 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
   }
-  std::cout << "Cand track size +/- : " << theTrackRefsNeg.size() << " / " << theTrackRefsPos.size() << std::endl; 
   auto calculateInvariantMassFromTransientTracks = [](
-    const std::vector<reco::TransientTrack*> transientTracks,
-    const std::vector<double>& masses) {
-    if (transientTracks.size() != masses.size()) {
-      throw std::runtime_error("Mismatch between the number of tracks and mass hypotheses.");
-    }
+    const std::array<const reco::TransientTrack*, 4>& transientTracks,
+    const std::array<double, 4>& masses) {
     // Composite 4-momentum
     math::XYZTLorentzVector compositeVector;
     // Loop over transient tracks and compute the total 4-momentum
     for (size_t i = 0; i < transientTracks.size(); ++i) {
-      const reco::TransientTrack& track = *(transientTracks[i]);
+      const auto* trackPtr = transientTracks[i];
+      if (!trackPtr) continue;
+      const reco::TransientTrack& track = *trackPtr;
       double mass = masses[i];
       // Get momentum vector at the closest approach to the beamline
       auto momentum = track.impactPointTSCP().momentum();
@@ -268,54 +276,66 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     return compositeVector.mass();
   };
 
-  int lpcnt = 0;
-  int passlpcnt = 0;
-  // int passlpcnt1 = 0;
-  int passlpcnt2 = 0;
-  int passlpcnt3 = 0;
+  const auto nPosTracks = theTrackRefsPos.size();
+  const auto nNegTracks = theTrackRefsNeg.size();
+
+  if (nPosTracks < 2 || nNegTracks < 2) {
+    return;
+  }
+
+  const auto estimatedComb = static_cast<size_t>((nPosTracks * (nPosTracks - 1)) / 2 *
+                                                 (nNegTracks * (nNegTracks - 1)) / 2);
+  if (estimatedComb > 0 && estimatedComb > theD0s.capacity()) {
+    theD0s.reserve(estimatedComb);
+  }
+
+  static const std::array<double, 4> pionMassHypothesis = {{0.13957, 0.13957, 0.13957, 0.13957}};
+  KinematicParticleFactoryFromTransientTrack pFactory;
+
   // Loop over tracks and vertex good charged track pairs
-  for(unsigned int itrkpos1 = 0; itrkpos1 < theTrackRefsPos.size(); itrkpos1++) {
-    for(unsigned int itrkpos2 = itrkpos1+1; itrkpos2 < theTrackRefsPos.size(); itrkpos2++) {
-      TrackRef ptr1, ptr2;
-      TransientTrack *posPtr1 = 0, *posPtr2 =0;
-      ptr1 = theTrackRefsPos[itrkpos1];
-      ptr2 = theTrackRefsPos[itrkpos2];
-      posPtr1 = &theTransTracksPos[itrkpos1];
-      posPtr2 = &theTransTracksPos[itrkpos2];
-      if( fabs(ptr1->eta() - ptr2->eta())> tkEtaDiffCut) continue;
-      for(unsigned int itrkneg1 = 0; itrkneg1 < theTrackRefsNeg.size(); itrkneg1++) {
-        TrackRef ntr1;
-        TransientTrack *negPtr1 = 0;
-        ntr1 = theTrackRefsNeg[itrkneg1];
-        negPtr1 = &theTransTracksNeg[itrkneg1];
-        if( fabs(ptr1->eta() - ntr1->eta())> tkEtaDiffCut) continue;
-        if( fabs(ptr2->eta() - ntr1->eta())> tkEtaDiffCut) continue;
-        for(unsigned int itrkneg2 = itrkneg1+1; itrkneg2 < theTrackRefsNeg.size(); itrkneg2++) {
+  for(unsigned int itrkpos1 = 0; itrkpos1 < nPosTracks; itrkpos1++) {
+    const TrackRef& ptr1 = theTrackRefsPos[itrkpos1];
+    TransientTrack* posPtr1 = &theTransTracksPos[itrkpos1];
+    const double posEta1 = ptr1->eta();
 
-          TrackRef ntr2;
-          TransientTrack *negPtr2 =0;
+    for(unsigned int itrkpos2 = itrkpos1+1; itrkpos2 < nPosTracks; itrkpos2++) {
+      const TrackRef& ptr2 = theTrackRefsPos[itrkpos2];
+      TransientTrack* posPtr2 = &theTransTracksPos[itrkpos2];
+      const double posEta2 = ptr2->eta();
 
-          KinematicParticleFactoryFromTransientTrack pFactory;
-          ntr2 = theTrackRefsNeg[itrkneg2];
-          negPtr2 = &theTransTracksNeg[itrkneg2];
+      if( fabs(posEta1 - posEta2) > tkEtaDiffCut) continue;
 
-          if( fabs(ptr1->eta() - ntr2->eta())> tkEtaDiffCut) continue;
-          if( fabs(ptr2->eta() - ntr2->eta())> tkEtaDiffCut) continue;
-          if( fabs(ntr2->eta() - ntr1->eta())> tkEtaDiffCut) continue;
+      for(unsigned int itrkneg1 = 0; itrkneg1 < nNegTracks; itrkneg1++) {
+        const TrackRef& ntr1 = theTrackRefsNeg[itrkneg1];
+        TransientTrack* negPtr1 = &theTransTracksNeg[itrkneg1];
+        const double negEta1 = ntr1->eta();
 
-          std::vector<TransientTrack> transTracks;
-          lpcnt++;
-          std::vector<reco::TransientTrack*> transientTracks = {posPtr1, posPtr2, negPtr1, negPtr2};
-          std::vector<double> masses = {0.13957, 0.13957, 0.13957, 0.13957};
-          double d0Mass = calculateInvariantMassFromTransientTracks(transientTracks, masses);
-          if( d0Mass > 2.4) continue;
+        if( fabs(posEta1 - negEta1) > tkEtaDiffCut) continue;
+        if( fabs(posEta2 - negEta1) > tkEtaDiffCut) continue;
 
-          passlpcnt2++;
+        for(unsigned int itrkneg2 = itrkneg1+1; itrkneg2 < nNegTracks; itrkneg2++) {
+          const TrackRef& ntr2 = theTrackRefsNeg[itrkneg2];
+          TransientTrack* negPtr2 = &theTransTracksNeg[itrkneg2];
+          const double negEta2 = ntr2->eta();
+
+          if( fabs(posEta1 - negEta2) > tkEtaDiffCut) continue;
+          if( fabs(posEta2 - negEta2) > tkEtaDiffCut) continue;
+          if( fabs(negEta2 - negEta1) > tkEtaDiffCut) continue;
+
+          const std::array<const reco::TransientTrack*, 4> transientTracks = {{
+            posPtr1,
+            posPtr2,
+            negPtr1,
+            negPtr2
+          }};
+          double d0Mass = calculateInvariantMassFromTransientTracks(transientTracks, pionMassHypothesis);
+          if( d0Mass > 2.1 ) continue;
 
           float chi = 0.0;
           float ndf = 0.0;
 
           vector<RefCountedKinematicParticle> d0Particles;
+          d0Particles.reserve(4);
           d0Particles.push_back(pFactory.particle(*posPtr1,kaonMassD04P,chi,ndf,kaonMassD04P_sigma));
           d0Particles.push_back(pFactory.particle(*posPtr2,piMassD04P,chi,ndf,piMassD04P_sigma));
           d0Particles.push_back(pFactory.particle(*negPtr1,piMassD04P,chi,ndf,piMassD04P_sigma));
@@ -329,7 +349,6 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           d0Vertex->movePointerToTheTop(); // D0
           RefCountedKinematicParticle d0Cand = d0Vertex->currentParticle(); // D0
           if (!d0Cand->currentState().isValid()) continue;
-          passlpcnt3++;
 
           RefCountedKinematicVertex d0DecayVertex = d0Vertex->currentDecayVertex(); // D0 Vtx
           if (!d0DecayVertex->vertexIsValid()) continue;
@@ -373,40 +392,142 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           thePosCand1.setTrack(ptr1);
           RecoChargedCandidate thePosCand2(1, Particle::LorentzVector(posCandTotalP2.x(), posCandTotalP2.y(), posCandTotalP2.z(), posCand2TotalE), d0Vtx);
           thePosCand2.setTrack(ptr2);
-          RecoChargedCandidate theNegCand1(1, Particle::LorentzVector(negCandTotalP1.x(), negCandTotalP1.y(), negCandTotalP1.z(), negCand1TotalE), d0Vtx);
-          theNegCand1.setTrack(ptr1);
-          RecoChargedCandidate theNegCand2(1, Particle::LorentzVector(negCandTotalP2.x(), negCandTotalP2.y(), negCandTotalP2.z(), negCand2TotalE), d0Vtx);
-          theNegCand2.setTrack(ptr2);
+          RecoChargedCandidate theNegCand1(-1, Particle::LorentzVector(negCandTotalP1.x(), negCandTotalP1.y(), negCandTotalP1.z(), negCand1TotalE), d0Vtx);
+          theNegCand1.setTrack(ntr1);
+          RecoChargedCandidate theNegCand2(-1, Particle::LorentzVector(negCandTotalP2.x(), negCandTotalP2.y(), negCandTotalP2.z(), negCand2TotalE), d0Vtx);
+          theNegCand2.setTrack(ntr2);
 
-          std::vector<double> d0VtxEVec;
-          d0VtxEVec.push_back( d0DecayVertex->error().cxx() );
-          d0VtxEVec.push_back( d0DecayVertex->error().cyx() );
-          d0VtxEVec.push_back( d0DecayVertex->error().cyy() );
-          d0VtxEVec.push_back( d0DecayVertex->error().czx() );
-          d0VtxEVec.push_back( d0DecayVertex->error().czy() );
-          d0VtxEVec.push_back( d0DecayVertex->error().czz() );
+          const std::array<double, 6> d0VtxEVec = {{
+            d0DecayVertex->error().cxx(),
+            d0DecayVertex->error().cyx(),
+            d0DecayVertex->error().cyy(),
+            d0DecayVertex->error().czx(),
+            d0DecayVertex->error().czy(),
+            d0DecayVertex->error().czz()
+          }};
           SMatrixSym3D d0VtxCovMatrix(d0VtxEVec.begin(), d0VtxEVec.end());
           const Vertex::CovarianceMatrix d0VtxCov(d0VtxCovMatrix);
           double d0VtxChi2(d0DecayVertex->chiSquared());
           double d0VtxNdof(d0DecayVertex->degreesOfFreedom());
-          double d0NormalizedChi2 = d0VtxChi2/d0VtxNdof;
-          VertexCompositeCandidate* theD0 = 0;
-          theD0 = new VertexCompositeCandidate(0, d0P4, d0Vtx, d0VtxCov, d0VtxChi2, d0VtxNdof);
-          theD0->addDaughter(thePosCand1);
-          theD0->addDaughter(thePosCand2);
-          theD0->addDaughter(theNegCand1);
-          theD0->addDaughter(theNegCand2);
-          theD0s.push_back(*theD0);
-          if(theD0) delete theD0;
-          passlpcnt++;
+          double d0NormalizedChi2 = (d0VtxNdof > 0.) ? d0VtxChi2/d0VtxNdof : -1.;
+
+          GlobalVector d0LineOfFlight(d0Vtx.x() - xVtx,
+                                      d0Vtx.y() - yVtx,
+                                      d0Vtx.z() - zVtx);
+          SMatrixSym3D d0TotalCov = isVtxPV ? (d0VtxCovMatrix + vtxPrimary->covariance())
+                                            : (d0VtxCovMatrix + theBeamSpotHandle->rotatedCovariance3D());
+          SVector3 distanceVector3D(d0LineOfFlight.x(), d0LineOfFlight.y(), d0LineOfFlight.z());
+          SVector3 distanceVector2D(d0LineOfFlight.x(), d0LineOfFlight.y(), 0.0);
+
+          double lVtxMag = d0LineOfFlight.mag();
+          double rVtxMag = d0LineOfFlight.perp();
+          double sigmaLvtxMag = (lVtxMag > 0.) ? std::sqrt(ROOT::Math::Similarity(d0TotalCov, distanceVector3D)) / lVtxMag : -1.;
+          double sigmaRvtxMag = (rVtxMag > 0.) ? std::sqrt(ROOT::Math::Similarity(d0TotalCov, distanceVector2D)) / rVtxMag : -1.;
+
+          double d0Angle3D = angle(d0LineOfFlight.x(), d0LineOfFlight.y(), d0LineOfFlight.z(),
+                                   d0TotalP.x(), d0TotalP.y(), d0TotalP.z());
+          double d0Angle2D = angle(d0LineOfFlight.x(), d0LineOfFlight.y(), 0.f,
+                                   d0TotalP.x(), d0TotalP.y(), 0.f);
+
+          if( d0NormalizedChi2 > chi2Cut ||
+              rVtxMag < rVtxCut ||
+              (sigmaRvtxMag > 0. && rVtxMag / sigmaRvtxMag < rVtxSigCut) ||
+              lVtxMag < lVtxCut ||
+              (sigmaLvtxMag > 0. && lVtxMag / sigmaLvtxMag < lVtxSigCut) ||
+              cos(d0Angle3D) < collinCut3D || cos(d0Angle2D) < collinCut2D ||
+              d0Angle3D > alphaCut || d0Angle2D > alpha2DCut )
+            continue;
+
+          Measurement1D cur3DIP(-1., -1.);
+          double dca = -1.;
+          double dcaError = -1.;
+          if(magField) {
+            AnalyticalImpactPointExtrapolator extrapolator(magField);
+            auto tsos = extrapolator.extrapolate(d0Cand->currentState().freeTrajectoryState(), RecoVertex::convertPos(vtxPrimary->position()));
+            if(tsos.isValid()) {
+              VertexDistance3D a3d;
+              GlobalPoint vertexPosition = RecoVertex::convertPos(vtxPrimary->position());
+              GlobalError vertexPositionErr = RecoVertex::convertError(vtxPrimary->error());
+              cur3DIP = a3d.distance(VertexState(vertexPosition, vertexPositionErr),
+                                     VertexState(tsos.globalPosition(), tsos.cartesianError().position()));
+            }
+          }
+
+          if(posPtr1->impactPointTSCP().isValid() && negPtr1->impactPointTSCP().isValid()) {
+            FreeTrajectoryState posStateDCA = posPtr1->impactPointTSCP().theState();
+            FreeTrajectoryState negStateDCA = negPtr1->impactPointTSCP().theState();
+            TwoTrackMinimumDistance minDistCalculator;
+            if(minDistCalculator.calculate(posStateDCA, negStateDCA)) {
+              dca = minDistCalculator.distance();
+              GlobalPoint cxPt = minDistCalculator.crossingPoint();
+              GlobalError posErr = posStateDCA.cartesianError().position();
+              GlobalError negErr = negStateDCA.cartesianError().position();
+              double sigma_x2 = posErr.cxx() + negErr.cxx();
+              double sigma_y2 = posErr.cyy() + negErr.cyy();
+              if(dca != 0.) {
+                dcaError = std::sqrt(std::max(0.0, sigma_x2 * cxPt.x() * cxPt.x() +
+                                                      sigma_y2 * cxPt.y() * cxPt.y())) / std::abs(dca);
+              }
+            }
+          }
+
+          if(isWrongSign)
+          {
+            thePosCand1.setCharge(ptr1->charge());
+            thePosCand2.setCharge(ptr2->charge());
+            theNegCand1.setCharge(ntr1->charge());
+            theNegCand2.setCharge(ntr2->charge());
+          }
+
+          auto theD0 = std::make_unique<CC>();
+          theD0->setP4(d0P4);
+          theD0->setCharge(0);
+          const int pdgId = isWrongSign ? -421 : 421;
+          theD0->setPdgId(pdgId);
+          theD0->setVertex(reco::Candidate::Point(d0Vtx.x(), d0Vtx.y(), d0Vtx.z()));
+
+          AddFourMomenta addp4;
+          theD0->addDaughter(thePosCand1, "dau1");
+          theD0->addDaughter(thePosCand2, "dau2");
+          theD0->addDaughter(theNegCand1, "dau3");
+          theD0->addDaughter(theNegCand2, "dau4");
+          addp4.set(*theD0);
+
+          if (std::abs(theD0->mass() - d0MassD04P) > d0MassCut) {
+            continue;
+          }
+
+          reco::Vertex d0VtxObj = *d0DecayVertex;
+          theD0->addUserData("Vtx", d0VtxObj);
+          theD0->addUserFloat("VtxChi2", d0VtxChi2);
+          theD0->addUserFloat("VtxNdof", d0VtxNdof);
+          theD0->addUserFloat("vertexChi2", d0VtxChi2);
+          theD0->addUserFloat("vertexNdof", d0VtxNdof);
+          theD0->addUserFloat("vertexNormalizedChi2", d0NormalizedChi2);
+          theD0->addUserFloat("alpha3D", d0Angle3D);
+          theD0->addUserFloat("alpha2D", d0Angle2D);
+          theD0->addUserFloat("decaylength3D", lVtxMag);
+          theD0->addUserFloat("decaylength2D", rVtxMag);
+          theD0->addUserFloat("decaylengthsignif3D", (sigmaLvtxMag > 0.) ? lVtxMag / sigmaLvtxMag : -1.f);
+          theD0->addUserFloat("decaylengthsignif2D", (sigmaRvtxMag > 0.) ? rVtxMag / sigmaRvtxMag : -1.f);
+          theD0->addUserFloat("dca3D", cur3DIP.value());
+          theD0->addUserFloat("dca3DErr", cur3DIP.error());
+          theD0->addUserFloat("track3DDCA", dca);
+          theD0->addUserFloat("track3DDCAErr", dcaError);
+
+          if(useAnyMVA_)
+          {
+            // Placeholder: dedicated 4-prong training not yet provided.
+            mvaVals_.push_back(0.f);
+          }
+
+          theD0s.emplace_back(std::move(*theD0));
 
         }
       }
     }
   }
 
-  std::cout << "Loop count (pass/total): " << passlpcnt << " / " << lpcnt << std::endl; //DEBUG
-  std::cout << "Loop count (mass cut/vtx cut): " << passlpcnt2 << " / " << passlpcnt3 << std::endl; //DEBUG
 
 
 
@@ -753,7 +874,7 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& D04PFitter::getD0() const {
+const D04PFitter::CCC& D04PFitter::getD0() const {
   return theD0s;
 }
 

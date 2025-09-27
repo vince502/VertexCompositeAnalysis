@@ -52,6 +52,9 @@
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
+using CC = DStar5PFitter::CC;
+using CCC = DStar5PFitter::CCC;
+
 static const float piMassDStar = 0.13957018;
 static const float piMassDStarSquared = piMassDStar*piMassDStar;
 static const float dStarMassDStar = 2.010000;
@@ -68,7 +71,7 @@ DStar5PFitter::DStar5PFitter(const edm::ParameterSet& theParameters,  edm::Consu
 
   // Get the track reco algorithm from the ParameterSet
   token_beamSpot = iC.consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
-  token_d0cand = iC.consumes<reco::VertexCompositeCandidateCollection>(theParameters.getParameter<edm::InputTag>("d0Collection"));
+  token_d0cand = iC.consumes<CCC>(theParameters.getParameter<edm::InputTag>("d0Collection"));
   token_tracks = iC.consumes<reco::TrackCollection>(theParameters.getParameter<edm::InputTag>("trackRecoAlgorithm"));
   token_vertices = iC.consumes<reco::VertexCollection>(theParameters.getParameter<edm::InputTag>("vertexRecoAlgorithm"));
   token_dedx = iC.consumes<edm::ValueMap<reco::DeDxData> >(edm::InputTag("dedxHarmonic2"));
@@ -161,7 +164,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   // Handles for tracks, B-field, and tracker geometry
   Handle<reco::TrackCollection> theTrackHandle;
   Handle<reco::VertexCollection> theVertexHandle;
-  Handle<reco::VertexCompositeCandidateCollection> theD0Handle;
+  Handle<CCC> theD0Handle;
   Handle<reco::BeamSpot> theBeamSpotHandle;
   ESHandle<MagneticField> bFieldHandle;
   Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle;
@@ -276,7 +279,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       TrackRef pionTrackRef = theTrackRefs[trdx1];
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
-      VertexCompositeCandidate theD0 = (*theD0Handle)[didx1];
+      const CC& theD0 = theD0Handle->at(didx1);
 
       // if( !pionTransTkPtr->impactPointStateAvailable()) continue;
       const auto& D0Vec = theD0.p4();
@@ -292,18 +295,24 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
        //Creating a KinematicParticleFactory
        KinematicParticleFactoryFromTransientTrack pFactory;
        vector<RefCountedKinematicParticle> d0Daus;
-       reco::Candidate* dau0 = theD0.daughter(0);
-       reco::Candidate* dau1 = theD0.daughter(1);
-       reco::Candidate* dau2 = theD0.daughter(2);
-       reco::Candidate* dau3 = theD0.daughter(3);
-       reco::TransientTrack ttk0(*dau0->bestTrack(), magField);
-       reco::TransientTrack ttk1(*dau1->bestTrack(), magField);
-       reco::TransientTrack ttk2(*dau2->bestTrack(), magField);
-       reco::TransientTrack ttk3(*dau3->bestTrack(), magField);
-       if(fabs(thePiTrack.eta() - dau0->bestTrack()->eta()) < 0.03) continue;
-       if(fabs(thePiTrack.eta() - dau1->bestTrack()->eta()) < 0.03) continue;
-       if(fabs(thePiTrack.eta() - dau2->bestTrack()->eta()) < 0.03) continue;
-       if(fabs(thePiTrack.eta() - dau3->bestTrack()->eta()) < 0.03) continue;
+       const reco::Candidate* dau0 = theD0.daughter(0);
+       const reco::Candidate* dau1 = theD0.daughter(1);
+       const reco::Candidate* dau2 = theD0.daughter(2);
+       const reco::Candidate* dau3 = theD0.daughter(3);
+       if(!dau0 || !dau1 || !dau2 || !dau3) continue;
+       const reco::Track* trk0 = dau0->bestTrack();
+       const reco::Track* trk1 = dau1->bestTrack();
+       const reco::Track* trk2 = dau2->bestTrack();
+       const reco::Track* trk3 = dau3->bestTrack();
+       if(!trk0 || !trk1 || !trk2 || !trk3) continue;
+       reco::TransientTrack ttk0(*trk0, magField);
+       reco::TransientTrack ttk1(*trk1, magField);
+       reco::TransientTrack ttk2(*trk2, magField);
+       reco::TransientTrack ttk3(*trk3, magField);
+       if(fabs(thePiTrack.eta() - trk0->eta()) < 0.03) continue;
+       if(fabs(thePiTrack.eta() - trk1->eta()) < 0.03) continue;
+       if(fabs(thePiTrack.eta() - trk2->eta()) < 0.03) continue;
+       if(fabs(thePiTrack.eta() - trk3->eta()) < 0.03) continue;
        d0Daus.push_back(pFactory.particle(ttk0,dau0->mass(),chi,ndf,D0MassD0_sigma));
        d0Daus.push_back(pFactory.particle(ttk1,dau1->mass(),chi,ndf,D0MassD0_sigma));
        d0Daus.push_back(pFactory.particle(ttk2,dau2->mass(),chi,ndf,D0MassD0_sigma));
@@ -369,7 +378,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
        const Vertex::CovarianceMatrix dStarVtxCov(dStarVtxCovMatrix);
        double dStarVtxChi2(dStarDecayVertex->chiSquared());
        double dStarVtxNdof(dStarDecayVertex->degreesOfFreedom());
-       double dStarNormalizedChi2 = dStarVtxChi2/dStarVtxNdof;
+       double dStarNormalizedChi2 = (dStarVtxNdof > 0.) ? dStarVtxChi2 / dStarVtxNdof : -1.;
 
        double rVtxMag = 99999.0; 
        double lVtxMag = 99999.0;
@@ -417,68 +426,54 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
            cos(dStarAngle3D) < collinCut3D || cos(dStarAngle2D) < collinCut2D || dStarAngle3D > alphaCut || dStarAngle2D > alpha2DCut
        ) continue;
 
-       VertexCompositeCandidate* theDStar = 0;
-       theDStar = new VertexCompositeCandidate(theTrackRefs[trdx1]->charge(), dStarP4, dStarVtx, dStarVtxCov, dStarVtxChi2, dStarVtxNdof);
+       auto theDStar = std::make_unique<CC>();
+       const int charge = theTrackRefs[trdx1]->charge();
+       theDStar->setP4(dStarP4);
+       theDStar->setCharge(charge);
+       theDStar->setPdgId(charge * 413);
+       theDStar->setVertex(reco::Candidate::Point(dStarVtx.x(), dStarVtx.y(), dStarVtx.z()));
 
        RecoChargedCandidate
-         theNegCand(theTrackRefs[trdx1]->charge(), Particle::LorentzVector(negCandTotalP.x(),
+         theNegCand(charge, Particle::LorentzVector(negCandTotalP.x(),
                                                   negCandTotalP.y(), negCandTotalP.z(),
                                                   negCandTotalE), dStarVtx);
        theNegCand.setTrack(pionTrackRef);
 
        AddFourMomenta addp4;
-       theDStar->addDaughter(theD0);
-       theDStar->addDaughter(theNegCand);
-       int pdgId = (int) theTrackRefs[trdx1]->charge() * 413;
-       theDStar->setPdgId(pdgId);
-       addp4.set( *theDStar );
-       if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
-           theDStar->mass() > dStarMassDStar - dStarMassCut ) 
+       theDStar->addDaughter(theD0, "D0");
+       theDStar->addDaughter(theNegCand, "slowPi");
+       addp4.set(*theDStar);
+
+       if( std::abs(theDStar->mass() - dStarMassDStar) <= dStarMassCut )
        {
-         theDStars.push_back( *theDStar );
+         const math::XYZPoint dStarXYZ(dStarVtx.x(), dStarVtx.y(), dStarVtx.z());
+         reco::Vertex dStarVtxObj(dStarXYZ, dStarVtxCov, dStarVtxChi2, dStarVtxNdof, theDStar->numberOfDaughters());
+         theDStar->addUserData("Vtx", dStarVtxObj);
+         theDStar->addUserFloat("VtxChi2", dStarVtxChi2);
+         theDStar->addUserFloat("VtxNdof", dStarVtxNdof);
+         theDStar->addUserFloat("vertexChi2", dStarVtxChi2);
+         theDStar->addUserFloat("vertexNdof", dStarVtxNdof);
+         theDStar->addUserFloat("vertexNormalizedChi2", dStarNormalizedChi2);
+         theDStar->addUserFloat("alpha3D", dStarAngle3D);
+         theDStar->addUserFloat("alpha2D", dStarAngle2D);
+         theDStar->addUserFloat("decaylength3D", lVtxMag);
+         theDStar->addUserFloat("decaylength2D", rVtxMag);
+         theDStar->addUserFloat("decaylengthsignif3D", (sigmaLvtxMag > 0.) ? lVtxMag / sigmaLvtxMag : -1.f);
+         theDStar->addUserFloat("decaylengthsignif2D", (sigmaRvtxMag > 0.) ? rVtxMag / sigmaRvtxMag : -1.f);
+         theDStar->addUserFloat("dca3D", cur3DIP.value());
+         theDStar->addUserFloat("dca3DErr", cur3DIP.error());
+         theDStar->addUserFloat("deltaM", theDStar->mass() - D0Vec.M());
+
+         theDStars.emplace_back(std::move(*theDStar));
          dcaVals_.push_back(cur3DIP.value());
          dcaErrs_.push_back(cur3DIP.error());
-         detlaM_.push_back( (theDStar->mass() - D0Vec.M()));
-//if(theDStar->pt()<4){cout <<"Dstar pt : " <<theDStar->pt()<<endl;}
+         detlaM_.push_back( theDStars.back().mass() - D0Vec.M());
 
-// per//form MVA evaluation
          if(useAnyMVA_)
          {
-      //    //   float gbrVals_[20];
-      //    //   gbrVals_[0] = d0P4.Pt();
-      //    //   gbrVals_[1] = d0P4.Eta();
-      //    //   gbrVals_[2] = d0C2Prob;
-      //    //   gbrVals_[3] = lVtxMag / sigmaLvtxMag;
-      //    //   gbrVals_[4] = rVtxMag / sigmaRvtxMag;
-      //    //   gbrVals_[5] = lVtxMag;
-      //    //   gbrVals_[6] = d0Angle3D;
-      //    //   gbrVals_[7] = d0Angle2D;
-      //    //   gbrVals_[8] = dauLongImpactSig_pos;
-      //    //   gbrVals_[9] = dauLongImpactSig_neg;
-      //    //   gbrVals_[10] = dauTransImpactSig_pos;
-      //    //   gbrVals_[11] = dauTransImpactSig_neg;
-      //    //   gbrVals_[12] = nhits_pos;
-      //    //   gbrVals_[13] = nhits_neg;
-      //    //   gbrVals_[14] = ptErr_pos;
-      //    //   gbrVals_[15] = ptErr_neg;
-      //    //   gbrVals_[16] = posCandTotalP.perp();
-      //    //   gbrVals_[17] = negCandTotalP.perp();
-      //    //   gbrVals_[18] = posCandTotalP.eta();
-      //    //   gbrVals_[19] = negCandTotalP.eta();
-
-      //    //   GBRForest const * forest = forest_;
-      //    //   if(useForestFromDB_){
-      //    //     edm::ESHandle<GBRForest> forestHandle;
-      //    //     iSetup.get<GBRWrapperRcd>().get(forestLabel_,forestHandle);
-      //    //     forest = forestHandle.product();
-      //    //   }
-
-      //    //   auto gbrVal = forest->GetClassifier(gbrVals_);
-      //    //   mvaVals_.push_back(gbrVal);
+           mvaVals_.push_back(0.f);
          }
        }
-
-       if(theDStar) delete theDStar;
       }
   }
 
@@ -489,7 +484,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 }
 // Get methods
 
-const reco::VertexCompositeCandidateCollection& DStar5PFitter::getDStar() const {
+const DStar5PFitter::CCC& DStar5PFitter::getDStar() const {
   return theDStars;
 }
 

@@ -29,7 +29,7 @@ DStar5PProducer::DStar5PProducer(const edm::ParameterSet& iConfig) :
   useAnyMVA_ = false;
   if(iConfig.exists("useAnyMVA")) useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
  
-  produces< reco::VertexCompositeCandidateCollection >("DStar5P");
+  produces< DStar5PProducer::CCC >("DStar5P");
   if(useAnyMVA_) produces<MVACollection>("MVAValuesDStar5P");
   produces<std::vector<float> >("DCAValuesDStar5P");
   produces<std::vector<float> >("DCAErrorsDStar5P");
@@ -58,7 +58,7 @@ void DStar5PProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 //   std::auto_ptr< reco::VertexCompositeCandidateCollection >
 //     d0Candidates( new reco::VertexCompositeCandidateCollection );
 //
-   auto d0Candidates = std::make_unique<reco::VertexCompositeCandidateCollection>();
+   auto d0Candidates = std::make_unique<DStar5PProducer::CCC>();
    d0Candidates->reserve( theVees.getDStar().size() );
 
    std::copy( theVees.getDStar().begin(),

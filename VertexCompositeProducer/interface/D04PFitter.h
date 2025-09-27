@@ -45,7 +45,7 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/VolumeBasedEngine/interface/VolumeBasedMagneticField.h"
 
-#include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/Math/interface/angle.h"
 #include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
@@ -81,8 +81,11 @@ class D04PFitter {
 
   void fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
-  // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
-  const reco::VertexCompositeCandidateCollection& getD0() const;
+  using CC = pat::CompositeCandidate;
+  using CCC = pat::CompositeCandidateCollection;
+
+  // Switching to PAT composite candidates for storage
+  const CCC& getD0() const;
   const std::vector<float>& getMVAVals() const; 
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
@@ -90,7 +93,7 @@ class D04PFitter {
 
  private:
   // STL vector of VertexCompositeCandidate that will be filled with VertexCompositeCandidates by fitAll()
-  reco::VertexCompositeCandidateCollection theD0s;
+  CCC theD0s;
 
   // Tracker geometry for discerning hit positions
   const TrackerGeometry* trackerGeom;

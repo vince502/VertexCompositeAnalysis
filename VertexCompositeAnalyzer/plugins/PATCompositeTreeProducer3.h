@@ -74,8 +74,6 @@
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
 
-// Validation utility for debugging and testing
-#include "ValidationUtility.h"
 
 //#define DEBUG true
 
@@ -165,9 +163,6 @@ private:
   // Strict D* → D0 + π → K + π + π decay chain validation
   bool isValidDStarDecayChain(const reco::Candidate* Dd1, const reco::Candidate* Dd2) const;
   
-  // Validation and debugging functions (delegated to ValidationUtility)
-  void performSelfDiagnostics() const;
-
   void genDecayLength(const uint&, const reco::GenParticle&) const;
 
   bool matchHadron(const reco::Candidate* _dmeson_, const reco::GenParticle& _gen_, bool isMatchD0) const;
