@@ -81,6 +81,9 @@ private:
   std::array<int, 4> dauCharge_{};
   std::array<float, 4> dauDxy_{};
   std::array<float, 4> dauDz_{};
+  std::array<float, 4> dauD3d_{};
+
+  std::array<float, 6> pairDca_{};
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <vector>
 
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
@@ -117,12 +118,47 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("pca_lambda2", &candLambda2_, "pca_lambda2/F");
   tree_->Branch("pca_lambda3", &candLambda3_, "pca_lambda3/F");
 
-  tree_->Branch("pi_pt", dauPt_.data(), "pi_pt[4]/F");
-  tree_->Branch("pi_eta", dauEta_.data(), "pi_eta[4]/F");
-  tree_->Branch("pi_phi", dauPhi_.data(), "pi_phi[4]/F");
-  tree_->Branch("pi_charge", dauCharge_.data(), "pi_charge[4]/I");
-  tree_->Branch("pi_dxy", dauDxy_.data(), "pi_dxy[4]/F");
-  tree_->Branch("pi_dz", dauDz_.data(), "pi_dz[4]/F");
+  tree_->Branch("pi1_pt", &dauPt_[0], "pi1_pt/F");
+  tree_->Branch("pi2_pt", &dauPt_[1], "pi2_pt/F");
+  tree_->Branch("pi3_pt", &dauPt_[2], "pi3_pt/F");
+  tree_->Branch("pi4_pt", &dauPt_[3], "pi4_pt/F");
+
+  tree_->Branch("pi1_eta", &dauEta_[0], "pi1_eta/F");
+  tree_->Branch("pi2_eta", &dauEta_[1], "pi2_eta/F");
+  tree_->Branch("pi3_eta", &dauEta_[2], "pi3_eta/F");
+  tree_->Branch("pi4_eta", &dauEta_[3], "pi4_eta/F");
+
+  tree_->Branch("pi1_phi", &dauPhi_[0], "pi1_phi/F");
+  tree_->Branch("pi2_phi", &dauPhi_[1], "pi2_phi/F");
+  tree_->Branch("pi3_phi", &dauPhi_[2], "pi3_phi/F");
+  tree_->Branch("pi4_phi", &dauPhi_[3], "pi4_phi/F");
+
+  tree_->Branch("pi1_charge", &dauCharge_[0], "pi1_charge/I");
+  tree_->Branch("pi2_charge", &dauCharge_[1], "pi2_charge/I");
+  tree_->Branch("pi3_charge", &dauCharge_[2], "pi3_charge/I");
+  tree_->Branch("pi4_charge", &dauCharge_[3], "pi4_charge/I");
+
+  tree_->Branch("pi1_dxy", &dauDxy_[0], "pi1_dxy/F");
+  tree_->Branch("pi2_dxy", &dauDxy_[1], "pi2_dxy/F");
+  tree_->Branch("pi3_dxy", &dauDxy_[2], "pi3_dxy/F");
+  tree_->Branch("pi4_dxy", &dauDxy_[3], "pi4_dxy/F");
+
+  tree_->Branch("pi1_dz", &dauDz_[0], "pi1_dz/F");
+  tree_->Branch("pi2_dz", &dauDz_[1], "pi2_dz/F");
+  tree_->Branch("pi3_dz", &dauDz_[2], "pi3_dz/F");
+  tree_->Branch("pi4_dz", &dauDz_[3], "pi4_dz/F");
+
+  tree_->Branch("pi1_d3d", &dauD3d_[0], "pi1_d3d/F");
+  tree_->Branch("pi2_d3d", &dauD3d_[1], "pi2_d3d/F");
+  tree_->Branch("pi3_d3d", &dauD3d_[2], "pi3_d3d/F");
+  tree_->Branch("pi4_d3d", &dauD3d_[3], "pi4_d3d/F");
+
+  tree_->Branch("dca_12", &pairDca_[0], "dca_12/F");
+  tree_->Branch("dca_13", &pairDca_[1], "dca_13/F");
+  tree_->Branch("dca_14", &pairDca_[2], "dca_14/F");
+  tree_->Branch("dca_23", &pairDca_[3], "dca_23/F");
+  tree_->Branch("dca_24", &pairDca_[4], "dca_24/F");
+  tree_->Branch("dca_34", &pairDca_[5], "dca_34/F");
 }
 
 void ChiCFlatNtuplizer::resetBranches() {
@@ -149,6 +185,9 @@ void ChiCFlatNtuplizer::resetBranches() {
   dauCharge_.fill(0);
   dauDxy_.fill(0.f);
   dauDz_.fill(0.f);
+  dauD3d_.fill(0.f);
+
+  pairDca_.fill(0.f);
 }
 
 void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -204,15 +243,19 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     candD3D_ = -1.f;
   }
 
-  std::array<const reco::Candidate*, 4> daughters{{nullptr, nullptr, nullptr, nullptr}};
-  const unsigned int nDau = std::min<unsigned int>(4, cand.numberOfDaughters());
-  for (unsigned int i = 0; i < nDau; ++i) {
+  struct DaughterInfo {
+    const reco::Candidate* cand{nullptr};
+    const reco::Track* track{nullptr};
+    double pt{0.0};
+  };
+
+  std::vector<DaughterInfo> daughters;
+  daughters.reserve(4);
+  const unsigned int totalDau = cand.numberOfDaughters();
+  for (unsigned int i = 0; i < totalDau; ++i) {
     const auto* dau = cand.daughter(i);
-    daughters[i] = dau;
-    dauPt_[i] = static_cast<float>(dau->pt());
-    dauEta_[i] = static_cast<float>(dau->eta());
-    dauPhi_[i] = static_cast<float>(dau->phi());
-    dauCharge_[i] = dau->charge();
+    if (!dau)
+      continue;
 
     const reco::Track* trackPtr = nullptr;
     if (const auto* recoDau = dynamic_cast<const reco::RecoChargedCandidate*>(dau)) {
@@ -223,19 +266,62 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     if (!trackPtr)
       trackPtr = dau->bestTrack();
 
-    if (trackPtr && primaryVertex) {
-      dauDxy_[i] = static_cast<float>(trackPtr->dxy(primaryVertex->position()));
-      dauDz_[i] = static_cast<float>(trackPtr->dz(primaryVertex->position()));
+    daughters.push_back({dau, trackPtr, dau->pt()});
+  }
+
+  std::sort(daughters.begin(), daughters.end(), [](const DaughterInfo& lhs, const DaughterInfo& rhs) {
+    return lhs.pt > rhs.pt;
+  });
+
+  if (daughters.size() > 4)
+    daughters.resize(4);
+
+  std::array<const reco::Candidate*, 4> orderedDaughters{{nullptr, nullptr, nullptr, nullptr}};
+  for (std::size_t i = 0; i < daughters.size(); ++i) {
+    const auto& info = daughters[i];
+    orderedDaughters[i] = info.cand;
+
+    dauPt_[i] = static_cast<float>(info.cand->pt());
+    dauEta_[i] = static_cast<float>(info.cand->eta());
+    dauPhi_[i] = static_cast<float>(info.cand->phi());
+    dauCharge_[i] = info.cand->charge();
+
+    if (info.track && primaryVertex) {
+      const auto& pvPos = primaryVertex->position();
+      const double dxy = info.track->dxy(pvPos);
+      const double dz = info.track->dz(pvPos);
+      dauDxy_[i] = static_cast<float>(dxy);
+      dauDz_[i] = static_cast<float>(dz);
+      dauD3d_[i] = static_cast<float>(std::sqrt(dxy * dxy + dz * dz));
     } else {
       dauDxy_[i] = 0.f;
       dauDz_[i] = 0.f;
+      dauD3d_[i] = 0.f;
     }
   }
+
+  const auto computePairDistance = [](const reco::Candidate* first, const reco::Candidate* second) {
+    if (!first || !second)
+      return 0.f;
+    const auto& v1 = first->vertex();
+    const auto& v2 = second->vertex();
+    const double dx = v1.x() - v2.x();
+    const double dy = v1.y() - v2.y();
+    const double dz = v1.z() - v2.z();
+    return static_cast<float>(std::sqrt(dx * dx + dy * dy + dz * dz));
+  };
+
+  pairDca_[0] = computePairDistance(orderedDaughters[0], orderedDaughters[1]);
+  pairDca_[1] = computePairDistance(orderedDaughters[0], orderedDaughters[2]);
+  pairDca_[2] = computePairDistance(orderedDaughters[0], orderedDaughters[3]);
+  pairDca_[3] = computePairDistance(orderedDaughters[1], orderedDaughters[2]);
+  pairDca_[4] = computePairDistance(orderedDaughters[1], orderedDaughters[3]);
+  pairDca_[5] = computePairDistance(orderedDaughters[2], orderedDaughters[3]);
 
   if (cand.hasUserFloat("acoplanarity")) {
     candAcoplanarity_ = cand.userFloat("acoplanarity");
   } else {
-    candAcoplanarity_ = static_cast<float>(computeAcoplanarity(daughters[0], daughters[1]));
+    candAcoplanarity_ = static_cast<float>(computeAcoplanarity(orderedDaughters[0], orderedDaughters[1]));
   }
 
   if (cand.hasUserFloat("sphericity") && cand.hasUserFloat("pca_lambda1")) {
@@ -244,7 +330,7 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     candLambda2_ = cand.userFloat("pca_lambda2");
     candLambda3_ = cand.userFloat("pca_lambda3");
   } else {
-    const auto es = computeEventShape(daughters);
+    const auto es = computeEventShape(orderedDaughters);
     candSphericity_ = static_cast<float>(es.sphericity);
     candLambda1_ = static_cast<float>(es.eigenvalues[0]);
     candLambda2_ = static_cast<float>(es.eigenvalues[1]);
