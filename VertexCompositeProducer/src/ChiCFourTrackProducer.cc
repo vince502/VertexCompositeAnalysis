@@ -9,11 +9,16 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
+
+#include <Eigen/Dense>
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <functional>
 #include <iterator>
+#include <limits>
 #include <memory>
 
 namespace {
@@ -38,6 +43,41 @@ bool hasTwoPositiveTwoNegative(const std::array<int, 4>& charges) {
   }
   return (nPos == 2 && nNeg == 2);
 }
+
+double computeSphericity(const std::array<reco::RecoChargedCandidate, 4>& daughters) {
+  Eigen::Matrix3d tensor = Eigen::Matrix3d::Zero();
+  double sumP2 = 0.0;
+  for (const auto& dau : daughters) {
+    Eigen::Vector3d p(dau.px(), dau.py(), dau.pz());
+    tensor += p * p.transpose();
+    sumP2 += p.squaredNorm();
+  }
+
+  if (sumP2 <= 0.0)
+    return 0.0;
+
+  tensor /= sumP2;
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigenSolver(tensor);
+  if (eigenSolver.info() != Eigen::Success)
+    return 0.0;
+
+  std::array<double, 3> eigenvalues{{eigenSolver.eigenvalues()(0), eigenSolver.eigenvalues()(1), eigenSolver.eigenvalues()(2)}};
+  std::sort(eigenvalues.begin(), eigenvalues.end(), std::greater<double>());
+  return 1.5 * (eigenvalues[1] + eigenvalues[2]);
+}
+
+double computeAcoplanarity(const std::array<reco::RecoChargedCandidate, 4>& daughters) {
+  std::array<std::pair<double, std::size_t>, 4> ptIndex;
+  for (std::size_t idx = 0; idx < daughters.size(); ++idx) {
+    ptIndex[idx] = std::make_pair(daughters[idx].pt(), idx);
+  }
+  std::sort(ptIndex.begin(), ptIndex.end(), [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
+
+  const auto& lead = daughters[ptIndex[0].second];
+  const auto& sublead = daughters[ptIndex[1].second];
+  const double deltaPhi = reco::deltaPhi(lead.phi(), sublead.phi());
+  return 1.0 - std::abs(deltaPhi) / M_PI;
+}
 }
 
 ChiCFourTrackProducer::ChiCFourTrackProducer(const edm::ParameterSet& cfg)
@@ -48,7 +88,9 @@ ChiCFourTrackProducer::ChiCFourTrackProducer(const edm::ParameterSet& cfg)
     maxTrackChi2_(cfg.getParameter<double>("maxTrackNormalizedChi2")),
     minTrackNHits_(cfg.getParameter<int>("minTrackNHits")),
     applyMassWindow_(cfg.getParameter<bool>("applyMassWindow")),
-    minCandidatePt_(cfg.getParameter<double>("minCandidatePt"))
+    minCandidatePt_(cfg.getParameter<double>("minCandidatePt")),
+    minAcoplanarity_(cfg.getParameter<double>("minAcoplanarity")),
+    maxSphericity_(cfg.getParameter<double>("maxSphericity"))
 {
   if (daughterMasses_.empty()) {
     throw cms::Exception("InvalidConfiguration") << "Parameter 'daughterMasses' must contain at least one value.";
@@ -104,6 +146,8 @@ void ChiCFourTrackProducer::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   AddFourMomenta addP4;
+  const bool applyAcoplanarityCut = (minAcoplanarity_ > 0.0);
+  const bool applySphericityCut = (maxSphericity_ >= 0.0 && maxSphericity_ < std::numeric_limits<double>::infinity());
 
   const auto massForIndex = [this](unsigned int index) {
     if (daughterMasses_.size() == 1)
@@ -162,6 +206,18 @@ void ChiCFourTrackProducer::produce(edm::Event& event, const edm::EventSetup&) {
             if (applyMassWindow_) {
               if (mass < state.mass - state.massWindow || mass > state.mass + state.massWindow)
                 continue;
+            }
+
+            if (applyAcoplanarityCut || applySphericityCut) {
+              const double acoplanarity = computeAcoplanarity(daughters);
+              if (applyAcoplanarityCut && acoplanarity < minAcoplanarity_)
+                continue;
+
+              if (applySphericityCut) {
+                const double sphericity = computeSphericity(daughters);
+                if (sphericity > maxSphericity_)
+                  continue;
+              }
             }
 
             outputs[stateIdx]->push_back(*chi);

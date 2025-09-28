@@ -46,6 +46,8 @@ private:
   int minTrackNHits_;
   bool applyMassWindow_;
   double minCandidatePt_;
+  double minAcoplanarity_;
+  double maxSphericity_;
 
   std::vector<ChiStateConfig> states_;
 };

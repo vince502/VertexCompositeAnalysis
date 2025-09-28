@@ -12,6 +12,8 @@ ChiC2To4K.minTrackNHits = cms.int32(6)
 
 # Candidate-level cuts
 ChiC2To4K.minCandidatePt = cms.double(1.5)
+ChiC2To4K.minAcoplanarity = cms.double(0.0)
+ChiC2To4K.maxSphericity = cms.double(1.5)
 ChiC2To4K.applyMassWindow = cms.bool(True)
 
 # Resonance definitions

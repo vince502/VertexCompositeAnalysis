@@ -68,20 +68,22 @@ process.ChiCTo4Pi.minTrackPt = cms.double(1.5)
 process.ChiCTo4Pi.maxTrackEta = cms.double(2.4)
 process.ChiCTo4Pi.maxTrackNormalizedChi2 = cms.double(10.0)
 process.ChiCTo4Pi.minTrackNHits = cms.int32(6)
-process.ChiCTo4Pi.minCandidatePt = cms.double(1.0)
+process.ChiCTo4Pi.minCandidatePt = cms.double(3.5)
+process.ChiCTo4Pi.minAcoplanarity = cms.double(0.6)
+process.ChiCTo4Pi.maxSphericity = cms.double(0.35)
 process.ChiCTo4Pi.applyMassWindow = cms.bool(True)
 process.ChiCTo4Pi.states = cms.VPSet(
     cms.PSet(
         name=cms.string('ChiC0'),
         pdgId=cms.int32(10441),
         mass=cms.double(3.4147),
-        massWindow=cms.double(0.080)
+        massWindow=cms.double(0.025)
     ),
     cms.PSet(
         name=cms.string('ChiC2'),
         pdgId=cms.int32(445),
         mass=cms.double(3.5562),
-        massWindow=cms.double(0.080)
+        massWindow=cms.double(0.025)
     )
 )
 process.ChiC2To4K = _ChiC2To4K.clone()
@@ -91,6 +93,8 @@ process.ChiC2To4K.maxTrackEta = cms.double(2.4)
 process.ChiC2To4K.maxTrackNormalizedChi2 = cms.double(10.0)
 process.ChiC2To4K.minTrackNHits = cms.int32(6)
 process.ChiC2To4K.minCandidatePt = cms.double(0.0)
+process.ChiC2To4K.minAcoplanarity = cms.double(0.0)
+process.ChiC2To4K.maxSphericity = cms.double(1.5)
 process.ChiC2To4K.applyMassWindow = cms.bool(True)
 process.ChiC2To4K.states = cms.VPSet(
     cms.PSet(

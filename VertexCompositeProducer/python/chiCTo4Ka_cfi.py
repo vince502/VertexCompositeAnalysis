@@ -9,6 +9,8 @@ ChiCTo4Ka = cms.EDProducer(
     maxTrackNormalizedChi2 = cms.double(10.0),
     minTrackNHits = cms.int32(6),
     minCandidatePt = cms.double(1.5),
+    minAcoplanarity = cms.double(0.0),
+    maxSphericity = cms.double(1.5),
     applyMassWindow = cms.bool(True),
     states = cms.VPSet(
         cms.PSet(
