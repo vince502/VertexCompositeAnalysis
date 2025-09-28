@@ -14,6 +14,8 @@ ChiC2To4K.minTrackNHits = cms.int32(6)
 ChiC2To4K.minCandidatePt = cms.double(1.5)
 ChiC2To4K.minAcoplanarity = cms.double(0.0)
 ChiC2To4K.maxSphericity = cms.double(1.5)
+ChiC2To4K.maxCandidateAbsEta = cms.double(2.4)
+ChiC2To4K.storeEventShape = cms.bool(False)
 ChiC2To4K.applyMassWindow = cms.bool(True)
 
 # Resonance definitions

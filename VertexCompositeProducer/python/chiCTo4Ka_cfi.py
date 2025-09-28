@@ -11,6 +11,8 @@ ChiCTo4Ka = cms.EDProducer(
     minCandidatePt = cms.double(1.5),
     minAcoplanarity = cms.double(0.0),
     maxSphericity = cms.double(1.5),
+    maxCandidateAbsEta = cms.double(2.4),
+    storeEventShape = cms.bool(False),
     applyMassWindow = cms.bool(True),
     states = cms.VPSet(
         cms.PSet(

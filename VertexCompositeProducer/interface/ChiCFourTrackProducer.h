@@ -48,6 +48,8 @@ private:
   double minCandidatePt_;
   double minAcoplanarity_;
   double maxSphericity_;
+  double maxCandidateAbsEta_;
+  bool storeEventShape_;
 
   std::vector<ChiStateConfig> states_;
 };

@@ -44,7 +44,13 @@ bool hasTwoPositiveTwoNegative(const std::array<int, 4>& charges) {
   return (nPos == 2 && nNeg == 2);
 }
 
-double computeSphericity(const std::array<reco::RecoChargedCandidate, 4>& daughters) {
+struct EventShapeResult {
+  double sphericity{0.0};
+  std::array<double, 3> eigenvalues{{0.0, 0.0, 0.0}};
+};
+
+EventShapeResult computeEventShape(const std::array<reco::RecoChargedCandidate, 4>& daughters) {
+  EventShapeResult result;
   Eigen::Matrix3d tensor = Eigen::Matrix3d::Zero();
   double sumP2 = 0.0;
   for (const auto& dau : daughters) {
@@ -54,16 +60,17 @@ double computeSphericity(const std::array<reco::RecoChargedCandidate, 4>& daught
   }
 
   if (sumP2 <= 0.0)
-    return 0.0;
+    return result;
 
   tensor /= sumP2;
   Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigenSolver(tensor);
   if (eigenSolver.info() != Eigen::Success)
-    return 0.0;
+    return result;
 
-  std::array<double, 3> eigenvalues{{eigenSolver.eigenvalues()(0), eigenSolver.eigenvalues()(1), eigenSolver.eigenvalues()(2)}};
-  std::sort(eigenvalues.begin(), eigenvalues.end(), std::greater<double>());
-  return 1.5 * (eigenvalues[1] + eigenvalues[2]);
+  result.eigenvalues = {{eigenSolver.eigenvalues()(0), eigenSolver.eigenvalues()(1), eigenSolver.eigenvalues()(2)}};
+  std::sort(result.eigenvalues.begin(), result.eigenvalues.end(), std::greater<double>());
+  result.sphericity = 1.5 * (result.eigenvalues[1] + result.eigenvalues[2]);
+  return result;
 }
 
 double computeAcoplanarity(const std::array<reco::RecoChargedCandidate, 4>& daughters) {
@@ -90,7 +97,9 @@ ChiCFourTrackProducer::ChiCFourTrackProducer(const edm::ParameterSet& cfg)
     applyMassWindow_(cfg.getParameter<bool>("applyMassWindow")),
     minCandidatePt_(cfg.getParameter<double>("minCandidatePt")),
     minAcoplanarity_(cfg.getParameter<double>("minAcoplanarity")),
-    maxSphericity_(cfg.getParameter<double>("maxSphericity"))
+    maxSphericity_(cfg.getParameter<double>("maxSphericity")),
+    maxCandidateAbsEta_(cfg.getParameter<double>("maxCandidateAbsEta")),
+    storeEventShape_(cfg.getParameter<bool>("storeEventShape"))
 {
   if (daughterMasses_.empty()) {
     throw cms::Exception("InvalidConfiguration") << "Parameter 'daughterMasses' must contain at least one value.";
@@ -208,16 +217,30 @@ void ChiCFourTrackProducer::produce(edm::Event& event, const edm::EventSetup&) {
                 continue;
             }
 
-            if (applyAcoplanarityCut || applySphericityCut) {
-              const double acoplanarity = computeAcoplanarity(daughters);
+            const double absEta = std::abs(chi->eta());
+            if (maxCandidateAbsEta_ >= 0.0 && absEta > maxCandidateAbsEta_)
+              continue;
+
+            double acoplanarity = 0.0;
+            EventShapeResult eventShape;
+
+            if (applyAcoplanarityCut || applySphericityCut || storeEventShape_) {
+              acoplanarity = computeAcoplanarity(daughters);
+              eventShape = computeEventShape(daughters);
+
               if (applyAcoplanarityCut && acoplanarity < minAcoplanarity_)
                 continue;
 
-              if (applySphericityCut) {
-                const double sphericity = computeSphericity(daughters);
-                if (sphericity > maxSphericity_)
-                  continue;
-              }
+              if (applySphericityCut && eventShape.sphericity > maxSphericity_)
+                continue;
+            }
+
+            if (storeEventShape_) {
+              chi->addUserFloat("acoplanarity", acoplanarity);
+              chi->addUserFloat("sphericity", eventShape.sphericity);
+              chi->addUserFloat("pca_lambda1", eventShape.eigenvalues[0]);
+              chi->addUserFloat("pca_lambda2", eventShape.eigenvalues[1]);
+              chi->addUserFloat("pca_lambda3", eventShape.eigenvalues[2]);
             }
 
             outputs[stateIdx]->push_back(*chi);
