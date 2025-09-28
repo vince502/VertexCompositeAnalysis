@@ -26,6 +26,8 @@ using namespace reco;
 
 PATCompositeTreeProducer3::PATCompositeTreeProducer3(const edm::ParameterSet& iConfig)
 {
+    treeName_ = iConfig.getUntrackedParameter<std::string>("treeName", "PATCompositeNtuple");
+
     doRecoNtuple_ = iConfig.getUntrackedParameter<bool>("doRecoNtuple");
     doGenNtuple_ = iConfig.getUntrackedParameter<bool>("doGenNtuple");
     twoLayerDecay_ = iConfig.getUntrackedParameter<bool>("twoLayerDecay");
@@ -1388,7 +1390,7 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
   void 
   PATCompositeTreeProducer3::initTree()
   { 
-      PATCompositeNtuple = fs->make< TTree>("PATCompositeNtuple","PATCompositeNtuple");
+      PATCompositeNtuple = fs->make<TTree>(treeName_.c_str(), treeName_.c_str());
       
       if(doRecoNtuple_) 
       { 

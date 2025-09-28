@@ -182,6 +182,7 @@ private:
     edm::Service<TFileService> fs;
 
     TTree* PATCompositeNtuple;
+    std::string treeName_;
     TH2F*  hMassVsMVA[6][10];
     TH2F*  hpTVsMVA[6][10];
     TH2F*  hetaVsMVA[6][10];
