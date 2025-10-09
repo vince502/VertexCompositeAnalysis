@@ -15,6 +15,7 @@
 //
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D0Fitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/commonTools.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -106,6 +107,7 @@ D0Fitter::D0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
+  combineAllTracks = theParameters.getParameter<bool>(string("combineAllTracks"));
   mvaCut = theParameters.getParameter<double>(string("mvaCut"));
 
 
@@ -221,35 +223,28 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //  mvaValValueMap = auto_ptr<edm::ValueMap<float> >(new edm::ValueMap<float>);
 //  edm::ValueMap<float>::Filler mvaFiller(*mvaValValueMap);
 
-  bool isVtxPV = 0;
-  double xVtx=-99999.0;
-  double yVtx=-99999.0;
-  double zVtx=-99999.0;
-  double xVtxError=-999.0;
-  double yVtxError=-999.0;
-  double zVtxError=-999.0;
+  // Use commonTools to get best vertex for reference
+  using namespace VertexCompositeProducerCommonTools;
   const reco::VertexCollection vtxCollection = *(theVertexHandle.product());
-  reco::VertexCollection::const_iterator vtxPrimary = vtxCollection.begin();
-  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=2)
-  {
-    isVtxPV = 1;
-    xVtx = vtxPrimary->x();
-    yVtx = vtxPrimary->y();
-    zVtx = vtxPrimary->z();
-    xVtxError = vtxPrimary->xError();
-    yVtxError = vtxPrimary->yError();
-    zVtxError = vtxPrimary->zError();
-  }
-  else {
-    isVtxPV = 0;
-    xVtx = theBeamSpotHandle->position().x();
-    yVtx = theBeamSpotHandle->position().y();
-    zVtx = 0.0;
+  
+  // Get first valid vertex for reference (used for legacy compatibility)
+  auto [bestvtx, vtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, 2);
+  bool isVtxPV = (vtxCollection.size() > 0 && vtxIdx < vtxCollection.size());
+  
+  double xVtxError = 0.0, yVtxError = 0.0, zVtxError = 0.0;
+  if (isVtxPV) {
+    const reco::Vertex& vtxPrimary = vtxCollection[vtxIdx];
+    xVtxError = vtxPrimary.xError();
+    yVtxError = vtxPrimary.yError();
+    zVtxError = vtxPrimary.zError();
+  } else {
     xVtxError = theBeamSpotHandle->BeamWidthX();
     yVtxError = theBeamSpotHandle->BeamWidthY();
     zVtxError = 0.0;
   }
-  math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
+
+  // Vector to store best vertex index for each track
+  std::vector<unsigned int> trackVertexIndices;
 
   // Fill vectors of TransientTracks and TrackRefs after applying preselection cuts.
   for(unsigned int indx = 0; indx < theTrackHandle->size(); indx++) {
@@ -273,10 +268,25 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //      TransientTrack tmpTk( *tmpRef, &(*bFieldHandle), globTkGeomHandle );
       TransientTrack tmpTk( *tmpRef, magField );
 
-      double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
-      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
-      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
+      // Find best vertex for this track
+      auto [trackVtx, trackVtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, tmpRef.get(), 
+                                                     VertexSelectionCriteria::CLOSEST_DZ, 2);
+      
+      double dzvtx = tmpRef->dz(trackVtx);
+      double dxyvtx = tmpRef->dxy(trackVtx);
+      
+      double trackZVtxError = 0.0, trackXYVtxError = 0.0;
+      if (trackVtxIdx < vtxCollection.size()) {
+        const reco::Vertex& trackVertex = vtxCollection[trackVtxIdx];
+        trackZVtxError = trackVertex.zError();
+        trackXYVtxError = trackVertex.xError() * trackVertex.yError();
+      } else {
+        trackZVtxError = 0.0;
+        trackXYVtxError = theBeamSpotHandle->BeamWidthX() * theBeamSpotHandle->BeamWidthY();
+      }
+      
+      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+trackZVtxError*trackZVtxError);
+      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+trackXYVtxError);
 
       double dauLongImpactSig = dzvtx/dzerror;
       double dauTransImpactSig = dxyvtx/dxyerror;
@@ -284,6 +294,7 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       if( fabs(dauTransImpactSig) > dauTransImpactSigCut && fabs(dauLongImpactSig) > dauLongImpactSigCut ) {
         theTrackRefs.push_back( tmpRef );
         theTransTracks.push_back( tmpTk );
+        trackVertexIndices.push_back( trackVtxIdx );
       }
     }
   }
@@ -303,6 +314,9 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   for(unsigned int trdx1 = 0; trdx1 < theTrackRefs.size(); trdx1++) {
 
     for(unsigned int trdx2 = trdx1 + 1; trdx2 < theTrackRefs.size(); trdx2++) {
+
+      // Skip tracks from different vertices unless combineAllTracks is enabled
+      if (!combineAllTracks && trackVertexIndices[trdx1] != trackVertexIndices[trdx2]) continue;
 
       if( (theTrackRefs[trdx1]->pt() + theTrackRefs[trdx2]->pt()) < tkPtSumCut) continue;
       if( abs(theTrackRefs[trdx1]->eta() - theTrackRefs[trdx2]->eta()) > tkEtaDiffCut) continue;
@@ -645,6 +659,19 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         theD0->addUserFloat("dca3DErr", cur3DIP.error());
         theD0->addUserFloat("track3DDCA", dca);
         theD0->addUserFloat("track3DDCAErr", dcaError);
+        
+        // Store vertex index: 
+        // -1 if combineAllTracks is true (no check done), 
+        // -1 if daughters have different vertices (sanity check),
+        // otherwise the common vertex index of both daughters
+        float vtxIndexToStore = -1.0f;
+        if (!combineAllTracks) {
+          // Verify both daughters have the same vertex index
+          if (trackVertexIndices[trdx1] == trackVertexIndices[trdx2]) {
+            vtxIndexToStore = static_cast<float>(trackVertexIndices[trdx1]);
+          }
+        }
+        theD0->addUserFloat("assocVtxIndex", vtxIndexToStore);
 
         addp4.set( *theD0 );
         if( theD0->mass() < d0MassD0 + d0MassCut &&

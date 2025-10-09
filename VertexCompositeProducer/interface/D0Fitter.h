@@ -148,6 +148,7 @@ class D0Fitter {
   double alphaCut;
   double alpha2DCut;
   bool   isWrongSign;
+  bool   combineAllTracks;
   double mvaCut;
   int cBin;
 

@@ -42,6 +42,7 @@ generalD0Candidates = cms.EDProducer("D0Producer",
     mvaCut = cms.double(-99.0),
 
     isWrongSign = cms.bool(False),
+    combineAllTracks = cms.bool(True),
 
 # MVA 
 
