@@ -231,12 +231,18 @@ void D0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   auto [bestvtx, vtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, 2);
   bool isVtxPV = (vtxCollection.size() > 0 && vtxIdx < vtxCollection.size());
   
+  // Store vertex position and errors for later use
+  double xVtx = bestvtx.x();
+  double yVtx = bestvtx.y();
+  double zVtx = bestvtx.z();
   double xVtxError = 0.0, yVtxError = 0.0, zVtxError = 0.0;
+  const reco::Vertex* vtxPrimary = nullptr;
+  
   if (isVtxPV) {
-    const reco::Vertex& vtxPrimary = vtxCollection[vtxIdx];
-    xVtxError = vtxPrimary.xError();
-    yVtxError = vtxPrimary.yError();
-    zVtxError = vtxPrimary.zError();
+    vtxPrimary = &(vtxCollection[vtxIdx]);
+    xVtxError = vtxPrimary->xError();
+    yVtxError = vtxPrimary->yError();
+    zVtxError = vtxPrimary->zError();
   } else {
     xVtxError = theBeamSpotHandle->BeamWidthX();
     yVtxError = theBeamSpotHandle->BeamWidthY();
