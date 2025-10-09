@@ -303,6 +303,7 @@ private:
     float dca3D[MAXCAN];
     float dca3DErr[MAXCAN];
     float dca2D[MAXCAN];
+    float assocVtxIndex[MAXCAN];
     bool isSwap[MAXCAN];
     bool matchGEN[MAXCAN];
     int idBAnc_reco[MAXCAN];

@@ -559,6 +559,12 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
           dca3D[it] = twoLayerDecay_? ((CC*)d1)->userFloat("dca3D") : trk.userFloat("dca3D");
           dca3DErr[it] = twoLayerDecay_? ((CC*)d1)->userFloat("dca3DErr") : trk.userFloat("dca3DErr");
           dca2D[it] = dl2D[it] * std::sin(agl2D_abs[it]);
+          
+          // Read assocVtxIndex from candidate (stores -1 if no unique vertex, or vertex index if unique)
+          // For twoLayerDecay (DStar), read from D0 daughter; otherwise read from current candidate
+          assocVtxIndex[it] = twoLayerDecay_? 
+              (((CC*)d1)->hasUserFloat("assocVtxIndex") ? ((CC*)d1)->userFloat("assocVtxIndex") : -1.0f) :
+              (trk.hasUserFloat("assocVtxIndex") ? trk.userFloat("assocVtxIndex") : -1.0f);
 
           auto dau1 = d1->get<reco::TrackRef>();
           if(!twoLayerDecay_)
@@ -1442,6 +1448,7 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
           PATCompositeNtuple->Branch("dca3D",&dca3D,"dca3D[candSize]/F");
           PATCompositeNtuple->Branch("dca3DErr",&dca3DErr,"dca3DErr[candSize]/F");
           PATCompositeNtuple->Branch("dca2D",&dca2D,"dca2D[candSize]/F");
+          PATCompositeNtuple->Branch("assocVtxIndex",&assocVtxIndex,"assocVtxIndex[candSize]/F");
       
           if(doGenMatching_)
           {
