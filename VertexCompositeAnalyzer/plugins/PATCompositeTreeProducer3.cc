@@ -565,8 +565,98 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
           assocVtxIndex[it] = twoLayerDecay_? 
               (((CC*)d1)->hasUserFloat("assocVtxIndex") ? ((CC*)d1)->userFloat("assocVtxIndex") : -1.0f) :
               (trk.hasUserFloat("assocVtxIndex") ? trk.userFloat("assocVtxIndex") : -1.0f);
-
+          
+          // Calculate DCA to all valid primary vertices for offline verification
+          // Use first daughter track for DCA calculation (representative of the decay)
           auto dau1 = d1->get<reco::TrackRef>();
+          
+          // Initialize multi-vertex arrays
+          nValidVtx[it] = 0;
+          for(int ivtx = 0; ivtx < MAXVTX; ++ivtx) {
+              vtx_dz[it][ivtx] = -999.0f;
+              vtx_dxy[it][ivtx] = -999.0f;
+              vtx_dzSig[it][ivtx] = -999.0f;
+              vtx_dxySig[it][ivtx] = -999.0f;
+              vtx_dz_comb[it][ivtx] = -999.0f;
+              vtx_dxy_comb[it][ivtx] = -999.0f;
+              vtx_dca3D_comb[it][ivtx] = -999.0f;
+          }
+          
+          // Loop over all valid primary vertices
+          reco::TrackRef refTrack = twoLayerDecay_ ? 
+              (d1->daughter(0) ? d1->daughter(0)->get<reco::TrackRef>() : dau1) : dau1;
+          
+          // Get refitted composite candidate position and momentum for combined DCA calculation
+          // For twoLayerDecay (DStar), use D0 daughter; otherwise use current candidate
+          const reco::Candidate* compCand = twoLayerDecay_ ? d1 : &trk;
+          math::XYZPoint compVtx(compCand->vx(), compCand->vy(), compCand->vz());
+          math::XYZVector compMom(compCand->px(), compCand->py(), compCand->pz());
+          
+          if(refTrack.isNonnull()) {
+              int vtxCount = 0;
+              for(size_t ivtx = 0; ivtx < vertices->size() && vtxCount < MAXVTX; ++ivtx) {
+                  const reco::Vertex& vtx = (*vertices)[ivtx];
+                  
+                  // Check if vertex is valid (same criteria as in commonTools.h)
+                  if(vtx.isFake() || vtx.tracksSize() < 5) continue;
+                  
+                  // Calculate DCA from daughter track
+                  math::XYZPoint vtxPos(vtx.x(), vtx.y(), vtx.z());
+                  double vtx_dz_val = refTrack->dz(vtxPos);
+                  double vtx_dxy_val = refTrack->dxy(vtxPos);
+                  
+                  // Calculate errors
+                  double vtxzError = sqrt(vtx.covariance(2,2));
+                  double vtxxError = sqrt(vtx.covariance(0,0));
+                  double vtxyError = sqrt(vtx.covariance(1,1));
+                  double dz_error = sqrt(refTrack->dzError()*refTrack->dzError() + vtxzError*vtxzError);
+                  double dxy_error = sqrt(refTrack->d0Error()*refTrack->d0Error() + vtxxError*vtxyError);
+                  
+                  // Store daughter track DCA values
+                  vtx_dz[it][vtxCount] = static_cast<float>(vtx_dz_val);
+                  vtx_dxy[it][vtxCount] = static_cast<float>(vtx_dxy_val);
+                  vtx_dzSig[it][vtxCount] = (dz_error > 0) ? static_cast<float>(vtx_dz_val / dz_error) : -999.0f;
+                  vtx_dxySig[it][vtxCount] = (dxy_error > 0) ? static_cast<float>(vtx_dxy_val / dxy_error) : -999.0f;
+                  
+                  // Calculate DCA from refitted composite candidate (combined transient track approach)
+                  // Vector from PV to composite decay vertex
+                  math::XYZVector pvToComp(compVtx.x() - vtxPos.x(), 
+                                           compVtx.y() - vtxPos.y(), 
+                                           compVtx.z() - vtxPos.z());
+                  
+                  // Project onto transverse plane for dxy
+                  double dx = compVtx.x() - vtxPos.x();
+                  double dy = compVtx.y() - vtxPos.y();
+                  double dz_comb_val = compVtx.z() - vtxPos.z();
+                  
+                  // dxy: transverse distance (signed by momentum direction)
+                  double dxy_comb_val = sqrt(dx*dx + dy*dy);
+                  // Sign convention: positive if decay vertex is "ahead" of PV in momentum direction
+                  double cross_z = dx * compMom.y() - dy * compMom.x();
+                  if(cross_z < 0) dxy_comb_val = -dxy_comb_val;
+                  
+                  // 3D DCA: perpendicular distance from PV to composite momentum line
+                  // DCA3D = |PV->Comp × p̂| where p̂ is unit momentum vector
+                  double ptot = sqrt(compMom.x()*compMom.x() + compMom.y()*compMom.y() + compMom.z()*compMom.z());
+                  double dca3D_comb_val = -999.0;
+                  if(ptot > 0) {
+                      // Cross product: pvToComp × momentum
+                      double cross_x = pvToComp.y() * compMom.z() - pvToComp.z() * compMom.y();
+                      double cross_y = pvToComp.z() * compMom.x() - pvToComp.x() * compMom.z();
+                      double cross_z_3d = pvToComp.x() * compMom.y() - pvToComp.y() * compMom.x();
+                      double cross_mag = sqrt(cross_x*cross_x + cross_y*cross_y + cross_z_3d*cross_z_3d);
+                      dca3D_comb_val = cross_mag / ptot;
+                  }
+                  
+                  // Store combined/refitted DCA values
+                  vtx_dz_comb[it][vtxCount] = static_cast<float>(dz_comb_val);
+                  vtx_dxy_comb[it][vtxCount] = static_cast<float>(dxy_comb_val);
+                  vtx_dca3D_comb[it][vtxCount] = static_cast<float>(dca3D_comb_val);
+                  
+                  ++vtxCount;
+              }
+              nValidVtx[it] = vtxCount;
+          }
           if(!twoLayerDecay_)
           {
               trkquality1[it] = dau1->quality(reco::TrackBase::highPurity);
@@ -1449,6 +1539,18 @@ void PATCompositeTreeProducer3::processCandidates(const CCC* v0candidates_,
           PATCompositeNtuple->Branch("dca3DErr",&dca3DErr,"dca3DErr[candSize]/F");
           PATCompositeNtuple->Branch("dca2D",&dca2D,"dca2D[candSize]/F");
           PATCompositeNtuple->Branch("assocVtxIndex",&assocVtxIndex,"assocVtxIndex[candSize]/F");
+          
+          // Multi-vertex information for offline verification and studies
+          PATCompositeNtuple->Branch("nValidVtx",&nValidVtx,"nValidVtx[candSize]/I");
+          // DCA from daughter track
+          PATCompositeNtuple->Branch("vtx_dz",vtx_dz,"vtx_dz[candSize][10]/F");
+          PATCompositeNtuple->Branch("vtx_dxy",vtx_dxy,"vtx_dxy[candSize][10]/F");
+          PATCompositeNtuple->Branch("vtx_dzSig",vtx_dzSig,"vtx_dzSig[candSize][10]/F");
+          PATCompositeNtuple->Branch("vtx_dxySig",vtx_dxySig,"vtx_dxySig[candSize][10]/F");
+          // DCA from refitted composite candidate (combined transient track)
+          PATCompositeNtuple->Branch("vtx_dz_comb",vtx_dz_comb,"vtx_dz_comb[candSize][10]/F");
+          PATCompositeNtuple->Branch("vtx_dxy_comb",vtx_dxy_comb,"vtx_dxy_comb[candSize][10]/F");
+          PATCompositeNtuple->Branch("vtx_dca3D_comb",vtx_dca3D_comb,"vtx_dca3D_comb[candSize][10]/F");
       
           if(doGenMatching_)
           {
