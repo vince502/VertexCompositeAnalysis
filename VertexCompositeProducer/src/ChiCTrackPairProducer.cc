@@ -37,7 +37,8 @@ ChiCTrackPairProducer::ChiCTrackPairProducer(const edm::ParameterSet& cfg)
     maxTrackChi2_(cfg.getParameter<double>("maxTrackNormalizedChi2")),
     minTrackNHits_(cfg.getParameter<int>("minTrackNHits")),
     applyMassWindow_(cfg.getParameter<bool>("applyMassWindow")),
-    minPairPt_(cfg.getParameter<double>("minPairPt"))
+    minPairPt_(cfg.getParameter<double>("minPairPt")),
+    requiredChargeProduct_(cfg.existsAs<int>("requiredChargeProduct") ? cfg.getParameter<int>("requiredChargeProduct") : -1)
 {
   const auto& statePsets = cfg.getParameter<std::vector<edm::ParameterSet> >("states");
   states_.reserve(statePsets.size());
@@ -98,8 +99,12 @@ void ChiCTrackPairProducer::produce(edm::Event& event, const edm::EventSetup&) {
       const auto& trackRef2 = selectedTracks[j];
       const auto& track2 = *trackRef2;
 
-      if (track1.charge() * track2.charge() >= 0)
-        continue;
+      const int chargeProduct = track1.charge() * track2.charge();
+      if (requiredChargeProduct_ == -1 && chargeProduct >= 0)
+        continue;  // Require opposite charge
+      if (requiredChargeProduct_ == +1 && chargeProduct <= 0)
+        continue;  // Require same charge
+      // If requiredChargeProduct_ == 0, accept any charge combination
 
       if ((track1.pt() + track2.pt()) < minPairPt_)
         continue;

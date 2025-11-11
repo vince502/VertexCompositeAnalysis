@@ -46,6 +46,7 @@ private:
   int minTrackNHits_;
   bool applyMassWindow_;
   double minPairPt_;
+  int requiredChargeProduct_;  // -1 for opposite charge, +1 for same charge, 0 for any
 
   std::vector<ChiStateConfig> states_;
 };

@@ -8,9 +8,12 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/PatCandidates/interface/IsolatedTrack.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -62,12 +65,19 @@ double computeAcoplanarity(const reco::Candidate* lead, const reco::Candidate* s
 }  // namespace
 
 ChiCFlatNtuplizer::ChiCFlatNtuplizer(const edm::ParameterSet& cfg)
-    : tree_(nullptr) {
+    : tree_(nullptr), useDeDx_(false) {
   usesResource("TFileService");
 
   treeName_ = cfg.getUntrackedParameter<std::string>("treeName", "ChiCFlatNtuple");
   const auto pvTag = cfg.getParameter<edm::InputTag>("primaryVertices");
   pvToken_ = consumes<VertexCollection>(pvTag);
+
+  // Optional: dE/dx from isolatedTracks
+  if (cfg.existsAs<edm::InputTag>("isolatedTracks")) {
+    const auto isoTracksTag = cfg.getParameter<edm::InputTag>("isolatedTracks");
+    isoTracksToken_ = consumes<edm::View<pat::IsolatedTrack>>(isoTracksTag);
+    useDeDx_ = true;
+  }
 
   const auto& sourcePsets = cfg.getParameter<std::vector<edm::ParameterSet>>("sources");
   if (sourcePsets.empty()) {
@@ -153,6 +163,16 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("pi3_d3d", &dauD3d_[2], "pi3_d3d/F");
   tree_->Branch("pi4_d3d", &dauD3d_[3], "pi4_d3d/F");
 
+  tree_->Branch("pi1_mass", &dauMass_[0], "pi1_mass/F");
+  tree_->Branch("pi2_mass", &dauMass_[1], "pi2_mass/F");
+  tree_->Branch("pi3_mass", &dauMass_[2], "pi3_mass/F");
+  tree_->Branch("pi4_mass", &dauMass_[3], "pi4_mass/F");
+
+  tree_->Branch("pi1_dedx", &dauDeDx_[0], "pi1_dedx/F");
+  tree_->Branch("pi2_dedx", &dauDeDx_[1], "pi2_dedx/F");
+  tree_->Branch("pi3_dedx", &dauDeDx_[2], "pi3_dedx/F");
+  tree_->Branch("pi4_dedx", &dauDeDx_[3], "pi4_dedx/F");
+
   tree_->Branch("dca_12", &pairDca_[0], "dca_12/F");
   tree_->Branch("dca_13", &pairDca_[1], "dca_13/F");
   tree_->Branch("dca_14", &pairDca_[2], "dca_14/F");
@@ -186,6 +206,8 @@ void ChiCFlatNtuplizer::resetBranches() {
   dauDxy_.fill(0.f);
   dauDz_.fill(0.f);
   dauD3d_.fill(0.f);
+  dauMass_.fill(-1.f);
+  dauDeDx_.fill(-1.f);
 
   pairDca_.fill(0.f);
 }
@@ -201,6 +223,12 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
     primaryVertex = &pvHandle->front();
   }
 
+  // Get isolated tracks for dE/dx matching
+  edm::Handle<edm::View<pat::IsolatedTrack>> isoTracksHandle;
+  if (useDeDx_) {
+    event.getByToken(isoTracksToken_, isoTracksHandle);
+  }
+
   for (const auto& src : sources_) {
     edm::Handle<pat::CompositeCandidateCollection> handle;
     event.getByToken(src.token, handle);
@@ -209,7 +237,7 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
 
     for (const auto& cand : *handle) {
       resetBranches();
-      fillCandidate(src, cand, primaryVertex);
+      fillCandidate(src, cand, primaryVertex, isoTracksHandle);
       tree_->Fill();
     }
   }
@@ -217,7 +245,8 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
 
 void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
                                        const pat::CompositeCandidate& cand,
-                                       const reco::Vertex* primaryVertex) {
+                                       const reco::Vertex* primaryVertex,
+                                       const edm::Handle<edm::View<pat::IsolatedTrack>>& isoTracksHandle) {
   sourceIndex_ = static_cast<int>(src.index);
   sourcePdgId_ = src.pdgId;
   sourceLabel_ = src.name;
@@ -285,6 +314,7 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     dauEta_[i] = static_cast<float>(info.cand->eta());
     dauPhi_[i] = static_cast<float>(info.cand->phi());
     dauCharge_[i] = info.cand->charge();
+    dauMass_[i] = static_cast<float>(info.cand->mass());
 
     if (info.track && primaryVertex) {
       const auto& pvPos = primaryVertex->position();
@@ -293,10 +323,44 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
       dauDxy_[i] = static_cast<float>(dxy);
       dauDz_[i] = static_cast<float>(dz);
       dauD3d_[i] = static_cast<float>(std::sqrt(dxy * dxy + dz * dz));
+      
+      // Match to isolated tracks for dE/dx
+      dauDeDx_[i] = -1.f;  // Default: no dE/dx
+      
+      if (isoTracksHandle.isValid() && isoTracksHandle->size() > 0) {
+        const double track_pt = info.cand->pt();
+        const double track_eta = info.cand->eta();
+        const double track_phi = info.cand->phi();
+        
+        // Find best matching isolated track
+        double best_dr = 999.0;
+        const pat::IsolatedTrack* best_match = nullptr;
+        
+        for (const auto& isoTrack : *isoTracksHandle) {
+          const double dr = reco::deltaR(track_eta, track_phi, isoTrack.eta(), isoTrack.phi());
+          const double dpt = std::abs(track_pt - isoTrack.pt()) / track_pt;
+          
+          // Match criteria: ΔR < 0.01 and Δp_T/p_T < 0.05
+          if (dr < 0.01 && dpt < 0.05 && dr < best_dr) {
+            best_dr = dr;
+            best_match = &isoTrack;
+          }
+        }
+        
+        // Extract dE/dx if match found
+        if (best_match != nullptr) {
+          // IsolatedTrack has dEdxStrip() method
+          const float dedx_strip = best_match->dEdxStrip();
+          if (dedx_strip > 0) {
+            dauDeDx_[i] = dedx_strip;
+          }
+        }
+      }
     } else {
       dauDxy_[i] = 0.f;
       dauDz_[i] = 0.f;
       dauD3d_[i] = 0.f;
+      dauDeDx_[i] = -1.f;
     }
   }
 

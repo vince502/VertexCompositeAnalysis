@@ -13,6 +13,7 @@ ChiCTo2Ka.minTrackNHits = cms.int32(6)
 # Pair-level cuts
 ChiCTo2Ka.minPairPt = cms.double(1.2)
 ChiCTo2Ka.applyMassWindow = cms.bool(True)
+ChiCTo2Ka.requiredChargeProduct = cms.int32(-1)  # -1 for opposite charge (K+ K-), +1 for same charge, 0 for any
 
 # Resonance definitions
 ChiCTo2Ka.states = cms.VPSet(

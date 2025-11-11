@@ -10,6 +10,7 @@ ChiCTo2Pi = cms.EDProducer(
     minTrackNHits = cms.int32(6),
     minPairPt = cms.double(1.0),
     applyMassWindow = cms.bool(True),
+    requiredChargeProduct = cms.int32(-1),  # -1 for opposite charge (?+ ?-), +1 for same charge, 0 for any
     states = cms.VPSet(
         cms.PSet(
             name = cms.string("ChiC0"),

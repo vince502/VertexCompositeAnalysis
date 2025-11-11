@@ -41,11 +41,16 @@ private:
   using VertexCollection = reco::VertexCollection;
 
   void resetBranches();
-  void fillCandidate(const SourceConfig&, const pat::CompositeCandidate&, const reco::Vertex* primaryVertex);
+  void fillCandidate(const SourceConfig&, 
+                     const pat::CompositeCandidate&, 
+                     const reco::Vertex* primaryVertex,
+                     const edm::Handle<edm::View<pat::IsolatedTrack>>& isoTracksHandle);
 
   edm::EDGetTokenT<VertexCollection> pvToken_;
+  edm::EDGetTokenT<edm::View<pat::IsolatedTrack>> isoTracksToken_;
   std::vector<SourceConfig> sources_;
   std::string treeName_;
+  bool useDeDx_;
 
   edm::Service<TFileService> fileService_;
   TTree* tree_;
@@ -82,6 +87,8 @@ private:
   std::array<float, 4> dauDxy_{};
   std::array<float, 4> dauDz_{};
   std::array<float, 4> dauD3d_{};
+  std::array<float, 4> dauMass_{};
+  std::array<float, 4> dauDeDx_{};
 
   std::array<float, 6> pairDca_{};
 };
