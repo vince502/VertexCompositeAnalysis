@@ -40,6 +40,7 @@ generalDStar5PCandidates = cms.EDProducer("DStar5PProducer",
     dPtCut = cms.double(0.0),
 
     isWrongSign = cms.bool(False),
+    combineAllTracks = cms.bool(True),
 
 # MVA
 

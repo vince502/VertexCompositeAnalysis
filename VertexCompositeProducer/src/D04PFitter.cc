@@ -15,6 +15,7 @@
 //
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/D04PFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/commonTools.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -91,6 +92,7 @@ D04PFitter::D04PFitter(const edm::ParameterSet& theParameters,  edm::ConsumesCol
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
+  combineAllTracks = theParameters.getParameter<bool>(string("combineAllTracks"));
 
 
   useAnyMVA_ = false;
@@ -175,34 +177,35 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 //  mvaValValueMap = auto_ptr<edm::ValueMap<float> >(new edm::ValueMap<float>);
 //  edm::ValueMap<float>::Filler mvaFiller(*mvaValValueMap);
 
-  bool isVtxPV = 0;
-  double xVtx=-99999.0;
-  double yVtx=-99999.0;
-  double zVtx=-99999.0;
-  double xVtxError=-999.0;
-  double yVtxError=-999.0;
-  double zVtxError=-999.0;
+  // Use commonTools to get best vertex for reference
+  using namespace VertexCompositeProducerCommonTools;
   const reco::VertexCollection vtxCollection = *(theVertexHandle.product());
-  reco::VertexCollection::const_iterator vtxPrimary = vtxCollection.begin();
-  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=4){
-    isVtxPV = 1;
-    xVtx = vtxPrimary->x();
-    yVtx = vtxPrimary->y();
-    zVtx = vtxPrimary->z();
+  
+  // Get first valid vertex for reference (used for legacy compatibility)
+  auto [bestvtx, vtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, 4);
+  bool isVtxPV = (vtxCollection.size() > 0 && vtxIdx < vtxCollection.size());
+  
+  // Store vertex position and errors for later use
+  double xVtx = bestvtx.x();
+  double yVtx = bestvtx.y();
+  double zVtx = bestvtx.z();
+  double xVtxError = 0.0, yVtxError = 0.0, zVtxError = 0.0;
+  const reco::Vertex* vtxPrimary = nullptr;
+  
+  if (isVtxPV) {
+    vtxPrimary = &(vtxCollection[vtxIdx]);
     xVtxError = vtxPrimary->xError();
     yVtxError = vtxPrimary->yError();
     zVtxError = vtxPrimary->zError();
-  }
-  else{
-    isVtxPV = 0;
-    xVtx = theBeamSpotHandle->position().x();
-    yVtx = theBeamSpotHandle->position().y();
-    zVtx = 0.0;
+  } else {
     xVtxError = theBeamSpotHandle->BeamWidthX();
     yVtxError = theBeamSpotHandle->BeamWidthY();
     zVtxError = 0.0;
   }
-  math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
+
+  // Vectors to store best vertex index for each track
+  std::vector<unsigned int> trackVertexIndicesPos;
+  std::vector<unsigned int> trackVertexIndicesNeg;
 
   // Fill vectors of TransientTracks and TrackRefs after applying preselection cuts.
   if(theTrackHandle->size() < 4) return;
@@ -228,10 +231,25 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       ){
       TransientTrack tmpTk( *tmpRef, magField );
 
-      double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
-      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
-      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
+      // Find best vertex for this track
+      auto [trackVtx, trackVtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, tmpRef.get(), 
+                                                     VertexSelectionCriteria::CLOSEST_DZ, 4);
+      
+      double dzvtx = tmpRef->dz(trackVtx);
+      double dxyvtx = tmpRef->dxy(trackVtx);
+      
+      double trackZVtxError = 0.0, trackXYVtxError = 0.0;
+      if (trackVtxIdx < vtxCollection.size()) {
+        const reco::Vertex& trackVertex = vtxCollection[trackVtxIdx];
+        trackZVtxError = trackVertex.zError();
+        trackXYVtxError = trackVertex.xError() * trackVertex.yError();
+      } else {
+        trackZVtxError = 0.0;
+        trackXYVtxError = theBeamSpotHandle->BeamWidthX() * theBeamSpotHandle->BeamWidthY();
+      }
+      
+      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+trackZVtxError*trackZVtxError);
+      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+trackXYVtxError);
 
       double dauLongImpactSig = dzvtx/dzerror;
       double dauTransImpactSig = dxyvtx/dxyerror;
@@ -240,10 +258,12 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         if( tmpRef->charge() > 0 ){
           theTrackRefsPos.push_back( tmpRef );
           theTransTracksPos.push_back( tmpTk );
+          trackVertexIndicesPos.push_back( trackVtxIdx );
         }
         if( tmpRef->charge() < 0 ){
           theTrackRefsNeg.push_back( tmpRef );
           theTransTracksNeg.push_back( tmpTk );
+          trackVertexIndicesNeg.push_back( trackVtxIdx );
         }
       }
     }
@@ -303,12 +323,18 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       TransientTrack* posPtr2 = &theTransTracksPos[itrkpos2];
       const double posEta2 = ptr2->eta();
 
+      // Skip tracks from different vertices unless combineAllTracks is enabled
+      if (!combineAllTracks && trackVertexIndicesPos[itrkpos1] != trackVertexIndicesPos[itrkpos2]) continue;
+
       if( fabs(posEta1 - posEta2) > tkEtaDiffCut) continue;
 
       for(unsigned int itrkneg1 = 0; itrkneg1 < nNegTracks; itrkneg1++) {
         const TrackRef& ntr1 = theTrackRefsNeg[itrkneg1];
         TransientTrack* negPtr1 = &theTransTracksNeg[itrkneg1];
         const double negEta1 = ntr1->eta();
+
+        // Skip tracks from different vertices unless combineAllTracks is enabled
+        if (!combineAllTracks && trackVertexIndicesPos[itrkpos1] != trackVertexIndicesNeg[itrkneg1]) continue;
 
         if( fabs(posEta1 - negEta1) > tkEtaDiffCut) continue;
         if( fabs(posEta2 - negEta1) > tkEtaDiffCut) continue;
@@ -317,6 +343,9 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           const TrackRef& ntr2 = theTrackRefsNeg[itrkneg2];
           TransientTrack* negPtr2 = &theTransTracksNeg[itrkneg2];
           const double negEta2 = ntr2->eta();
+
+          // Skip tracks from different vertices unless combineAllTracks is enabled
+          if (!combineAllTracks && trackVertexIndicesPos[itrkpos1] != trackVertexIndicesNeg[itrkneg2]) continue;
 
           if( fabs(posEta1 - negEta2) > tkEtaDiffCut) continue;
           if( fabs(posEta2 - negEta2) > tkEtaDiffCut) continue;
@@ -514,6 +543,21 @@ void D04PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           theD0->addUserFloat("dca3DErr", cur3DIP.error());
           theD0->addUserFloat("track3DDCA", dca);
           theD0->addUserFloat("track3DDCAErr", dcaError);
+          
+          // Store vertex index: 
+          // -1 if combineAllTracks is true (no check done), 
+          // -1 if daughters have different vertices (sanity check),
+          // otherwise the common vertex index of all 4 daughters
+          float vtxIndexToStore = -1.0f;
+          if (!combineAllTracks) {
+            // Verify all 4 daughters have the same vertex index
+            if (trackVertexIndicesPos[itrkpos1] == trackVertexIndicesPos[itrkpos2] &&
+                trackVertexIndicesPos[itrkpos1] == trackVertexIndicesNeg[itrkneg1] &&
+                trackVertexIndicesPos[itrkpos1] == trackVertexIndicesNeg[itrkneg2]) {
+              vtxIndexToStore = static_cast<float>(trackVertexIndicesPos[itrkpos1]);
+            }
+          }
+          theD0->addUserFloat("assocVtxIndex", vtxIndexToStore);
 
           if(useAnyMVA_)
           {

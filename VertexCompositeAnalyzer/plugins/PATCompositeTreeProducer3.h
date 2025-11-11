@@ -96,6 +96,7 @@
 // Constants
 static constexpr double PI = TMath::Pi();
 static constexpr int MAXCAN = 30000;
+static constexpr int MAXVTX = 10;  // Maximum number of vertices to store per candidate
 static constexpr double INVALID_VALUE = -999.9;
 static constexpr double PT_ERROR_THRESHOLD = 0.10;
 static constexpr double DZ_SIGNIFICANCE_CUT = 3.0;
@@ -303,6 +304,18 @@ private:
     float dca3D[MAXCAN];
     float dca3DErr[MAXCAN];
     float dca2D[MAXCAN];
+    float assocVtxIndex[MAXCAN];
+    
+    // Multi-vertex information for each candidate
+    int nValidVtx[MAXCAN];                    // Number of valid primary vertices in event
+    float vtx_dz[MAXCAN][MAXVTX];            // dz to each valid PV (from daughter track)
+    float vtx_dxy[MAXCAN][MAXVTX];           // dxy to each valid PV (from daughter track)
+    float vtx_dzSig[MAXCAN][MAXVTX];         // dz significance to each valid PV (from daughter track)
+    float vtx_dxySig[MAXCAN][MAXVTX];        // dxy significance to each valid PV (from daughter track)
+    float vtx_dz_comb[MAXCAN][MAXVTX];       // dz to each valid PV (from refitted composite)
+    float vtx_dxy_comb[MAXCAN][MAXVTX];      // dxy to each valid PV (from refitted composite)
+    float vtx_dca3D_comb[MAXCAN][MAXVTX];    // 3D DCA to each valid PV (from refitted composite)
+    
     bool isSwap[MAXCAN];
     bool matchGEN[MAXCAN];
     int idBAnc_reco[MAXCAN];

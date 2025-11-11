@@ -143,6 +143,7 @@ class DStar5PFitter {
   double alphaCut;
   double alpha2DCut;
   bool   isWrongSign;
+  bool   combineAllTracks;
 
   std::vector<reco::TrackBase::TrackQuality> qualities;
 

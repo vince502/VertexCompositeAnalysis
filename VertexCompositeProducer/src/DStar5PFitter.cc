@@ -15,6 +15,7 @@
 //
 
 #include "VertexCompositeAnalysis/VertexCompositeProducer/interface/DStar5PFitter.h"
+#include "VertexCompositeAnalysis/VertexCompositeProducer/interface/commonTools.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
 
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -102,6 +103,7 @@ DStar5PFitter::DStar5PFitter(const edm::ParameterSet& theParameters,  edm::Consu
   alphaCut = theParameters.getParameter<double>(string("alphaCut"));
   alpha2DCut = theParameters.getParameter<double>(string("alpha2DCut"));
   isWrongSign = theParameters.getParameter<bool>(string("isWrongSign"));
+  combineAllTracks = theParameters.getParameter<bool>(string("combineAllTracks"));
 
 
   useAnyMVA_ = false;
@@ -191,35 +193,34 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 //  mvaValValueMap = auto_ptr<edm::ValueMap<float> >(new edm::ValueMap<float>);
 //  edm::ValueMap<float>::Filler mvaFiller(*mvaValValueMap);
 
-  bool isVtxPV = 0;
-  double xVtx=-99999.0;
-  double yVtx=-99999.0;
-  double zVtx=-99999.0;
-  double xVtxError=-999.0;
-  double yVtxError=-999.0;
-  double zVtxError=-999.0;
+  // Use commonTools to get best vertex for reference
+  using namespace VertexCompositeProducerCommonTools;
   const reco::VertexCollection vtxCollection = *(theVertexHandle.product());
-  reco::VertexCollection::const_iterator vtxPrimary = vtxCollection.begin();
-  if(vtxCollection.size()>0 && !vtxPrimary->isFake() && vtxPrimary->tracksSize()>=5)
-  {
-    isVtxPV = 1;
-    xVtx = vtxPrimary->x();
-    yVtx = vtxPrimary->y();
-    zVtx = vtxPrimary->z();
+  
+  // Get first valid vertex for reference (used for legacy compatibility)
+  auto [bestvtx, vtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, 5);
+  bool isVtxPV = (vtxCollection.size() > 0 && vtxIdx < vtxCollection.size());
+  
+  // Store vertex position and errors for later use
+  double xVtx = bestvtx.x();
+  double yVtx = bestvtx.y();
+  double zVtx = bestvtx.z();
+  double xVtxError = 0.0, yVtxError = 0.0, zVtxError = 0.0;
+  const reco::Vertex* vtxPrimary = nullptr;
+  
+  if (isVtxPV) {
+    vtxPrimary = &(vtxCollection[vtxIdx]);
     xVtxError = vtxPrimary->xError();
     yVtxError = vtxPrimary->yError();
     zVtxError = vtxPrimary->zError();
-  }
-  else {
-    isVtxPV = 0;
-    xVtx = theBeamSpotHandle->position().x();
-    yVtx = theBeamSpotHandle->position().y();
-    zVtx = 0.0;
+  } else {
     xVtxError = theBeamSpotHandle->BeamWidthX();
     yVtxError = theBeamSpotHandle->BeamWidthY();
     zVtxError = 0.0;
   }
-  math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
+
+  // Vector to store best vertex index for each track
+  std::vector<unsigned int> trackVertexIndices;
 
   // Fill vectors of TransientTracks and TrackRefs after applying preselection cuts.
   if(theTrackHandle->size() < 5 ) return;
@@ -243,10 +244,25 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
         tmpRef->pt() > tkPtCut && fabs(tmpRef->eta()) < tkEtaCut ) {
       TransientTrack tmpTk( *tmpRef, magField );
 
-      double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
-      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
-      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
+      // Find best vertex for this track
+      auto [trackVtx, trackVtxIdx] = getBestVertex(vtxCollection, *theBeamSpotHandle, tmpRef.get(), 
+                                                     VertexSelectionCriteria::CLOSEST_DZ, 5);
+      
+      double dzvtx = tmpRef->dz(trackVtx);
+      double dxyvtx = tmpRef->dxy(trackVtx);
+      
+      double trackZVtxError = 0.0, trackXYVtxError = 0.0;
+      if (trackVtxIdx < vtxCollection.size()) {
+        const reco::Vertex& trackVertex = vtxCollection[trackVtxIdx];
+        trackZVtxError = trackVertex.zError();
+        trackXYVtxError = trackVertex.xError() * trackVertex.yError();
+      } else {
+        trackZVtxError = 0.0;
+        trackXYVtxError = theBeamSpotHandle->BeamWidthX() * theBeamSpotHandle->BeamWidthY();
+      }
+      
+      double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+trackZVtxError*trackZVtxError);
+      double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+trackXYVtxError);
 
       double dauLongImpactSig = dzvtx/dzerror;
       double dauTransImpactSig = dxyvtx/dxyerror;
@@ -254,6 +270,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       if( fabs(dauTransImpactSig) > dauTransImpactSigCut && fabs(dauLongImpactSig) > dauLongImpactSigCut ) {
         theTrackRefs.push_back( tmpRef );
         theTransTracks.push_back( tmpTk );
+        trackVertexIndices.push_back( trackVtxIdx );
       }
     }
   }
@@ -273,13 +290,21 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     for(unsigned int trdx1 = 0; trdx1 < theTrackRefs.size(); trdx1++) {
 
-      //This vector holds the 3 tracks (K + pi) +pi to be vertexed
+      //This vector holds the 5 tracks (4-prong D0) + pi to be vertexed
       std::vector<TransientTrack> transTracks;
 
       TrackRef pionTrackRef = theTrackRefs[trdx1];
       TransientTrack* pionTransTkPtr = 0;
       pionTransTkPtr = &theTransTracks[trdx1];
       const CC& theD0 = theD0Handle->at(didx1);
+
+      // Check vertex matching between D0 and slow pion if both have valid vertex association
+      if (!combineAllTracks && theD0.hasUserFloat("assocVtxIndex")) {
+        float d0VtxIndex = theD0.userFloat("assocVtxIndex");
+        float slowPiVtxIndex = static_cast<float>(trackVertexIndices[trdx1]);
+        // Skip if D0 has a valid vertex index (>= 0) and it doesn't match the slow pion's
+        if (d0VtxIndex >= 0.0f && std::abs(d0VtxIndex - slowPiVtxIndex) > 0.1f) continue;
+      }
 
       // if( !pionTransTkPtr->impactPointStateAvailable()) continue;
       const auto& D0Vec = theD0.p4();
