@@ -8,7 +8,6 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
-#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -171,6 +170,16 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("chic_vy", &candVy_, "chic_vy/F");
   tree_->Branch("chic_vz", &candVz_, "chic_vz/F");
   tree_->Branch("chic_d3d", &candD3D_, "chic_d3d/F");
+  tree_->Branch("chic_decayLength3D", &candDecayLength3D_, "chic_decayLength3D/F");
+  tree_->Branch("chic_decayLength2D", &candDecayLength2D_, "chic_decayLength2D/F");
+  tree_->Branch("chic_pointingAngle3D", &candPointingAngle3D_, "chic_pointingAngle3D/F");
+  tree_->Branch("chic_pointingAngle2D", &candPointingAngle2D_, "chic_pointingAngle2D/F");
+  tree_->Branch("chic_cosPointingAngle3D", &candCosPointingAngle3D_, "chic_cosPointingAngle3D/F");
+  tree_->Branch("chic_cosPointingAngle2D", &candCosPointingAngle2D_, "chic_cosPointingAngle2D/F");
+  tree_->Branch("chic_dxy", &candDxy_, "chic_dxy/F");
+  tree_->Branch("chic_dz", &candDz_, "chic_dz/F");
+  tree_->Branch("chic_dxySig", &candDxySig_, "chic_dxySig/F");
+  tree_->Branch("chic_dzSig", &candDzSig_, "chic_dzSig/F");
 
   tree_->Branch("acoplanarity", &candAcoplanarity_, "acoplanarity/F");
   tree_->Branch("sphericity", &candSphericity_, "sphericity/F");
@@ -223,12 +232,73 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("pi3_dedx", &dauDeDx_[2], "pi3_dedx/F");
   tree_->Branch("pi4_dedx", &dauDeDx_[3], "pi4_dedx/F");
 
+  tree_->Branch("pi1_dxySig", &dauDxySig_[0], "pi1_dxySig/F");
+  tree_->Branch("pi2_dxySig", &dauDxySig_[1], "pi2_dxySig/F");
+  tree_->Branch("pi3_dxySig", &dauDxySig_[2], "pi3_dxySig/F");
+  tree_->Branch("pi4_dxySig", &dauDxySig_[3], "pi4_dxySig/F");
+
+  tree_->Branch("pi1_dzSig", &dauDzSig_[0], "pi1_dzSig/F");
+  tree_->Branch("pi2_dzSig", &dauDzSig_[1], "pi2_dzSig/F");
+  tree_->Branch("pi3_dzSig", &dauDzSig_[2], "pi3_dzSig/F");
+  tree_->Branch("pi4_dzSig", &dauDzSig_[3], "pi4_dzSig/F");
+
+  tree_->Branch("pi1_chi2", &dauChi2_[0], "pi1_chi2/F");
+  tree_->Branch("pi2_chi2", &dauChi2_[1], "pi2_chi2/F");
+  tree_->Branch("pi3_chi2", &dauChi2_[2], "pi3_chi2/F");
+  tree_->Branch("pi4_chi2", &dauChi2_[3], "pi4_chi2/F");
+
+  tree_->Branch("pi1_nhits", &dauNhits_[0], "pi1_nhits/I");
+  tree_->Branch("pi2_nhits", &dauNhits_[1], "pi2_nhits/I");
+  tree_->Branch("pi3_nhits", &dauNhits_[2], "pi3_nhits/I");
+  tree_->Branch("pi4_nhits", &dauNhits_[3], "pi4_nhits/I");
+
+  tree_->Branch("pi1_npixHits", &dauNpixHits_[0], "pi1_npixHits/I");
+  tree_->Branch("pi2_npixHits", &dauNpixHits_[1], "pi2_npixHits/I");
+  tree_->Branch("pi3_npixHits", &dauNpixHits_[2], "pi3_npixHits/I");
+  tree_->Branch("pi4_npixHits", &dauNpixHits_[3], "pi4_npixHits/I");
+
+  tree_->Branch("pi1_ptErr", &dauPtErr_[0], "pi1_ptErr/F");
+  tree_->Branch("pi2_ptErr", &dauPtErr_[1], "pi2_ptErr/F");
+  tree_->Branch("pi3_ptErr", &dauPtErr_[2], "pi3_ptErr/F");
+  tree_->Branch("pi4_ptErr", &dauPtErr_[3], "pi4_ptErr/F");
+
+  tree_->Branch("pi1_etaErr", &dauEtaErr_[0], "pi1_etaErr/F");
+  tree_->Branch("pi2_etaErr", &dauEtaErr_[1], "pi2_etaErr/F");
+  tree_->Branch("pi3_etaErr", &dauEtaErr_[2], "pi3_etaErr/F");
+  tree_->Branch("pi4_etaErr", &dauEtaErr_[3], "pi4_etaErr/F");
+
+  tree_->Branch("pi1_phiErr", &dauPhiErr_[0], "pi1_phiErr/F");
+  tree_->Branch("pi2_phiErr", &dauPhiErr_[1], "pi2_phiErr/F");
+  tree_->Branch("pi3_phiErr", &dauPhiErr_[2], "pi3_phiErr/F");
+  tree_->Branch("pi4_phiErr", &dauPhiErr_[3], "pi4_phiErr/F");
+
   tree_->Branch("dca_12", &pairDca_[0], "dca_12/F");
   tree_->Branch("dca_13", &pairDca_[1], "dca_13/F");
   tree_->Branch("dca_14", &pairDca_[2], "dca_14/F");
   tree_->Branch("dca_23", &pairDca_[3], "dca_23/F");
   tree_->Branch("dca_24", &pairDca_[4], "dca_24/F");
   tree_->Branch("dca_34", &pairDca_[5], "dca_34/F");
+
+  tree_->Branch("pairMass_12", &pairMass_[0], "pairMass_12/F");
+  tree_->Branch("pairMass_13", &pairMass_[1], "pairMass_13/F");
+  tree_->Branch("pairMass_14", &pairMass_[2], "pairMass_14/F");
+  tree_->Branch("pairMass_23", &pairMass_[3], "pairMass_23/F");
+  tree_->Branch("pairMass_24", &pairMass_[4], "pairMass_24/F");
+  tree_->Branch("pairMass_34", &pairMass_[5], "pairMass_34/F");
+
+  tree_->Branch("pairPt_12", &pairPt_[0], "pairPt_12/F");
+  tree_->Branch("pairPt_13", &pairPt_[1], "pairPt_13/F");
+  tree_->Branch("pairPt_14", &pairPt_[2], "pairPt_14/F");
+  tree_->Branch("pairPt_23", &pairPt_[3], "pairPt_23/F");
+  tree_->Branch("pairPt_24", &pairPt_[4], "pairPt_24/F");
+  tree_->Branch("pairPt_34", &pairPt_[5], "pairPt_34/F");
+
+  tree_->Branch("nPV", &nPV_, "nPV/I");
+  tree_->Branch("pvX", &pvX_, "pvX/F");
+  tree_->Branch("pvY", &pvY_, "pvY/F");
+  tree_->Branch("pvZ", &pvZ_, "pvZ/F");
+  tree_->Branch("pvNdof", &pvNdof_, "pvNdof/F");
+  tree_->Branch("pvChi2", &pvChi2_, "pvChi2/F");
 
   // Generator-level and q-vector variables
   tree_->Branch("genMatch", &genMatch_, "genMatch/I");
@@ -253,7 +323,17 @@ void ChiCFlatNtuplizer::resetBranches() {
   candPhi_ = -99.f;
   candRapidity_ = -99.f;
   candVx_ = candVy_ = candVz_ = 0.f;
-  candD3D_ = 0.f;
+  candD3D_ = -1.f;
+  candDecayLength3D_ = -1.f;
+  candDecayLength2D_ = -1.f;
+  candPointingAngle3D_ = -99.f;
+  candPointingAngle2D_ = -99.f;
+  candCosPointingAngle3D_ = -99.f;
+  candCosPointingAngle2D_ = -99.f;
+  candDxy_ = 0.f;
+  candDz_ = 0.f;
+  candDxySig_ = 0.f;
+  candDzSig_ = 0.f;
 
   candAcoplanarity_ = 0.f;
   candSphericity_ = 0.f;
@@ -268,8 +348,25 @@ void ChiCFlatNtuplizer::resetBranches() {
   dauD3d_.fill(0.f);
   dauMass_.fill(-1.f);
   dauDeDx_.fill(-1.f);
+  dauDxySig_.fill(0.f);
+  dauDzSig_.fill(0.f);
+  dauChi2_.fill(-1.f);
+  dauNhits_.fill(0);
+  dauNpixHits_.fill(0);
+  dauPtErr_.fill(-1.f);
+  dauEtaErr_.fill(-1.f);
+  dauPhiErr_.fill(-1.f);
 
   pairDca_.fill(0.f);
+  pairMass_.fill(-1.f);
+  pairPt_.fill(-1.f);
+  pairEta_.fill(-99.f);
+  pairPhi_.fill(-99.f);
+
+  nPV_ = 0;
+  pvX_ = pvY_ = pvZ_ = 0.f;
+  pvNdof_ = -1.f;
+  pvChi2_ = -1.f;
 
   genMatch_ = 0;
   genMass_ = -1.f;
@@ -290,6 +387,18 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
   edm::Handle<VertexCollection> pvHandle;
   if (event.getByToken(pvToken_, pvHandle) && pvHandle.isValid() && !pvHandle->empty()) {
     primaryVertex = &pvHandle->front();
+    nPV_ = static_cast<int>(pvHandle->size());
+    pvX_ = static_cast<float>(primaryVertex->x());
+    pvY_ = static_cast<float>(primaryVertex->y());
+    pvZ_ = static_cast<float>(primaryVertex->z());
+    pvNdof_ = static_cast<float>(primaryVertex->ndof());
+    pvChi2_ = static_cast<float>(primaryVertex->chi2());
+  }
+
+  edm::Handle<GenParticleCollection> genHandle;
+  const edm::Handle<GenParticleCollection>* genParticles = nullptr;
+  if (useGenMatching_ && event.getByToken(genToken_, genHandle) && genHandle.isValid()) {
+    genParticles = &genHandle;
   }
 
   for (const auto& src : sources_) {
@@ -300,7 +409,16 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
 
     for (const auto& cand : *handle) {
       resetBranches();
-      fillCandidate(src, cand, primaryVertex);
+      // Restore event-level info that was reset
+      nPV_ = static_cast<int>(pvHandle.isValid() ? pvHandle->size() : 0);
+      if (primaryVertex) {
+        pvX_ = static_cast<float>(primaryVertex->x());
+        pvY_ = static_cast<float>(primaryVertex->y());
+        pvZ_ = static_cast<float>(primaryVertex->z());
+        pvNdof_ = static_cast<float>(primaryVertex->ndof());
+        pvChi2_ = static_cast<float>(primaryVertex->chi2());
+      }
+      fillCandidate(src, cand, primaryVertex, genParticles);
       tree_->Fill();
     }
   }
@@ -327,12 +445,51 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
   candVz_ = static_cast<float>(vtx.z());
 
   if (primaryVertex) {
-    const double dx = vtx.x() - primaryVertex->x();
-    const double dy = vtx.y() - primaryVertex->y();
-    const double dz = vtx.z() - primaryVertex->z();
+    const auto& pvPos = primaryVertex->position();
+    const double dx = vtx.x() - pvPos.x();
+    const double dy = vtx.y() - pvPos.y();
+    const double dz = vtx.z() - pvPos.z();
+    
     candD3D_ = static_cast<float>(std::sqrt(dx * dx + dy * dy + dz * dz));
+    candDecayLength3D_ = candD3D_;
+    candDecayLength2D_ = static_cast<float>(std::sqrt(dx * dx + dy * dy));
+    
+    // Pointing angle calculation
+    const math::XYZVector flightDir(dx, dy, dz);
+    const math::XYZVector candMom(cand.px(), cand.py(), cand.pz());
+    const double flightDirMag = std::sqrt(flightDir.mag2());
+    const double candMomMag = std::sqrt(candMom.mag2());
+    
+    if (flightDirMag > 0 && candMomMag > 0) {
+      const double cosAngle3D = flightDir.Dot(candMom) / (flightDirMag * candMomMag);
+      candCosPointingAngle3D_ = static_cast<float>(cosAngle3D);
+      candPointingAngle3D_ = static_cast<float>(std::acos(std::max(-1.0, std::min(1.0, cosAngle3D))));
+      
+      const math::XYZVector flightDir2D(dx, dy, 0);
+      const math::XYZVector candMom2D(cand.px(), cand.py(), 0);
+      const double flightDir2DMag = std::sqrt(flightDir2D.mag2());
+      const double candMom2DMag = std::sqrt(candMom2D.mag2());
+      if (flightDir2DMag > 0 && candMom2DMag > 0) {
+        const double cosAngle2D = flightDir2D.Dot(candMom2D) / (flightDir2DMag * candMom2DMag);
+        candCosPointingAngle2D_ = static_cast<float>(cosAngle2D);
+        candPointingAngle2D_ = static_cast<float>(std::acos(std::max(-1.0, std::min(1.0, cosAngle2D))));
+      }
+    }
+    
+    // Impact parameters (using best track if available)
+    const reco::Track* candTrack = cand.bestTrack();
+    if (candTrack) {
+      candDxy_ = static_cast<float>(candTrack->dxy(pvPos));
+      candDz_ = static_cast<float>(candTrack->dz(pvPos));
+      const double dxyErr = candTrack->dxyError();
+      const double dzErr = candTrack->dzError();
+      if (dxyErr > 0) candDxySig_ = static_cast<float>(std::abs(candDxy_) / dxyErr);
+      if (dzErr > 0) candDzSig_ = static_cast<float>(std::abs(candDz_) / dzErr);
+    }
   } else {
     candD3D_ = -1.f;
+    candDecayLength3D_ = -1.f;
+    candDecayLength2D_ = -1.f;
   }
 
   struct DaughterInfo {
@@ -379,41 +536,91 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     dauCharge_[i] = info.cand->charge();
     dauMass_[i] = static_cast<float>(info.cand->mass());
 
-    if (info.track && primaryVertex) {
-      const auto& pvPos = primaryVertex->position();
-      const double dxy = info.track->dxy(pvPos);
-      const double dz = info.track->dz(pvPos);
-      dauDxy_[i] = static_cast<float>(dxy);
-      dauDz_[i] = static_cast<float>(dz);
-      dauD3d_[i] = static_cast<float>(std::sqrt(dxy * dxy + dz * dz));
+    if (info.track) {
+      dauChi2_[i] = static_cast<float>(info.track->normalizedChi2());
+      dauNhits_[i] = static_cast<int>(info.track->numberOfValidHits());
+      dauNpixHits_[i] = static_cast<int>(info.track->hitPattern().numberOfValidPixelHits());
+      dauPtErr_[i] = static_cast<float>(info.track->ptError());
+      dauEtaErr_[i] = static_cast<float>(info.track->etaError());
+      dauPhiErr_[i] = static_cast<float>(info.track->phiError());
       
-      // dE/dx not available (IsolatedTrack collection removed)
+      if (primaryVertex) {
+        const auto& pvPos = primaryVertex->position();
+        const double dxy = info.track->dxy(pvPos);
+        const double dz = info.track->dz(pvPos);
+        dauDxy_[i] = static_cast<float>(dxy);
+        dauDz_[i] = static_cast<float>(dz);
+        dauD3d_[i] = static_cast<float>(std::sqrt(dxy * dxy + dz * dz));
+        
+        const double dxyErr = info.track->dxyError();
+        const double dzErr = info.track->dzError();
+        if (dxyErr > 0) dauDxySig_[i] = static_cast<float>(std::abs(dxy) / dxyErr);
+        if (dzErr > 0) dauDzSig_[i] = static_cast<float>(std::abs(dz) / dzErr);
+      }
+      
+      // dE/dx not directly available from PAT candidates without ValueMap
+      // Set to -1 (can be filled later if dE/dx ValueMap is provided)
       dauDeDx_[i] = -1.f;
     } else {
-      dauDxy_[i] = 0.f;
-      dauDz_[i] = 0.f;
-      dauD3d_[i] = 0.f;
+      dauChi2_[i] = -1.f;
+      dauNhits_[i] = 0;
+      dauNpixHits_[i] = 0;
+      dauPtErr_[i] = -1.f;
+      dauEtaErr_[i] = -1.f;
+      dauPhiErr_[i] = -1.f;
       dauDeDx_[i] = -1.f;
     }
   }
 
-  const auto computePairDistance = [](const reco::Candidate* first, const reco::Candidate* second) {
+  // Compute pair DCA and invariant masses
+  const auto computePairInfo = [](const reco::Candidate* first, const reco::Candidate* second) -> std::pair<float, float> {
     if (!first || !second)
-      return 0.f;
+      return std::make_pair(0.f, -1.f);
+    
     const auto& v1 = first->vertex();
     const auto& v2 = second->vertex();
     const double dx = v1.x() - v2.x();
     const double dy = v1.y() - v2.y();
     const double dz = v1.z() - v2.z();
-    return static_cast<float>(std::sqrt(dx * dx + dy * dy + dz * dz));
+    const float dca = static_cast<float>(std::sqrt(dx * dx + dy * dy + dz * dz));
+    
+    // Invariant mass of the pair
+    const double px = first->px() + second->px();
+    const double py = first->py() + second->py();
+    const double pz = first->pz() + second->pz();
+    const double e = first->energy() + second->energy();
+    const float mass = static_cast<float>(std::sqrt(e * e - px * px - py * py - pz * pz));
+    
+    return std::make_pair(dca, mass);
   };
-
-  pairDca_[0] = computePairDistance(orderedDaughters[0], orderedDaughters[1]);
-  pairDca_[1] = computePairDistance(orderedDaughters[0], orderedDaughters[2]);
-  pairDca_[2] = computePairDistance(orderedDaughters[0], orderedDaughters[3]);
-  pairDca_[3] = computePairDistance(orderedDaughters[1], orderedDaughters[2]);
-  pairDca_[4] = computePairDistance(orderedDaughters[1], orderedDaughters[3]);
-  pairDca_[5] = computePairDistance(orderedDaughters[2], orderedDaughters[3]);
+  
+  const std::array<std::pair<const reco::Candidate*, const reco::Candidate*>, 6> pairs = {{
+    {orderedDaughters[0], orderedDaughters[1]},
+    {orderedDaughters[0], orderedDaughters[2]},
+    {orderedDaughters[0], orderedDaughters[3]},
+    {orderedDaughters[1], orderedDaughters[2]},
+    {orderedDaughters[1], orderedDaughters[3]},
+    {orderedDaughters[2], orderedDaughters[3]}
+  }};
+  
+  for (size_t i = 0; i < 6; ++i) {
+    const auto& pair = pairs[i];
+    const auto info = computePairInfo(pair.first, pair.second);
+    pairDca_[i] = info.first;
+    pairMass_[i] = info.second;
+    
+    if (pair.first && pair.second) {
+      const double px = pair.first->px() + pair.second->px();
+      const double py = pair.first->py() + pair.second->py();
+      pairPt_[i] = static_cast<float>(std::sqrt(px * px + py * py));
+      const double pz = pair.first->pz() + pair.second->pz();
+      const double p = std::sqrt(px * px + py * py + pz * pz);
+      if (p > 0) {
+        pairEta_[i] = static_cast<float>(0.5 * std::log((p + pz) / (p - pz)));
+        pairPhi_[i] = static_cast<float>(std::atan2(py, px));
+      }
+    }
+  }
 
   if (cand.hasUserFloat("acoplanarity")) {
     candAcoplanarity_ = cand.userFloat("acoplanarity");
@@ -439,7 +646,7 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
   q2Phase_ = static_cast<float>(computeQ2Phase(orderedDaughters));
 
   // Generator matching
-  if (genParticles && genParticles->isValid()) {
+  if (genParticles && genParticles->isValid() && useGenMatching_) {
     const reco::GenParticle* genMatch = findGenMatch(cand, *genParticles);
     if (genMatch) {
       genMatch_ = 1;

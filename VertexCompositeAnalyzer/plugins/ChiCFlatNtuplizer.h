@@ -80,6 +80,16 @@ private:
   float candVy_{};
   float candVz_{};
   float candD3D_{};
+  float candDecayLength3D_{};
+  float candDecayLength2D_{};
+  float candPointingAngle3D_{};
+  float candPointingAngle2D_{};
+  float candCosPointingAngle3D_{};
+  float candCosPointingAngle2D_{};
+  float candDxy_{};
+  float candDz_{};
+  float candDxySig_{};
+  float candDzSig_{};
 
   float candAcoplanarity_{};
   float candSphericity_{};
@@ -96,8 +106,28 @@ private:
   std::array<float, 4> dauD3d_{};
   std::array<float, 4> dauMass_{};
   std::array<float, 4> dauDeDx_{};
+  std::array<float, 4> dauDxySig_{};
+  std::array<float, 4> dauDzSig_{};
+  std::array<float, 4> dauChi2_{};
+  std::array<int, 4> dauNhits_{};
+  std::array<int, 4> dauNpixHits_{};
+  std::array<float, 4> dauPtErr_{};
+  std::array<float, 4> dauEtaErr_{};
+  std::array<float, 4> dauPhiErr_{};
 
   std::array<float, 6> pairDca_{};
+  std::array<float, 6> pairMass_{};
+  std::array<float, 6> pairPt_{};
+  std::array<float, 6> pairEta_{};
+  std::array<float, 6> pairPhi_{};
+
+  // Event-level information
+  int nPV_{};
+  float pvX_{};
+  float pvY_{};
+  float pvZ_{};
+  float pvNdof_{};
+  float pvChi2_{};
 
   // Generator-level and q-vector variables
   int genMatch_{};

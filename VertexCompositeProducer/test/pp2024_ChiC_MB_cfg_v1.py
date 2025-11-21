@@ -26,21 +26,23 @@ process.source = cms.Source(
     'PoolSource',
     fileNames=cms.untracked.vstring(
 #'/store/hidata/OORun2025/IonPhysics0/MINIAOD/PromptReco-v1/000/394/075/00000/09db905b-c8ac-4e9e-9d6d-2be7f844a12b.root'
-'file:04e18742-3308-45a5-b0d6-560741bec33f.root',
+#'file:04e18742-3308-45a5-b0d6-560741bec33f.root',
         # '/store/data/Run2024J/PPRefZeroBiasPlusForward0/MINIAOD/PromptReco-v1/000/387/696/00000/0037fb37-713f-4df8-9668-a2ce4665a93c.root'
+'/store/hidata/HIRun2025A/HIForward0/MINIAOD/PromptReco-v1/000/399/540/00000/491ce449-be44-4fe8-a337-f85c90499ea9.root',
     ),
 )
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = cms.string('150X_dataRun3_Prompt_v1')
+process.GlobalTag.globaltag = cms.string('151X_dataRun3_Prompt_v1')
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 process.hltFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltFilter.andOr = cms.bool(True)
 process.hltFilter.throw = cms.bool(False)
 process.hltFilter.HLTPaths = [
-    'HLT_*',
+    'HLT_HIUPC_ZeroBias_SinglePixelTrackLowPt_MaxPixelCluster400_v*',
+    'HLT_HIUPC_ZeroBias_MinPixelCluster400_MaxPixelCluster10000_v16*',
 ]
 
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.collisionEventSelection_cff')
@@ -48,7 +50,20 @@ process.load('VertexCompositeAnalysis.VertexCompositeProducer.hfCoincFilter_cff'
 process.load('VertexCompositeAnalysis.VertexCompositeProducer.hffilter_cfi')
 process.colEvtSel = cms.Sequence()
 
-process.eventFilter_HM = cms.Sequence(process.hltFilter)
+# Track count filter - configurable cut on number of selected tracks
+from VertexCompositeAnalysis.VertexCompositeProducer.trackCountFilter_cfi import trackCountFilter
+process.trackCountFilter = trackCountFilter.clone()
+# Configure track selection cuts (matching ChiC producers)
+process.trackCountFilter.trackCollection = cms.InputTag('generalTracks')
+process.trackCountFilter.minTrackPt = cms.double(0.1)  # Match ChiCTo4Pi/ChiCTo2Ka
+process.trackCountFilter.maxTrackEta = cms.double(2.4)  # Match ChiC2To4K/ChiCTo2Ka
+process.trackCountFilter.maxTrackNormalizedChi2 = cms.double(10.0)
+process.trackCountFilter.minTrackNHits = cms.int32(0)  # Match ChiCTo4Pi/ChiC2To4K/ChiCTo2Ka
+# Configure track count cuts
+process.trackCountFilter.minNSelectedTracks = cms.int32(4)  # Minimum tracks required (>=)
+process.trackCountFilter.maxNSelectedTracks = cms.int32(6)  # Maximum tracks (<=)
+
+process.eventFilter_HM = cms.Sequence(process.hltFilter * process.trackCountFilter)
 process.eventFilter_HM_step = cms.Path(process.eventFilter_HM)
 
 from VertexCompositeAnalysis.VertexCompositeProducer.PATAlgos_cff import changeToMiniAOD
@@ -65,14 +80,14 @@ from VertexCompositeAnalysis.VertexCompositeAnalyzer.chiCNtuplizer_cfi import Ch
 
 process.ChiCTo4Pi = _ChiCTo4Pi.clone()
 # Expose key ChiCTo4Pi selections
-process.ChiCTo4Pi.minTrackPt = cms.double(2)
+process.ChiCTo4Pi.minTrackPt = cms.double(0.1)
 process.ChiCTo4Pi.maxTrackEta = cms.double(1.6)
 process.ChiCTo4Pi.maxTrackNormalizedChi2 = cms.double(10.0)
 process.ChiCTo4Pi.minTrackNHits = cms.int32(0)
-process.ChiCTo4Pi.minCandidatePt = cms.double(5)
+process.ChiCTo4Pi.minCandidatePt = cms.double(0)
 process.ChiCTo4Pi.minAcoplanarity = cms.double(0.6)
 process.ChiCTo4Pi.maxSphericity = cms.double(0.35)
-process.ChiCTo4Pi.maxCandidateAbsEta = cms.double(2.0)
+process.ChiCTo4Pi.maxCandidateAbsEta = cms.double(2.4)
 process.ChiCTo4Pi.storeEventShape = cms.bool(True)
 process.ChiCTo4Pi.applyMassWindow = cms.bool(True)
 process.ChiCTo4Pi.states = cms.VPSet(
@@ -91,7 +106,7 @@ process.ChiCTo4Pi.states = cms.VPSet(
 )
 process.ChiC2To4K = _ChiC2To4K.clone()
 # Expose key ChiC2To4K selections for easy tweaking in this config
-process.ChiC2To4K.minTrackPt = cms.double(2)
+process.ChiC2To4K.minTrackPt = cms.double(-1)
 process.ChiC2To4K.maxTrackEta = cms.double(2.4)
 process.ChiC2To4K.maxTrackNormalizedChi2 = cms.double(10.0)
 process.ChiC2To4K.minTrackNHits = cms.int32(0)
@@ -117,11 +132,11 @@ process.ChiC2To4K.states = cms.VPSet(
 )
 process.ChiCTo2Ka = _ChiCTo2Ka.clone()
 # Expose key ChiCTo2Ka selections
-process.ChiCTo2Ka.minTrackPt = cms.double(2.0)
+process.ChiCTo2Ka.minTrackPt = cms.double(0.1)
 process.ChiCTo2Ka.maxTrackEta = cms.double(2.4)
-process.ChiCTo2Ka.maxTrackNormalizedChi2 = cms.double(10.0)
+process.ChiCTo2Ka.maxTrackNormalizedChi2 = cms.double(0)
 process.ChiCTo2Ka.minTrackNHits = cms.int32(0)
-process.ChiCTo2Ka.minPairPt = cms.double(5)
+process.ChiCTo2Ka.minPairPt = cms.double(0)
 process.ChiCTo2Ka.applyMassWindow = cms.bool(True)
 process.ChiCTo2Ka.states = cms.VPSet(
     cms.PSet(
@@ -142,7 +157,7 @@ process.KshortProducer = _KshortProducer.clone()
 # Expose key KshortProducer selections
 process.KshortProducer.trackRecoAlgorithm = cms.InputTag('generalTracks')
 process.KshortProducer.vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices')
-process.KshortProducer.tkChi2Cut = cms.double(7.0)
+process.KshortProducer.tkChi2Cut = cms.double(3.0)
 process.KshortProducer.tkNhitsCut = cms.int32(3)
 process.KshortProducer.tkPtCut = cms.double(0.5)
 process.KshortProducer.tkDCACut = cms.double(1.0)
