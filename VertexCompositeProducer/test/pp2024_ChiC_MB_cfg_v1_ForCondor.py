@@ -1,5 +1,50 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
+import sys
+import os
+import argparse
+
+# Parse command line arguments using argparse
+# CMSSW passes arguments in format: key=value key2=value2
+# We need to parse these before argparse can handle them
+def parse_cmssw_args():
+    """Parse CMSSW-style arguments (key=value) into argparse format"""
+    parser = argparse.ArgumentParser(
+        description='ChiC Analysis Configuration for Condor',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  cmsRun pp2024_ChiC_MB_cfg_v1_ForCondor.py inputFiles=file1.root,file2.root outputFile=output.root
+  cmsRun pp2024_ChiC_MB_cfg_v1_ForCondor.py inputFileList=filelist.txt outputFile=output.root storageSite=cern
+  cmsRun pp2024_ChiC_MB_cfg_v1_ForCondor.py inputFileList=filelist.txt outputFile=output.root storageSite=fnal
+        """
+    )
+    
+    parser.add_argument('--inputFiles', type=str, default=None,
+                       help='Comma-separated list of input ROOT files')
+    parser.add_argument('--inputFileList', type=str, default=None,
+                       help='Path to text file containing list of input files (one per line)')
+    parser.add_argument('--outputFile', type=str, default='chic_combination_tree.root',
+                       help='Output ROOT file path (default: chic_combination_tree.root)')
+    parser.add_argument('--storageSite', type=str, default='cern',
+                       help='Storage site/redirector: cern (default), fnal, local, or custom xrootd redirector (e.g., root://hostname/)')
+    
+    # Parse CMSSW-style arguments (key=value format)
+    # Convert to standard --key=value format for argparse
+    cmssw_args = []
+    for arg in sys.argv[1:]:
+        if '=' in arg and not arg.startswith('--'):
+            # Convert key=value to --key=value
+            key, value = arg.split('=', 1)
+            cmssw_args.append(f'--{key}={value}')
+        else:
+            cmssw_args.append(arg)
+    
+    args = parser.parse_args(cmssw_args)
+    return args
+
+# Parse arguments
+args = parse_cmssw_args()
 
 process = cms.Process('ANASKIM', eras.Run3_2025)
 
@@ -9,7 +54,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.options = cms.untracked.PSet(
     wantSummary=cms.untracked.bool(True),
     numberOfThreads=cms.untracked.uint32(1),
@@ -22,13 +67,90 @@ process.FastTimerService = cms.Service(
     enableDQM=cms.untracked.bool(False),
 )
 
+# Get storage site/redirector from parsed arguments
+storageSite = args.storageSite.lower()
+
+# Define xrootd redirectors for different sites
+xrootdRedirectors = {
+    'cern': 'root://eoscms.cern.ch/',
+    'fnal': 'root://cmsxrootd.fnal.gov/',
+    #'infn': 'root://xrootd-se37-vanderbilt.sites.opensciencegrid.org/',
+    'infn': 'root://xrootd-cms.infn.it/',
+    'local': '',  # No prefix for local files
+}
+
+# Get redirector prefix
+if storageSite in xrootdRedirectors:
+    redirectorPrefix = xrootdRedirectors[storageSite]
+else:
+    # Custom redirector provided (not in predefined list)
+    redirectorPrefix = storageSite if storageSite.startswith('root://') else 'root://' + storageSite + '/'
+
+# Get input files from parsed arguments
+inputFiles = []
+
+if args.inputFiles:
+    # Comma-separated list provided
+    inputFiles = [f.strip() for f in args.inputFiles.split(',') if f.strip()]
+elif args.inputFileList:
+    # File list provided
+    fileListPath = args.inputFileList
+    if os.path.exists(fileListPath):
+        with open(fileListPath, 'r') as f:
+            inputFiles = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+    else:
+        raise FileNotFoundError(f"Input file list not found: {fileListPath}")
+
+# Default if no arguments provided
+if not inputFiles:
+    inputFiles = [
+'file:04e18742-3308-45a5-b0d6-560741bec33f.root',
+#        '/store/hidata/OORun2025/IonPhysics0/MINIAOD/PromptReco-v1/000/394/075/00000/09db905b-c8ac-4e9e-9d6d-2be7f844a12b.root'
+    ]
+
+# Add redirector prefix to file paths if needed
+# Only add prefix if file path starts with /store/ and redirector is not 'local'
+processedFiles = []
+for f in inputFiles:
+    if f.startswith('/store/') and redirectorPrefix and storageSite != 'local':
+        # Add xrootd redirector prefix
+        processedFiles.append(redirectorPrefix + f)
+    elif f.startswith('root://'):
+        # Already has redirector, use as is
+        processedFiles.append(f)
+    elif f.startswith('file:'):
+        # Local file, use as is
+        processedFiles.append(f)
+    else:
+        # Assume it's a local path or already has redirector
+        processedFiles.append(f)
+
+inputFiles = processedFiles
+
+# Get output file from parsed arguments
+outputFile = args.outputFile
+
+# Print configuration summary
+print("=" * 80)
+print("ChiC Analysis Configuration")
+print("=" * 80)
+print("Storage site: {0}".format(storageSite))
+if redirectorPrefix:
+    print("Xrootd redirector: {0}".format(redirectorPrefix))
+print("Input files ({0}):".format(len(inputFiles)))
+for i, f in enumerate(inputFiles[:5], 1):  # Print first 5
+    print("  [{0}] {1}".format(i, f))
+if len(inputFiles) > 5:
+    print("  ... and {0} more files".format(len(inputFiles) - 5))
+print("Output file: {0}".format(outputFile))
+print("=" * 80)
+
 process.source = cms.Source(
     'PoolSource',
-    fileNames=cms.untracked.vstring(
-#'/store/hidata/OORun2025/IonPhysics0/MINIAOD/PromptReco-v1/000/394/075/00000/09db905b-c8ac-4e9e-9d6d-2be7f844a12b.root'
-'file:04e18742-3308-45a5-b0d6-560741bec33f.root',
-        # '/store/data/Run2024J/PPRefZeroBiasPlusForward0/MINIAOD/PromptReco-v1/000/387/696/00000/0037fb37-713f-4df8-9668-a2ce4665a93c.root'
-    ),
+    fileNames=cms.untracked.vstring(inputFiles),
+    # Optional: specify storage account/site
+    # This helps CMSSW route file access to the correct storage element
+    # StorageAccount = cms.untracked.string('site://T2_CH_CERN'),  # Example for CERN
 )
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 
@@ -80,13 +202,13 @@ process.ChiCTo4Pi.states = cms.VPSet(
         name=cms.string('ChiC0'),
         pdgId=cms.int32(10441),
         mass=cms.double(3.4147),
-        massWindow=cms.double(0.025)
+        massWindow=cms.double(0.125)
     ),
     cms.PSet(
         name=cms.string('ChiC2'),
         pdgId=cms.int32(445),
         mass=cms.double(3.5562),
-        massWindow=cms.double(0.025)
+        massWindow=cms.double(0.125)
     )
 )
 process.ChiC2To4K = _ChiC2To4K.clone()
@@ -106,13 +228,13 @@ process.ChiC2To4K.states = cms.VPSet(
         name=cms.string('ChiC0'),
         pdgId=cms.int32(10441),
         mass=cms.double(3.4147),
-        massWindow=cms.double(0.090)
+        massWindow=cms.double(0.190)
     ),
     cms.PSet(
         name=cms.string('ChiC2'),
         pdgId=cms.int32(445),
         mass=cms.double(3.5562),
-        massWindow=cms.double(0.090)
+        massWindow=cms.double(0.190)
     )
 )
 process.ChiCTo2Ka = _ChiCTo2Ka.clone()
@@ -128,13 +250,13 @@ process.ChiCTo2Ka.states = cms.VPSet(
         name=cms.string('ChiC0'),
         pdgId=cms.int32(10441),
         mass=cms.double(3.4147),
-        massWindow=cms.double(0.080)
+        massWindow=cms.double(0.180)
     ),
     cms.PSet(
         name=cms.string('ChiC2'),
         pdgId=cms.int32(445),
         mass=cms.double(3.5562),
-        massWindow=cms.double(0.080)
+        massWindow=cms.double(0.180)
     )
 )
 
@@ -142,9 +264,9 @@ process.KshortProducer = _KshortProducer.clone()
 # Expose key KshortProducer selections
 process.KshortProducer.trackRecoAlgorithm = cms.InputTag('generalTracks')
 process.KshortProducer.vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices')
-process.KshortProducer.tkChi2Cut = cms.double(7.0)
-process.KshortProducer.tkNhitsCut = cms.int32(3)
-process.KshortProducer.tkPtCut = cms.double(0.5)
+process.KshortProducer.tkChi2Cut = cms.double(10.0)
+process.KshortProducer.tkNhitsCut = cms.int32(0)
+process.KshortProducer.tkPtCut = cms.double(1.0)
 process.KshortProducer.tkDCACut = cms.double(1.0)
 process.KshortProducer.mPiPiCutMin = cms.double(0.0)
 process.KshortProducer.mPiPiCutMax = cms.double(0.6)
@@ -155,7 +277,7 @@ process.ChiC2FromKshorts = _ChiCFromKshorts.clone(
             name=cms.string('ChiC2'),
             pdgId=cms.int32(445),
             mass=cms.double(3.5562),
-            massWindow=cms.double(0.050)
+            massWindow=cms.double(0.150)
         )
     )
 )
@@ -182,7 +304,7 @@ process.ChiC2FromDiKaonPairs.states = cms.VPSet(
         name=cms.string('ChiC2'),
         pdgId=cms.int32(445),
         mass=cms.double(3.5562),
-        massWindow=cms.double(0.060)
+        massWindow=cms.double(0.160)
     )
 )
 process.ChiC2FromDiKaonPairsSequence = cms.Sequence(process.DiKaonWideMass * process.ChiC2FromDiKaonPairs)
@@ -265,7 +387,7 @@ process.chic2KK_step = cms.Path(
 process.load('VertexCompositeAnalysis.VertexCompositeAnalyzer.eventinfotree_cff')
 process.TFileService = cms.Service(
     'TFileService',
-    fileName=cms.string('chic_combination_tree.root'),
+    fileName=cms.string(outputFile),
 )
 
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
@@ -298,7 +420,7 @@ for P in eventFilterPaths:
     process.schedule.insert(0, P)
 
 changeToMiniAOD(process)
-process.options.numberOfThreads = 10
+process.options.numberOfThreads = 1
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.outCustom = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string("myOutput.root"),

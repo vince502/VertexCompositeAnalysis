@@ -1,3 +1,47 @@
+#!/bin/bash
+
+# Script to run CMSSW job with a subset of files from file.txt
+# Usage: ./run.sh <job_index> <files_per_job> <output_dir>
+
+JOB_INDEX=$1
+FILES_PER_JOB=${2:-20}
+OUTPUT_DIR=${3:-/afs/cern.ch/work/s/soohwan/private/Analysis/DmesonAna/2025OxygenAnalysis/output}
+
+# Calculate line range for this job
+START_LINE=$((JOB_INDEX * FILES_PER_JOB + 1))
+END_LINE=$((START_LINE + FILES_PER_JOB - 1))
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONFIG_FILE="${SCRIPT_DIR}/pp2024_ChiC_MB_cfg_v1.py"
+FILE_LIST="${SCRIPT_DIR}/file.txt"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+# Create temporary config file with selected files
+TEMP_CONFIG="${SCRIPT_DIR}/pp2024_ChiC_MB_cfg_v${JOB_INDEX}.py"
+OUTPUT_FILE="${OUTPUT_DIR}/chic_combination_tree_job${JOB_INDEX}.root"
+
+# Extract files for this job
+JOB_FILES=$(sed -n "${START_LINE},${END_LINE}p" "${FILE_LIST}")
+
+# Check if we have any files
+if [ -z "$JOB_FILES" ]; then
+    echo "No files found for job ${JOB_INDEX} (lines ${START_LINE}-${END_LINE})"
+    exit 1
+fi
+
+# Count actual number of files (filter out empty lines)
+NUM_FILES=$(echo "$JOB_FILES" | grep -v '^$' | wc -l)
+echo "Job ${JOB_INDEX}: Processing ${NUM_FILES} files (lines ${START_LINE}-${END_LINE})"
+
+# Create temporary file list for Python
+TEMP_FILE_LIST="${SCRIPT_DIR}/filelist_job${JOB_INDEX}.txt"
+echo "$JOB_FILES" | grep -v '^$' > "${TEMP_FILE_LIST}"
+
+# Create temporary config file
+cat > "${TEMP_CONFIG}" << 'CONFIG_EOF'
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
@@ -9,7 +53,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Reconstruction_Data_cff')
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.options = cms.untracked.PSet(
     wantSummary=cms.untracked.bool(True),
     numberOfThreads=cms.untracked.uint32(1),
@@ -24,16 +68,27 @@ process.FastTimerService = cms.Service(
 
 process.source = cms.Source(
     'PoolSource',
-    fileNames=cms.untracked.vstring(
-#'/store/hidata/OORun2025/IonPhysics0/MINIAOD/PromptReco-v1/000/394/075/00000/09db905b-c8ac-4e9e-9d6d-2be7f844a12b.root'
-'file:04e18742-3308-45a5-b0d6-560741bec33f.root',
-        # '/store/data/Run2024J/PPRefZeroBiasPlusForward0/MINIAOD/PromptReco-v1/000/387/696/00000/0037fb37-713f-4df8-9668-a2ce4665a93c.root'
-    ),
+    fileNames = cms.untracked.vstring(
+CONFIG_EOF
+
+# Append file list to config
+while IFS= read -r line; do
+    if [ -n "$line" ]; then
+        echo "        '${line}'," >> "${TEMP_CONFIG}"
+    fi
+done < "${TEMP_FILE_LIST}"
+
+# Remove trailing comma from last line and close the list
+sed -i '$ s/,$//' "${TEMP_CONFIG}"
+
+# Continue with rest of config
+cat >> "${TEMP_CONFIG}" << 'CONFIG_EOF'
+    )
 )
 process.maxEvents = cms.untracked.PSet(input=cms.untracked.int32(-1))
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = cms.string('150X_dataRun3_Prompt_v1')
+process.GlobalTag.globaltag = cms.string('141X_dataRun3_Express_v3')
 
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 process.hltFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
@@ -64,7 +119,6 @@ from VertexCompositeAnalysis.VertexCompositeProducer.chiCFromKshorts_cfi import 
 from VertexCompositeAnalysis.VertexCompositeAnalyzer.chiCNtuplizer_cfi import ChiCNtuplizer as _ChiCNtuplizer
 
 process.ChiCTo4Pi = _ChiCTo4Pi.clone()
-# Expose key ChiCTo4Pi selections
 process.ChiCTo4Pi.minTrackPt = cms.double(2)
 process.ChiCTo4Pi.maxTrackEta = cms.double(1.6)
 process.ChiCTo4Pi.maxTrackNormalizedChi2 = cms.double(10.0)
@@ -90,7 +144,6 @@ process.ChiCTo4Pi.states = cms.VPSet(
     )
 )
 process.ChiC2To4K = _ChiC2To4K.clone()
-# Expose key ChiC2To4K selections for easy tweaking in this config
 process.ChiC2To4K.minTrackPt = cms.double(2)
 process.ChiC2To4K.maxTrackEta = cms.double(2.4)
 process.ChiC2To4K.maxTrackNormalizedChi2 = cms.double(10.0)
@@ -116,7 +169,6 @@ process.ChiC2To4K.states = cms.VPSet(
     )
 )
 process.ChiCTo2Ka = _ChiCTo2Ka.clone()
-# Expose key ChiCTo2Ka selections
 process.ChiCTo2Ka.minTrackPt = cms.double(2.0)
 process.ChiCTo2Ka.maxTrackEta = cms.double(2.4)
 process.ChiCTo2Ka.maxTrackNormalizedChi2 = cms.double(10.0)
@@ -139,7 +191,6 @@ process.ChiCTo2Ka.states = cms.VPSet(
 )
 
 process.KshortProducer = _KshortProducer.clone()
-# Expose key KshortProducer selections
 process.KshortProducer.trackRecoAlgorithm = cms.InputTag('generalTracks')
 process.KshortProducer.vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices')
 process.KshortProducer.tkChi2Cut = cms.double(7.0)
@@ -161,13 +212,11 @@ process.ChiC2FromKshorts = _ChiCFromKshorts.clone(
 )
 process.ChiC2FromKshortsSequence = cms.Sequence(process.KshortProducer * process.ChiC2FromKshorts)
 
-# Di-kaon pair combination (wide mass range)
 process.DiKaonWideMass = _DiKaonProducer.clone(
     phiMassCut=cms.double(0.7),
     mKKCutMin=cms.double(0.4),
     mKKCutMax=cms.double(1.5)
 )
-# Expose di-kaon mass window knobs (0.4-1.5 GeV default)
 process.DiKaonWideMass.phiMassCut = cms.double(0.7)
 process.DiKaonWideMass.mKKCutMin = cms.double(0.4)
 process.DiKaonWideMass.mKKCutMax = cms.double(1.5)
@@ -187,57 +236,46 @@ process.ChiC2FromDiKaonPairs.states = cms.VPSet(
 )
 process.ChiC2FromDiKaonPairsSequence = cms.Sequence(process.DiKaonWideMass * process.ChiC2FromDiKaonPairs)
 
-# Unified ChiC ntuple writer
-# cand_type mapping (0-based index in sources list):
-#   cand_type = 0: ChiC0 → 4π (ChiC0_4Pi)
-#   cand_type = 1: ChiC2 → 4π (ChiC2_4Pi)
-#   cand_type = 2: ChiC0 → 4K (ChiC0_4K)
-#   cand_type = 3: ChiC2 → 4K (ChiC2_4K)
-#   cand_type = 4: ChiC0 → 2Ka (ChiC0_2Ka)
-#   cand_type = 5: ChiC2 → 2Ka (ChiC2_2Ka)
-#   cand_type = 6: ChiC2 → Kshort Kshort (ChiC2_KshortKshort)
-#   cand_type = 7: ChiC2 → KK (ChiC2_KK)
 process.ChiCNtuplizer = _ChiCNtuplizer.clone(
     treeName=cms.untracked.string('ChiCNtuple'),
     storeDaughterInfo=cms.untracked.bool(True),
-    primaryVertices=cms.InputTag('offlinePrimaryVertices'),
     sources=cms.VPSet(
-        cms.PSet(  # cand_type = 0: ChiC0 → 4π
+        cms.PSet(
             name=cms.string('ChiC0_4Pi'),
             pdgId=cms.int32(10441),
             collection=cms.InputTag('ChiCTo4Pi', 'ChiC0')
         ),
-        cms.PSet(  # cand_type = 1: ChiC2 → 4π
+        cms.PSet(
             name=cms.string('ChiC2_4Pi'),
             pdgId=cms.int32(445),
             collection=cms.InputTag('ChiCTo4Pi', 'ChiC2')
         ),
-        cms.PSet(  # cand_type = 2: ChiC0 → 4K
+        cms.PSet(
             name=cms.string('ChiC0_4K'),
             pdgId=cms.int32(10441),
             collection=cms.InputTag('ChiC2To4K', 'ChiC0')
         ),
-        cms.PSet(  # cand_type = 3: ChiC2 → 4K
+        cms.PSet(
             name=cms.string('ChiC2_4K'),
             pdgId=cms.int32(445),
             collection=cms.InputTag('ChiC2To4K', 'ChiC2')
         ),
-        cms.PSet(  # cand_type = 4: ChiC0 → 2Ka
+        cms.PSet(
             name=cms.string('ChiC0_2Ka'),
             pdgId=cms.int32(10441),
             collection=cms.InputTag('ChiCTo2Ka', 'ChiC0')
         ),
-        cms.PSet(  # cand_type = 5: ChiC2 → 2Ka
+        cms.PSet(
             name=cms.string('ChiC2_2Ka'),
             pdgId=cms.int32(445),
             collection=cms.InputTag('ChiCTo2Ka', 'ChiC2')
         ),
-        cms.PSet(  # cand_type = 6: ChiC2 → Kshort Kshort
+        cms.PSet(
             name=cms.string('ChiC2_KshortKshort'),
             pdgId=cms.int32(445),
             collection=cms.InputTag('ChiC2FromKshorts', 'ChiC2')
         ),
-        cms.PSet(  # cand_type = 7: ChiC2 → KK
+        cms.PSet(
             name=cms.string('ChiC2_KK'),
             pdgId=cms.int32(445),
             collection=cms.InputTag('ChiC2FromDiKaonPairs', 'ChiC2')
@@ -245,7 +283,6 @@ process.ChiCNtuplizer = _ChiCNtuplizer.clone(
     )
 )
 
-# --- Analysis paths ---
 process.chic4Pi_step = cms.Path(
     process.eventFilter_HM * process.ChiCTo4Pi
 )
@@ -265,7 +302,7 @@ process.chic2KK_step = cms.Path(
 process.load('VertexCompositeAnalysis.VertexCompositeAnalyzer.eventinfotree_cff')
 process.TFileService = cms.Service(
     'TFileService',
-    fileName=cms.string('chic_combination_tree.root'),
+    fileName=cms.string('${OUTPUT_FILE}'),
 )
 
 process.eventinfoana.selectEvents = cms.untracked.string('eventFilter_HM_step')
@@ -300,13 +337,37 @@ for P in eventFilterPaths:
 changeToMiniAOD(process)
 process.options.numberOfThreads = 10
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
-process.outCustom = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string("myOutput.root"),
-    outputCommands = cms.untracked.vstring("keep *_*_*_ANASKIM")  # Keep everything
-)
 
-# Output path
 process.chicNtuple = cms.EndPath(process.ChiCNtuplizer)
-#process.outpathcustom = cms.EndPath(process.outCustom)
-#process.schedule.append(process.outpathcustom)
 process.schedule.append(process.chicNtuple)
+CONFIG_EOF
+
+# Clean up temporary file list
+rm -f "${TEMP_FILE_LIST}"
+
+# Setup CMSSW environment
+cd /afs/cern.ch/work/s/soohwan/private/Analysis/DmesonAna/2025OxygenAnalysis/CMSSW_15_0_9_patch4/src
+eval `scramv1 runtime -sh`
+
+# Run the job
+echo "Starting job ${JOB_INDEX} at $(date)"
+cmsRun "${TEMP_CONFIG}" 2>&1 | tee "${OUTPUT_DIR}/job${JOB_INDEX}.log"
+
+EXIT_CODE=$?
+
+# Clean up temporary config
+rm -f "${TEMP_CONFIG}"
+
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "Job ${JOB_INDEX} completed successfully at $(date)"
+    # Check if output file exists and has reasonable size
+    if [ -f "${OUTPUT_FILE}" ] && [ -s "${OUTPUT_FILE}" ]; then
+        echo "Output file created: ${OUTPUT_FILE}"
+    else
+        echo "WARNING: Output file ${OUTPUT_FILE} is missing or empty"
+    fi
+else
+    echo "Job ${JOB_INDEX} failed with exit code ${EXIT_CODE} at $(date)"
+fi
+
+exit $EXIT_CODE

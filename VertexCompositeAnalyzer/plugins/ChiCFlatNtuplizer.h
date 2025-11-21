@@ -14,6 +14,7 @@
 
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -39,18 +40,24 @@ private:
   };
 
   using VertexCollection = reco::VertexCollection;
+  using GenParticleCollection = reco::GenParticleCollection;
 
   void resetBranches();
   void fillCandidate(const SourceConfig&, 
                      const pat::CompositeCandidate&, 
                      const reco::Vertex* primaryVertex,
-                     const edm::Handle<edm::View<pat::IsolatedTrack>>& isoTracksHandle);
+                     const edm::Handle<GenParticleCollection>* genParticles = nullptr);
+  
+  const reco::GenParticle* findGenMatch(const pat::CompositeCandidate& cand,
+                                        const edm::Handle<GenParticleCollection>& genParticles) const;
+  void collectStablePions(const reco::GenParticle& particle,
+                          std::vector<const reco::GenParticle*>& pions) const;
 
   edm::EDGetTokenT<VertexCollection> pvToken_;
-  edm::EDGetTokenT<edm::View<pat::IsolatedTrack>> isoTracksToken_;
+  edm::EDGetTokenT<GenParticleCollection> genToken_;
+  bool useGenMatching_;
   std::vector<SourceConfig> sources_;
   std::string treeName_;
-  bool useDeDx_;
 
   edm::Service<TFileService> fileService_;
   TTree* tree_;
@@ -91,6 +98,16 @@ private:
   std::array<float, 4> dauDeDx_{};
 
   std::array<float, 6> pairDca_{};
+
+  // Generator-level and q-vector variables
+  int genMatch_{};
+  float genMass_{};
+  float genPt_{};
+  float genEta_{};
+  float genPhi_{};
+  float genY_{};
+  float q2Magnitude_{};
+  float q2Phase_{};
 };
 
 #endif

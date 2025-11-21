@@ -9,11 +9,12 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
-#include "DataFormats/PatCandidates/interface/IsolatedTrack.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Math/interface/Vector3D.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -62,21 +63,70 @@ double computeAcoplanarity(const reco::Candidate* lead, const reco::Candidate* s
   const double delta = reco::deltaPhi(lead->phi(), sublead->phi());
   return 1.0 - std::abs(delta) / M_PI;
 }
+
+// Compute q2 vector magnitude for 4 pions: q2 = (1/N) * sum(exp(2i*phi))
+// Returns magnitude of the q2 vector
+double computeQ2Magnitude(const std::array<const reco::Candidate*, 4>& daughters) {
+  double q2x = 0.0;
+  double q2y = 0.0;
+  int nValid = 0;
+  
+  for (const auto* dau : daughters) {
+    if (!dau)
+      continue;
+    const double phi = dau->phi();
+    q2x += std::cos(2.0 * phi);
+    q2y += std::sin(2.0 * phi);
+    ++nValid;
+  }
+  
+  if (nValid == 0)
+    return 0.0;
+  
+  q2x /= nValid;
+  q2y /= nValid;
+  
+  return std::sqrt(q2x * q2x + q2y * q2y);
+}
+
+// Compute q2 phase
+double computeQ2Phase(const std::array<const reco::Candidate*, 4>& daughters) {
+  double q2x = 0.0;
+  double q2y = 0.0;
+  int nValid = 0;
+  
+  for (const auto* dau : daughters) {
+    if (!dau)
+      continue;
+    const double phi = dau->phi();
+    q2x += std::cos(2.0 * phi);
+    q2y += std::sin(2.0 * phi);
+    ++nValid;
+  }
+  
+  if (nValid == 0)
+    return 0.0;
+  
+  q2x /= nValid;
+  q2y /= nValid;
+  
+  return std::atan2(q2y, q2x);
+}
 }  // namespace
 
 ChiCFlatNtuplizer::ChiCFlatNtuplizer(const edm::ParameterSet& cfg)
-    : tree_(nullptr), useDeDx_(false) {
+    : useGenMatching_(false), tree_(nullptr) {
   usesResource("TFileService");
 
   treeName_ = cfg.getUntrackedParameter<std::string>("treeName", "ChiCFlatNtuple");
   const auto pvTag = cfg.getParameter<edm::InputTag>("primaryVertices");
   pvToken_ = consumes<VertexCollection>(pvTag);
 
-  // Optional: dE/dx from isolatedTracks
-  if (cfg.existsAs<edm::InputTag>("isolatedTracks")) {
-    const auto isoTracksTag = cfg.getParameter<edm::InputTag>("isolatedTracks");
-    isoTracksToken_ = consumes<edm::View<pat::IsolatedTrack>>(isoTracksTag);
-    useDeDx_ = true;
+  // Optional: generator particle matching
+  if (cfg.existsAs<edm::InputTag>("genParticles")) {
+    const auto genTag = cfg.getParameter<edm::InputTag>("genParticles");
+    genToken_ = consumes<GenParticleCollection>(genTag);
+    useGenMatching_ = true;
   }
 
   const auto& sourcePsets = cfg.getParameter<std::vector<edm::ParameterSet>>("sources");
@@ -179,6 +229,16 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("dca_23", &pairDca_[3], "dca_23/F");
   tree_->Branch("dca_24", &pairDca_[4], "dca_24/F");
   tree_->Branch("dca_34", &pairDca_[5], "dca_34/F");
+
+  // Generator-level and q-vector variables
+  tree_->Branch("genMatch", &genMatch_, "genMatch/I");
+  tree_->Branch("genMass", &genMass_, "genMass/F");
+  tree_->Branch("genPt", &genPt_, "genPt/F");
+  tree_->Branch("genEta", &genEta_, "genEta/F");
+  tree_->Branch("genPhi", &genPhi_, "genPhi/F");
+  tree_->Branch("genY", &genY_, "genY/F");
+  tree_->Branch("q2Magnitude", &q2Magnitude_, "q2Magnitude/F");
+  tree_->Branch("q2Phase", &q2Phase_, "q2Phase/F");
 }
 
 void ChiCFlatNtuplizer::resetBranches() {
@@ -210,6 +270,15 @@ void ChiCFlatNtuplizer::resetBranches() {
   dauDeDx_.fill(-1.f);
 
   pairDca_.fill(0.f);
+
+  genMatch_ = 0;
+  genMass_ = -1.f;
+  genPt_ = -1.f;
+  genEta_ = -99.f;
+  genPhi_ = -99.f;
+  genY_ = -99.f;
+  q2Magnitude_ = 0.f;
+  q2Phase_ = 0.f;
 }
 
 void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -223,12 +292,6 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
     primaryVertex = &pvHandle->front();
   }
 
-  // Get isolated tracks for dE/dx matching
-  edm::Handle<edm::View<pat::IsolatedTrack>> isoTracksHandle;
-  if (useDeDx_) {
-    event.getByToken(isoTracksToken_, isoTracksHandle);
-  }
-
   for (const auto& src : sources_) {
     edm::Handle<pat::CompositeCandidateCollection> handle;
     event.getByToken(src.token, handle);
@@ -237,7 +300,7 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
 
     for (const auto& cand : *handle) {
       resetBranches();
-      fillCandidate(src, cand, primaryVertex, isoTracksHandle);
+      fillCandidate(src, cand, primaryVertex);
       tree_->Fill();
     }
   }
@@ -246,7 +309,7 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
 void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
                                        const pat::CompositeCandidate& cand,
                                        const reco::Vertex* primaryVertex,
-                                       const edm::Handle<edm::View<pat::IsolatedTrack>>& isoTracksHandle) {
+                                       const edm::Handle<GenParticleCollection>* genParticles) {
   sourceIndex_ = static_cast<int>(src.index);
   sourcePdgId_ = src.pdgId;
   sourceLabel_ = src.name;
@@ -324,38 +387,8 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
       dauDz_[i] = static_cast<float>(dz);
       dauD3d_[i] = static_cast<float>(std::sqrt(dxy * dxy + dz * dz));
       
-      // Match to isolated tracks for dE/dx
-      dauDeDx_[i] = -1.f;  // Default: no dE/dx
-      
-      if (isoTracksHandle.isValid() && isoTracksHandle->size() > 0) {
-        const double track_pt = info.cand->pt();
-        const double track_eta = info.cand->eta();
-        const double track_phi = info.cand->phi();
-        
-        // Find best matching isolated track
-        double best_dr = 999.0;
-        const pat::IsolatedTrack* best_match = nullptr;
-        
-        for (const auto& isoTrack : *isoTracksHandle) {
-          const double dr = reco::deltaR(track_eta, track_phi, isoTrack.eta(), isoTrack.phi());
-          const double dpt = std::abs(track_pt - isoTrack.pt()) / track_pt;
-          
-          // Match criteria: ΔR < 0.01 and Δp_T/p_T < 0.05
-          if (dr < 0.01 && dpt < 0.05 && dr < best_dr) {
-            best_dr = dr;
-            best_match = &isoTrack;
-          }
-        }
-        
-        // Extract dE/dx if match found
-        if (best_match != nullptr) {
-          // IsolatedTrack has dEdxStrip() method
-          const float dedx_strip = best_match->dEdxStrip();
-          if (dedx_strip > 0) {
-            dauDeDx_[i] = dedx_strip;
-          }
-        }
-      }
+      // dE/dx not available (IsolatedTrack collection removed)
+      dauDeDx_[i] = -1.f;
     } else {
       dauDxy_[i] = 0.f;
       dauDz_[i] = 0.f;
@@ -400,6 +433,103 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     candLambda2_ = static_cast<float>(es.eigenvalues[1]);
     candLambda3_ = static_cast<float>(es.eigenvalues[2]);
   }
+
+  // Compute q2 vector for 4 pions
+  q2Magnitude_ = static_cast<float>(computeQ2Magnitude(orderedDaughters));
+  q2Phase_ = static_cast<float>(computeQ2Phase(orderedDaughters));
+
+  // Generator matching
+  if (genParticles && genParticles->isValid()) {
+    const reco::GenParticle* genMatch = findGenMatch(cand, *genParticles);
+    if (genMatch) {
+      genMatch_ = 1;
+      genMass_ = static_cast<float>(genMatch->mass());
+      genPt_ = static_cast<float>(genMatch->pt());
+      genEta_ = static_cast<float>(genMatch->eta());
+      genPhi_ = static_cast<float>(genMatch->phi());
+      genY_ = static_cast<float>(genMatch->rapidity());
+    }
+  }
 }
+
+const reco::GenParticle* ChiCFlatNtuplizer::findGenMatch(
+    const pat::CompositeCandidate& cand,
+    const edm::Handle<GenParticleCollection>& genParticles) const {
+  const double recoPt = cand.pt();
+  const double recoEta = cand.eta();
+  const double recoPhi = cand.phi();
+  const double recoMass = cand.mass();
+
+  const double maxDeltaR = 0.3;
+  const double maxDeltaPt = 0.3;
+  const double maxDeltaMass = 0.2;
+
+  const reco::GenParticle* bestMatch = nullptr;
+  double bestDeltaR = maxDeltaR;
+
+  for (const auto& genPart : *genParticles) {
+    // Look for ChiC (PDG ID 445) or similar
+    if (std::abs(genPart.pdgId()) != 445)
+      continue;
+
+    // Check if it decays to 4 pions
+    std::vector<const reco::GenParticle*> pions;
+    collectStablePions(genPart, pions);
+    
+    int nPlus = 0, nMinus = 0;
+    bool valid = true;
+    for (const auto* pion : pions) {
+      if (std::abs(pion->pdgId()) != 211) {
+        valid = false;
+        break;
+      }
+      if (pion->pdgId() > 0) ++nPlus;
+      else ++nMinus;
+    }
+    
+    if (!valid || pions.size() != 4 || nPlus != 2 || nMinus != 2)
+      continue;
+
+    const double deltaR = reco::deltaR(recoEta, recoPhi, genPart.eta(), genPart.phi());
+    const double deltaPt = std::abs(recoPt - genPart.pt()) / recoPt;
+    const double deltaMass = std::abs(recoMass - genPart.mass());
+
+    if (deltaR < maxDeltaR && deltaPt < maxDeltaPt && deltaMass < maxDeltaMass) {
+      if (deltaR < bestDeltaR) {
+        bestDeltaR = deltaR;
+        bestMatch = &genPart;
+      }
+    }
+  }
+
+  return bestMatch;
+}
+
+void ChiCFlatNtuplizer::collectStablePions(
+    const reco::GenParticle& particle,
+    std::vector<const reco::GenParticle*>& pions) const {
+  const auto nDau = particle.numberOfDaughters();
+  if (nDau == 0)
+    return;
+
+  for (size_t i = 0; i < nDau; ++i) {
+    const auto* dauCandidate = particle.daughter(i);
+    if (!dauCandidate)
+      continue;
+
+    const auto* dau = dynamic_cast<const reco::GenParticle*>(dauCandidate);
+    if (!dau)
+      continue;
+
+    if (dau->status() == 1) {
+      if (std::abs(dau->pdgId()) == 211) {
+        pions.push_back(dau);
+      }
+    } else {
+      collectStablePions(*dau, pions);
+    }
+  }
+}
+
 
 DEFINE_FWK_MODULE(ChiCFlatNtuplizer);
