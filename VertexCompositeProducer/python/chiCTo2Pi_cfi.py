@@ -8,9 +8,15 @@ ChiCTo2Pi = cms.EDProducer(
     maxTrackEta = cms.double(2.4),
     maxTrackNormalizedChi2 = cms.double(10.0),
     minTrackNHits = cms.int32(6),
+    minTrackNPix = cms.int32(0),  # 0 = no cut (can be overridden)
     minPairPt = cms.double(1.0),
     applyMassWindow = cms.bool(True),
     requiredChargeProduct = cms.int32(-1),  # -1 for opposite charge (?+ ?-), +1 for same charge, 0 for any
+    # Vertex fitting configuration
+    useVertexFitting = cms.bool(False),  # Disabled by default for backward compatibility
+    vertexRecoAlgorithm = cms.InputTag("offlinePrimaryVertices"),
+    beamSpot = cms.InputTag("offlineBeamSpot"),
+    daughterMassSigma = cms.double(0.0013957018),  # 1% uncertainty for pion mass
     states = cms.VPSet(
         cms.PSet(
             name = cms.string("ChiC0"),

@@ -208,7 +208,16 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 //  iEvent.getByLabel(recoAlg, theTrackHandle);
 //  iEvent.getByLabel(vtxAlg,  theVertexHandle);
 //  iEvent.getByLabel(std::string("offlineBeamSpot"), theBeamSpotHandle);
-  if( !theTrackHandle->size() ) return;
+  
+  edm::LogInfo("V0Fitter") << "V0Fitter::fitAll - Event " << iEvent.id().run() << ":" << iEvent.id().luminosityBlock() << ":" << iEvent.id().event();
+  edm::LogInfo("V0Fitter") << "  Total tracks in collection: " << (theTrackHandle.isValid() ? theTrackHandle->size() : 0);
+  edm::LogInfo("V0Fitter") << "  Total vertices in collection: " << (theVertexHandle.isValid() ? theVertexHandle->size() : 0);
+  edm::LogInfo("V0Fitter") << "  doPhis=" << doPhis << ", doKshorts=" << doKshorts << ", doLambdas=" << doLambdas;
+  
+  if( !theTrackHandle->size() ) {
+    edm::LogWarning("V0Fitter") << "  No tracks found, returning early";
+    return;
+  }
   bFieldHandle = iSetup.getHandle(bField_esToken_);
 //  iSetup.get<TrackerDigiGeometryRecord>().get(trackerGeomHandle);
 //  iSetup.get<GlobalTrackingGeometryRecord>().get(globTkGeomHandle);
@@ -246,6 +255,9 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   }
 
   // Fill vectors of TransientTracks and TrackRefs after applying preselection cuts.
+  int nTracksPassQuality = 0;
+  int nTracksPassCuts = 0;
+  int nTracksPassImpact = 0;
   for(unsigned int indx = 0; indx < theTrackHandle->size(); indx++) {
     TrackRef tmpRef( theTrackHandle, indx );
     bool quality_ok = true;
@@ -259,10 +271,12 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       }
     }
     if( !quality_ok ) continue;
+    nTracksPassQuality++;
 
     if( tmpRef->normalizedChi2() < tkChi2Cut &&
         tmpRef->numberOfValidHits() >= tkNhitsCut &&
         tmpRef->pt() > tkPtCut ) {
+      nTracksPassCuts++;
 //      TransientTrack tmpTk( *tmpRef, &(*bFieldHandle), globTkGeomHandle );
       TransientTrack tmpTk( *tmpRef, magField );
 
@@ -278,14 +292,25 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       if( fabs(dauTransImpactSig) > dauTransImpactSigCut && fabs(dauLongImpactSig) > dauLongImpactSigCut ) {
         theTrackRefs.push_back( tmpRef );
         theTransTracks.push_back( tmpTk );
+        nTracksPassImpact++;
       }
     }
   }
+  edm::LogInfo("V0Fitter") << "  Tracks passing quality: " << nTracksPassQuality;
+  edm::LogInfo("V0Fitter") << "  Tracks passing cuts (chi2<" << tkChi2Cut << ", nhits>=" << tkNhitsCut << ", pt>" << tkPtCut << "): " << nTracksPassCuts;
+  edm::LogInfo("V0Fitter") << "  Tracks passing impact sig cuts: " << nTracksPassImpact;
+  edm::LogInfo("V0Fitter") << "  Final selected tracks for vertexing: " << theTrackRefs.size();
 
   // Loop over tracks and vertex good charged track pairs
+  int nPairsChecked = 0;
+  int nOppositeChargePairs = 0;
+  int nPairsPassMassCut = 0;
+  int nPairsPassVertexFit = 0;
+  
   for(unsigned int trdx1 = 0; trdx1 < theTrackRefs.size(); trdx1++) {
 
     for(unsigned int trdx2 = trdx1 + 1; trdx2 < theTrackRefs.size(); trdx2++) {
+      nPairsChecked++;
 
       //This vector holds the pair of oppositely-charged tracks to be vertexed
       std::vector<TransientTrack> transTracks;
@@ -297,6 +322,9 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
       // Look at the two tracks we're looping over.  If they're oppositely
       //  charged, load them into the hypothesized positive and negative tracks
+      if (theTrackRefs[trdx1]->charge() * theTrackRefs[trdx2]->charge() < 0) {
+        nOppositeChargePairs++;
+      }
       //  and references to be sent to the KalmanVertexFitter
       if(theTrackRefs[trdx1]->charge() < 0. && 
 	 theTrackRefs[trdx2]->charge() > 0.) {
@@ -361,7 +389,10 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         ( posTSCP.momentum() + negTSCP.momentum() ).mag2();
       mass = sqrt( totalESq - totalPSq);
 
-      if( mass > mKKCutMax || mass < mKKCutMin ) continue;
+      if( mass > mKKCutMax || mass < mKKCutMin ) {
+        continue;
+      }
+      nPairsPassMassCut++;
 
       // Create the vertex fitter object and vertex the tracks
       TransientVertex theRecoVertex;
@@ -394,8 +425,11 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       // If the vertex is valid, make a VertexCompositeCandidate with it
       else if( theRecoVertex.isValid() && theRecoVertex.totalChiSquared() >= 0. ) {
         theVtx = theRecoVertex;
+        nPairsPassVertexFit++;
       }
-      else continue;
+      else {
+        continue;
+      }
 
       // Create and fill vector of refitted TransientTracks
       //  (iff they've been created by the KVF)
@@ -643,9 +677,14 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
         thePhi->addDaughter(theKaonMinusCand);
         thePhi->setPdgId(333);
         addp4.set( *thePhi );
-        if( thePhi->mass() < phiMass + phiMassCut &&
-            thePhi->mass() > phiMass - phiMassCut ) {
+        double phiMassValue = thePhi->mass();
+        if( phiMassValue < phiMass + phiMassCut &&
+            phiMassValue > phiMass - phiMassCut ) {
           thePhis.push_back( *thePhi );
+          if (thePhis.size() <= 5) {  // Log first few
+            edm::LogInfo("V0Fitter") << "  Accepted phi candidate: mass=" << phiMassValue 
+                                     << " GeV (window: " << (phiMass - phiMassCut) << "-" << (phiMass + phiMassCut) << ")";
+          }
         }
       }
 
@@ -989,6 +1028,15 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     }
 
   };
+  
+  // Summary logging
+  if (doPhis) {
+    edm::LogInfo("V0Fitter") << "  Summary: Total pairs checked=" << nPairsChecked 
+                             << ", opposite charge pairs=" << nOppositeChargePairs
+                             << ", pairs passing mass cut=" << nPairsPassMassCut
+                             << ", pairs passing vertex fit=" << nPairsPassVertexFit
+                             << ", final phi candidates=" << thePhis.size();
+  }
 
   // DsToPhiPi reconstruction                                                                                                                                                                                                        
   if( doDSToPhiPis && thePhis.size() > 0) 
@@ -1616,6 +1664,8 @@ const reco::VertexCompositeCandidateCollection& V0Fitter::getKshorts() const {
 const reco::VertexCompositeCandidateCollection& V0Fitter::getPhis() const {
   return thePhis;
 }
+
+// Add summary logging at end of fitAll - find where the loop ends
 
 const reco::VertexCompositeCandidateCollection& V0Fitter::getLambdas() const {
   return theLambdas;

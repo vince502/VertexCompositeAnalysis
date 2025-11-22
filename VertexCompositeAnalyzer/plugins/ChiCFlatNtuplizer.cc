@@ -187,6 +187,27 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("pca_lambda2", &candLambda2_, "pca_lambda2/F");
   tree_->Branch("pca_lambda3", &candLambda3_, "pca_lambda3/F");
 
+  // Vertex fit quality variables
+  tree_->Branch("vtxChi2", &vtxChi2_, "vtxChi2/F");
+  tree_->Branch("vtxNdof", &vtxNdof_, "vtxNdof/F");
+  tree_->Branch("vtxProb", &vtxProb_, "vtxProb/F");
+  tree_->Branch("vtxNormalizedChi2", &vtxNormalizedChi2_, "vtxNormalizedChi2/F");
+  
+  // Decay length and pointing from vertex fit
+  tree_->Branch("decayLength2D", &decayLength2D_, "decayLength2D/F");
+  tree_->Branch("decayLength3D", &decayLength3D_, "decayLength3D/F");
+  tree_->Branch("decayLengthSig2D", &decayLengthSig2D_, "decayLengthSig2D/F");
+  tree_->Branch("decayLengthSig3D", &decayLengthSig3D_, "decayLengthSig3D/F");
+  tree_->Branch("alpha2D", &alpha2D_, "alpha2D/F");
+  tree_->Branch("alpha3D", &alpha3D_, "alpha3D/F");
+  tree_->Branch("cosAlpha2D", &cosAlpha2D_, "cosAlpha2D/F");
+  tree_->Branch("cosAlpha3D", &cosAlpha3D_, "cosAlpha3D/F");
+  
+  // Track DCA variables
+  tree_->Branch("trackDCA_min", &trackDCA_min_, "trackDCA_min/F");
+  tree_->Branch("trackDCA_max", &trackDCA_max_, "trackDCA_max/F");
+  tree_->Branch("trackDCA_avg", &trackDCA_avg_, "trackDCA_avg/F");
+
   tree_->Branch("pi1_pt", &dauPt_[0], "pi1_pt/F");
   tree_->Branch("pi2_pt", &dauPt_[1], "pi2_pt/F");
   tree_->Branch("pi3_pt", &dauPt_[2], "pi3_pt/F");
@@ -242,6 +263,16 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("pi3_dzSig", &dauDzSig_[2], "pi3_dzSig/F");
   tree_->Branch("pi4_dzSig", &dauDzSig_[3], "pi4_dzSig/F");
 
+  tree_->Branch("pi1_dxSig", &dauDxSig_[0], "pi1_dxSig/F");
+  tree_->Branch("pi2_dxSig", &dauDxSig_[1], "pi2_dxSig/F");
+  tree_->Branch("pi3_dxSig", &dauDxSig_[2], "pi3_dxSig/F");
+  tree_->Branch("pi4_dxSig", &dauDxSig_[3], "pi4_dxSig/F");
+
+  tree_->Branch("pi1_dySig", &dauDySig_[0], "pi1_dySig/F");
+  tree_->Branch("pi2_dySig", &dauDySig_[1], "pi2_dySig/F");
+  tree_->Branch("pi3_dySig", &dauDySig_[2], "pi3_dySig/F");
+  tree_->Branch("pi4_dySig", &dauDySig_[3], "pi4_dySig/F");
+
   tree_->Branch("pi1_chi2", &dauChi2_[0], "pi1_chi2/F");
   tree_->Branch("pi2_chi2", &dauChi2_[1], "pi2_chi2/F");
   tree_->Branch("pi3_chi2", &dauChi2_[2], "pi3_chi2/F");
@@ -293,12 +324,24 @@ void ChiCFlatNtuplizer::beginJob() {
   tree_->Branch("pairPt_24", &pairPt_[4], "pairPt_24/F");
   tree_->Branch("pairPt_34", &pairPt_[5], "pairPt_34/F");
 
+  tree_->Branch("pairQ2_12", &pairQ2_[0], "pairQ2_12/F");
+  tree_->Branch("pairQ2_13", &pairQ2_[1], "pairQ2_13/F");
+  tree_->Branch("pairQ2_14", &pairQ2_[2], "pairQ2_14/F");
+  tree_->Branch("pairQ2_23", &pairQ2_[3], "pairQ2_23/F");
+  tree_->Branch("pairQ2_24", &pairQ2_[4], "pairQ2_24/F");
+  tree_->Branch("pairQ2_34", &pairQ2_[5], "pairQ2_34/F");
+
+  tree_->Branch("chic_decay", &chicDecay_, "chic_decay/I");
   tree_->Branch("nPV", &nPV_, "nPV/I");
   tree_->Branch("pvX", &pvX_, "pvX/F");
   tree_->Branch("pvY", &pvY_, "pvY/F");
   tree_->Branch("pvZ", &pvZ_, "pvZ/F");
   tree_->Branch("pvNdof", &pvNdof_, "pvNdof/F");
   tree_->Branch("pvChi2", &pvChi2_, "pvChi2/F");
+  tree_->Branch("pvNTracks", &pvNTracks_, "pvNTracks/I");
+  tree_->Branch("pvXError", &pvXError_, "pvXError/F");
+  tree_->Branch("pvYError", &pvYError_, "pvYError/F");
+  tree_->Branch("pvZError", &pvZError_, "pvZError/F");
 
   // Generator-level and q-vector variables
   tree_->Branch("genMatch", &genMatch_, "genMatch/I");
@@ -339,6 +382,32 @@ void ChiCFlatNtuplizer::resetBranches() {
   candSphericity_ = 0.f;
   candLambda1_ = candLambda2_ = candLambda3_ = 0.f;
 
+  // Vertex fit quality variables
+  vtxChi2_ = -1.f;
+  vtxNdof_ = -1.f;
+  vtxProb_ = -1.f;
+  vtxNormalizedChi2_ = -1.f;
+  
+  // Decay length and pointing from vertex fit
+  decayLength2D_ = -1.f;
+  decayLength3D_ = -1.f;
+  decayLengthSig2D_ = -1.f;
+  decayLengthSig3D_ = -1.f;
+  alpha2D_ = -99.f;
+  alpha3D_ = -99.f;
+  cosAlpha2D_ = -99.f;
+  cosAlpha3D_ = -99.f;
+  
+  // Track DCA variables
+  trackDCA_min_ = -1.f;
+  trackDCA_max_ = -1.f;
+  trackDCA_avg_ = -1.f;
+  
+  // PV error variables
+  pvXError_ = -1.f;
+  pvYError_ = -1.f;
+  pvZError_ = -1.f;
+
   dauPt_.fill(-1.f);
   dauEta_.fill(-99.f);
   dauPhi_.fill(-99.f);
@@ -350,6 +419,8 @@ void ChiCFlatNtuplizer::resetBranches() {
   dauDeDx_.fill(-1.f);
   dauDxySig_.fill(0.f);
   dauDzSig_.fill(0.f);
+  dauDxSig_.fill(0.f);
+  dauDySig_.fill(0.f);
   dauChi2_.fill(-1.f);
   dauNhits_.fill(0);
   dauNpixHits_.fill(0);
@@ -362,8 +433,12 @@ void ChiCFlatNtuplizer::resetBranches() {
   pairPt_.fill(-1.f);
   pairEta_.fill(-99.f);
   pairPhi_.fill(-99.f);
+  pairQ2_.fill(0.f);
+  
+  chicDecay_ = -1;
 
   nPV_ = 0;
+  pvNTracks_ = 0;
   pvX_ = pvY_ = pvZ_ = 0.f;
   pvNdof_ = -1.f;
   pvChi2_ = -1.f;
@@ -385,14 +460,20 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
 
   const reco::Vertex* primaryVertex = nullptr;
   edm::Handle<VertexCollection> pvHandle;
-  if (event.getByToken(pvToken_, pvHandle) && pvHandle.isValid() && !pvHandle->empty()) {
-    primaryVertex = &pvHandle->front();
+  nPV_ = 0;  // Initialize to 0
+  pvNTracks_ = 0;  // Initialize to 0
+  
+  if (event.getByToken(pvToken_, pvHandle) && pvHandle.isValid()) {
     nPV_ = static_cast<int>(pvHandle->size());
-    pvX_ = static_cast<float>(primaryVertex->x());
-    pvY_ = static_cast<float>(primaryVertex->y());
-    pvZ_ = static_cast<float>(primaryVertex->z());
-    pvNdof_ = static_cast<float>(primaryVertex->ndof());
-    pvChi2_ = static_cast<float>(primaryVertex->chi2());
+    if (!pvHandle->empty()) {
+      primaryVertex = &pvHandle->front();
+      pvX_ = static_cast<float>(primaryVertex->x());
+      pvY_ = static_cast<float>(primaryVertex->y());
+      pvZ_ = static_cast<float>(primaryVertex->z());
+      pvNdof_ = static_cast<float>(primaryVertex->ndof());
+      pvChi2_ = static_cast<float>(primaryVertex->chi2());
+      pvNTracks_ = static_cast<int>(primaryVertex->tracksSize());  // Track multiplicity
+    }
   }
 
   edm::Handle<GenParticleCollection> genHandle;
@@ -404,12 +485,19 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
   for (const auto& src : sources_) {
     edm::Handle<pat::CompositeCandidateCollection> handle;
     event.getByToken(src.token, handle);
-    if (!handle.isValid())
+    if (!handle.isValid() || handle->empty()) {
+      // Empty collections are expected - skip silently
       continue;
+    }
 
     for (const auto& cand : *handle) {
+      // Mass cut: only store candidates in range 2.5 - 4.2 GeV
+      const double candMass = cand.mass();
+      if (candMass < 2.5 || candMass > 4.2)
+        continue;
+      
       resetBranches();
-      // Restore event-level info that was reset
+      // Restore event-level info that was reset (nPV and PV info are event-level, not per-candidate)
       nPV_ = static_cast<int>(pvHandle.isValid() ? pvHandle->size() : 0);
       if (primaryVertex) {
         pvX_ = static_cast<float>(primaryVertex->x());
@@ -417,6 +505,9 @@ void ChiCFlatNtuplizer::analyze(const edm::Event& event, const edm::EventSetup&)
         pvZ_ = static_cast<float>(primaryVertex->z());
         pvNdof_ = static_cast<float>(primaryVertex->ndof());
         pvChi2_ = static_cast<float>(primaryVertex->chi2());
+        pvNTracks_ = static_cast<int>(primaryVertex->tracksSize());  // Track multiplicity
+      } else {
+        pvNTracks_ = 0;
       }
       fillCandidate(src, cand, primaryVertex, genParticles);
       tree_->Fill();
@@ -431,6 +522,81 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
   sourceIndex_ = static_cast<int>(src.index);
   sourcePdgId_ = src.pdgId;
   sourceLabel_ = src.name;
+  
+  // Read vertex fit quality variables from userFloats
+  if (cand.hasUserFloat("VtxChi2")) {
+    vtxChi2_ = cand.userFloat("VtxChi2");
+  }
+  if (cand.hasUserFloat("VtxNdof")) {
+    vtxNdof_ = cand.userFloat("VtxNdof");
+  }
+  if (cand.hasUserFloat("VtxProb")) {
+    vtxProb_ = cand.userFloat("VtxProb");
+  }
+  if (cand.hasUserFloat("VtxNormalizedChi2")) {
+    vtxNormalizedChi2_ = cand.userFloat("VtxNormalizedChi2");
+  }
+  
+  // Read decay length and pointing from vertex fit
+  if (cand.hasUserFloat("decaylength2D")) {
+    decayLength2D_ = cand.userFloat("decaylength2D");
+  }
+  if (cand.hasUserFloat("decaylength3D")) {
+    decayLength3D_ = cand.userFloat("decaylength3D");
+  }
+  if (cand.hasUserFloat("decaylengthsignif2D")) {
+    decayLengthSig2D_ = cand.userFloat("decaylengthsignif2D");
+  }
+  if (cand.hasUserFloat("decaylengthsignif3D")) {
+    decayLengthSig3D_ = cand.userFloat("decaylengthsignif3D");
+  }
+  if (cand.hasUserFloat("alpha2D")) {
+    alpha2D_ = cand.userFloat("alpha2D");
+  }
+  if (cand.hasUserFloat("alpha3D")) {
+    alpha3D_ = cand.userFloat("alpha3D");
+  }
+  if (cand.hasUserFloat("cosAlpha2D")) {
+    cosAlpha2D_ = cand.userFloat("cosAlpha2D");
+  }
+  if (cand.hasUserFloat("cosAlpha3D")) {
+    cosAlpha3D_ = cand.userFloat("cosAlpha3D");
+  }
+  
+  // Read track DCA variables
+  if (cand.hasUserFloat("trackDCA_min")) {
+    trackDCA_min_ = cand.userFloat("trackDCA_min");
+  }
+  if (cand.hasUserFloat("trackDCA_max")) {
+    trackDCA_max_ = cand.userFloat("trackDCA_max");
+  }
+  if (cand.hasUserFloat("trackDCA_avg")) {
+    trackDCA_avg_ = cand.userFloat("trackDCA_avg");
+  }
+  
+  // Read PV error variables
+  if (cand.hasUserFloat("pvXError")) {
+    pvXError_ = cand.userFloat("pvXError");
+  }
+  if (cand.hasUserFloat("pvYError")) {
+    pvYError_ = cand.userFloat("pvYError");
+  }
+  if (cand.hasUserFloat("pvZError")) {
+    pvZError_ = cand.userFloat("pvZError");
+  }
+  
+  // Set decay mode identifier based on source name
+  if (src.name.find("4Pi") != std::string::npos || src.name.find("ChiC_4Pi") != std::string::npos) {
+    chicDecay_ = 0;  // 4pi
+  } else if (src.name.find("DiKaon") != std::string::npos || src.name.find("ChiC_DiKaon") != std::string::npos) {
+    chicDecay_ = 1;  // di-kaon
+  } else if (src.name.find("KsKs") != std::string::npos || src.name.find("ChiC_KsKs") != std::string::npos) {
+    chicDecay_ = 2;  // di-Ks
+  } else if (src.name.find("PP") != std::string::npos || src.name.find("EtaC_PP") != std::string::npos) {
+    chicDecay_ = 3;  // p+p-
+  } else {
+    chicDecay_ = -1;  // unknown
+  }
 
   candCharge_ = cand.charge();
   candMass_ = static_cast<float>(cand.mass());
@@ -522,11 +688,14 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     return lhs.pt > rhs.pt;
   });
 
-  if (daughters.size() > 4)
+  // Ensure we don't exceed array bounds
+  if (daughters.size() > 4) {
     daughters.resize(4);
+  }
 
   std::array<const reco::Candidate*, 4> orderedDaughters{{nullptr, nullptr, nullptr, nullptr}};
-  for (std::size_t i = 0; i < daughters.size(); ++i) {
+  const std::size_t nDaughters = std::min(daughters.size(), static_cast<std::size_t>(4));
+  for (std::size_t i = 0; i < nDaughters; ++i) {
     const auto& info = daughters[i];
     orderedDaughters[i] = info.cand;
 
@@ -544,7 +713,7 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
       dauEtaErr_[i] = static_cast<float>(info.track->etaError());
       dauPhiErr_[i] = static_cast<float>(info.track->phiError());
       
-      if (primaryVertex) {
+      if (primaryVertex && info.track) {
         const auto& pvPos = primaryVertex->position();
         const double dxy = info.track->dxy(pvPos);
         const double dz = info.track->dz(pvPos);
@@ -554,8 +723,45 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
         
         const double dxyErr = info.track->dxyError();
         const double dzErr = info.track->dzError();
-        if (dxyErr > 0) dauDxySig_[i] = static_cast<float>(std::abs(dxy) / dxyErr);
-        if (dzErr > 0) dauDzSig_[i] = static_cast<float>(std::abs(dz) / dzErr);
+        if (dxyErr > 0) {
+          dauDxySig_[i] = static_cast<float>(std::abs(dxy) / dxyErr);
+        }
+        if (dzErr > 0) {
+          dauDzSig_[i] = static_cast<float>(std::abs(dz) / dzErr);
+        }
+        
+        // Compute dx and dy from dxy and phi angle (safer than referencePoint)
+        // dxy is signed impact parameter, phi is track azimuthal angle
+        const double phi = info.track->phi();
+        const double dx = dxy * std::sin(phi);
+        const double dy = -dxy * std::cos(phi);
+        
+        // Use dxy error as approximation for dx and dy errors
+        // More accurate would require full covariance matrix diagonalization
+        if (dxyErr > 0) {
+          // Approximate: dxErr ≈ dxyErr * |sin(phi)|, dyErr ≈ dxyErr * |cos(phi)|
+          const double dxErr = dxyErr * std::abs(std::sin(phi));
+          const double dyErr = dxyErr * std::abs(std::cos(phi));
+          if (dxErr > 1e-10) dauDxSig_[i] = static_cast<float>(std::abs(dx) / dxErr);
+          if (dyErr > 1e-10) dauDySig_[i] = static_cast<float>(std::abs(dy) / dyErr);
+        }
+      }
+      
+      // Try to read userFloat values from producer (more accurate, computed with vertex fitting)
+      if (i < 4) {  // Safety check
+        // Build keys efficiently
+        const char digit = char('1' + i);
+        std::string longKey = "dauLongImpactSig_";
+        longKey += digit;
+        std::string transKey = "dauTransImpactSig_";
+        transKey += digit;
+        
+        if (cand.hasUserFloat(longKey)) {
+          dauDzSig_[i] = cand.userFloat(longKey);
+        }
+        if (cand.hasUserFloat(transKey)) {
+          dauDxySig_[i] = cand.userFloat(transKey);
+        }
       }
       
       // dE/dx not directly available from PAT candidates without ValueMap
@@ -603,11 +809,23 @@ void ChiCFlatNtuplizer::fillCandidate(const SourceConfig& src,
     {orderedDaughters[2], orderedDaughters[3]}
   }};
   
+  // Compute q2 for each pair: q2 = (1/N) * sum(exp(2i*phi)) for the pair
+  const auto computePairQ2 = [](const reco::Candidate* first, const reco::Candidate* second) -> float {
+    if (!first || !second)
+      return 0.f;
+    const double phi1 = first->phi();
+    const double phi2 = second->phi();
+    const double q2x = 0.5 * (std::cos(2.0 * phi1) + std::cos(2.0 * phi2));
+    const double q2y = 0.5 * (std::sin(2.0 * phi1) + std::sin(2.0 * phi2));
+    return static_cast<float>(std::sqrt(q2x * q2x + q2y * q2y));
+  };
+  
   for (size_t i = 0; i < 6; ++i) {
     const auto& pair = pairs[i];
     const auto info = computePairInfo(pair.first, pair.second);
     pairDca_[i] = info.first;
     pairMass_[i] = info.second;
+    pairQ2_[i] = computePairQ2(pair.first, pair.second);
     
     if (pair.first && pair.second) {
       const double px = pair.first->px() + pair.second->px();

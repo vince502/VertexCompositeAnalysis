@@ -97,6 +97,32 @@ private:
   float candLambda2_{};
   float candLambda3_{};
 
+  // Vertex fit quality variables
+  float vtxChi2_{};
+  float vtxNdof_{};
+  float vtxProb_{};
+  float vtxNormalizedChi2_{};
+  
+  // Decay length and pointing from vertex fit
+  float decayLength2D_{};
+  float decayLength3D_{};
+  float decayLengthSig2D_{};
+  float decayLengthSig3D_{};
+  float alpha2D_{};
+  float alpha3D_{};
+  float cosAlpha2D_{};
+  float cosAlpha3D_{};
+  
+  // Track DCA variables
+  float trackDCA_min_{};
+  float trackDCA_max_{};
+  float trackDCA_avg_{};
+  
+  // PV error variables
+  float pvXError_{};
+  float pvYError_{};
+  float pvZError_{};
+
   std::array<float, 4> dauPt_{};
   std::array<float, 4> dauEta_{};
   std::array<float, 4> dauPhi_{};
@@ -108,6 +134,8 @@ private:
   std::array<float, 4> dauDeDx_{};
   std::array<float, 4> dauDxySig_{};
   std::array<float, 4> dauDzSig_{};
+  std::array<float, 4> dauDxSig_{};
+  std::array<float, 4> dauDySig_{};
   std::array<float, 4> dauChi2_{};
   std::array<int, 4> dauNhits_{};
   std::array<int, 4> dauNpixHits_{};
@@ -120,6 +148,7 @@ private:
   std::array<float, 6> pairPt_{};
   std::array<float, 6> pairEta_{};
   std::array<float, 6> pairPhi_{};
+  std::array<float, 6> pairQ2_{};
 
   // Event-level information
   int nPV_{};
@@ -128,6 +157,7 @@ private:
   float pvZ_{};
   float pvNdof_{};
   float pvChi2_{};
+  int pvNTracks_{};  // Track multiplicity of primary vertex
 
   // Generator-level and q-vector variables
   int genMatch_{};
@@ -138,6 +168,9 @@ private:
   float genY_{};
   float q2Magnitude_{};
   float q2Phase_{};
+  
+  // Decay mode identifier
+  int chicDecay_{};  // 0=4pi, 1=di-kaon, 2=di-Ks, 3=p+p-
 };
 
 #endif

@@ -7,6 +7,13 @@ ChiCFromKshorts = cms.EDProducer(
     resonanceCollection = cms.InputTag("KshortProducer", "Kshort"),
     applyMassWindow = cms.bool(True),
     requireUniqueTracks = cms.bool(True),
+    # Vertex fitting configuration
+    useVertexFitting = cms.bool(True),
+    vertexRecoAlgorithm = cms.InputTag("offlinePrimaryVertices"),
+    beamSpot = cms.InputTag("offlineBeamSpot"),
+    # Mass sigmas for kinematic fitting (for Ks: ~0.497 GeV with ~1% uncertainty)
+    # These are used for the 4 tracks (2 pions from each Ks)
+    resonanceMassSigmas = cms.vdouble(0.0013957018, 0.0013957018, 0.0013957018, 0.0013957018),  # Pion mass uncertainty (1%)
     states = cms.VPSet(
         cms.PSet(
             name = cms.string("ChiC0"),

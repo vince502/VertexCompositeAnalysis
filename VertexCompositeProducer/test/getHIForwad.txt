@@ -1,0 +1,6 @@
+for i in {0..23};do dasgoclient --query="file dataset=/HIForward"$i"/HIRun2025A-PromptReco-v1/MINIAOD" ;done
+for i in {0..23};do dasgoclient --query="file dataset=/HIForward"$i"/HIRun2025A-PromptReco-v1/MINIAOD" >> forward.txt ;done
+
+for i in {0..19};do dasgoclient --query="file dataset=/HIForward"$i"/HIRun2024A-PromptReco-v1/MINIAOD" >> forward2024.txt ;done
+for i in {0..19};do dasgoclient --query="file dataset=/HIForward"$i"/HIRun2024B-PromptReco-v1/MINIAOD" >> forward2024.txt ;done
+for i in {0..19};do dasgoclient --query="file dataset=/HIForward"$i"/HIRun2024B-PromptReco-v2/MINIAOD" >> forward2024.txt ;done

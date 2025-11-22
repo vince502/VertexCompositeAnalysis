@@ -1,10 +1,12 @@
 // -*- C++ -*-
 //
 // Package:    VertexCompositeProducer
-// Class:      ChiCResonanceProducer
+// Class:      P4000Producer
+//
+// Producer for P(4000) -> J/ψ(μ+μ-) + φ(K+K-)
 
-#ifndef VertexCompositeAnalysis__CHIC_RESONANCE_PRODUCER_H
-#define VertexCompositeAnalysis__CHIC_RESONANCE_PRODUCER_H
+#ifndef VertexCompositeAnalysis__P4000_PRODUCER_H
+#define VertexCompositeAnalysis__P4000_PRODUCER_H
 
 #include <memory>
 #include <string>
@@ -25,16 +27,16 @@
 
 class MagneticField;
 
-class ChiCResonanceProducer : public edm::one::EDProducer<> {
+class P4000Producer : public edm::one::EDProducer<> {
 public:
   using ResonanceCollection = reco::VertexCompositeCandidateCollection;
-  using ChiCollection = pat::CompositeCandidateCollection;
+  using P4000Collection = pat::CompositeCandidateCollection;
 
-  explicit ChiCResonanceProducer(const edm::ParameterSet&);
-  ~ChiCResonanceProducer() override;
+  explicit P4000Producer(const edm::ParameterSet&);
+  ~P4000Producer() override;
 
 private:
-  struct ChiStateConfig {
+  struct P4000StateConfig {
     std::string name;
     int pdgId;
     double mass;
@@ -45,10 +47,11 @@ private:
   void produce(edm::Event&, const edm::EventSetup&) override;
   void endJob() override;
 
-  bool shareTracks(const reco::VertexCompositeCandidate& first,
-                   const reco::VertexCompositeCandidate& second) const;
+  bool shareTracks(const reco::VertexCompositeCandidate& jpsi,
+                   const reco::VertexCompositeCandidate& phi) const;
 
-  edm::EDGetTokenT<ResonanceCollection> resonanceToken_;
+  edm::EDGetTokenT<ResonanceCollection> jpsiToken_;
+  edm::EDGetTokenT<ResonanceCollection> phiToken_;
   edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
@@ -58,7 +61,7 @@ private:
   bool requireUniqueTracks_;
   bool useVertexFitting_;
 
-  std::vector<ChiStateConfig> states_;
+  std::vector<P4000StateConfig> states_;
 };
 
 #endif

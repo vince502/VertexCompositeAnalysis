@@ -21,7 +21,11 @@ DiKaonFitter::DiKaonFitter(const edm::ParameterSet& params, edm::ConsumesCollect
 DiKaonFitter::~DiKaonFitter() = default;
 
 void DiKaonFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+  edm::LogInfo("DiKaonFitter") << "DiKaonFitter::fitAll - Calling baseFitter_.fitAll() for event " 
+                                << iEvent.id().run() << ":" << iEvent.id().luminosityBlock() << ":" << iEvent.id().event();
   baseFitter_.fitAll(iEvent, iSetup);
+  const auto& phis = baseFitter_.getPhis();
+  edm::LogInfo("DiKaonFitter") << "DiKaonFitter::fitAll - After baseFitter_.fitAll(), found " << phis.size() << " phi candidates";
 }
 
 const DiKaonFitter::CandidateCollection& DiKaonFitter::getDiKaons() const {

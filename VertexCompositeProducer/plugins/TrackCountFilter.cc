@@ -52,6 +52,7 @@ class TrackCountFilter : public edm::stream::EDFilter<> {
       double maxTrackEta_;
       double maxTrackChi2_;
       int minTrackNHits_;
+      int minTrackNPix_;
       int minNSelectedTracks_;
       int maxNSelectedTracks_;
 };
@@ -73,6 +74,7 @@ TrackCountFilter::TrackCountFilter(const edm::ParameterSet& iConfig) :
   maxTrackEta_(iConfig.getParameter<double>("maxTrackEta")),
   maxTrackChi2_(iConfig.getParameter<double>("maxTrackNormalizedChi2")),
   minTrackNHits_(iConfig.getParameter<int>("minTrackNHits")),
+  minTrackNPix_(iConfig.exists("minTrackNPix") ? iConfig.getParameter<int>("minTrackNPix") : 0),
   minNSelectedTracks_(iConfig.getParameter<int>("minNSelectedTracks")),
   maxNSelectedTracks_(iConfig.getParameter<int>("maxNSelectedTracks"))
 {
@@ -116,6 +118,8 @@ TrackCountFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       continue;
     if (track.numberOfValidHits() < minTrackNHits_)
       continue;
+    if (minTrackNPix_ > 0 && track.hitPattern().numberOfValidPixelHits() < minTrackNPix_)
+      continue;
     nSelected++;
   }
 
@@ -148,6 +152,7 @@ TrackCountFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions)
   desc.add<double>("maxTrackEta", 2.4)->setComment("Maximum track |eta|");
   desc.add<double>("maxTrackNormalizedChi2", 10.0)->setComment("Maximum track normalized chi2");
   desc.add<int>("minTrackNHits", 6)->setComment("Minimum number of valid hits");
+  desc.add<int>("minTrackNPix", 0)->setComment("Minimum number of valid pixel hits (0 = no cut)");
   desc.add<int>("minNSelectedTracks", 4)->setComment("Minimum number of selected tracks (>=)");
   desc.add<int>("maxNSelectedTracks", std::numeric_limits<int>::max())->setComment("Maximum number of selected tracks (<=)");
   descriptions.add("trackCountFilter", desc);

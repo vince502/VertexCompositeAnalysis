@@ -101,38 +101,31 @@ process.ChiCTo4Pi.maxSphericity = cms.double(1.0)
 process.ChiCTo4Pi.maxCandidateAbsEta = cms.double(100.0)
 process.ChiCTo4Pi.storeEventShape = cms.bool(True)
 process.ChiCTo4Pi.applyMassWindow = cms.bool(True)
+# Enable vertex fitting to get quality metrics
+process.ChiCTo4Pi.useVertexFitting = cms.bool(True)
+process.ChiCTo4Pi.vertexRecoAlgorithm = cms.InputTag('offlinePrimaryVertices')
+process.ChiCTo4Pi.beamSpot = cms.InputTag('offlineBeamSpot')
+# Single state since we don't care about mass cuts - all 4-pion candidates go to one collection
+# If you need separate ChiC0/ChiC2 collections or different mass windows, use multiple states
 process.ChiCTo4Pi.states = cms.VPSet(
-    #cms.PSet(
-    #    name=cms.string('ChiC0'),
-    #    pdgId=cms.int32(10441),
-    #    mass=cms.double(3.4147),
-    #    massWindow=cms.double(0.125)
-    #),
     cms.PSet(
-        name=cms.string('ChiC2'),
-        pdgId=cms.int32(445),
-        mass=cms.double(3.5562),
-        massWindow=cms.double(0.6)
+        name=cms.string('ChiC'),
+        pdgId=cms.int32(445),  # ChiC2 PDG ID (or use 10441 for ChiC0, doesn't matter if not using mass cuts)
+        mass=cms.double(3.5),  # Not used if applyMassWindow=False
+        massWindow=cms.double(10.0)  # Wide window, not used if applyMassWindow=False
     )
 )
 
 # Unified ChiC flat ntuple writer (4pi only) - comprehensive information for offline analysis
-# cand_type mapping (0-based index in sources list):
-#   cand_type = 0: ChiC0 → 4π (ChiC0_4Pi)
-#   cand_type = 1: ChiC2 → 4π (ChiC2_4Pi)
+# Single collection since we're using single state
 process.ChiCFlatNtuplizer = _ChiCFlatNtuplizer.clone(
     treeName=cms.untracked.string('ChiCFlatNtuple'),
     primaryVertices=cms.InputTag('offlinePrimaryVertices'),
     sources=cms.VPSet(
-        #cms.PSet(  # cand_type = 0: ChiC0 → 4π
-        #    name=cms.string('ChiC0_4Pi'),
-        #    pdgId=cms.int32(10441),
-        #    collection=cms.InputTag('ChiCTo4Pi', 'ChiC0')
-        #),
-        cms.PSet(  # cand_type = 1: ChiC2 → 4π
-            name=cms.string('ChiC2_4Pi'),
-            pdgId=cms.int32(445),
-            collection=cms.InputTag('ChiCTo4Pi', 'ChiC2')
+        cms.PSet(
+            name=cms.string('ChiC_4Pi'),
+            pdgId=cms.int32(445),  # Match the pdgId in states
+            collection=cms.InputTag('ChiCTo4Pi', 'ChiC')
         )
     )
 )

@@ -3,8 +3,7 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-#config.General.requestName = "Ntuplizer_test_AOD_Z_Run2018HI_Data"
-config.General.requestName = "D04P_CMSSW_15_1_0_21NOv_2025_All_v1"
+config.General.requestName = "D04P_CMSSW_15_1_0_22Nov_2025_All_Forward2025_v1"
 config.General.workArea = 'crab_projects'
 config.General.transferOutputs = True
 config.General.transferLogs = False
@@ -12,20 +11,24 @@ config.General.transferLogs = False
 config.section_("JobType")
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.pluginName = "Analysis"
-config.JobType.psetName = "UPC2025_ChiC_MB_cfg_v1.py"
+#config.JobType.psetName = "UPC2025_ChiC_MB_cfg_v1.py"
+config.JobType.psetName = "UPC2025_ChiC_Ultimate_cfg.py"
 config.JobType.numCores = 1
-config.JobType.maxMemoryMB = 2000         # request high memory machines.
+config.JobType.maxMemoryMB = 2500         # request high memory machines.
 #config.JobType.inputFiles=['CentralityTable_HFtowers200_DataPbPb_periHYDJETshape_run3v1302x04_offline_374810.db']
 #config.JobType.maxJobRuntimeMin = 2750    # request longer runtime, ~48 hours.
 
 config.section_("Data")
 #config.Data.inputDataset = '/HIForward4/HIRun2025A-PromptReco-v1/MINIAOD'
-config.Data.outputPrimaryDataset = 'ForwardCheck2025UPC'
-config.Data.userInputFiles = open('filesForward0_23.txt').readlines()
+#config.Data.outputPrimaryDataset = 'ForwardCheck2025UPC'
+config.Data.outputPrimaryDataset = 'ForwardCheck2024UPC'
+config.Data.userInputFiles = open('forward.txt').readlines()
+#config.Data.userInputFiles = open('forward2024.txt').readlines()
 config.Data.ignoreLocality = False
 config.Data.inputDBS = 'global'
-config.Data.unitsPerJob = 11
+config.Data.unitsPerJob = 16
 config.Data.splitting = 'FileBased'
+#config.Data.outLFNDirBase = '/store/user/soohwan/store/UPC2024/Charmonia/Chic/%s' % (config.General.requestName)
 config.Data.outLFNDirBase = '/store/user/soohwan/store/UPC2025/Charmonia/Chic/%s' % (config.General.requestName)
 config.Data.publication = False
 config.Data.totalUnits = -1

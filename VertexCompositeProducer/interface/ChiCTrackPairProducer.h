@@ -18,6 +18,11 @@
 
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+
+class MagneticField;
 
 class ChiCTrackPairProducer : public edm::one::EDProducer<> {
 public:
@@ -39,14 +44,21 @@ private:
   void endJob() override;
 
   edm::EDGetTokenT<reco::TrackCollection> trackToken_;
+  edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
+  edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
+  edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> bFieldToken_;
+
   double daughterMass_;
+  double daughterMassSigma_;
   double minTrackPt_;
   double maxTrackEta_;
   double maxTrackChi2_;
   int minTrackNHits_;
+  int minTrackNPix_;
   bool applyMassWindow_;
   double minPairPt_;
   int requiredChargeProduct_;  // -1 for opposite charge, +1 for same charge, 0 for any
+  bool useVertexFitting_;
 
   std::vector<ChiStateConfig> states_;
 };

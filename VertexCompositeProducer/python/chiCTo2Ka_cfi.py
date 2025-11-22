@@ -15,6 +15,12 @@ ChiCTo2Ka.minPairPt = cms.double(1.2)
 ChiCTo2Ka.applyMassWindow = cms.bool(True)
 ChiCTo2Ka.requiredChargeProduct = cms.int32(-1)  # -1 for opposite charge (K+ K-), +1 for same charge, 0 for any
 
+# Vertex fitting configuration
+ChiCTo2Ka.useVertexFitting = cms.bool(False)  # Disabled by default for backward compatibility
+ChiCTo2Ka.vertexRecoAlgorithm = cms.InputTag("offlinePrimaryVertices")
+ChiCTo2Ka.beamSpot = cms.InputTag("offlineBeamSpot")
+ChiCTo2Ka.daughterMassSigma = cms.double(0.00493677)  # 1% uncertainty for kaon mass
+
 # Resonance definitions
 ChiCTo2Ka.states = cms.VPSet(
     cms.PSet(
