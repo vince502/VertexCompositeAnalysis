@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      DStar5PFitter
-// 
+//
 /**\class DStar5PFitter DStar5PFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DStar5PFitter.cc
 
  Description: <one line class summary>
@@ -46,18 +46,20 @@
 #include <Math/Functions.h>
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
+#include <TFile.h>
 #include <TMath.h>
+#include <TString.h>
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "CondFormats/DataRecord/interface/GBRWrapperRcd.h"
 
 static const float piMassDStar = 0.13957018;
-static const float piMassDStarSquared = piMassDStar*piMassDStar;
+[[maybe_unused]] static const float piMassDStarSquared = piMassDStar*piMassDStar;
 static const float dStarMassDStar = 2.010000;
 static float piMassDStar_sigma = 3.5E-7f;
 static float D0MassD0_sigma = 1.6E-4f;
-static float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
+[[maybe_unused]] static float dStarMassDStar_sigma = dStarMassDStar*1.e-6;
 
 
 // Constructor and (empty) destructor
@@ -147,7 +149,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   using std::endl;
   using namespace reco;
   using namespace edm;
-  using namespace std; 
+  using namespace std;
 
   typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
   typedef ROOT::Math::SVector<double, 3> SVector3;
@@ -168,10 +170,10 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
   iEvent.getByToken(token_d0cand, theD0Handle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
   iEvent.getByToken(token_dedx, dEdxHandle);
 
 
@@ -228,7 +230,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	      if (tmpRef->quality(qualities[ndx_])){
 	        quality_ok = true;
-	        break;          
+	        break;
 	      }
       }
     }
@@ -241,7 +243,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       TransientTrack tmpTk( *tmpRef, magField );
 
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -285,7 +287,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       double theDStarcandMass = (D0Vec + pPi).M();
       // std::cout << "D* - D0 mass : " << theDStarcandMass << ", " << D0Vec.M() << std::endl;
       if(theDStarcandMass - D0Vec.M() >0.16) continue;
-      
+
        float chi = 0.0;
        float ndf = 0.0;
 
@@ -371,7 +373,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
        double dStarVtxNdof(dStarDecayVertex->degreesOfFreedom());
        double dStarNormalizedChi2 = dStarVtxChi2/dStarVtxNdof;
 
-       double rVtxMag = 99999.0; 
+       double rVtxMag = 99999.0;
        double lVtxMag = 99999.0;
        double sigmaRvtxMag = 999.0;
        double sigmaLvtxMag = 999.0;
@@ -433,7 +435,7 @@ void DStar5PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
        theDStar->setPdgId(pdgId);
        addp4.set( *theDStar );
        if( theDStar->mass() < dStarMassDStar + dStarMassCut &&
-           theDStar->mass() > dStarMassDStar - dStarMassCut ) 
+           theDStar->mass() > dStarMassDStar - dStarMassCut )
        {
          theDStars.push_back( *theDStar );
          dcaVals_.push_back(cur3DIP.value());

@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      DPlus3PFitter
-// 
+//
 /**\class DPlus3PFitter DPlus3PFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/DPlus3PFitter.cc
 
  Description: <one line class summary>
@@ -42,7 +42,9 @@
 #include <Math/Functions.h>
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
+#include <TFile.h>
 #include <TMath.h>
+#include <TString.h>
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
@@ -55,7 +57,7 @@ const float piMassDPlus3P = 0.13957018;
 const float piMassDPlus3PSquared = piMassDPlus3P*piMassDPlus3P;
 const float kaonMassDPlus3P = 0.493677;
 const float kaonMassDPlus3PSquared = kaonMassDPlus3P*kaonMassDPlus3P;
-const float protonMassDPlus3P = 0.938272013; 
+const float protonMassDPlus3P = 0.938272013;
 const float protonMassDPlus3PSquared = protonMassDPlus3P*protonMassDPlus3P;
 const float DPlusMassDPlus3P = 2.28646;
 float piMassDPlus3P_sigma = 3.5E-7f;
@@ -157,7 +159,7 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   using std::endl;
   using namespace reco;
   using namespace edm;
-  using namespace std; 
+  using namespace std;
 
   // Create std::vectors for Tracks and TrackRefs (required for
   //  passing to the KalmanVertexFitter)
@@ -175,9 +177,9 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
   iEvent.getByToken(token_dedx, dEdxHandle);
 
   if( !theTrackHandle->size() ) return;
@@ -229,7 +231,7 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	if (tmpRef->quality(qualities[ndx_])){
 	  quality_ok = true;
-	  break;          
+	  break;
 	}
       }
     }
@@ -243,7 +245,7 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
       TransientTrack tmpTk( *tmpRef, magField );
 
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -268,16 +270,16 @@ void DPlus3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSet
   if(!isWrongSign)
   {
 #if DEBUG == true
-cout << "NEG = " << theTrackRefs_pos.size() << ", POS = " << theTrackRefs_neg.size() << endl; 
+cout << "NEG = " << theTrackRefs_pos.size() << ", POS = " << theTrackRefs_neg.size() << endl;
 
 #endif
     fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,411);
     fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-411);
   }
-  else 
+  else
   {
     fitDPlusCandidates(theTrackRefs_pos,theTrackRefs_pos,theTransTracks_pos,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,411);
-    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-411);    
+    fitDPlusCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-411);
   }
 }
 
@@ -334,8 +336,8 @@ void DPlus3PFitter::fitDPlusCandidates(
 //      double dauTransImpactSig2 = dxyvtx2/dxyerror2;
 
 //      double nhits1 = trackRef1->numberOfValidHits();
-//      double nhits2 = trackRef2->numberOfValidHits(); 
-    
+//      double nhits2 = trackRef2->numberOfValidHits();
+
 //      double ptErr1 = trackRef1->ptError();
 //      double ptErr2 = trackRef2->ptError();
 
@@ -377,7 +379,7 @@ void DPlus3PFitter::fitDPlusCandidates(
 //        ( trkTSCP1.momentum() + trkTSCP2.momentum() ).perp();
 
 //       double mass1 = sqrt( totalE1Sq - totalPSq);
-//       double minp = 
+//       double minp =
 //       double mintotE = totalE1 + sqrt(kaonMassDPlus3PSquared + (tkPtCut*tkPtCut));
 //       double minTotMass = sqrt( mintotE*mintotE - totalPSq - (tkPtCut*tkPtCut) );
 
@@ -421,7 +423,7 @@ void DPlus3PFitter::fitDPlusCandidates(
           transTkPtr3->trajectoryStateClosestToPoint( cxPt13 );
         if( !trkTSCP31.isValid() ) continue;
         double totalE31 = sqrt( trkTSCP1.momentum().mag2() + piMassDPlus3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) + 
+                          sqrt( trkTSCP2.momentum().mag2() + piMassDPlus3PSquared ) +
                           sqrt( trkTSCP31.momentum().mag2() + kaonMassDPlus3PSquared );
         double totalE31Sq = totalE31*totalE31;
         double totalP3Sq =
@@ -435,7 +437,7 @@ void DPlus3PFitter::fitDPlusCandidates(
 
         if( (mass31 > mPiKPCutMax || mass31 < mPiKPCutMin) ) continue;
         if( totalPt3 < dPtCut ) continue;
-  
+
 
         // Measure distance between tracks at their closest approach
         // Get trajectory states for the tracks at POCA for later cuts
@@ -448,7 +450,7 @@ void DPlus3PFitter::fitDPlusCandidates(
         for(int i=0;i<1;i++) {
           //Creating a KinematicParticleFactory
           KinematicParticleFactoryFromTransientTrack pFactory;
-        
+
           float chi = 0.0;
           float ndf = 0.0;
 
@@ -516,7 +518,7 @@ void DPlus3PFitter::fitDPlusCandidates(
           double DPlusVtxNdof(DPlusDecayVertex->degreesOfFreedom());
           double DPlusNormalizedChi2 = DPlusVtxChi2/DPlusVtxNdof;
 
-          double rVtxMag = 99999.0; 
+          double rVtxMag = 99999.0;
           double lVtxMag = 99999.0;
           double sigmaRvtxMag = 999.0;
           double sigmaLvtxMag = 999.0;
@@ -642,7 +644,7 @@ void DPlus3PFitter::fitDPlusCandidates(
 */
           if(theDPlus3P) delete theDPlus3P;
         } // swap mass
-      } // trk3 
+      } // trk3
     }  // trk2
   } // trk1
 

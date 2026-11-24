@@ -9,6 +9,7 @@
 #include <TH2.h>
 #include <TTree.h>
 #include <TFile.h>
+#include <TString.h>
 #include <TVector3.h>
 #include <TMath.h>
 
@@ -128,7 +129,7 @@ private:
   int    massHistBins_;
 
   //options
-  bool doRecoNtuple_;  
+  bool doRecoNtuple_;
   bool doGenMatching_;
   bool doGenMatchingTOF_;
   bool twoLayerDecay_;
@@ -197,7 +198,7 @@ private:
   bool isSwap;
   bool matchGEN;
   int idmom_reco;
-    
+
   //dau candidate info
   float grand_mass;
   float grand_VtxProb;
@@ -228,7 +229,7 @@ private:
   float H2dedx[MAXDAU];
   float T4dedx[MAXDAU];
   float trkChi[MAXDAU];
-   
+
   //grand-dau info
   float grand_dzos[MAXGDAU];
   float grand_dxyos[MAXGDAU];
@@ -242,7 +243,7 @@ private:
   float grand_H2dedx[MAXGDAU];
   float grand_T4dedx[MAXGDAU];
   float grand_trkChi[MAXGDAU];
-    
+
   //dau muon info
   bool  onestmuon[MAXDAU];
   bool  pfmuon[MAXDAU];
@@ -379,7 +380,7 @@ PATCompositeNtupleProducer::PATCompositeNtupleProducer(const edm::ParameterSet& 
   useAnyMVA_ = (iConfig.exists("useAnyMVA") ? iConfig.getParameter<bool>("useAnyMVA") : false);
   if(useAnyMVA_) MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
   isSkimMVA_ = iConfig.getUntrackedParameter<bool>("isSkimMVA");
-  
+
   tok_triggerResults_ = consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("TriggerResultCollection"));
   tok_filterResults_ = consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("FilterResultCollection"));
 }
@@ -516,7 +517,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
     ZDCPlus = (cent.isValid() ? cent->zdcSumPlus() : -1.);
     ZDCMinus = (cent.isValid() ? cent->zdcSumMinus() : -1.);
     Ntrkoffline = (cent.isValid() ? cent->Ntracks() : -1);
-      
+
     edm::Handle<int> cbin;
     iEvent.getByToken(tok_centBinLabel_, cbin);
     centrality = (cbin.isValid() ? *cbin : -1);
@@ -560,7 +561,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
   //RECO Candidate info
   candSize = v0candidates->size();
   for(uint it=0; it<candSize; ++it)
-  { 
+  {
     const auto& trk = (*v0candidates)[it];
 
     pt = trk.pt();
@@ -590,7 +591,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
     agl_abs = secvec.Angle(ptosvec);
     agl2D = std::cos(secvec2D.Angle(ptosvec2D));
     agl2D_abs = secvec2D.Angle(ptosvec2D);
-        
+
     //Decay length 3D
     const SMatrixSym3D& trkCovMat = *trk.userData<reco::Vertex::CovarianceMatrix>("vertexCovariance");
     const SMatrixSym3D& totalCov = vtx.covariance() + trkCovMat;
@@ -696,7 +697,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
           dxyos[iDau] = dxybest/dxyerror;
         }
       }
- 
+
       if(doMuon_)
       {
         const auto& muon = (dau.isMuon() ? *dynamic_cast<const pat::Muon*>(trk.daughter(iDau)) : pat::Muon());
@@ -818,7 +819,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
         }
       }
     }
- 
+
     if(twoLayerDecay_)
     {
       const auto& d = *(trk.daughter(0));
@@ -838,7 +839,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
         {
           const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle1.product();
           grand_H2dedx[iGDau] = dEdxTrack[gdau].dEdx();
-        }   
+        }
         grand_T4dedx[iGDau] = -999.9;
         if(gdau.isNonnull() && dEdxHandle2.isValid())
         {
@@ -880,7 +881,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
           grand_dxyos[iGDau] = gdxybest/gdxyerror;
         }
       }
-   
+
       //vtxChi2
       grand_vtxChi2 = d.vertexChi2();
       grand_ndf = d.vertexNdof();
@@ -889,7 +890,7 @@ PATCompositeNtupleProducer::fillRECO(const edm::Event& iEvent, const edm::EventS
       //PAngle
       const double& secvz = d.vz(), secvx = d.vx(), secvy = d.vy();
       const TVector3 ptosvec(secvx-bestvx, secvy-bestvy, secvz-bestvz);
-      const TVector3 secvec(d.px(), d.py(), d.pz());            
+      const TVector3 secvec(d.px(), d.py(), d.pz());
       const TVector3 ptosvec2D(secvx-bestvx, secvy-bestvy, 0);
       const TVector3 secvec2D(d.px(), d.py(), 0);
 
@@ -1025,15 +1026,15 @@ PATCompositeNtupleProducer::initHistogram()
 }
 
 
-void 
+void
 PATCompositeNtupleProducer::initTree()
-{ 
+{
   PATCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
 
   if(doRecoNtuple_)
   {
     // Event info
-    
+
     PATCompositeNtuple->Branch("RunNb",&runNb,"RunNb/i");
     PATCompositeNtuple->Branch("LSNb",&lsNb,"LSNb/i");
     PATCompositeNtuple->Branch("EventNb",&eventNb,"EventNb/i");
@@ -1042,7 +1043,7 @@ PATCompositeNtupleProducer::initTree()
     PATCompositeNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
     PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
     PATCompositeNtuple->Branch("candSize",&candSize,"candSize/i");
-    if(isCentrality_) 
+    if(isCentrality_)
     {
       PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
       PATCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
@@ -1102,7 +1103,7 @@ PATCompositeNtupleProducer::initTree()
         PATCompositeNtuple->Branch("idmom_reco",&idmom_reco,"idmom_reco/I");
         PATCompositeNtuple->Branch("matchGEN",&matchGEN,"matchGEN/O");
       }
- 
+
       if(doGenMatchingTOF_)
       {
         for(ushort iDau=1; iDau<=NDAU_; iDau++)
@@ -1157,7 +1158,7 @@ PATCompositeNtupleProducer::initTree()
           PATCompositeNtuple->Branch(Form("dedxHarmonic2D%d",iDau),&H2dedx[iDau-1],Form("dedxHarmonic2D%d/F",iDau));
         }
       }
- 
+
       if(doMuon_)
       {
         for(ushort iDau=1; iDau<=NDAU_; iDau++)
@@ -1206,7 +1207,7 @@ PATCompositeNtupleProducer::initTree()
 
 
 //--------------------------------------------------------------------------------------------------
-void 
+void
 PATCompositeNtupleProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
   bool changed = true;
@@ -1218,7 +1219,7 @@ PATCompositeNtupleProducer::beginRun(const edm::Run& iRun, const edm::EventSetup
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
-void 
+void
 PATCompositeNtupleProducer::endJob()
 {
 }

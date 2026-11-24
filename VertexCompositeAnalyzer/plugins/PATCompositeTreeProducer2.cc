@@ -23,7 +23,7 @@ PATCompositeTreeProducer2::PATCompositeTreeProducer2(const edm::ParameterSet& iC
     PID_dau1_ = iConfig.getUntrackedParameter<int>("PID_dau1");
     PID_dau2_ = iConfig.getUntrackedParameter<int>("PID_dau2");
     if(threeProngDecay_) PID_dau3_ = iConfig.getUntrackedParameter<int>("PID_dau3");
-    
+
     saveTree_ = iConfig.getUntrackedParameter<bool>("saveTree");
     saveHistogram_ = iConfig.getUntrackedParameter<bool>("saveHistogram");
     saveAllHistogram_ = iConfig.getUntrackedParameter<bool>("saveAllHistogram");
@@ -32,7 +32,7 @@ PATCompositeTreeProducer2::PATCompositeTreeProducer2(const edm::ParameterSet& iC
     massHistBins_ = iConfig.getUntrackedParameter<int>("massHistBins");
 
     useAnyMVA_ = iConfig.getParameter<bool>("useAnyMVA");
-    isSkimMVA_ = iConfig.getUntrackedParameter<bool>("isSkimMVA"); 
+    isSkimMVA_ = iConfig.getUntrackedParameter<bool>("isSkimMVA");
 
     //cut variables
     multMax_ = iConfig.getUntrackedParameter<double>("multMax", -1);
@@ -74,7 +74,7 @@ PATCompositeTreeProducer2::PATCompositeTreeProducer2(const edm::ParameterSet& iC
 
 PATCompositeTreeProducer2::~PATCompositeTreeProducer2()
 {
- 
+
   // do anything here that needs to be done at desctruction time
   // (e.g. close files, deallocate resources etc.)
 
@@ -110,14 +110,14 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
     //get collections
     edm::Handle<reco::VertexCollection> vertices;
     iEvent.getByToken(tok_offlinePV_,vertices);
-    
+
     edm::Handle<reco::TrackCollection> tracks;
     iEvent.getByToken(tok_generalTrk_, tracks);
 
     edm::Handle<CCC> v0candidates;
     iEvent.getByToken(PATCompositeCandidateCollection_Token_,v0candidates);
     const CCC * v0candidates_ = v0candidates.product();
-    
+
     edm::Handle<MVACollection> mvavalues;
     if(useAnyMVA_)
     {
@@ -130,10 +130,10 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
     edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle1;
     iEvent.getByToken(Dedx_Token1_, dEdxHandle1);
-    
+
     edm::Handle<edm::ValueMap<reco::DeDxData> > dEdxHandle2;
     iEvent.getByToken(Dedx_Token2_, dEdxHandle2);
-    
+
     centrality=-1;
     if(isCentrality_)
     {
@@ -141,7 +141,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       iEvent.getByToken(tok_centSrc_, cent);
 
       iEvent.getByToken(tok_centBinLabel_,cbin_);
-      centrality = *cbin_;  
+      centrality = *cbin_;
 
       HFsumETPlus = cent->EtHFtowerSumPlus();
       HFsumETMinus = cent->EtHFtowerSumMinus();
@@ -161,7 +161,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       const reco::EvtPlane & ephfm2 = (*eventplanes)[7];
       const reco::EvtPlane & ephfp3 = (*eventplanes)[13];
       const reco::EvtPlane & ephfm3 = (*eventplanes)[14];
-     
+
       ephfpAngle[0] = ephfp1.angle(2);
       ephfpAngle[1] = ephfp2.angle(2);
       ephfpAngle[2] = ephfp3.angle(2);
@@ -188,30 +188,30 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
     const reco::Vertex & vtx = (*vertices)[0];
     bestvz = vtx.z(); bestvx = vtx.x(); bestvy = vtx.y();
     bestvzError = vtx.zError(); bestvxError = vtx.xError(); bestvyError = vtx.yError();
-    
+
     //Ntrkoffline
     Ntrkoffline = 0;
     if(multMax_!=-1 && multMin_!=-1)
     {
       for(unsigned it=0; it<tracks->size(); ++it){
-        
+
         const reco::Track & trk = (*tracks)[it];
-        
+
         math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-        
+
         double dzvtx = trk.dz(bestvtx);
         double dxyvtx = trk.dxy(bestvtx);
         double dzerror = sqrt(trk.dzError()*trk.dzError()+bestvzError*bestvzError);
         double dxyerror = sqrt(trk.d0Error()*trk.d0Error()+bestvxError*bestvyError);
-        
+
         if(!trk.quality(reco::TrackBase::highPurity)) continue;
         if(fabs(trk.ptError())/trk.pt()>0.10) continue;
         if(fabs(dzvtx/dzerror) > 3) continue;
         if(fabs(dxyvtx/dxyerror) > 3) continue;
-        
+
         double eta = trk.eta();
         double pt  = trk.pt();
-        
+
         if(fabs(eta)>2.4) continue;
         if(pt<=0.4) continue;
         Ntrkoffline++;
@@ -294,9 +294,9 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
     #endif
 
     for(unsigned it=0; it<v0candidates_->size(); ++it){
-        
+
         const CC & trk = (*v0candidates_)[it];
-        
+
         double secvz=-999.9, secvx=-999.9, secvy=-999.9;
         secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
 
@@ -317,7 +317,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
         double py = trk.py();
         double pz = trk.pz();
         mass[it] = trk.mass();
-        
+
         // Need cases where this is not true
         const reco::Candidate * d1 = trk.daughter(0);
         // const CC* d1 = trk.daughter(0);
@@ -328,7 +328,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           gd2 = d1->daughter(1);
         }
         const reco::Candidate * d2 = trk.daughter(1);
-        const reco::Candidate * d3 = 0;        
+        const reco::Candidate * d3 = 0;
         if(threeProngDecay_) d3 = trk.daughter(2);
 
         //Gen match
@@ -354,7 +354,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               if (abs(trk.daughter(0)->pdgId())== 421) idxRecoD0 = 0;
               recoD1 = trk.daughter(idxRecoD0);
               recoPi = trk.daughter(1-idxRecoD0);
-              const auto nGenDau = theGenD0->numberOfDaughters();
+              [[maybe_unused]] const auto nGenDau = theGenD0->numberOfDaughters();
 
 
              //if(debug_ ) std::cout << "nGenDau: " << nGenDau<< std::endl;
@@ -402,7 +402,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   #endif
                     __ref_anc__ = findMother(__ref_anc__);
                     if( __ref_anc__.isNonnull()){
-                      if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
+                      if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){
                         idBAnc_reco[it] = __ref_anc__->pdgId();
                   } } }
                   matchGen_DStarpT_[it] = theGenDStar->pt();
@@ -463,7 +463,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
               for( unsigned int igen=0; igen<nGen; igen++){
                 auto const theGenP = genRefs.at(igen);
-                #ifdef DEBUG 
+                #ifdef DEBUG
                 cout << "theGenP pdgId : " << theGenP->pdgId() << endl;
                 #endif
                 matchGEN[it] = matchGEN[it] || matchHadron(&trk, *theGenP,true);
@@ -476,7 +476,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   while ( __ref_anc__.isNonnull() && __count_anc__ < 50 ){
                     __ref_anc__ = findMother(__ref_anc__);
                     if( __ref_anc__.isNonnull()){
-                      if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){ 
+                      if( ((int) abs(__ref_anc__->pdgId())) % 1000 / 100 == 5){
                         idBAnc_reco[it] = __ref_anc__->pdgId();
                   } } }
 
@@ -514,37 +514,37 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               } // END for nGen
             }
           }
-          
+
           double pxd1 = d1->px();
           double pyd1 = d1->py();
           double pzd1 = d1->pz();
           double pxd2 = d2->px();
           double pyd2 = d2->py();
           double pzd2 = d2->pz();
-          
+
           TVector3 dauvec1(pxd1,pyd1,pzd1);
           TVector3 dauvec2(pxd2,pyd2,pzd2);
-          
+
           //pt
           pt1[it] = d1->pt();
           pt2[it] = d2->pt();
-          
+
           //momentum
           p1[it] = d1->p();
           p2[it] = d2->p();
-          
+
           //eta
           eta1[it] = d1->eta();
           eta2[it] = d2->eta();
-          
+
           //phi
           phi1[it] = d1->phi();
           phi2[it] = d2->phi();
-          
+
           //charge
           charge1[it] = d1->charge();
           charge2[it] = d2->charge();
-          
+
           double pxd3 = -999.9;
           double pyd3 = -999.9;
           double pzd3 = -999.9;
@@ -581,7 +581,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   if(deltaR < deltaR_ && fabs((trk.pt()-pt1[it])/pt1[it]) < 0.5 && trk.charge()==charge1[it] && pid1[it]==-99999)
                   {
                     pid1[it] = id;
-                  } 
+                  }
 
                   // matching daughter 2
                   deltaR = trkvect.DeltaR(dauvec2);
@@ -599,7 +599,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   TVector3 d2vect(Dd2->px(),Dd2->py(),Dd2->pz());
                   int id1 = Dd1->pdgId();
                   int id2 = Dd2->pdgId();
-                
+
                   double deltaR = d1vect.DeltaR(dauvec1);
                   if(deltaR < deltaR_ && fabs((Dd1->pt()-pt1[it])/pt1[it]) < 0.5 && Dd1->charge()==charge1[it] && pid1[it]==-99999)
                   {
@@ -632,14 +632,14 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           vtxChi2[it] = trk.userFloat("VtxChi2");
           ndf[it] = trk.userFloat("VtxNdof");
           VtxProb[it] = TMath::Prob(vtxChi2[it],ndf[it]);
-          
+
           //PAngle
           TVector3 ptosvec(secvx-bestvx,secvy-bestvy,secvz-bestvz);
           TVector3 secvec(px,py,pz);
-          
+
           TVector3 ptosvec2D(secvx-bestvx,secvy-bestvy,0);
           TVector3 secvec2D(px,py,0);
-          
+
           // agl[it] = cos(secvec.Angle(ptosvec));
           // agl_abs[it] = secvec.Angle(ptosvec);
           // agl2D[it] = cos(secvec2D.Angle(ptosvec2D));
@@ -649,36 +649,36 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           agl_abs[it] = trk.userFloat("alpha3D");
           agl2D[it] = cos(trk.userFloat("alpha2D"));
           agl2D_abs[it] = trk.userFloat("alpha2D");
-          
+
           //Decay length 3D
           // typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
           // typedef ROOT::Math::SVector<double, 3> SVector3;
           // typedef ROOT::Math::SVector<double, 6> SVector6;
-          
+
           // SMatrixSym3D totalCov = vtx.covariance() + trk.vertexCovariance();
           // SVector3 distanceVector(secvx-bestvx,secvy-bestvy,secvz-bestvz);
-          
+
           // dl[it] = ROOT::Math::Mag(distanceVector);
           // dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector))/dl[it];
 
           dl[it] = trk.userFloat("decaylength3D");
           dlos[it] = trk.userFloat("decaylengthsignif3D");
-          
+
           dlerror[it] = dl[it]/dlos[it];
-          
+
           //Decay length 2D
           // SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1),vtx.covariance(1,1),0,0,0);
           // SVector6 v2(trk.vertexCovariance(0,0), trk.vertexCovariance(0,1),trk.vertexCovariance(1,1),0,0,0);
-          
+
           // SMatrixSym3D sv1(v1);
           // SMatrixSym3D sv2(v2);
-          
+
           // SMatrixSym3D totalCov2D = sv1 + sv2;
           // SVector3 distanceVector2D(secvx-bestvx,secvy-bestvy,0);
-          
+
           dl2D[it] = trk.userFloat("decaylength2D");
           // double dl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/dl2D[it];
-          
+
           dlos2D[it] = trk.userFloat("decaylengthsignif2D");
           trk3Ddca[it] = twoLayerDecay_? ((CC*)d1)->userFloat("track3DDCA") : trk.userFloat("track3DDCA");
           trk3DdcaErr[it] = twoLayerDecay_? ((CC*)d1)->userFloat("track3DDCAErr") : trk.userFloat("track3DDCAErr");
@@ -691,105 +691,105 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           {
               //trk quality
               trkquality1[it] = dau1->quality(reco::TrackBase::highPurity);
-              
+
               //trk dEdx
               H2dedx1[it] = -999.9;
-              
+
               if(dEdxHandle1.isValid()){
                   const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
                   H2dedx1[it] = dEdxTrack[dau1].dEdx();
               }
-              
+
               T4dedx1[it] = -999.9;
-              
+
               if(dEdxHandle2.isValid()){
                   const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
                   T4dedx1[it] = dEdxTrack[dau1].dEdx();
               }
-              
+
               //track Chi2
               trkChi1[it] = dau1->normalizedChi2();
-              
+
               //track pT error
               ptErr1[it] = dau1->ptError();
-              
+
               //vertexCovariance 00-xError 11-y 22-z
               secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
-              
+
               //trkNHits
               nhit1[it] = dau1->numberOfValidHits();
-              
+
               //DCA
               math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-              
+
               double dzbest1 = dau1->dz(bestvtx);
               double dxybest1 = dau1->dxy(bestvtx);
               double dzerror1 = sqrt(dau1->dzError()*dau1->dzError()+bestvzError*bestvzError);
               double dxyerror1 = sqrt(dau1->d0Error()*dau1->d0Error()+bestvxError*bestvyError);
-              
+
               dzos1[it] = dzbest1/dzerror1;
               dxyos1[it] = dxybest1/dxyerror1;
               dzval1[it] = dzbest1;
               dxyval1[it] = dxybest1;
           }
-          
+
           auto dau2 = d2->get<reco::TrackRef>();
-          
+
           //trk quality
           trkquality2[it] = dau2->quality(reco::TrackBase::highPurity);
-          
+
           //trk dEdx
           H2dedx2[it] = -999.9;
-          
+
           if(dEdxHandle1.isValid()){
               const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
               H2dedx2[it] = dEdxTrack[dau2].dEdx();
           }
-          
+
           T4dedx2[it] = -999.9;
-          
+
           if(dEdxHandle2.isValid()){
               const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
               T4dedx2[it] = dEdxTrack[dau2].dEdx();
           }
-          
+
           //track Chi2
           trkChi2[it] = dau2->normalizedChi2();
-          
+
           //track pT error
           ptErr2[it] = dau2->ptError();
-          
+
           //vertexCovariance 00-xError 11-y 22-z
           secvz = trk.vz(); secvx = trk.vx(); secvy = trk.vy();
-          
+
           //trkNHits
           nhit2[it] = dau2->numberOfValidHits();
-          
+
           //DCA
           math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-          
+
           double dzbest2 = dau2->dz(bestvtx);
           double dxybest2 = dau2->dxy(bestvtx);
           double dzerror2 = sqrt(dau2->dzError()*dau2->dzError()+bestvzError*bestvzError);
           double dxyerror2 = sqrt(dau2->d0Error()*dau2->d0Error()+bestvxError*bestvyError);
-          
+
           dzos2[it] = dzbest2/dzerror2;
           dxyos2[it] = dxybest2/dxyerror2;
           dzval2[it] = dzbest2;
           dxyval2[it] = dxybest2;
-          
+
           if(doMuon_)
           {
             edm::Handle<reco::MuonCollection> theMuonHandle;
             iEvent.getByToken(tok_muon_, theMuonHandle);
-              
+
             nmatchedch1[it] = -1;
             nmatchedst1[it] = -1;
             matchedenergy1[it] = -1;
             nmatchedch2[it] = -1;
             nmatchedst2[it] = -1;
             matchedenergy2[it] = -1;
-              
+
             double x_exp = -999.;
             double y_exp = -999.;
             double xerr_exp = -999.;
@@ -798,7 +798,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
             double dydz_exp = -999.;
             double dxdzerr_exp = -999.;
             double dydzerr_exp = -999.;
-              
+
             double x_seg = -999.;
             double y_seg = -999.;
             double xerr_seg = -999.;
@@ -807,7 +807,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
             double dydz_seg = -999.;
             double dxdzerr_seg = -999.;
             double dydzerr_seg = -999.;
-              
+
             double dx_seg = 999.;
             double dy_seg = 999.;
             double dxerr_seg = 999.;
@@ -820,12 +820,12 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
             double ddydzerr_seg = 999.;
             double ddxdzSig_seg = 999.;
             double ddydzSig_seg = 999.;
-              
+
             onestmuon1[it] = false;
             pfmuon1[it] = false;
             glbmuon1[it] = false;
             trkmuon1[it] = false;
-            calomuon1[it] = false; 
+            calomuon1[it] = false;
             softmuon1[it] = false;
             onestmuon2[it] = false;
             pfmuon2[it] = false;
@@ -847,11 +847,11 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               trkmuon1[it] =  cand.isTrackerMuon();
               calomuon1[it] =  cand.isCaloMuon();
 
-              if( 
-                  //glbmuon1[it] && 
+              if(
+                  //glbmuon1[it] &&
                   trkmuon1[it] &&
-                  cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 && 
-                  cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 && 
+                  cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 &&
+                  cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 &&
                   fabs(cand.innerTrack()->dxy(vtx.position())) < 0.3 &&
                   fabs(cand.innerTrack()->dz(vtx.position())) < 20.
                 ) softmuon1[it] = true;
@@ -868,7 +868,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               calomuon2[it] =  cand.isCaloMuon();
 
               if(
-                  //glbmuon2[it] && 
+                  //glbmuon2[it] &&
                   trkmuon2[it] &&
                   cand.innerTrack()->hitPattern().trackerLayersWithMeasurement() > 5 &&
                   cand.innerTrack()->hitPattern().pixelLayersWithMeasurement() > 0 &&
@@ -886,12 +886,12 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
               nmatchedch1[it] = cand.numberOfMatches();
               nmatchedst1[it] = cand.numberOfMatchedStations();
-                    
+
               reco::MuonEnergy muenergy = cand.calEnergy();
               matchedenergy1[it] = muenergy.hadMax;
-                      
+
               const std::vector<reco::MuonChamberMatch>& muchmatches = cand.matches();
-                    
+
               for(unsigned int ich=0;ich<muchmatches.size();ich++)
               {
                 x_exp = muchmatches[ich].x;
@@ -902,9 +902,9 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 dydz_exp = muchmatches[ich].dYdZ;
                 dxdzerr_exp = muchmatches[ich].dXdZErr;
                 dydzerr_exp = muchmatches[ich].dYdZErr;
-                          
+
                 std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
-                          
+
                 if(!musegmatches.size()) continue;
                 for(unsigned int jseg=0;jseg<musegmatches.size();jseg++)
                 {
@@ -916,7 +916,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   dydz_seg = musegmatches[jseg].dYdZ;
                   dxdzerr_seg = musegmatches[jseg].dXdZErr;
                   dydzerr_seg = musegmatches[jseg].dYdZErr;
-                              
+
                   if(sqrt((x_seg-x_exp)*(x_seg-x_exp)+(y_seg-y_exp)*(y_seg-y_exp))<sqrt(dx_seg*dx_seg+dy_seg*dy_seg))
                   {
                     dx_seg = x_seg - x_exp;
@@ -933,7 +933,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                     ddydzSig_seg = ddydz_seg / ddydzerr_seg;
                   }
                 }
-                        
+
                 dx1_seg_[it]=dx_seg;
                 dy1_seg_[it]=dy_seg;
                 dxSig1_seg_[it]=dxSig_seg;
@@ -943,7 +943,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 ddxdzSig1_seg_[it]=ddxdzSig_seg;
                 ddydzSig1_seg_[it]=ddydzSig_seg;
               }
-            } 
+            }
 
             if( muId2 != -1 )
             {
@@ -951,10 +951,10 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
 
               nmatchedch2[it] = cand.numberOfMatches();
               nmatchedst2[it] = cand.numberOfMatchedStations();
-                      
+
               reco::MuonEnergy muenergy = cand.calEnergy();
               matchedenergy2[it] = muenergy.hadMax;
-                      
+
               const std::vector<reco::MuonChamberMatch>& muchmatches = cand.matches();
               for(unsigned int ich=0;ich<muchmatches.size();ich++)
                           //                        for(unsigned int ich=0;ich<1;ich++)
@@ -967,9 +967,9 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 dydz_exp = muchmatches[ich].dYdZ;
                 dxdzerr_exp = muchmatches[ich].dXdZErr;
                 dydzerr_exp = muchmatches[ich].dYdZErr;
-                          
+
                 std::vector<reco::MuonSegmentMatch> musegmatches = muchmatches[ich].segmentMatches;
-                          
+
                 if(!musegmatches.size()) continue;
                 for(unsigned int jseg=0;jseg<musegmatches.size();jseg++)
                 {
@@ -981,7 +981,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                   dydz_seg = musegmatches[jseg].dYdZ;
                   dxdzerr_seg = musegmatches[jseg].dXdZErr;
                   dydzerr_seg = musegmatches[jseg].dYdZErr;
-                              
+
                   if(sqrt((x_seg-x_exp)*(x_seg-x_exp)+(y_seg-y_exp)*(y_seg-y_exp))<sqrt(dx_seg*dx_seg+dy_seg*dy_seg))
                   {
                     dx_seg = x_seg - x_exp;
@@ -998,7 +998,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                     ddydzSig_seg = ddydz_seg / ddydzerr_seg;
                   }
                 }
-                          
+
                 dx2_seg_[it]=dx_seg;
                 dy2_seg_[it]=dy_seg;
                 dxSig2_seg_[it]=dxSig_seg;
@@ -1011,156 +1011,156 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
             }
             } // doMuonFull
           }
-          
+
           if(twoLayerDecay_)
           {
               grand_mass[it] = d1->mass();
-              
+
               // const reco::Candidate * gd1 = d1->daughter(0);
               // const reco::Candidate * gd2 = d1->daughter(1);
-              
+
               double gpxd1 = gd1->px();
               double gpyd1 = gd1->py();
               double gpzd1 = gd1->pz();
               double gpxd2 = gd2->px();
               double gpyd2 = gd2->py();
               double gpzd2 = gd2->pz();
-              
+
               TVector3 gdauvec1(gpxd1,gpyd1,gpzd1);
               TVector3 gdauvec2(gpxd2,gpyd2,gpzd2);
-              
+
               auto gdau1 = gd1->get<reco::TrackRef>();
               auto gdau2 = gd2->get<reco::TrackRef>();
-              
+
               //trk quality
-              
+
               grand_trkquality1[it] = gdau1->quality(reco::TrackBase::highPurity);
               grand_trkquality2[it] = gdau2->quality(reco::TrackBase::highPurity);
-              
+
               //trk dEdx
               grand_H2dedx1[it] = -999.9;
               grand_H2dedx2[it] = -999.9;
-              
+
               if(dEdxHandle1.isValid()){
                   const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle1.product();
                   grand_H2dedx1[it] = dEdxTrack[gdau1].dEdx();
                   grand_H2dedx2[it] = dEdxTrack[gdau2].dEdx();
               }
-              
+
               grand_T4dedx1[it] = -999.9;
               grand_T4dedx2[it] = -999.9;
-              
+
               if(dEdxHandle2.isValid()){
                   const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle2.product();
                   grand_T4dedx1[it] = dEdxTrack[gdau1].dEdx();
                   grand_T4dedx2[it] = dEdxTrack[gdau2].dEdx();
               }
-              
+
               //track pt
               grand_pt1[it] = gd1->pt();
               grand_pt2[it] = gd2->pt();
-              
+
               //track momentum
               grand_p1[it] = gd1->p();
               grand_p2[it] = gd2->p();
-              
+
               //track eta
               grand_eta1[it] = gd1->eta();
               grand_eta2[it] = gd2->eta();
-              
+
               //track charge
               grand_charge1[it] = gd1->charge();
               grand_charge2[it] = gd2->charge();
-              
+
               //track Chi2
               grand_trkChi1[it] = gdau1->normalizedChi2();
               grand_trkChi2[it] = gdau2->normalizedChi2();
-              
+
               //track pT error
               grand_ptErr1[it] = gdau1->ptError();
               grand_ptErr2[it] = gdau2->ptError();
-              
+
               //vertexCovariance 00-xError 11-y 22-z
               secvz = d1->vz(); secvx = d1->vx(); secvy = d1->vy();
-              
+
               //trkNHits
               grand_nhit1[it] = gdau1->numberOfValidHits();
               grand_nhit2[it] = gdau2->numberOfValidHits();
-              
+
               //DCA
               math::XYZPoint bestvtx(bestvx,bestvy,bestvz);
-              
+
               double gdzbest1 = gdau1->dz(bestvtx);
               double gdxybest1 = gdau1->dxy(bestvtx);
               double gdzerror1 = sqrt(gdau1->dzError()*gdau1->dzError()+bestvzError*bestvzError);
               double gdxyerror1 = sqrt(gdau1->d0Error()*gdau1->d0Error()+bestvxError*bestvyError);
-              
+
               grand_dzos1[it] = gdzbest1/gdzerror1;
               grand_dxyos1[it] = gdxybest1/gdxyerror1;
-              
+
               double gdzbest2 = gdau2->dz(bestvtx);
               double gdxybest2 = gdau2->dxy(bestvtx);
               double gdzerror2 = sqrt(gdau2->dzError()*gdau2->dzError()+bestvzError*bestvzError);
               double gdxyerror2 = sqrt(gdau2->d0Error()*gdau2->d0Error()+bestvxError*bestvyError);
-              
+
               grand_dzos2[it] = gdzbest2/gdzerror2;
               grand_dxyos2[it] = gdxybest2/gdxyerror2;
-              
-              //vtxChi2 -> is D0 for D* analysis 
+
+              //vtxChi2 -> is D0 for D* analysis
               // If we want to make it more general, should be a case where either the candidate is reco::Candidate or pat::CompositeCandidate
               // grand_vtxChi2[it] = d1->vertexChi2();
               // grand_ndf[it] = d1->vertexNdof();
               grand_vtxChi2[it] = ((CC*) d1)->userFloat("VtxChi2");
               grand_ndf[it] = ((CC*) d1)->userFloat("VtxNdof");
               grand_VtxProb[it] = TMath::Prob(grand_vtxChi2[it],grand_ndf[it]);
-              
+
               //PAngle
               TVector3 ptosvec(secvx-bestvx,secvy-bestvy,secvz-bestvz);
               TVector3 secvec(d1->px(),d1->py(),d1->pz());
-              
+
               TVector3 ptosvec2D(secvx-bestvx,secvy-bestvy,0);
               TVector3 secvec2D(d1->px(),d1->py(),0);
-              
+
               grand_agl[it] = cos(secvec.Angle(ptosvec));
               grand_agl_abs[it] = secvec.Angle(ptosvec);
-              
+
               grand_agl2D[it] = cos(secvec2D.Angle(ptosvec2D));
               grand_agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
-              
+
               //Decay length 3D
               typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
               typedef ROOT::Math::SVector<double, 3> SVector3;
               typedef ROOT::Math::SVector<double, 6> SVector6;
-              
+
               // const reco::Vertex* d1vtx;
               // d1vtx = ((CC*) d1)->userData<reco::Vertex>("D0Vtx");
               CC* d1CC = (CC*) d1;
-              // SMatrixSym3D d1Cov = d1vtx.vertexCovariance(); 
+              // SMatrixSym3D d1Cov = d1vtx.vertexCovariance();
               // SMatrixSym3D totalCov = vtx.covariance() + d1Cov;
               // SVector3 distanceVector(secvx-bestvx,secvy-bestvy,secvz-bestvz);
-              
+
               // grand_dl[it] = ROOT::Math::Mag(distanceVector);
               // grand_dlerror[it] = sqrt(ROOT::Math::Similarity(totalCov, distanceVector))/grand_dl[it];
-              
+
               // grand_dlos[it] = grand_dl[it]/grand_dlerror[it];
 
               grand_dl[it] = d1CC->userFloat("decaylength3D");
               grand_dlos[it] = d1CC->userFloat("decaylengthsignif3D");
               grand_dlerror[it] = grand_dl[it]/grand_dlos[it];
-              
+
               //Decay length 2D
               // SVector6 v1(vtx.covariance(0,0), vtx.covariance(0,1),vtx.covariance(1,1),0,0,0);
               // SVector6 v2(d1->vertexCovariance(0,0), d1->vertexCovariance(0,1),d1->vertexCovariance(1,1),0,0,0);
-              
+
               // SMatrixSym3D sv1(v1);
               // SMatrixSym3D sv2(v2);
-              
+
               // SMatrixSym3D totalCov2D = sv1 + sv2;
               // SVector3 distanceVector2D(secvx-bestvx,secvy-bestvy,0);
-              
+
               // double gdl2D = ROOT::Math::Mag(distanceVector2D);
               // double gdl2Derror = sqrt(ROOT::Math::Similarity(totalCov2D, distanceVector2D))/gdl2D;
-              
+
               // grand_dlos2D[it] = gdl2D/gdl2Derror;
 
               double gdl2D = d1CC->userFloat("decaylength2D");
@@ -1168,8 +1168,8 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
               //D03Ddca[it] = trk.userFloat("D03DDCA");
               //D03DdcaErr[it] = trk.userFloat("D03DDCAErr");
 
-              double gdl2Derror = gdl2D/grand_dlos2D[it];
-              
+              [[maybe_unused]] double gdl2Derror = gdl2D/grand_dlos2D[it];
+
           }
   #ifdef DEBUG
   cout << "Done reco single iter" << endl;
@@ -1325,7 +1325,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           auto const* theGenPion = genRefs.at(igen)->daughter(1- idxD0);
           mass_gen[igen] = theGenDStar->mass();
           pt_gen[igen] = theGenDStar->pt();
-          eta_gen[igen] = theGenDStar->eta(); 
+          eta_gen[igen] = theGenDStar->eta();
           phi_gen[igen] = theGenDStar->phi();
           y_gen[igen] = theGenDStar->rapidity();
           status_gen[igen] = theGenDStar->status();
@@ -1345,7 +1345,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           gen_D0phi_[igen] = theGenD0->phi();
           gen_D0y_[igen] = theGenD0->rapidity();
           gen_D0pdgId_[igen] = theGenD0->pdgId();
-          gen_D1mass_[igen] = theGenPion->mass(); 
+          gen_D1mass_[igen] = theGenPion->mass();
           gen_D1pT_[igen] = theGenPion->pt();
           gen_D1eta_[igen] = theGenPion->eta();
           gen_D1phi_[igen] = theGenPion->phi();
@@ -1414,19 +1414,19 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 }
               } // END for nGen
             }
-  
+
 
           //if (genRefs.size()>1) std::cout << "More than one target of generated particles\n";
-      
+
       //     if(trk.numberOfMothers()!=0)
       //     {
       //         const reco::Candidate * mom = trk.mother();
       //         idmom[candSize_gen-1] = mom->pdgId();
       //     }
-              
+
       //         const reco::Candidate * Dd1 = trk.daughter(0);
       //         const reco::Candidate * Dd2 = trk.daughter(1);
-          
+
 
 
 
@@ -1460,7 +1460,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
   PATCompositeTreeProducer2::beginJob()
   {
       TH1D::SetDefaultSumw2();
-      
+
       if(!doRecoNtuple_ && !doGenNtuple_)
       {
           cout<<"No output for either RECO or GEN!! Fix config!!"<<endl; return;
@@ -1470,7 +1470,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       {
           cout<<"Muons cannot be coming from two layer decay!! Fix config!!"<<endl; return;
       }
-      
+
       if(saveHistogram_) initHistogram();
       if(saveTree_) initTree();
   }
@@ -1534,14 +1534,14 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
   }
   }
 
-  void 
+  void
   PATCompositeTreeProducer2::initTree()
-  { 
+  {
       PATCompositeNtuple = fs->make< TTree>("PATCompositeNtuple","PATCompositeNtuple");
-      
-      if(doRecoNtuple_) 
-      { 
-    
+
+      if(doRecoNtuple_)
+      {
+
       // Event info
       PATCompositeNtuple->Branch("Ntrkoffline",&Ntrkoffline,"Ntrkoffline/I");
       PATCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
@@ -1554,7 +1554,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       PATCompositeNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
       PATCompositeNtuple->Branch("candSize",&candSize,"candSize/I");
       if(isCentrality_) PATCompositeNtuple->Branch("centrality",&centrality,"centrality/I");
-      if(isEventPlane_) 
+      if(isEventPlane_)
       {
         PATCompositeNtuple->Branch("ephfpAngle",&ephfpAngle,"ephfpAngle[3]/F");
         PATCompositeNtuple->Branch("ephfmAngle",&ephfmAngle,"ephfmAngle[3]/F");
@@ -1572,7 +1572,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
       PATCompositeNtuple->Branch("mass",&mass,"mass[candSize]/F");
       PATCompositeNtuple->Branch("mva",&mva,"mva[candSize]/F");
 
-      if(!isSkimMVA_)  
+      if(!isSkimMVA_)
       {
           //Composite candidate info RECO
           PATCompositeNtuple->Branch("flavor",&flavor,"flavor[candSize]/F");
@@ -1591,7 +1591,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
           PATCompositeNtuple->Branch("Trk3DDCAErr",&trk3DdcaErr,"Trk3DDCAErr[candSize]/F");
           PATCompositeNtuple->Branch("dca3D",&dca3D,"dca3D[candSize]/F");
           PATCompositeNtuple->Branch("dca3DErr",&dca3DErr,"dca3DErr[candSize]/F");
-      
+
           if(doGenMatching_)
           {
               PATCompositeNtuple->Branch("isSwap",&isSwap,"isSwap[candSize]/O");
@@ -1684,7 +1684,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 PATCompositeNtuple->Branch("matchGen_D1ancestorFlavor_",&matchGen_D1ancestorFlavor_, "matchGen_D1ancestorFlavor_[candSize]/I");
               }
           }
-          
+
           if(doGenMatchingTOF_)
           {
             PATCompositeNtuple->Branch("PIDD1",&pid1,"PIDD1[candSize]/I");
@@ -1787,7 +1787,7 @@ PATCompositeTreeProducer2::fillRECO(const edm::Event& iEvent, const edm::EventSe
                 PATCompositeNtuple->Branch("dedxHarmonic2D3",&H2dedx1,"dedxHarmonic2D3[candSize]/F");
               }
           }
-          
+
           if(doMuon_)
           {
               PATCompositeNtuple->Branch("OneStMuon1",&onestmuon1,"OneStMuon1[candSize]/O");
@@ -1923,9 +1923,9 @@ muAssocToTrack( const reco::TrackRef& trackref,
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
-void 
+void
 PATCompositeTreeProducer2::endJob() {
-    
+
 }
 
 //define this as a plug-in

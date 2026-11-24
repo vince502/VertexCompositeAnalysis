@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      DPlus3PFitter
-// 
+//
 /**\class DPlus3PFitter DPlus3PFitter.h VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PFitter.h
 
  Description: <one line class summary>
@@ -15,8 +15,8 @@
 //
 //
 
-#ifndef VertexCompositeAnalysis__LAMC3P_FITTER_H
-#define VertexCompositeAnalysis__LAMC3P_FITTER_H
+#ifndef VertexCompositeAnalysis__DPLUS3P_FITTER_H
+#define VertexCompositeAnalysis__DPLUS3P_FITTER_H
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -85,7 +85,7 @@ class DPlus3PFitter {
                           std::vector<reco::TrackRef> theTrackRefs_sgn2,
                           std::vector<reco::TransientTrack> theTransTracks_sgn1,
                           std::vector<reco::TransientTrack> theTransTracks_sgn2,
-                          bool isVtxPV, 
+                          bool isVtxPV,
                           reco::VertexCollection::const_iterator vtxPrimary, edm::Handle<reco::BeamSpot> theBeamSpotHandle,
                           math::XYZPoint bestvtx, math::XYZPoint bestvtxError,
                           int pdg_id
@@ -95,7 +95,7 @@ class DPlus3PFitter {
   const reco::VertexCompositeCandidateCollection& getDPlus3P() const;
   const std::vector<float>& getDCAVals() const;
   const std::vector<float>& getDCAErrs() const;
-  const std::vector<float>& getMVAVals() const; 
+  const std::vector<float>& getMVAVals() const;
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
@@ -161,7 +161,7 @@ class DPlus3PFitter {
   std::vector<float> mvaVals_;
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
-//  MVACollection mvas; 
+//  MVACollection mvas;
   std::vector<float> dcaVals_;
   std::vector<float> dcaErrs_;
 

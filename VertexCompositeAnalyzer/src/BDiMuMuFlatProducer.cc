@@ -16,7 +16,7 @@ BDiMuMuFlatProducer::BDiMuMuFlatProducer(const edm::ParameterSet& iConfig) :
     genToken_(consumes<reco::GenParticleCollection>(iConfig.getParameter<edm::InputTag>("genParticleCollection"))),
     centralityToken_(consumes<reco::Centrality>(iConfig.getParameter<edm::InputTag>("centralityCollection"))),
     centralityBinToken_(consumes<int>(iConfig.getParameter<edm::InputTag>("centralityBinCollection"))),
-    
+
     // Configuration
     isMC_(iConfig.getParameter<bool>("isMC")),
     saveBPlus_(iConfig.getParameter<bool>("saveBPlus")),
@@ -42,7 +42,7 @@ void BDiMuMuFlatProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
 {
     resetBranches();
     fillEventInfo(iEvent);
-    
+
     // Fill B meson collections
     if (saveBPlus_) {
         edm::Handle<pat::CompositeCandidateCollection> bPlusCollection;
@@ -50,21 +50,21 @@ void BDiMuMuFlatProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
             fillBCandidates(bPlusCollection, 0); // B+ type = 0
         }
     }
-    
+
     if (saveBZero_) {
         edm::Handle<pat::CompositeCandidateCollection> bZeroCollection;
         if (iEvent.getByToken(bZeroToken_, bZeroCollection)) {
             fillBCandidates(bZeroCollection, 1); // B0 type = 1
         }
     }
-    
+
     if (saveBc_) {
         edm::Handle<pat::CompositeCandidateCollection> bcCollection;
         if (iEvent.getByToken(bcToken_, bcCollection)) {
             fillBCandidates(bcCollection, 2); // Bc type = 2
         }
     }
-    
+
     // Fill generator information for MC
     if (isMC_) {
         edm::Handle<reco::GenParticleCollection> genCollection;
@@ -72,7 +72,7 @@ void BDiMuMuFlatProducer::analyze(const edm::Event& iEvent, const edm::EventSetu
             fillGenInfo(genCollection);
         }
     }
-    
+
     flatTree->Fill();
 }
 
@@ -83,7 +83,7 @@ void BDiMuMuFlatProducer::endJob()
 void BDiMuMuFlatProducer::initTree()
 {
     flatTree = fs->make<TTree>("bDiMuMuFlatTree", "B meson flat tree for analysis");
-    
+
     // Event info branches
     flatTree->Branch("runNb", &runNb, "runNb/i");
     flatTree->Branch("eventNb", &eventNb, "eventNb/l");
@@ -93,7 +93,7 @@ void BDiMuMuFlatProducer::initTree()
     flatTree->Branch("bestvx", &bestvx, "bestvx/F");
     flatTree->Branch("bestvy", &bestvy, "bestvy/F");
     flatTree->Branch("bestvz", &bestvz, "bestvz/F");
-    
+
     // B meson branches
     flatTree->Branch("nBMeson", &nBMeson, "nBMeson/s");
     flatTree->Branch("bMesonType", bMesonType, "bMesonType[nBMeson]/S");
@@ -103,25 +103,25 @@ void BDiMuMuFlatProducer::initTree()
     flatTree->Branch("bMesonY", bMesonY, "bMesonY[nBMeson]/F");
     flatTree->Branch("bMesonMass", bMesonMass, "bMesonMass[nBMeson]/F");
     flatTree->Branch("bMesonCharge", bMesonCharge, "bMesonCharge[nBMeson]/F");
-    
+
     // Vertex quality branches
     flatTree->Branch("bMesonVtxChi2", bMesonVtxChi2, "bMesonVtxChi2[nBMeson]/F");
     flatTree->Branch("bMesonVtxNdof", bMesonVtxNdof, "bMesonVtxNdof[nBMeson]/F");
     flatTree->Branch("bMesonVtxProb", bMesonVtxProb, "bMesonVtxProb[nBMeson]/F");
-    
+
     // Topological variables
     flatTree->Branch("bMesonPointingAngle2D", bMesonPointingAngle2D, "bMesonPointingAngle2D[nBMeson]/F");
     flatTree->Branch("bMesonPointingAngle3D", bMesonPointingAngle3D, "bMesonPointingAngle3D[nBMeson]/F");
     flatTree->Branch("bMesonDecayLength2D", bMesonDecayLength2D, "bMesonDecayLength2D[nBMeson]/F");
     flatTree->Branch("bMesonDecayLength3D", bMesonDecayLength3D, "bMesonDecayLength3D[nBMeson]/F");
-    
+
     // Dimuon branches
     flatTree->Branch("dimuonPt", dimuonPt, "dimuonPt[nBMeson]/F");
     flatTree->Branch("dimuonEta", dimuonEta, "dimuonEta[nBMeson]/F");
     flatTree->Branch("dimuonPhi", dimuonPhi, "dimuonPhi[nBMeson]/F");
     flatTree->Branch("dimuonMass", dimuonMass, "dimuonMass[nBMeson]/F");
     flatTree->Branch("dimuonCharge", dimuonCharge, "dimuonCharge[nBMeson]/F");
-    
+
     // Muon branches
     flatTree->Branch("muonPt", muonPt, "muonPt[nBMeson][2]/F");
     flatTree->Branch("muonEta", muonEta, "muonEta[nBMeson][2]/F");
@@ -130,7 +130,7 @@ void BDiMuMuFlatProducer::initTree()
     flatTree->Branch("muonIsGlobal", muonIsGlobal, "muonIsGlobal[nBMeson][2]/O");
     flatTree->Branch("muonIsTracker", muonIsTracker, "muonIsTracker[nBMeson][2]/O");
     flatTree->Branch("muonIsPF", muonIsPF, "muonIsPF[nBMeson][2]/O");
-    
+
     // Track branches
     flatTree->Branch("nTracks", nTracks, "nTracks[nBMeson]/s");
     flatTree->Branch("trackPt", trackPt, "trackPt[nBMeson][10]/F");
@@ -138,13 +138,13 @@ void BDiMuMuFlatProducer::initTree()
     flatTree->Branch("trackPhi", trackPhi, "trackPhi[nBMeson][10]/F");
     flatTree->Branch("trackCharge", trackCharge, "trackCharge[nBMeson][10]/F");
     flatTree->Branch("trackPID", trackPID, "trackPID[nBMeson][10]/S");
-    
+
     // K*0 branches (for B0 only)
     flatTree->Branch("kstarPt", kstarPt, "kstarPt[nBMeson]/F");
     flatTree->Branch("kstarEta", kstarEta, "kstarEta[nBMeson]/F");
     flatTree->Branch("kstarPhi", kstarPhi, "kstarPhi[nBMeson]/F");
     flatTree->Branch("kstarMass", kstarMass, "kstarMass[nBMeson]/F");
-    
+
     // Generator branches (MC only)
     if (isMC_) {
         flatTree->Branch("nGenBMeson", &nGenBMeson, "nGenBMeson/s");
@@ -165,8 +165,8 @@ void BDiMuMuFlatProducer::resetBranches()
     lumiSection = 0;
     centrality = -1;
     nPV = 0;
-    bestvx = bestvyError = bestvz = -999.;
-    
+    bestvx = bestvy = bestvz = -999.;
+
     // Reset B meson info
     nBMeson = 0;
     for (int i = 0; i < MAXBMESON_FLAT; i++) {
@@ -184,20 +184,20 @@ void BDiMuMuFlatProducer::resetBranches()
         bMesonPointingAngle3D[i] = -999.;
         bMesonDecayLength2D[i] = -999.;
         bMesonDecayLength3D[i] = -999.;
-        
+
         dimuonPt[i] = -999.;
         dimuonEta[i] = -999.;
         dimuonPhi[i] = -999.;
         dimuonMass[i] = -999.;
         dimuonCharge[i] = -999.;
-        
+
         kstarPt[i] = -999.;
         kstarEta[i] = -999.;
         kstarPhi[i] = -999.;
         kstarMass[i] = -999.;
-        
+
         nTracks[i] = 0;
-        
+
         for (int j = 0; j < 2; j++) {
             muonPt[i][j] = -999.;
             muonEta[i][j] = -999.;
@@ -207,7 +207,7 @@ void BDiMuMuFlatProducer::resetBranches()
             muonIsTracker[i][j] = false;
             muonIsPF[i][j] = false;
         }
-        
+
         for (int j = 0; j < MAXTRACK_FLAT; j++) {
             trackPt[i][j] = -999.;
             trackEta[i][j] = -999.;
@@ -216,7 +216,7 @@ void BDiMuMuFlatProducer::resetBranches()
             trackPID[i][j] = 0;
         }
     }
-    
+
     // Reset generator info
     if (isMC_) {
         nGenBMeson = 0;
@@ -236,13 +236,13 @@ void BDiMuMuFlatProducer::fillEventInfo(const edm::Event& iEvent)
     runNb = iEvent.id().run();
     eventNb = iEvent.id().event();
     lumiSection = iEvent.luminosityBlock();
-    
+
     // Get centrality information
     edm::Handle<reco::Centrality> centralityHandle;
     if (iEvent.getByToken(centralityToken_, centralityHandle)) {
         centrality = (Short_t)(centralityHandle->EtHFtowerSum());
     }
-    
+
     // Get primary vertex information
     edm::Handle<reco::VertexCollection> vertices;
     if (iEvent.getByToken(vertexToken_, vertices) && !vertices->empty()) {
@@ -258,7 +258,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
 {
     for (const auto& candidate : *candidates) {
         if (nBMeson >= MAXBMESON_FLAT) break;
-        
+
         bMesonType[nBMeson] = type;
         bMesonPt[nBMeson] = candidate.pt();
         bMesonEta[nBMeson] = candidate.eta();
@@ -266,7 +266,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
         bMesonY[nBMeson] = candidate.rapidity();
         bMesonMass[nBMeson] = candidate.mass();
         bMesonCharge[nBMeson] = candidate.charge();
-        
+
         // Get vertex quality from userData
         if (candidate.hasUserFloat("vtxChi2")) {
             bMesonVtxChi2[nBMeson] = candidate.userFloat("vtxChi2");
@@ -277,7 +277,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
         if (candidate.hasUserFloat("vtxProb")) {
             bMesonVtxProb[nBMeson] = candidate.userFloat("vtxProb");
         }
-        
+
         // Get topological variables
         if (candidate.hasUserFloat("pointingAngle2D")) {
             bMesonPointingAngle2D[nBMeson] = candidate.userFloat("pointingAngle2D");
@@ -291,7 +291,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
         if (candidate.hasUserFloat("decayLength3D")) {
             bMesonDecayLength3D[nBMeson] = candidate.userFloat("decayLength3D");
         }
-        
+
         // Fill daughter information
         if (candidate.numberOfDaughters() >= 2) {
             // First daughter should be dimuon
@@ -302,7 +302,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
                 dimuonPhi[nBMeson] = dimuon->phi();
                 dimuonMass[nBMeson] = dimuon->mass();
                 dimuonCharge[nBMeson] = dimuon->charge();
-                
+
                 // Fill muon information
                 if (dimuon->numberOfDaughters() >= 2) {
                     for (int iMu = 0; iMu < 2 && iMu < (int)dimuon->numberOfDaughters(); iMu++) {
@@ -312,7 +312,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
                             muonEta[nBMeson][iMu] = muon->eta();
                             muonPhi[nBMeson][iMu] = muon->phi();
                             muonCharge[nBMeson][iMu] = muon->charge();
-                            
+
                             // Try to cast to pat::Muon for additional info
                             const pat::Muon* patMuon = dynamic_cast<const pat::Muon*>(muon);
                             if (patMuon) {
@@ -324,11 +324,11 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
                     }
                 }
             }
-            
+
             // Additional tracks (kaon/pion for B+/Bc, K*0 daughters for B0)
             int trackIdx = 0;
             nTracks[nBMeson] = candidate.numberOfDaughters() - 1; // Exclude dimuon
-            
+
             for (size_t iDau = 1; iDau < candidate.numberOfDaughters() && trackIdx < MAXTRACK_FLAT; iDau++) {
                 const reco::Candidate* track = candidate.daughter(iDau);
                 if (track) {
@@ -337,7 +337,7 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
                     trackPhi[nBMeson][trackIdx] = track->phi();
                     trackCharge[nBMeson][trackIdx] = track->charge();
                     trackPID[nBMeson][trackIdx] = track->pdgId();
-                    
+
                     // For B0, check if this is K*0
                     if (type == 1 && trackIdx == 0 && track->numberOfDaughters() == 2) {
                         kstarPt[nBMeson] = track->pt();
@@ -345,12 +345,12 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
                         kstarPhi[nBMeson] = track->phi();
                         kstarMass[nBMeson] = track->mass();
                     }
-                    
+
                     trackIdx++;
                 }
             }
         }
-        
+
         nBMeson++;
     }
 }
@@ -358,18 +358,18 @@ void BDiMuMuFlatProducer::fillBCandidates(const edm::Handle<pat::CompositeCandid
 void BDiMuMuFlatProducer::fillGenInfo(const edm::Handle<reco::GenParticleCollection>& genParticles)
 {
     nGenBMeson = 0;
-    
+
     for (const auto& genParticle : *genParticles) {
         if (nGenBMeson >= MAXBMESON_FLAT) break;
-        
+
         int absPdgId = abs(genParticle.pdgId());
-        
+
         // Check for B mesons (B+: 521, B0: 511, Bc: 541)
         int genType = -1;
         if (absPdgId == 521) genType = 0; // B+
         else if (absPdgId == 511) genType = 1; // B0
         else if (absPdgId == 541) genType = 2; // Bc
-        
+
         if (genType >= 0) {
             genBMesonType[nGenBMeson] = genType;
             genBMesonPt[nGenBMeson] = genParticle.pt();
@@ -377,7 +377,7 @@ void BDiMuMuFlatProducer::fillGenInfo(const edm::Handle<reco::GenParticleCollect
             genBMesonPhi[nGenBMeson] = genParticle.phi();
             genBMesonMass[nGenBMeson] = genParticle.mass();
             genBMesonPdgId[nGenBMeson] = genParticle.pdgId();
-            
+
             nGenBMeson++;
         }
     }

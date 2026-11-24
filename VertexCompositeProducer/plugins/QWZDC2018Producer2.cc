@@ -15,7 +15,11 @@
 #include "CalibCalorimetry/HcalAlgos/interface/HcalPulseShapes.h"
 
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
-#include "iostream"
+#include <cstdint>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "QWZDC2018Helper.h"
 #include "boost/bimap.hpp"
@@ -35,6 +39,7 @@ private:
     edm::ESGetToken<HcalDbService, HcalDbRecord> tok_dbservice_;
 
 	edm::InputTag	Src_;
+	edm::EDGetTokenT<QIE10DigiCollection> tok_src_;
 	int		SOI_;
 	bool		bHardCode_;
 	bool		bDebug_;
@@ -48,11 +53,11 @@ private:
 QWZDC2018Producer2::QWZDC2018Producer2(const edm::ParameterSet& pset) :
     tok_dbservice_(esConsumes<HcalDbService, HcalDbRecord>()),
 	Src_(pset.getUntrackedParameter<edm::InputTag>("Src")),
+	tok_src_(consumes<QIE10DigiCollection>(Src_)),
 	SOI_(pset.getUntrackedParameter<int>("SOI", 4)),
 	bHardCode_(pset.getUntrackedParameter<bool>("HardCode", true)), // has to be hard coded now, calibration format is not working at the moment =_=
 	bDebug_(pset.getUntrackedParameter<bool>("Debug", false))
 {
-	consumes<QIE10DigiCollection>(Src_);
 
 	for ( int channel = 0; channel < 16; channel++ ) {
 		HcalZDCDetId did(HcalZDCDetId::EM, true, channel);
@@ -142,7 +147,7 @@ void QWZDC2018Producer2::produce(edm::Event& iEvent, const edm::EventSetup& iSet
 
 
 	Handle<QIE10DigiCollection> digis;
-	iEvent.getByLabel(Src_, digis);
+	iEvent.getByToken(tok_src_, digis);
 
 //	double adc[50][10] = {};
 //

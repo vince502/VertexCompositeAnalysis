@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      LamC3PFitter
-// 
+//
 /**\class LamC3PFitter LamC3PFitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/LamC3PFitter.cc
 
  Description: <one line class summary>
@@ -35,7 +35,9 @@
 #include <Math/Functions.h>
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
+#include <TFile.h>
 #include <TMath.h>
+#include <TString.h>
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
@@ -44,7 +46,7 @@ const float piMassLamC3P = 0.13957018;
 const float piMassLamC3PSquared = piMassLamC3P*piMassLamC3P;
 const float kaonMassLamC3P = 0.493677;
 const float kaonMassLamC3PSquared = kaonMassLamC3P*kaonMassLamC3P;
-const float protonMassLamC3P = 0.938272013; 
+const float protonMassLamC3P = 0.938272013;
 const float protonMassLamC3PSquared = protonMassLamC3P*protonMassLamC3P;
 const float lamCMassLamC3P = 2.28646;
 float piMassLamC3P_sigma = 3.5E-7f;
@@ -147,7 +149,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
   using std::endl;
   using namespace reco;
   using namespace edm;
-  using namespace std; 
+  using namespace std;
 
   // Create std::vectors for Tracks and TrackRefs (required for
   //  passing to the KalmanVertexFitter)
@@ -165,9 +167,9 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
   iEvent.getByToken(token_dedx, dEdxHandle);
 
   if( !theTrackHandle->size() ) return;
@@ -219,7 +221,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	if (tmpRef->quality(qualities[ndx_])){
 	  quality_ok = true;
-	  break;          
+	  break;
 	}
       }
     }
@@ -233,7 +235,7 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
       TransientTrack tmpTk( *tmpRef, magField );
 
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -260,10 +262,10 @@ void LamC3PFitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetu
     fitLamCCandidates(theTrackRefs_pos,theTrackRefs_neg,theTransTracks_pos,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
     fitLamCCandidates(theTrackRefs_neg,theTrackRefs_pos,theTransTracks_neg,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);
   }
-  else 
+  else
   {
     fitLamCCandidates(theTrackRefs_pos,theTrackRefs_pos,theTransTracks_pos,theTransTracks_pos,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,4122);
-    fitLamCCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);    
+    fitLamCCandidates(theTrackRefs_neg,theTrackRefs_neg,theTransTracks_neg,theTransTracks_neg,isVtxPV,vtxPrimary,theBeamSpotHandle,bestvtx,bestvtxError,-4122);
   }
 }
 
@@ -320,8 +322,8 @@ void LamC3PFitter::fitLamCCandidates(
 //      double dauTransImpactSig2 = dxyvtx2/dxyerror2;
 
 //      double nhits1 = trackRef1->numberOfValidHits();
-//      double nhits2 = trackRef2->numberOfValidHits(); 
-    
+//      double nhits2 = trackRef2->numberOfValidHits();
+
 //      double ptErr1 = trackRef1->ptError();
 //      double ptErr2 = trackRef2->ptError();
 
@@ -376,7 +378,7 @@ void LamC3PFitter::fitLamCCandidates(
 
         TrackRef trackRef3 = theTrackRefs_sgn2[trdx3];
         TransientTrack* transTkPtr3 = &theTransTracks_sgn2[trdx3];
-  
+
 //        double dzvtx3 = trackRef3->dz(bestvtx);
 //        double dxyvtx3 = trackRef3->dxy(bestvtx);
 //        double dzerror3 = sqrt(trackRef3->dzError()*trackRef3->dzError()+bestvtxError.z()*bestvtxError.z());
@@ -406,12 +408,12 @@ void LamC3PFitter::fitLamCCandidates(
         if( !trkTSCP31.isValid() ) continue;
 
         double totalE31 = sqrt( trkTSCP1.momentum().mag2() + protonMassLamC3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + piMassLamC3PSquared ) + 
+                          sqrt( trkTSCP2.momentum().mag2() + piMassLamC3PSquared ) +
                           sqrt( trkTSCP31.momentum().mag2() + kaonMassLamC3PSquared );
         double totalE31Sq = totalE31*totalE31;
 
         double totalE32 = sqrt( trkTSCP1.momentum().mag2() + piMassLamC3PSquared ) +
-                          sqrt( trkTSCP2.momentum().mag2() + protonMassLamC3PSquared ) + 
+                          sqrt( trkTSCP2.momentum().mag2() + protonMassLamC3PSquared ) +
                           sqrt( trkTSCP31.momentum().mag2() + kaonMassLamC3PSquared );
         double totalE32Sq = totalE32*totalE32;
 
@@ -436,7 +438,7 @@ void LamC3PFitter::fitLamCCandidates(
         {
           //Creating a KinematicParticleFactory
           KinematicParticleFactoryFromTransientTrack pFactory;
-        
+
           float chi = 0.0;
           float ndf = 0.0;
 
@@ -504,7 +506,7 @@ void LamC3PFitter::fitLamCCandidates(
           double lamCVtxNdof(lamCDecayVertex->degreesOfFreedom());
           double lamCNormalizedChi2 = lamCVtxChi2/lamCVtxNdof;
 
-          double rVtxMag = 99999.0; 
+          double rVtxMag = 99999.0;
           double lVtxMag = 99999.0;
           double sigmaRvtxMag = 999.0;
           double sigmaLvtxMag = 999.0;
@@ -612,7 +614,7 @@ void LamC3PFitter::fitLamCCandidates(
 */
           if(theLamC3P) delete theLamC3P;
         } // swap mass
-      } // trk3 
+      } // trk3
     }  // trk2
   } // trk1
 

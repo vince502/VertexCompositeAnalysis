@@ -1,2 +1,12 @@
 <flags   EDM_PLUGIN="1"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="CommonTools/UtilAlgos"/>
+<use   name="DataFormats/BeamSpot"/>
+<use   name="DataFormats/HeavyIonEvent"/>
+<use   name="DataFormats/HepMCCandidate"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/RecoCandidate"/>
+<use   name="DataFormats/VertexReco"/>
 <use   name="root"/>

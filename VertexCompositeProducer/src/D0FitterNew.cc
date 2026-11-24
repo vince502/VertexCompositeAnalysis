@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      D0FitterNew
-// 
+//
 /**\class D0FitterNew D0FitterNew.cc VertexCompositeAnalysis/VertexCompositeProducer/src/D0FitterNew.cc
 
  Description: <one line class summary>
@@ -35,7 +35,9 @@
 #include <Math/Functions.h>
 #include <Math/SVector.h>
 #include <Math/SMatrix.h>
+#include <TFile.h>
 #include <TMath.h>
+#include <TString.h>
 #include <TVector3.h>
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
@@ -138,7 +140,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
   using std::endl;
   using namespace reco;
   using namespace edm;
-  using namespace std; 
+  using namespace std;
 
   typedef ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > SMatrixSym3D;
   typedef ROOT::Math::SVector<double, 3> SVector3;
@@ -157,9 +159,9 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
   iEvent.getByToken(token_dedx, dEdxHandle);
 
 
@@ -211,7 +213,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	if (tmpRef->quality(qualities[ndx_])){
 	  quality_ok = true;
-	  break;          
+	  break;
 	}
       }
     }
@@ -225,7 +227,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       TransientTrack tmpTk( *tmpRef, magField );
 
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -264,7 +266,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       // Look at the two tracks we're looping over.  If they're oppositely
       //  charged, load them into the hypothesized positive and negative tracks
       //  and references to be sent to the KalmanVertexFitter
-      if(!isWrongSign && theTrackRefs[trdx1]->charge() < 0. && 
+      if(!isWrongSign && theTrackRefs[trdx1]->charge() < 0. &&
 	 theTrackRefs[trdx2]->charge() > 0.) {
 	negativeTrackRef = theTrackRefs[trdx1];
 	positiveTrackRef = theTrackRefs[trdx2];
@@ -279,14 +281,14 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	posTransTkPtr = &theTransTracks[trdx1];
       }
       else if(isWrongSign && theTrackRefs[trdx1]->charge() > 0. &&
-              theTrackRefs[trdx2]->charge() > 0.) { 
+              theTrackRefs[trdx2]->charge() > 0.) {
         negativeTrackRef = theTrackRefs[trdx2];
         positiveTrackRef = theTrackRefs[trdx1];
         negTransTkPtr = &theTransTracks[trdx2];
         posTransTkPtr = &theTransTracks[trdx1];
       }
       else if(isWrongSign && theTrackRefs[trdx1]->charge() < 0. &&
-              theTrackRefs[trdx2]->charge() < 0.) { 
+              theTrackRefs[trdx2]->charge() < 0.) {
         negativeTrackRef = theTrackRefs[trdx1];
         positiveTrackRef = theTrackRefs[trdx2];
         negTransTkPtr = &theTransTracks[trdx1];
@@ -313,8 +315,8 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       double dauTransImpactSig_neg = dxyvtx_neg/dxyerror_neg;
 
       double nhits_pos = positiveTrackRef->numberOfValidHits();
-      double nhits_neg = negativeTrackRef->numberOfValidHits(); 
-    
+      double nhits_neg = negativeTrackRef->numberOfValidHits();
+
       double ptErr_pos = positiveTrackRef->ptError();
       double ptErr_neg = negativeTrackRef->ptError();
 
@@ -325,7 +327,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
         const edm::ValueMap<reco::DeDxData> dEdxTrack = *dEdxHandle.product();
         dedx_pos = dEdxTrack[positiveTrackRef].dEdx();
         dedx_neg = dEdxTrack[negativeTrackRef].dEdx();
-      } 
+      }
       dedx_pos = dedx_pos;
       dedx_neg = dedx_neg;
 
@@ -347,7 +349,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       GlobalPoint cxPt = cApp.crossingPoint();
 
       if (dca < 0. || dca > tkDCACut) continue;
-//      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120. 
+//      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120.
 //          || std::abs(cxPt.z()) > 300.) continue;
 
       // Get trajectory states for the tracks at POCA for later cuts
@@ -379,14 +381,14 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       if( totalPt < dPtCut ) continue;
 
       // Create the vertex fitter object and vertex the tracks
-    
+
       float posCandTotalE[2]={0.0};
       float negCandTotalE[2]={0.0};
       float d0TotalE[2]={0.0};
 
       //Creating a KinematicParticleFactory
       KinematicParticleFactoryFromTransientTrack pFactory;
-        
+
       float chi = 0.0;
       float ndf = 0.0;
 
@@ -441,7 +443,7 @@ void D0FitterNew::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup
       double d0VtxNdof(d0DecayVertex->degreesOfFreedom());
       double d0NormalizedChi2 = d0VtxChi2/d0VtxNdof;
 
-      double rVtxMag = 99999.0; 
+      double rVtxMag = 99999.0;
       double lVtxMag = 99999.0;
       double sigmaRvtxMag = 999.0;
       double sigmaLvtxMag = 999.0;

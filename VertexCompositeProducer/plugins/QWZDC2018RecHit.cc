@@ -30,7 +30,12 @@
 #include "DataFormats/HcalRecHit/interface/HcalRecHitDefs.h"
 #include "DataFormats/HcalDetId/interface/HcalZDCDetId.h"
 
+#include <algorithm>
+#include <cstdint>
 #include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 class QWZDC2018RecHit : public edm::one::EDProducer<> {
 public:
@@ -44,6 +49,8 @@ private:
 	// tags
 	edm::InputTag		srcDid_;
 	edm::InputTag		srcfC_;
+	edm::EDGetTokenT<std::vector<double>> tok_srcDid_;
+	edm::EDGetTokenT<std::vector<double>> tok_srcfC_;
 	bool			bNpeak_;
 
 	std::map<uint32_t, std::string>		cname2str_;
@@ -56,10 +63,10 @@ private:
 QWZDC2018RecHit::QWZDC2018RecHit(const edm::ParameterSet& pset) :
 	srcDid_(pset.getUntrackedParameter<edm::InputTag>("srcDetId")),
 	srcfC_(pset.getUntrackedParameter<edm::InputTag>("srcfC")),
+	tok_srcDid_(consumes<std::vector<double>>(srcDid_)),
+	tok_srcfC_(consumes<std::vector<double>>(srcfC_)),
 	bNpeak_(pset.getUntrackedParameter<bool>("bFilter", false))
 {
-	consumes<std::vector<double>>(srcDid_);
-	consumes<std::vector<double>>(srcfC_);
 
 	// Care only ZDC EM and HAD channels
 	// RPD channels not considered now
@@ -120,30 +127,32 @@ void QWZDC2018RecHit::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	edm::Handle<std::vector<double>> psrcDid;
 	edm::Handle<std::vector<double>> psrcfC;
 
-	iEvent.getByLabel( srcDid_, psrcDid );
-	iEvent.getByLabel( srcfC_,  psrcfC );
+	iEvent.getByToken( tok_srcDid_, psrcDid );
+	iEvent.getByToken( tok_srcfC_,  psrcfC );
 
-	std::map<std::string, double*> charge;
-	std::map<uint32_t, double*> energy;
+	std::map<std::string, std::vector<double>> charge;
+	std::map<uint32_t, std::vector<double>> energy;
 
-	int NS = psrcfC->size() / psrcDid->size();
+	int NS = psrcDid->empty() ? 0 : (psrcfC->size() / psrcDid->size());
 
 	int idx = 0;
 	for ( auto it = psrcDid->begin(); it != psrcDid->end(); it++ ) {
 		if ( cname2str_.find(uint32_t(*it)) == cname2str_.end() ) continue;
 
-		charge[ cname2str_[uint32_t(*it)] ] = new double[NS];
-		energy[ uint32_t(*it) ] = new double[NS];
+		auto& chVec = charge[ cname2str_[uint32_t(*it)] ];
+		auto& enVec = energy[ uint32_t(*it) ];
+		chVec.resize(NS, 0.);
+		enVec.resize(NS, 0.);
 		for ( int ts = 0; ts < NS; ts++ ) {
-			charge[ cname2str_[uint32_t(*it)] ][ts] = (*psrcfC)[idx];
-			energy[ uint32_t(*it) ][ts] = (*psrcfC)[idx] * calib_[uint32_t(*it)];
+			chVec[ts] = (*psrcfC)[idx];
+			enVec[ts] = (*psrcfC)[idx] * calib_[uint32_t(*it)];
 			idx++;
 		}
 	}
 
 	for ( auto it = psrcDid->begin(); it != psrcDid->end(); it++ ) {
 		if ( energy.find(uint32_t(*it)) == energy.end() ) continue;
-		double E = energy[uint32_t(*it)][4] + energy[uint32_t(*it)][5] + energy[uint32_t(*it)][6];
+		double E = (NS > 6) ? (energy[uint32_t(*it)][4] + energy[uint32_t(*it)][5] + energy[uint32_t(*it)][6]) : 0.;
 		HcalZDCDetId did = HcalZDCDetId( uint32_t(*it) );
 		if ( did.zside() > 0 ) {
 			E /= Pscale_;
@@ -156,16 +165,20 @@ void QWZDC2018RecHit::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.put(std::move(prec));
 
 	if ( bNpeak_ ) {
-		int ts1 = std::distance( charge[std::string("hZDCP_HAD1")], std::max_element(charge[std::string("hZDCP_HAD1")], charge[std::string("hZDCP_HAD1")]+NS) );
-		int ts2 = std::distance( charge[std::string("hZDCP_HAD2")], std::max_element(charge[std::string("hZDCP_HAD2")], charge[std::string("hZDCP_HAD2")]+NS) );
+		auto peakTS = [](const std::vector<double>& v) -> int {
+			if ( v.empty() ) return -1;
+			return static_cast<int>(std::distance(v.begin(), std::max_element(v.begin(), v.end())));
+		};
+		int ts1 = peakTS(charge[std::string("hZDCP_HAD1")]);
+		int ts2 = peakTS(charge[std::string("hZDCP_HAD2")]);
 		if ( (ts1==4 or ts1==5) and (ts2==4 or ts2==5) ) {
 			iEvent.put(std::make_unique<double>(1.), "NpeakP");
 		} else {
 			iEvent.put(std::make_unique<double>(0.), "NpeakP");
 		}
 
-		ts1 = std::distance( charge[std::string("hZDCM_HAD1")], std::max_element(charge[std::string("hZDCM_HAD1")], charge[std::string("hZDCM_HAD1")]+NS) );
-		ts2 = std::distance( charge[std::string("hZDCM_HAD2")], std::max_element(charge[std::string("hZDCM_HAD2")], charge[std::string("hZDCM_HAD2")]+NS) );
+		ts1 = peakTS(charge[std::string("hZDCM_HAD1")]);
+		ts2 = peakTS(charge[std::string("hZDCM_HAD2")]);
 		if ( (ts1==4 or ts1==5) and (ts2==4 or ts2==5) ) {
 			iEvent.put(std::make_unique<double>(1.), "NpeakM");
 		} else {

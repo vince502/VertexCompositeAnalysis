@@ -1,6 +1,9 @@
 
 // system include files
+#include <algorithm>
+#include <cmath>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -65,6 +68,7 @@
 #include "DataFormats/HeavyIonEvent/interface/CentralityBins.h"
 #include "DataFormats/HeavyIonEvent/interface/Centrality.h"
 #include "DataFormats/HeavyIonEvent/interface/EvtPlane.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 //#include "RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneFlatten.h"
 //#include "RecoHI/HiEvtPlaneAlgos/interface/HiEvtPlaneList.h"
@@ -118,7 +122,7 @@ private:
   void getAncestorId(const reco::Candidate& gCand, int& gen_ancestorId_, int& gen_ancestorFlavor_ );
 
   // ----------member data ---------------------------
-    
+
     edm::Service<TFileService> fs;
 
     TTree* PATCompositeNtuple;
@@ -161,7 +165,7 @@ private:
     TH2F*  hEtaD3VsMVA[6][10];
     TH2F*  hdedxHarmonic2D3VsMVA[6][10];
     TH2F*  hdedxHarmonic2D3VsP[6][10];
-    
+
     bool   saveTree_;
     bool   saveHistogram_;
     bool   saveAllHistogram_;
@@ -171,7 +175,7 @@ private:
 
     //options
     bool doRecoNtuple_;
-    bool doGenNtuple_;   
+    bool doGenNtuple_;
     bool doGenMatching_;
     bool doGenMatchingTOF_;
     bool hasSwap_;
@@ -184,7 +188,7 @@ private:
     int PID_dau1_;
     int PID_dau2_;
     int PID_dau3_;
-    
+
     //cut variables
     double multMax_;
     double multMin_;
@@ -212,7 +216,7 @@ private:
     float ephfmQ[3];
     float ephfpSumW;
     float ephfmSumW;
-    
+
     //Composite candidate info
     float mva[MAXCAN];
     float pt[MAXCAN];
@@ -246,7 +250,7 @@ private:
     float gen_agl2D_abs[MAXCAN];
     float gen_dl[MAXCAN];
     float gen_dl2D[MAXCAN];
-    
+
     //dau candidate info
     float grand_mass[MAXCAN];
     float grand_VtxProb[MAXCAN];
@@ -313,7 +317,7 @@ private:
     float trkChi1[MAXCAN];
     float trkChi2[MAXCAN];
     float trkChi3[MAXCAN];
-   
+
     //grand-dau info
     float grand_dzos1[MAXCAN];
     float grand_dzos2[MAXCAN];
@@ -339,7 +343,7 @@ private:
     float grand_T4dedx2[MAXCAN];
     float grand_trkChi1[MAXCAN];
     float grand_trkChi2[MAXCAN];
-    
+
     //dau muon info
     bool  onestmuon1[MAXCAN];
     bool  onestmuon2[MAXCAN];
@@ -380,7 +384,7 @@ private:
     float ddxdzSig2_seg_[MAXCAN];
     float ddydzSig2_seg_[MAXCAN];
 
-    // gen info    
+    // gen info
     int candSize_gen;
     float mass_gen[MAXCAN];
     float pt_gen[MAXCAN];
@@ -485,7 +489,7 @@ private:
     vector<double> *GDvector2;
     vector<double> *Dvector3;
     vector<int> *pVectIDmom;
-    
+
     bool useAnyMVA_;
     bool isSkimMVA_;
     bool isCentrality_;
@@ -538,13 +542,13 @@ bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, con
             match = true;
             return match;
         }
-    }    
+    }
     if( matchTrackdR(reco_trk2, gen_trk1, true)){
         if( matchTrackdR(reco_trk1, gen_trk2,true)) {
             match = true;
             return match;
         }
-    }    
+    }
   }
   if(!isMatchD0){
     if(matchTrackdR(_dmeson_, &_gen_,true)) match = true;
@@ -565,13 +569,13 @@ bool PATCompositeTreeProducer2::matchHadron(const reco::Candidate* _dmeson_, con
             match = true;
             return match;
         }
-    }    
+    }
     if( matchTrackdR(reco_trk2, gen_trk1, true)){
         if( matchTrackdR(reco_trk1, gen_trk2,true)) {
             match = true;
             return match;
         }
-    }    
+    }
   }
   if(!isMatchD0){
     if(matchTrackdR(_dmeson_, &_gen_,true)) match = true;
@@ -658,5 +662,5 @@ void PATCompositeTreeProducer2::getAncestorId(const reco::Candidate& gCand, int&
           mom = mom->mother();
   }
 
-          
+
 };

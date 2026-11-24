@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      D0ProducerNew
-// 
+//
 /**\class D0ProducerNew D0ProducerNew.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D0ProducerNew.h
 
  Description: <one line class summary>
@@ -11,12 +11,12 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li 
+// Original Author:  Wei Li
 //
 //
 
-#ifndef VertexCompositeAnalysis__D0_PRODUCER_H
-#define VertexCompositeAnalysis__D0_PRODUCER_H
+#ifndef VertexCompositeAnalysis__D0_PRODUCER_NEW_H
+#define VertexCompositeAnalysis__D0_PRODUCER_NEW_H
 
 // system include files
 #include <memory>
@@ -52,7 +52,7 @@ private:
 
   bool useAnyMVA_;
 
-  D0FitterNew theVees; 
+  D0FitterNew theVees;
 //  edm::ParameterSet theParams;
 };
 

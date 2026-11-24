@@ -9,6 +9,7 @@
 #include <TH2.h>
 #include <TTree.h>
 #include <TFile.h>
+#include <TString.h>
 #include <TVector3.h>
 #include <TMath.h>
 
@@ -220,7 +221,7 @@ private:
   bool isSwap[MAXCAN];
   bool matchGEN[MAXCAN];
   int idmom_reco[MAXCAN];
-    
+
   //dau candidate info
   float grand_mass[MAXCAN];
   float grand_VtxProb[MAXCAN];
@@ -251,7 +252,7 @@ private:
   float H2dedx[MAXDAU][MAXCAN];
   float T4dedx[MAXDAU][MAXCAN];
   float trkChi[MAXDAU][MAXCAN];
-   
+
   //grand-dau info
   float grand_dzos[MAXGDAU][MAXCAN];
   float grand_dxyos[MAXGDAU][MAXCAN];
@@ -265,7 +266,7 @@ private:
   float grand_H2dedx[MAXGDAU][MAXCAN];
   float grand_T4dedx[MAXGDAU][MAXCAN];
   float grand_trkChi[MAXGDAU][MAXCAN];
-    
+
   //dau muon info
   bool  onestmuon[MAXDAU][MAXCAN];
   bool  pfmuon[MAXDAU][MAXCAN];
@@ -465,7 +466,7 @@ PATCompositeTreeProducer::PATCompositeTreeProducer(const edm::ParameterSet& iCon
   useAnyMVA_ = (iConfig.exists("useAnyMVA") ? iConfig.getParameter<bool>("useAnyMVA") : false);
   if(useAnyMVA_) MVAValues_Token_ = consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("MVACollection"));
   isSkimMVA_ = iConfig.getUntrackedParameter<bool>("isSkimMVA");
-  
+
   tok_triggerResults_ = consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("TriggerResultCollection"));
   tok_filterResults_ = consumes<edm::TriggerResults>(iConfig.getUntrackedParameter<edm::InputTag>("FilterResultCollection"));
 }
@@ -612,11 +613,11 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     iEvent.getByToken(tok_centBinLabel_, cbin);
     centrality = (cbin.isValid() ? *cbin : -1);
   }
-  
+
   NtrkHP = -1;
   edm::Handle<reco::TrackCollection> trackColl;
   iEvent.getByToken(tok_tracks_, trackColl);
-  if(trackColl.isValid()) 
+  if(trackColl.isValid())
   {
     NtrkHP = 0;
     for (const auto& trk : *trackColl) { if (trk.quality(reco::TrackBase::highPurity)) NtrkHP++; }
@@ -649,7 +650,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     ephfpAngle[0] = (eventplanes.isValid() ? (*eventplanes)[1].angle(2) : -99.);
     ephfpAngle[1] = (eventplanes.isValid() ? (*eventplanes)[7].angle(2) : -99.);
     ephfpAngle[2] = (eventplanes.isValid() ? (*eventplanes)[14].angle(2) : -99.);
-    
+
     eptrackmidAngle[0] = -99.9;
     eptrackmidAngle[1] = (eventplanes.isValid() ? (*eventplanes)[9].angle(2) : -99.);
     eptrackmidAngle[2] = (eventplanes.isValid() ? (*eventplanes)[16].angle(2) : -99.);
@@ -665,7 +666,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     eptrackmidQ[0] = -99.9;
     eptrackmidQ[1] = (eventplanes.isValid() ? (*eventplanes)[9].q(2) : -99.);
     eptrackmidQ[2] = (eventplanes.isValid() ? (*eventplanes)[16].q(2) : -99.);
-    
+
     ephfmSumW = (eventplanes.isValid() ? (*eventplanes)[6].sumw() : -99.);
     ephfpSumW = (eventplanes.isValid() ? (*eventplanes)[7].sumw() : -99.);
     eptrackmidSumW = (eventplanes.isValid() ? (*eventplanes)[9].sumw() : -99.);
@@ -683,9 +684,9 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
 
   //RECO Candidate info
   candSize = v0candidates->size();
-  if(candSize>MAXCAN) throw cms::Exception("PATCompositeAnalyzer") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl; 
+  if(candSize>MAXCAN) throw cms::Exception("PATCompositeAnalyzer") << "Number of candidates (" << candSize << ") exceeds limit!" << std::endl;
   for(uint it=0; it<candSize; ++it)
-  { 
+  {
     const auto& trk = (*v0candidates)[it];
 
     pt[it] = trk.pt();
@@ -715,7 +716,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
     agl_abs[it] = secvec.Angle(ptosvec);
     agl2D[it] = std::cos(secvec2D.Angle(ptosvec2D));
     agl2D_abs[it] = secvec2D.Angle(ptosvec2D);
-        
+
     //Decay length 3D
     const SMatrixSym3D& trkCovMat = *trk.userData<reco::Vertex::CovarianceMatrix>("vertexCovariance");
     const SMatrixSym3D& totalCov = vtx.covariance() + trkCovMat;
@@ -822,7 +823,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
           dxyos[iDau][it] = dxybest/dxyerror;
         }
       }
- 
+
       if(doMuon_)
       {
         const auto& muon = (dau.isMuon() ? *dynamic_cast<const pat::Muon*>(trk.daughter(iDau)) : pat::Muon());
@@ -948,7 +949,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
         }
       }
     }
- 
+
     if(twoLayerDecay_)
     {
       const auto& d = *(trk.daughter(0));
@@ -968,7 +969,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
         {
           const edm::ValueMap<reco::DeDxData>& dEdxTrack = *dEdxHandle1.product();
           grand_H2dedx[iGDau][it] = dEdxTrack[gdau].dEdx();
-        }   
+        }
         grand_T4dedx[iGDau][it] = -999.9;
         if(gdau.isNonnull() && dEdxHandle2.isValid())
         {
@@ -1010,7 +1011,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
           grand_dxyos[iGDau][it] = gdxybest/gdxyerror;
         }
       }
-   
+
       //vtxChi2
       grand_vtxChi2[it] = d.vertexChi2();
       grand_ndf[it] = d.vertexNdof();
@@ -1019,7 +1020,7 @@ PATCompositeTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSet
       //PAngle
       const double& secvz = d.vz(), secvx = d.vx(), secvy = d.vy();
       const TVector3 ptosvec(secvx-bestvx, secvy-bestvy, secvz-bestvz);
-      const TVector3 secvec(d.px(), d.py(), d.pz());            
+      const TVector3 secvec(d.px(), d.py(), d.pz());
       const TVector3 ptosvec2D(secvx-bestvx, secvy-bestvy, 0);
       const TVector3 secvec2D(d.px(), d.py(), 0);
 
@@ -1212,8 +1213,8 @@ PATCompositeTreeProducer::fillGEN(const edm::Event& iEvent, const edm::EventSetu
 
       candSize_gen = 1;
       continue;
-    } 
-  
+    }
+
     if (trk->status()!=2 && trk->status()!=62) continue; //check gen particle status
     if(!findDaughters(dauVec, trk)) continue; //check if has the daughters
 
@@ -1310,15 +1311,15 @@ PATCompositeTreeProducer::initHistogram()
 }
 
 
-void 
+void
 PATCompositeTreeProducer::initTree()
-{ 
+{
   PATCompositeNtuple = fs->make< TTree>("VertexCompositeNtuple","VertexCompositeNtuple");
 
   if(doRecoNtuple_)
   {
     // Event info
-    
+
     PATCompositeNtuple->Branch("RunNb",&runNb,"RunNb/i");
     PATCompositeNtuple->Branch("LSNb",&lsNb,"LSNb/i");
     PATCompositeNtuple->Branch("EventNb",&eventNb,"EventNb/i");
@@ -1329,7 +1330,7 @@ PATCompositeTreeProducer::initTree()
     PATCompositeNtuple->Branch("candSize",&candSize,"candSize/i");
     PATCompositeNtuple->Branch("HFmaxETPlus",&HFmaxETPlus,"HFmaxETPlus/F");
     PATCompositeNtuple->Branch("HFmaxETMinus",&HFmaxETMinus,"HFmaxETMinus/F");
-    if(isCentrality_) 
+    if(isCentrality_)
     {
       PATCompositeNtuple->Branch("centrality",&centrality,"centrality/S");
       PATCompositeNtuple->Branch("Npixel",&Npixel,"Npixel/I");
@@ -1385,7 +1386,7 @@ PATCompositeTreeProducer::initTree()
         PATCompositeNtuple->Branch("idmom_reco",idmom_reco,"idmom_reco[candSize]/I");
         PATCompositeNtuple->Branch("matchGEN",matchGEN,"matchGEN[candSize]/O");
       }
- 
+
       if(doGenMatchingTOF_)
       {
         for(ushort iDau=1; iDau<=NDAU_; iDau++)
@@ -1440,7 +1441,7 @@ PATCompositeTreeProducer::initTree()
           PATCompositeNtuple->Branch(Form("dedxHarmonic2D%d",iDau),H2dedx[iDau-1],Form("dedxHarmonic2D%d[candSize]/F",iDau));
         }
       }
- 
+
       if(doMuon_)
       {
         for(ushort iDau=1; iDau<=NDAU_; iDau++)
@@ -1545,7 +1546,7 @@ PATCompositeTreeProducer::initTree()
 
 
 //--------------------------------------------------------------------------------------------------
-void 
+void
 PATCompositeTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
   bool changed = true;
@@ -1557,7 +1558,7 @@ PATCompositeTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& 
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
-void 
+void
 PATCompositeTreeProducer::endJob()
 {
 }

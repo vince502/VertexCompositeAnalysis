@@ -5,6 +5,11 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
+#include <cmath>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 class GenParticleFixer : public edm::stream::EDProducer<>
 {
 
@@ -51,7 +56,7 @@ void GenParticleFixer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
       par.addMother(reco::GenParticleRef(ref, mom.key()));
     }
   }
-  
+
   // Extract final state particles without mothers
   std::vector<size_t> idxV;
   for (size_t i=0; i<output->size(); i++) {
@@ -90,7 +95,7 @@ void GenParticleFixer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     }
   }
   else if (!idxV.empty()) {
-    throw std::logic_error(Form("[ERROR] Found %lu final state particles without mothers", idxV.size()));
+    throw std::logic_error(std::string("[ERROR] Found ") + std::to_string(idxV.size()) + " final state particles without mothers");
   }
 
   iEvent.put(std::move(output));

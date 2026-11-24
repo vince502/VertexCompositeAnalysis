@@ -1,9 +1,16 @@
 <flags   EDM_PLUGIN="1"/>
 <use   name="roottmva"/>
-<use   name="PhysicsTools/ONNXRuntime" />
+<use   name="root"/>
+<use   name="rootmath"/>
+<use   name="PhysicsTools/ONNXRuntime"/>
 <use   name="DataFormats/BeamSpot"/>
 <use   name="DataFormats/Candidate"/>
 <use   name="DataFormats/Common"/>
+<use   name="DataFormats/EgammaCandidates"/>
+<use   name="DataFormats/GeometryVector"/>
+<use   name="DataFormats/HepMCCandidate"/>
+<use   name="DataFormats/Math"/>
+<use   name="DataFormats/PatCandidates"/>
 <use   name="DataFormats/RecoCandidate"/>
 <use   name="DataFormats/TrackReco"/>
 <use   name="DataFormats/MuonReco"/>
@@ -14,24 +21,29 @@
 <use   name="Geometry/TrackerGeometryBuilder"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/Utilities"/>
 <use   name="FWCore/MessageLogger"/>
+<use   name="MagneticField/Engine"/>
 <use   name="MagneticField/Records"/>
 <use   name="MagneticField/VolumeBasedEngine"/>
 <use   name="CommonTools/CandUtils"/>
+<use   name="CommonTools/Statistics"/>
 <use   name="CommonTools/UtilAlgos"/>
 <use   name="RecoVertex/AdaptiveVertexFit"/>
 <use   name="RecoVertex/KalmanVertexFit"/>
 <use   name="RecoVertex/VertexPrimitives"/>
+<use   name="RecoVertex/VertexTools"/>
 <use   name="RecoVertex/KinematicFit"/>
 <use   name="RecoVertex/KinematicFitPrimitives"/>
 <use   name="TrackingTools/TransientTrack"/>
 <use   name="TrackingTools/IPTools"/>
+<use   name="TrackingTools/PatternTools"/>
 <use   name="TrackingTools/Records"/>
+<use   name="TrackingTools/TrajectoryState"/>
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/EgammaObjects"/>
 <use   name="CondFormats/GBRForest"/>
-<use name="PhysicsTools/ONNXRuntime" />
-
 
 <flags CXXFLAGS="-Wno-error=unused-but-set-variable"/>
 <flags SKIM_FILES="FourTrkD0Fitter.cc"/>

@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      DPlus3PProducer
-// 
+//
 /**\class DPlus3PProducer DPlus3PProducer.h VertexCompositeAnalysis/VertexCompositeProducer/interface/DPlus3PProducer.h
 
  Description: <one line class summary>
@@ -11,12 +11,12 @@
      <Notes on implementation>
 */
 //
-// Original Author:  Wei Li 
+// Original Author:  Wei Li
 //
 //
 
-#ifndef VertexCompositeAnalysis__LAMC3P_PRODUCER_H
-#define VertexCompositeAnalysis__LAMC3P_PRODUCER_H
+#ifndef VertexCompositeAnalysis__DPLUS3P_PRODUCER_H
+#define VertexCompositeAnalysis__DPLUS3P_PRODUCER_H
 
 // system include files
 #include <memory>
@@ -52,7 +52,7 @@ private:
 
   bool useAnyMVA_;
 
-  DPlus3PFitter theVees; 
+  DPlus3PFitter theVees;
 //  edm::ParameterSet theParams;
 };
 

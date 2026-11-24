@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      D0FitterNew
-// 
+//
 /**\class D0FitterNew D0FitterNew.h VertexCompositeAnalysis/VertexCompositeProducer/interface/D0FitterNew.h
 
  Description: <one line class summary>
@@ -15,8 +15,8 @@
 //
 //
 
-#ifndef VertexCompositeAnalysis__D0_FITTER_H
-#define VertexCompositeAnalysis__D0_FITTER_H
+#ifndef VertexCompositeAnalysis__D0_FITTER_NEW_H
+#define VertexCompositeAnalysis__D0_FITTER_NEW_H
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -83,7 +83,7 @@ class D0FitterNew {
 
   // Switching to L. Lista's reco::Candidate infrastructure for D0 storage
   const reco::VertexCompositeCandidateCollection& getD0() const;
-  const std::vector<float>& getMVAVals() const; 
+  const std::vector<float>& getMVAVals() const;
 
 //  auto_ptr<edm::ValueMap<float> > getMVAMap() const;
   void resetAll();
@@ -148,7 +148,7 @@ class D0FitterNew {
   edm::ESGetToken<GBRForest, GBRWrapperRcd> mvaToken_;
 
 //  auto_ptr<edm::ValueMap<float> >mvaValValueMap;
-//  MVACollection mvas; 
+//  MVACollection mvas;
 
   std::string dbFileName_;
 

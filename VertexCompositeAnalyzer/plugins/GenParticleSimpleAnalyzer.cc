@@ -15,7 +15,8 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <algorithm> 
+#include <algorithm>
+#include <TString.h>
 
 
 
@@ -31,7 +32,7 @@ private:
 
     std::vector<int> wanted;
     edm::EDGetTokenT<reco::GenParticleCollection> tok_genParticle_;
-    
+
 };
 
 GenParticleSimpleAnalyzer::GenParticleSimpleAnalyzer(const edm::ParameterSet& iConfig){

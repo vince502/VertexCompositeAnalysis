@@ -9,6 +9,7 @@
 #include <TH2.h>
 #include <TTree.h>
 #include <TFile.h>
+#include <TString.h>
 #include <TVector3.h>
 #include <TMath.h>
 
@@ -246,9 +247,6 @@ EventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup&
       if(triggerResults->accept(triggerIndex)) isTriggerFired = true;
       //Get the trigger prescale
       float prescaleValue = -1;
-      const auto& l1tGlobalUtil = hltPrescaleProvider_.l1tGlobalUtil();
-      const auto& hltConfig = hltPrescaleProvider_.hltConfigProvider();
-      const auto& hltPaths = hltConfig.triggerNames();
       if(hltPrescaleProvider_.hltConfigProvider().inited() && hltPrescaleProvider_.prescaleSet(iEvent,iSetup)>=0)
       {
         const auto& presInfo = hltPrescaleProvider_.prescaleValuesInDetail<double>(iEvent, iSetup, triggerNames.triggerName(triggerIndex));
@@ -286,16 +284,16 @@ EventInfoTreeProducer::fillRECO(const edm::Event& iEvent, const edm::EventSetup&
     ZDCPlus = (cent.isValid() ? cent->zdcSumPlus() : -1.);
     ZDCMinus = (cent.isValid() ? cent->zdcSumMinus() : -1.);
     Ntrkoffline = (cent.isValid() ? cent->Ntracks() : -1);
-      
+
     edm::Handle<int> cbin;
     iEvent.getByToken(tok_centBinLabel_, cbin);
     centrality = (cbin.isValid() ? *cbin : -1);
   }
-  
+
   NtrkHP = -1;
   edm::Handle<reco::TrackCollection> trackColl;
   iEvent.getByToken(tok_tracks_, trackColl);
-  if(trackColl.isValid()) 
+  if(trackColl.isValid())
   {
     NtrkHP = 0;
     for (const auto& trk : *trackColl) { if (trk.quality(reco::TrackBase::highPurity)) NtrkHP++; }
@@ -345,9 +343,9 @@ EventInfoTreeProducer::beginJob()
   initTree();
 }
 
-void 
+void
 EventInfoTreeProducer::initTree()
-{ 
+{
   EventInfoNtuple = fs->make< TTree>("EventInfoNtuple","EventInfoNtuple");
 
   // Event info
@@ -358,7 +356,7 @@ EventInfoTreeProducer::initTree()
   EventInfoNtuple->Branch("bestvtxX",&bestvx,"bestvtxX/F");
   EventInfoNtuple->Branch("bestvtxY",&bestvy,"bestvtxY/F");
   EventInfoNtuple->Branch("bestvtxZ",&bestvz,"bestvtxZ/F");
-  if(isCentrality_) 
+  if(isCentrality_)
   {
     EventInfoNtuple->Branch("centrality",&centrality,"centrality/S");
     EventInfoNtuple->Branch("Npixel",&Npixel,"Npixel/I");
@@ -384,7 +382,7 @@ EventInfoTreeProducer::initTree()
 
 
 //--------------------------------------------------------------------------------------------------
-void 
+void
 EventInfoTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
   bool changed = true;
@@ -396,7 +394,7 @@ EventInfoTreeProducer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSe
 
 // ------------ method called once each job just after ending the event
 //loop  ------------
-void 
+void
 EventInfoTreeProducer::endJob()
 {
 }

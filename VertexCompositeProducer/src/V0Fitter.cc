@@ -2,7 +2,7 @@
 //
 // Package:    VertexCompositeProducer
 // Class:      V0Fitter
-// 
+//
 /**\class V0Fitter V0Fitter.cc VertexCompositeAnalysis/VertexCompositeProducer/src/V0Fitter.cc
 
  Description: <one line class summary>
@@ -96,7 +96,7 @@ V0Fitter::V0Fitter(const edm::ParameterSet& theParameters,  edm::ConsumesCollect
   doPhis = theParameters.getParameter<bool>(string("selectPhis"));
   //  -whether to reconstruct Lambdas
   doLambdas = theParameters.getParameter<bool>(string("selectLambdas"));
-  //  -whether to reconstruct Xi 
+  //  -whether to reconstruct Xi
   doXis = theParameters.getParameter<bool>(string("selectXis"));
   //  -whether to reconstruct Omega
   doOmegas = theParameters.getParameter<bool>(string("selectOmegas"));
@@ -202,9 +202,9 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   // Get the tracks, vertices from the event, and get the B-field record
   //  from the EventSetup
-  iEvent.getByToken(token_tracks, theTrackHandle); 
+  iEvent.getByToken(token_tracks, theTrackHandle);
   iEvent.getByToken(token_vertices, theVertexHandle);
-  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);  
+  iEvent.getByToken(token_beamSpot, theBeamSpotHandle);
 //  iEvent.getByLabel(recoAlg, theTrackHandle);
 //  iEvent.getByLabel(vtxAlg,  theVertexHandle);
 //  iEvent.getByLabel(std::string("offlineBeamSpot"), theBeamSpotHandle);
@@ -254,7 +254,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       for (unsigned int ndx_ = 0; ndx_ < qualities.size(); ndx_++) {
 	if (tmpRef->quality(qualities[ndx_])){
 	  quality_ok = true;
-	  break;          
+	  break;
 	}
       }
     }
@@ -268,7 +268,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
       math::XYZPoint bestvtx(xVtx,yVtx,zVtx);
       double dzvtx = tmpRef->dz(bestvtx);
-      double dxyvtx = tmpRef->dxy(bestvtx);      
+      double dxyvtx = tmpRef->dxy(bestvtx);
       double dzerror = sqrt(tmpRef->dzError()*tmpRef->dzError()+zVtxError*zVtxError);
       double dxyerror = sqrt(tmpRef->d0Error()*tmpRef->d0Error()+xVtxError*yVtxError);
 
@@ -298,7 +298,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       // Look at the two tracks we're looping over.  If they're oppositely
       //  charged, load them into the hypothesized positive and negative tracks
       //  and references to be sent to the KalmanVertexFitter
-      if(theTrackRefs[trdx1]->charge() < 0. && 
+      if(theTrackRefs[trdx1]->charge() < 0. &&
 	 theTrackRefs[trdx2]->charge() > 0.) {
 	negativeTrackRef = theTrackRefs[trdx1];
 	positiveTrackRef = theTrackRefs[trdx2];
@@ -334,11 +334,11 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       GlobalPoint cxPt = cApp.crossingPoint();
 
       if (dca < 0. || dca > tkDCACut) continue;
-      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120. 
+      if (sqrt( cxPt.x()*cxPt.x() + cxPt.y()*cxPt.y() ) > 120.
           || std::abs(cxPt.z()) > 300.) continue;
 
       // Get trajectory states for the tracks at POCA for later cuts
-      TrajectoryStateClosestToPoint posTSCP = 
+      TrajectoryStateClosestToPoint posTSCP =
 	posTransTkPtr->trajectoryStateClosestToPoint( cxPt );
       TrajectoryStateClosestToPoint negTSCP =
 	negTransTkPtr->trajectoryStateClosestToPoint( cxPt );
@@ -383,12 +383,12 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	AdaptiveVertexFitter theAdaptiveFitter;
 	theRecoVertex = theAdaptiveFitter.vertex(transTracks);
       }
-    
+
       // Create reco::Vertex object for use in creating the Candidate
       reco::Vertex theVtx;
       // If do not fit vertex, assign a dummy vertex using the beam spot
       if(!doVertexFit) {
-        theVtx = reco::Vertex(theBeamSpotHandle->position(), 
+        theVtx = reco::Vertex(theBeamSpotHandle->position(),
 	                      theBeamSpotHandle->rotatedCovariance3D(),0.,0.,0);
       }
       // If the vertex is valid, make a VertexCompositeCandidate with it
@@ -409,7 +409,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       GlobalPoint vtxPos(theVtx.x(), theVtx.y(), theVtx.z()); // for V0 candidate vertex
       GlobalPoint vtxPosPrimary(xVtx, yVtx, zVtx); // for primary vertex
 
-      double rVtxMag = 99999.0; 
+      double rVtxMag = 99999.0;
       double lVtxMag = 99999.0;
       double sigmaRvtxMag = 999.0;
       double sigmaLvtxMag = 999.0;
@@ -422,12 +422,12 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       GlobalVector V0GlobalMomentum = posTSCP.momentum() + negTSCP.momentum();
 
       SMatrixSym3D totalCov;
-      if(isVtxPV) totalCov = theVtx.covariance() + vtxPrimary->covariance(); 
+      if(isVtxPV) totalCov = theVtx.covariance() + vtxPrimary->covariance();
       else totalCov = theVtx.covariance() + theBeamSpotHandle->rotatedCovariance3D();
 
       SVector3 distanceVector3D(V0LineOfFlight.x(), V0LineOfFlight.y(), V0LineOfFlight.z());
       SVector3 distanceVector2D(V0LineOfFlight.x(), V0LineOfFlight.y(), 0.0);
-      
+
       V0Angle = angle(V0LineOfFlight.x(), V0LineOfFlight.y(), V0LineOfFlight.z(),
                       V0GlobalMomentum.x(), V0GlobalMomentum.y(), V0GlobalMomentum.z());
       lVtxMag = V0LineOfFlight.mag();
@@ -440,7 +440,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       // to -1 avoids this problem and allows to run on AOD.
       if( innerHitPosCut > 0. && positiveTrackRef->innerOk() ) {
 	reco::Vertex::Point posTkHitPos = positiveTrackRef->innerPosition();
-	double posTkHitPosD2 = 
+	double posTkHitPosD2 =
 	  (posTkHitPos.x()-xVtx)*(posTkHitPos.x()-xVtx) +
 	  (posTkHitPos.y()-yVtx)*(posTkHitPos.y()-yVtx);
 	if( sqrt( posTkHitPosD2 ) < ( rVtxMag - sigmaRvtxMag*innerHitPosCut )
@@ -450,7 +450,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       }
       if( innerHitPosCut > 0. && negativeTrackRef->innerOk() ) {
 	reco::Vertex::Point negTkHitPos = negativeTrackRef->innerPosition();
-	double negTkHitPosD2 = 
+	double negTkHitPosD2 =
 	  (negTkHitPos.x()-xVtx)*(negTkHitPos.x()-xVtx) +
 	  (negTkHitPos.y()-yVtx)*(negTkHitPos.y()-yVtx);
 	if( sqrt( negTkHitPosD2 ) < ( rVtxMag - sigmaRvtxMag*innerHitPosCut )
@@ -458,7 +458,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	  continue;
 	}
       }
-      
+
       if( theVtx.normalizedChi2() > chi2Cut ||
 	  rVtxMag < rVtxCut ||
 	  rVtxMag / sigmaRvtxMag < rVtxSigCut ||
@@ -468,9 +468,9 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       )	continue;
 
       // Cuts finished, now we create the candidates and push them back into the collections.
-      
-      std::auto_ptr<TrajectoryStateClosestToPoint> trajPlus;
-      std::auto_ptr<TrajectoryStateClosestToPoint> trajMins;
+
+      std::unique_ptr<TrajectoryStateClosestToPoint> trajPlus;
+      std::unique_ptr<TrajectoryStateClosestToPoint> trajMins;
 
       if( useRefTrax && refittedTrax.size() > 1 ) {
 	// Need an iterator over the refitted tracks for below
@@ -481,7 +481,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	//  refitted tracks
 	TransientTrack* thePositiveRefTrack = 0;
 	TransientTrack* theNegativeRefTrack = 0;
-        
+
 	for( ; traxIter != traxEnd; ++traxIter) {
 	  if( traxIter->track().charge() > 0. ) {
 	    thePositiveRefTrack = &*traxIter;
@@ -530,17 +530,17 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       using namespace reco;
 
       // Create momentum 4-vectors for the 3 candidate types
-      const Particle::LorentzVector kShortP4(totalP.x(), 
-					     totalP.y(), totalP.z(), 
+      const Particle::LorentzVector kShortP4(totalP.x(),
+					     totalP.y(), totalP.z(),
 					     kShortETot);
       const Particle::LorentzVector phiP4(totalP.x(),
                                              totalP.y(), totalP.z(),
                                              phiETot);
-      const Particle::LorentzVector lambdaP4(totalP.x(), 
-					     totalP.y(), totalP.z(), 
+      const Particle::LorentzVector lambdaP4(totalP.x(),
+					     totalP.y(), totalP.z(),
 					     lambdaEtot);
-      const Particle::LorentzVector lambdaBarP4(totalP.x(), 
-						totalP.y(), totalP.z(), 
+      const Particle::LorentzVector lambdaBarP4(totalP.x(),
+						totalP.y(), totalP.z(),
 						lambdaBarEtot);
       const Particle::LorentzVector d0P4(totalP.x(),
                                              totalP.y(), totalP.z(),
@@ -572,11 +572,11 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
       if( doLambdas ) {
 	if( positiveP.mag() > negativeP.mag() ) {
-	  theLambda = 
+	  theLambda =
 	    new VertexCompositeCandidate(0, lambdaP4, vtx, vtxCov, vtxChi2, vtxNdof);
 	}
 	else {
-	  theLambdaBar = 
+	  theLambdaBar =
 	    new VertexCompositeCandidate(0, lambdaBarP4, vtx, vtxCov, vtxChi2, vtxNdof);
 	}
       }
@@ -588,18 +588,18 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       }
 
       // Create daughter candidates for the VertexCompositeCandidates
-      RecoChargedCandidate 
-	thePiPlusCand(1, Particle::LorentzVector(positiveP.x(), 
+      RecoChargedCandidate
+	thePiPlusCand(1, Particle::LorentzVector(positiveP.x(),
 						 positiveP.y(), positiveP.z(),
 						 piPlusE), vtx);
       thePiPlusCand.setTrack(positiveTrackRef);
-      
+
       RecoChargedCandidate
-	thePiMinusCand(-1, Particle::LorentzVector(negativeP.x(), 
+	thePiMinusCand(-1, Particle::LorentzVector(negativeP.x(),
 						   negativeP.y(), negativeP.z(),
 						   piMinusE), vtx);
       thePiMinusCand.setTrack(negativeTrackRef);
-      
+
        RecoChargedCandidate
         theKaonPlusCand(1, Particle::LorentzVector(positiveP.x(),
                                                  positiveP.y(), positiveP.z(),
@@ -625,7 +625,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
       theAntiProtonCand.setTrack(negativeTrackRef);
 
       AddFourMomenta addp4;
-      // Store the daughter Candidates in the VertexCompositeCandidates 
+      // Store the daughter Candidates in the VertexCompositeCandidates
       //    if they pass mass cuts
       if( doKshorts ) {
 	theKshort->addDaughter(thePiPlusCand);
@@ -637,7 +637,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 	  theKshorts.push_back( *theKshort );
 	}
       }
-      
+
       if( doPhis ) {
         thePhi->addDaughter(theKaonPlusCand);
         thePhi->addDaughter(theKaonMinusCand);
@@ -704,7 +704,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
     }
   }
 
-  if((doLambdaCToKsPs || doDSToKsKs || doDPMs) && theKshorts.size() > 0) 
+  if((doLambdaCToKsPs || doDSToKsKs || doDPMs) && theKshorts.size() > 0)
   {
     for(unsigned it=0; it<theKshorts.size(); ++it){
 
@@ -990,8 +990,8 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   };
 
-  // DsToPhiPi reconstruction                                                                                                                                                                                                        
-  if( doDSToPhiPis && thePhis.size() > 0) 
+  // DsToPhiPi reconstruction
+  if( doDSToPhiPis && thePhis.size() > 0)
     {
       for(unsigned it=0; it<thePhis.size(); ++it){
 
@@ -1200,7 +1200,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   {
 
     for(unsigned it=0; it<theLambdas.size(); ++it){
-        
+
       const reco::VertexCompositeCandidate & theLambda = theLambdas[it];
 
       // check lambda mass to be within +- 20MeV...
@@ -1275,7 +1275,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
          // check if pion is in *any* good V0
          // Placeholder
-       
+
          TransientTrack pionTT(theDaughterTracks[0], &(*bFieldHandle) );
          TransientTrack protonTT(theDaughterTracks[1], &(*bFieldHandle) );
          TransientTrack batPionTT(theTrackRefs[trdx], &(*bFieldHandle) );
@@ -1298,7 +1298,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
          RefCountedKinematicTree lambdaVertexFitTree;
          lambdaVertexFitTree = fitter.fit(lambdaParticles);
          if (!lambdaVertexFitTree->isValid()) continue;
-  
+
          lambdaVertexFitTree->movePointerToTheTop();
 
          RefCountedKinematicParticle lambda_vFit = lambdaVertexFitTree->currentParticle();
@@ -1315,7 +1315,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
          // now apply Lambda mass constraint
          KinematicParticleFitter csFitterLambda;
          KinematicConstraint * lam_c = new MassKinematicConstraint(lambdaMass,lambdaMass_sigma);
-         // add mass constraint to the lambda fit to do a constrained fit:  
+         // add mass constraint to the lambda fit to do a constrained fit:
 
          lambdaVertexFitTree->movePointerToTheTop();
          lambdaVertexFitTree = csFitterLambda.fit(lam_c,lambdaVertexFitTree);
@@ -1323,7 +1323,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
          lambdaVertexFitTree->movePointerToTheTop();
          RefCountedKinematicParticle lambda_vFit_withMC = lambdaVertexFitTree->currentParticle();
 
-         if (!lambda_vFit_withMC->currentState().isValid()) continue; 
+         if (!lambda_vFit_withMC->currentState().isValid()) continue;
 
          if(doXis || doLambdaCToLamPis)
          {
@@ -1338,13 +1338,13 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
              if(lamIsParticle && theTrackRefs[trdx]->charge()<0) continue;
              if(!lamIsParticle && theTrackRefs[trdx]->charge()>0) continue;
            }
- 
+
            vector<RefCountedKinematicParticle> xiFitParticles;
 
            xiFitParticles.push_back(pFactory.particle(batPionTT,piMass,chi,ndf,piMass_sigma));
            xiFitParticles.push_back(lambda_vFit_withMC);
 
-           //fit Xi 
+           //fit Xi
            RefCountedKinematicTree xiFitTree = fitter.fit(xiFitParticles);
            if (!xiFitTree->isValid()) continue;
 
@@ -1369,7 +1369,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
            RefCountedKinematicParticle batPionCand = xiFitTree->currentParticle();
            xiFitTree->movePointerToTheNextChild();
            RefCountedKinematicParticle lambdaCandMC = xiFitTree->currentParticle();
-         
+
            if(!batPionCand->currentState().isValid() || !lambdaCandMC->currentState().isValid()) continue;
 
            // get batchlor pion and V0 parameters from Xi fit
@@ -1442,7 +1442,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
            PionCand.setTrack(theTrackRefs[trdx]);
 
            AddFourMomenta addp4;
-           // Store the daughter Candidates in the VertexCompositeCandidates 
+           // Store the daughter Candidates in the VertexCompositeCandidates
            // if they pass mass cuts
            if(doXis)
            {
@@ -1471,7 +1471,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
              theLambdaCToLamPi->addDaughter(theLambda);
              theLambdaCToLamPi->addDaughter(PionCand);
              if(lamIsParticle) { theLambdaCToLamPi->setPdgId(4122); theLambdaCToLamPi->setCharge(1); }
-             else { theLambdaCToLamPi->setPdgId(-4122); theLambdaCToLamPi->setCharge(-1); } 
+             else { theLambdaCToLamPi->setPdgId(-4122); theLambdaCToLamPi->setCharge(-1); }
              addp4.set( *theLambdaCToLamPi );
              if( theLambdaCToLamPi->mass() < lambdaCMass + lambdaCMassCut &&
                  theLambdaCToLamPi->mass() > lambdaCMass - lambdaCMassCut ) theLambdaCToLamPis.push_back( *theLambdaCToLamPi );
@@ -1490,7 +1490,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
            omegaFitParticles.push_back(pFactory.particle(batPionTT,kaonMass,chi,ndf,kaonMass_sigma));
            omegaFitParticles.push_back(lambda_vFit_withMC);
 
-           //fit Omega 
+           //fit Omega
            RefCountedKinematicTree omegaFitTree = fitter.fit(omegaFitParticles);
            if (!omegaFitTree->isValid()) continue;
 
@@ -1514,7 +1514,7 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
            RefCountedKinematicParticle batPionCand = omegaFitTree->currentParticle();
            omegaFitTree->movePointerToTheNextChild();
            RefCountedKinematicParticle lambdaCandMC = omegaFitTree->currentParticle();
-         
+
            if(!batPionCand->currentState().isValid() || !lambdaCandMC->currentState().isValid()) continue;
 
            // get batchlor pion and V0 parameters from Xi fit
@@ -1591,12 +1591,12 @@ void V0Fitter::fitAll(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
            PionCand.setTrack(theTrackRefs[trdx]);
 
            AddFourMomenta addp4;
-           // Store the daughter Candidates in the VertexCompositeCandidates 
+           // Store the daughter Candidates in the VertexCompositeCandidates
            // if they pass mass cuts
            theOmega->addDaughter(theLambda);
            theOmega->addDaughter(PionCand);
            if(lamIsParticle) { theOmega->setPdgId(3334);  theOmega->setCharge(-2); }
-           else { theOmega->setPdgId(-3334);  theOmega->setCharge(2); } 
+           else { theOmega->setPdgId(-3334);  theOmega->setCharge(2); }
            addp4.set( *theOmega );
            if( theOmega->mass() < omegaMass + omegaMassCut &&
                theOmega->mass() > omegaMass - omegaMassCut ) theOmegas.push_back( *theOmega );
@@ -1668,7 +1668,7 @@ void V0Fitter::resetAll() {
 }
 
 // Experimental
-double V0Fitter::findV0MassError(const GlobalPoint &vtxPos, std::vector<reco::TransientTrack> dauTracks) { 
+double V0Fitter::findV0MassError(const GlobalPoint &vtxPos, std::vector<reco::TransientTrack> dauTracks) {
   return -1.;
 }
 
@@ -1680,7 +1680,7 @@ double V0Fitter::findV0MassError(const GlobalPoint &vtxPos, std::vector<reco::Tr
   std::vector<TrajectoryStateClosestToPoint> sortedTrajStatesAtVtx;
   for( unsigned int ndx = 0; ndx < dauTracks.size(); ndx++ ) {
     if( dauTracks[ndx].trajectoryStateClosestToPoint(vtxPos).isValid() ) {
-      std::cout << "From TSCP: " 
+      std::cout << "From TSCP: "
 		<< dauTracks[ndx].trajectoryStateClosestToPoint(vtxPos).perigeeParameters().transverseCurvature()
 		<< "; From Track: " << dauTracks[ndx].track().qoverp() << std::endl;
     }
